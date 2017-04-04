@@ -11,6 +11,8 @@ It is made to be used with the [Zou
 API](https://github.com/cgwire/cgwire-api). It requires an up and running
 instance of Zou to run properly.
 
+The source is available on [Github](https://github.com/cgwire/gazu).
+
 
 ## Who is it for?
 
@@ -43,7 +45,7 @@ to know where is located the API server:
 ```python
 import gazu
 
-gazu.set_host("https://zou-server-url")
+gazu.client.set_host("https://zou-server-url")
 ```
 
 ## Usage
@@ -61,6 +63,6 @@ coding and consider that strong quality and good developer experience matter a l
 Our extensive experience allows studios to get better at doing software and focus
 more on the artistic work.
 
-Visit [cg-wire.com](https://cgwire.com) for more information.
+Visit [cg-wire.com](https://cg-wire.com) for more information.
 
 [![CGWire Logo](/cgwire.png)](https://cgwire.com)
