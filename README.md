@@ -1,6 +1,6 @@
 ![Gazu Logo](https://gazu.cg-wire.com/gazu.png)
 
-## Python client for Zou API (steroïds for your CG tools)
+## Gazu, steroïds for your CG tools
 
 Gazu is a Python client that allows to fetch data easily from your CG production
 environment (tasks, shots, assets, casting and dependencies). 
