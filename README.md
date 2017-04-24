@@ -24,8 +24,43 @@ environment variable.
 git clone https://github.com/cgwire/cgwire-api-client.git
 ```
 
+The client requires a few extra configuration before being used. It needs
+to know where is located the API server:
+
+``python
+import gazu
+
+gazu.client.set_host("https://zou-server-url")
+```
+
+Then try to fetch all the open projects:
+
+```
+projects = gazu.projects.open_projects()
+```
+
+Then jump to the documentation to see what features are available!
+
+
 ### Documentation
 
 Documentation is available on a dedicated website:
 
 [https://gazu.cg-wire.com/](https://gazu.cg-wire.com)
+
+
+## About authors
+
+Gazu is written by CG Wire, a company based in France. We help small to
+midsize CG studios to manage their production and build pipeline efficiently.
+
+We apply software craftmanship principles as much as possible. We love
+coding and consider that strong quality and good developer experience matter a
+ lot.
+Our extensive experience allows studios to get better at doing software and
+ focus
+more on the artistic work.
+
+Visit [cg-wire.com](https://cg-wire.com) for more information.
+
+[![CGWire Logo](https://gazu.cg-wire.com/cgwire.png)](https://cgwire.com)
