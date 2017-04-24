@@ -1,3 +1,5 @@
+[![Gazu Logo](https://gazu.cg-wire.com/gazu.png)]
+
 ## Python client for Zou API (steroïds for your CG tools)
 
 Gazu is a Python client that allows to fetch data easily from your CG production
@@ -13,21 +15,21 @@ an up and running instance of Zou to run properly.
 
 Install Gazu in your application environment via pip:
 
-```
+```bash
 pip install git+https://github.com/cgwire/cgwire-api-client.git
 ```
 
 or clone this repository in a directory contained in your PYTHONPATH
 environment variable.
 
-```
+```bash
 git clone https://github.com/cgwire/cgwire-api-client.git
 ```
 
 The client requires a few extra configuration before being used. It needs
 to know where is located the API server:
 
-``python
+```python
 import gazu
 
 gazu.client.set_host("https://zou-server-url")
