@@ -9,7 +9,7 @@ shot and many more. To make it short, it will boost your pipeline tools!
 It is made to be used with the [Zou API](https://zou.cg-wire.com). It requires
 an up and running instance of Zou to run properly.
 
-### Quickstart
+### Quickstart
 
 Install Gazu in your application environment via pip:
 
@@ -28,6 +28,4 @@ git clone https://github.com/cgwire/cgwire-api-client.git
 
 Documentation is available on a dedicated website:
 
-```
-https://gazu.cg-wire.com/
-```
+[https://gazu.cg-wire.com/](https://gazu.cg-wire.com)
