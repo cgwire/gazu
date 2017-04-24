@@ -1,4 +1,4 @@
-[![Gazu Logo](https://gazu.cg-wire.com/gazu.png)]
+![Gazu Logo](https://gazu.cg-wire.com/gazu.png)
 
 ## Python client for Zou API (steroïds for your CG tools)
 
@@ -51,7 +51,7 @@ Documentation is available on a dedicated website:
 [https://gazu.cg-wire.com/](https://gazu.cg-wire.com)
 
 
-## About authors
+### About authors
 
 Gazu is written by CG Wire, a company based in France. We help small to
 midsize CG studios to manage their production and build pipeline efficiently.
