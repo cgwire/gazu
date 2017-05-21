@@ -19,23 +19,21 @@ if sys.argv[-1] == "publish":
 packages = [
     "gazu",
 ]
-
-
 requires = get_requirements_list("requirements.txt")
 test_requirements = get_requirements_list("requirements_test.txt")
 
+with open("README.md", "r") as fd:
+    readme = fd.read()
+
 with open("gazu/__init__.py", "r") as fd:
     version = re.search(
-        r'^__version__\s*=\s*[\""]([^\""]*)[\""]',
+        r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
         fd.read(),
         re.MULTILINE
     ).group(1)
 
 if not version:
     raise RuntimeError("Cannot find version information")
-
-with open("README.md", "r") as f:
-    readme = f.read()
 
 setup(
     name="Gazu",
