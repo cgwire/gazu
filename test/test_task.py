@@ -68,7 +68,8 @@ class TaskTestCase(unittest.TestCase):
                 file_path,
                 "shot"
             )
-            request_body = json.loads(mock.request_history[0].body)
+            request_body_string = mock.request_history[0].body.decode("utf-8")
+            request_body = json.loads(request_body_string)
             self.assertEquals(request_body["project_id"], "project-id")
             self.assertEquals(request_body["type"], "shot")
             self.assertEquals(request_body["file_path"], file_path)

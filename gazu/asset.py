@@ -1,6 +1,6 @@
-import client
+from . import client
 
-from sorting import sort_by_name
+from .sorting import sort_by_name
 
 
 def all():
