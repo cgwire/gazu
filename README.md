@@ -65,4 +65,4 @@ more on the artistic work.
 
 Visit [cg-wire.com](https://cg-wire.com) for more information.
 
-[![CGWire Logo](https://gazu.cg-wire.com/cgwire.png)](https://cgwire.com)
+[![CGWire Logo](https://gazu.cg-wire.com/cgwire.png)](https://cg-wire.com)
