@@ -16,14 +16,14 @@ an up and running instance of Zou to run properly.
 Install Gazu in your application environment via pip:
 
 ```bash
-pip install git+https://github.com/cgwire/cgwire-api-client.git
+pip install git+https://github.com/cgwire/gazu.git
 ```
 
 or clone this repository in a directory contained in your PYTHONPATH
 environment variable.
 
 ```bash
-git clone https://github.com/cgwire/cgwire-api-client.git
+git clone https://github.com/cgwire/gazu.git
 ```
 
 The client requires a few extra configuration before being used. It needs
@@ -35,13 +35,13 @@ import gazu
 gazu.client.set_host("https://zou-server-url")
 ```
 
-Then try to fetch all the open projects:
+Let's finish with an example. Fetch all the open projects:
 
 ```
 projects = gazu.projects.open_projects()
 ```
 
-Then jump to the documentation to see what features are available!
+Then jump to the [documentation](https://gazu.cg-wire.com) to see what features are available!
 
 
 ### Documentation
