@@ -9,6 +9,10 @@ from . import asset
 from . import files
 
 
+def set_host(url):
+    client.set_host(url)
+
+
 def log_in(email, password):
     client.post("auth/login", {
         "email": email,
