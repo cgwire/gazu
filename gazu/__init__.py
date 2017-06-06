@@ -7,3 +7,10 @@ from . import task
 from . import shot
 from . import asset
 from . import files
+
+
+def log_in(email, password):
+    client.post("auth/login", {
+        "email": email,
+        "password": password
+    })

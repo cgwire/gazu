@@ -4,7 +4,11 @@ import json
 
 from gazu.encoder import CustomJSONEncoder
 
-from .exception import RouteNotFoundException, ServerErrorException
+from .exception import (
+    RouteNotFoundException,
+    ServerErrorException,
+    NotAuthenticatedException
+)
 
 # Little hack to allow json encoder to manage dates.
 requests.models.complexjson.dumps = functools.partial(
@@ -15,13 +19,15 @@ requests.models.complexjson.dumps = functools.partial(
 
 HOST = "http://localhost:5000/"
 
+session = requests.session()
+
 
 def host_is_up():
     """
     :return: if the host is up
     """
-    r = requests.head(HOST)
-    return r.status_code == 200
+    response = session.head(HOST)
+    return response.status_code == 200
 
 
 def get_host():
@@ -58,10 +64,12 @@ def get(path):
     """
     Run a get request toward given path for configured host.
     """
-    response = requests.get(get_full_url(path))
+    response = session.get(get_full_url(path))
 
     if (response.status_code == 404):
         raise RouteNotFoundException(path)
+    elif (response.status_code == 401):
+        raise NotAuthenticatedException(path)
     elif (response.status_code == 500):
         raise ServerErrorException(path)
 
@@ -72,10 +80,12 @@ def post(path, data):
     """
     Run a post request toward given path for configured host.
     """
-    response = requests.post(get_full_url(path), json=data)
+    response = session.post(get_full_url(path), json=data)
 
     if (response.status_code == 404):
         raise RouteNotFoundException(path)
+    elif (response.status_code == 401):
+        raise NotAuthenticatedException(path)
     elif (response.status_code == 500):
         raise ServerErrorException(path)
 
@@ -86,10 +96,12 @@ def put(path, data):
     """
     Run a put request toward given path for configured host.
     """
-    response = requests.put(get_full_url(path), json=data)
+    response = session.put(get_full_url(path), json=data)
 
     if (response.status_code == 404):
         raise RouteNotFoundException(path)
+    elif (response.status_code == 401):
+        raise NotAuthenticatedException(path)
     elif (response.status_code == 500):
         raise ServerErrorException(path)
 
@@ -100,10 +112,12 @@ def delete(path):
     """
     Run a get request toward given path for configured host.
     """
-    response = requests.delete(get_full_url(path))
+    response = session.delete(get_full_url(path))
 
     if (response.status_code == 404):
         raise RouteNotFoundException(path)
+    elif (response.status_code == 401):
+        raise NotAuthenticatedException(path)
     elif (response.status_code == 500):
         raise ServerErrorException(path)
 

@@ -12,3 +12,7 @@ class RouteNotFoundException(Exception):
 
 class ServerErrorException(Exception):
     pass
+
+
+class NotAuthenticatedException(Exception):
+    pass
