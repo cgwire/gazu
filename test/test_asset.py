@@ -17,6 +17,15 @@ class AssetTestCase(unittest.TestCase):
             asset_instance = assets[0]
             self.assertEquals(asset_instance["name"], "Asset 01")
 
+    def test_fetch_asset(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url("data/entities/asset-1"),
+                text='{"name": "Asset 01", "project_id": "project-1"}'
+            )
+            asset = gazu.asset.fetch_asset('asset-1')
+            self.assertEquals(asset["name"], "Asset 01")
+
     def test_all_for_project_and_type(self):
         with requests_mock.mock() as mock:
             path = "data/projects/project-1/asset_types/asset-type-1/assets"

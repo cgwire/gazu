@@ -16,6 +16,20 @@ def fetch_task(task_type, entity):
     return tasks[0] if tasks else None
 
 
+def fetch_task_by_name(name, entity):
+    """
+    Find a task by looking for it through its name and its entity.
+    """
+    entity_id = entity["id"]
+    tasks = client.fetch_all(
+        "tasks?name={name}&entity_id={entity_id}".format(
+            name=name,
+            entity_id=entity_id
+        )
+    )
+    return tasks[0] if tasks else None
+
+
 def fetch_task_type(task_type_name):
     """
     Return task type object for given name.

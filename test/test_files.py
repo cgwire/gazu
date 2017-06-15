@@ -55,3 +55,25 @@ class FilesTestCase(unittest.TestCase):
             )
             name = result["output_file"]["file_name"]
             self.assertEquals(name, "filename.max")
+
+    def test_next_output_revision(self):
+        with requests_mock.mock() as mock:
+            path = "project/tasks/task-01/output_files/next-revision"
+            mock.get(
+                gazu.client.get_full_url(path),
+                text=json.dumps({"next_revision": 3})
+            )
+            task = {"id": "task-01"}
+            revision = gazu.files.get_next_output_revision(task)
+            self.assertEquals(revision, 3)
+
+    def test_last_output_revision(self):
+        with requests_mock.mock() as mock:
+            path = "project/tasks/task-01/output_files/next-revision"
+            mock.get(
+                gazu.client.get_full_url(path),
+                text=json.dumps({"next_revision": 3})
+            )
+            task = {"id": "task-01"}
+            revision = gazu.files.get_last_output_revision(task)
+            self.assertEquals(revision, 2)

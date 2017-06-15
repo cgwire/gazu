@@ -1,4 +1,4 @@
-from gazu import client
+from . import client
 
 
 def build_folder_path(task, mode="working", sep="/"):
@@ -69,3 +69,10 @@ def publish_file(task, person, comment, sep="/"):
 def get_next_output_revision(task):
     path = "project/tasks/%s/output_files/next-revision" % task["id"]
     return client.get(path)["next_revision"]
+
+
+def get_last_output_revision(task):
+    revision = get_next_output_revision(task)
+    if revision != 1:
+        revision -= 1
+    return revision

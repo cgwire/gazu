@@ -10,7 +10,7 @@ def all():
     return sort_by_name(client.fetch_all('projects'))
 
 
-def get(project_id):
+def fetch_project(project_id):
     """
     Returns project corresponding to given id
     """

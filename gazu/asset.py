@@ -25,6 +25,10 @@ def all_for_project_and_type(project, asset_type):
     return sort_by_name(assets)
 
 
+def fetch_asset(asset_id):
+    return client.fetch_one('entities', asset_id)
+
+
 def all_types():
     return sort_by_name(client.fetch_all("asset_types"))
 

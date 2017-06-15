@@ -17,7 +17,6 @@ def all_for_sequence(sequence):
 
 
 def all_sequences(project=None):
-
     if project is not None:
         sequences = client.fetch_all("projects/%s/sequences" % project["id"])
     else:
@@ -27,7 +26,6 @@ def all_sequences(project=None):
 
 
 def all_episodes(project=None):
-
     if project is not None:
         episodes = client.fetch_all("projects/%s/episodes" % project["id"])
     else:
@@ -39,6 +37,10 @@ def all_episodes(project=None):
 def all_sequences_for_episode(episode):
     sequences = client.fetch_all("episodes/%s/sequences" % episode["id"])
     return sort_by_name(sequences)
+
+
+def fetch_shot(shot_id):
+    return client.fetch_one('entities', shot_id)
 
 
 def task_types_for_shot(shot):

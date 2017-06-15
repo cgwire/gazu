@@ -22,6 +22,21 @@ class TaskTestCase(unittest.TestCase):
             )
             self.assertEquals(test_task["name"], "Task 01")
 
+    def test_fetch_task_by_name(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url(
+                    'data/tasks?name=Modeling&entity_id=entity-1'
+                ),
+                text=json.dumps(
+                    [{"name": "Task 01", "project_id": "project-1"}]
+                )
+            )
+            test_task = gazu.task.fetch_task_by_name(
+                "Modeling", {"id": "entity-1"}
+            )
+            self.assertEquals(test_task["name"], "Task 01")
+
     def test_start_task(self):
         with requests_mock.mock() as mock:
             mock.put(

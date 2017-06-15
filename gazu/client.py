@@ -2,7 +2,7 @@ import functools
 import requests
 import json
 
-from gazu.encoder import CustomJSONEncoder
+from .encoder import CustomJSONEncoder
 
 from .exception import (
     RouteNotFoundException,
