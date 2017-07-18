@@ -4,7 +4,7 @@ from .sorting import sort_by_name
 
 
 def all():
-    return sort_by_name(client.fetch_all("assets"))
+    return sort_by_name(client.fetch_all("assets/all"))
 
 
 def all_for_shot(shot):
