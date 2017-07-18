@@ -10,7 +10,7 @@ class AssetTestCase(unittest.TestCase):
     def test_all(self):
         with requests_mock.mock() as mock:
             mock.get(
-                gazu.client.get_full_url("data/assets"),
+                gazu.client.get_full_url("data/assets/all"),
                 text='[{"name": "Asset 01", "project_id": "project-1"}]'
             )
             assets = gazu.asset.all()
