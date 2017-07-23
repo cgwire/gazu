@@ -53,7 +53,7 @@ Documentation is available on a dedicated website:
 
 [https://gazu.cg-wire.com/](https://gazu.cg-wire.com)
 
-### Contributions
+### Contributions
 
 All contributions are welcome as long as they respect the [C4
 contract](https://rfc.zeromq.org/spec:42/C4).
