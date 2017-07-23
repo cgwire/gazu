@@ -43,7 +43,8 @@ Let's finish with an example. Fetch all the open projects:
 projects = gazu.projects.open_projects()
 ```
 
-Then jump to the [documentation](https://gazu.cg-wire.com) to see what features are available!
+Then jump to the [documentation](https://gazu.cg-wire.com) to see what features
+are available!
 
 
 ### Documentation
@@ -52,6 +53,12 @@ Documentation is available on a dedicated website:
 
 [https://gazu.cg-wire.com/](https://gazu.cg-wire.com)
 
+### Contributions
+
+All contributions are welcome as long as they respect the [C4
+contract](https://rfc.zeromq.org/spec:42/C4).
+
+Code must follow the pep8 convention.
 
 ### About authors
 
