@@ -7,7 +7,7 @@ def all(project=None):
     if project is not None:
         shots = client.fetch_all("projects/%s/shots" % project["id"])
     else:
-        shots = client.fetch_all("shots")
+        shots = client.fetch_all("shots/all")
 
     return sort_by_name(shots)
 
