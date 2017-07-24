@@ -10,7 +10,7 @@ class ShotTestCase(unittest.TestCase):
     def test_all(self):
         with requests_mock.mock() as mock:
             mock.get(
-                gazu.client.get_full_url('data/shots'),
+                gazu.client.get_full_url('data/shots/all'),
                 text='[{"name": "Shot 01", "project_id": "project-1"}]'
             )
             shots = gazu.shot.all()
