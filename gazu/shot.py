@@ -4,19 +4,28 @@ from .sorting import sort_by_name
 
 
 def all(project=None):
+    """
+    Retrieve all shots from database or for given project.
+    """
     if project is not None:
         shots = client.fetch_all("projects/%s/shots" % project["id"])
     else:
-        shots = client.fetch_all("shots/all")
+        shots = client.fetch_all("shots")
 
     return sort_by_name(shots)
 
 
 def all_for_sequence(sequence):
+    """
+    Retrieve all shots which are children from given sequence.
+    """
     return sort_by_name(client.fetch_all("sequences/%s/shots" % sequence["id"]))
 
 
 def all_sequences(project=None):
+    """
+    Retrieve all sequences from database or for given project.
+    """
     if project is not None:
         sequences = client.fetch_all("projects/%s/sequences" % project["id"])
     else:
@@ -25,7 +34,18 @@ def all_sequences(project=None):
     return sort_by_name(sequences)
 
 
+def all_sequences_for_episode(episode):
+    """
+    Retrieve all sequences which are children of given episode.
+    """
+    sequences = client.fetch_all("episodes/%s/sequences" % episode["id"])
+    return sort_by_name(sequences)
+
+
 def all_episodes(project=None):
+    """
+    Retrieve all episodes from database or for given project.
+    """
     if project is not None:
         episodes = client.fetch_all("projects/%s/episodes" % project["id"])
     else:
@@ -34,20 +54,8 @@ def all_episodes(project=None):
     return sort_by_name(episodes)
 
 
-def all_sequences_for_episode(episode):
-    sequences = client.fetch_all("episodes/%s/sequences" % episode["id"])
-    return sort_by_name(sequences)
-
-
-def fetch_shot(shot_id):
+def get_shot(shot_id):
+    """
+    Return shot corresponding to given shot ID.
+    """
     return client.fetch_one('entities', shot_id)
-
-
-def task_types_for_shot(shot):
-    task_types = client.fetch_all("shots/%s/task_types" % shot['id'])
-    return sort_by_name(task_types)
-
-
-def tasks_for_shot(shot):
-    tasks = client.fetch_all("shots/%s/tasks" % shot['id'])
-    return sort_by_name(tasks)
