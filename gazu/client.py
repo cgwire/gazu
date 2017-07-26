@@ -17,16 +17,18 @@ requests.models.complexjson.dumps = functools.partial(
 )
 
 
-HOST = "http://localhost:5000/"
-
-session = requests.session()
+HOST = "http://gazu-server/"
+tokens = {
+    "access_token": "",
+    "refresh_token": ""
+}
 
 
 def host_is_up():
     """
-    :return: if the host is up
+    :return: True if the host is up
     """
-    response = session.head(HOST)
+    response = requests.head(HOST)
     return response.status_code == 200
 
 
@@ -43,6 +45,19 @@ def set_host(new_host):
     """
     global HOST
     HOST = new_host
+
+
+def set_tokens(new_tokens):
+    """
+    Store authentication token to reuse them in all requests.
+    """
+    global tokens
+    tokens = new_tokens
+
+
+def make_auth_header():
+    global tokens
+    return {"Authorization": "Bearer %s" % tokens["access_token"]}
 
 
 def url_path_join(*items):
@@ -64,13 +79,13 @@ def get(path):
     """
     Run a get request toward given path for configured host.
     """
-    response = session.get(get_full_url(path))
+    response = requests.get(get_full_url(path), headers=make_auth_header())
 
     if (response.status_code == 404):
         raise RouteNotFoundException(path)
-    elif (response.status_code == 401):
+    elif (response.status_code in [401, 422]):
         raise NotAuthenticatedException(path)
-    elif (response.status_code == 500):
+    elif (response.status_code in [500, 502]):
         raise ServerErrorException(path)
 
     return response.json()
@@ -80,13 +95,17 @@ def post(path, data):
     """
     Run a post request toward given path for configured host.
     """
-    response = session.post(get_full_url(path), json=data)
+    response = requests.post(
+        get_full_url(path),
+        json=data,
+        headers=make_auth_header()
+    )
 
     if (response.status_code == 404):
         raise RouteNotFoundException(path)
-    elif (response.status_code == 401):
+    elif (response.status_code in [401, 422]):
         raise NotAuthenticatedException(path)
-    elif (response.status_code == 500):
+    elif (response.status_code in [500, 502]):
         raise ServerErrorException(path)
 
     return response.json()
@@ -96,13 +115,17 @@ def put(path, data):
     """
     Run a put request toward given path for configured host.
     """
-    response = session.put(get_full_url(path), json=data)
+    response = requests.put(
+        get_full_url(path),
+        json=data,
+        headers=make_auth_header()
+    )
 
     if (response.status_code == 404):
         raise RouteNotFoundException(path)
-    elif (response.status_code == 401):
+    elif (response.status_code in [401, 422]):
         raise NotAuthenticatedException(path)
-    elif (response.status_code == 500):
+    elif (response.status_code in [500, 502]):
         raise ServerErrorException(path)
 
     return response.json()
@@ -112,13 +135,13 @@ def delete(path):
     """
     Run a get request toward given path for configured host.
     """
-    response = session.delete(get_full_url(path))
+    response = requests.delete(get_full_url(path), headers=make_auth_header())
 
     if (response.status_code == 404):
         raise RouteNotFoundException(path)
-    elif (response.status_code == 401):
+    elif (response.status_code in [401, 422]):
         raise NotAuthenticatedException(path)
-    elif (response.status_code == 500):
+    elif (response.status_code in [500, 502]):
         raise ServerErrorException(path)
 
     return response.json()
@@ -145,11 +168,11 @@ def create(model, data):
     return post(url_path_join('data', model), data)
 
 
-def fetch_api_git_hash():
+def get_api_version():
     """
     Get current version of the API.
     """
-    return get('')['git_hash']
+    return get('')['version']
 
 
 def upload(path, file_path):
