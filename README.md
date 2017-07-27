@@ -13,6 +13,8 @@ an up and running instance of Zou to run properly.
 
 ![Build status](https://api.travis-ci.org/cgwire/gazu.svg?branch=master)
 
+[![Gitter badge](https://badges.gitter.im/cgwire/Lobby.png)](https://gitter.im/cgwire/Lobby)
+
 ### Quickstart
 
 Install Gazu in your application environment via pip:
