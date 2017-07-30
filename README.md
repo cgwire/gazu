@@ -1,6 +1,6 @@
 ![Gazu Logo](https://gazu.cg-wire.com/gazu.png)
 
-## Gazu, steroïds for your CG tools
+# Gazu, steroïds for your CG tools
 
 Gazu is a Python client that allows to fetch data easily from your CG production
 environment (tasks, shots, assets, casting and dependencies). 
@@ -15,7 +15,7 @@ an up and running instance of Zou to run properly.
 
 [![Gitter badge](https://badges.gitter.im/cgwire/Lobby.png)](https://gitter.im/cgwire/Lobby)
 
-### Quickstart
+## Quickstart
 
 Install Gazu in your application environment via pip:
 
@@ -49,20 +49,20 @@ Then jump to the [documentation](https://gazu.cg-wire.com) to see what features
 are available!
 
 
-### Documentation
+## Documentation
 
 Documentation is available on a dedicated website:
 
 [https://gazu.cg-wire.com/](https://gazu.cg-wire.com)
 
-### Contributions
+## Contributions
 
 All contributions are welcome as long as they respect the [C4
 contract](https://rfc.zeromq.org/spec:42/C4).
 
 Code must follow the pep8 convention.
 
-### About authors
+## About authors
 
 Gazu is written by CG Wire, a company based in France. We help small to
 midsize CG studios to manage their production and build pipeline efficiently.
