@@ -36,6 +36,26 @@ class FilesTestCase(unittest.TestCase):
             name = gazu.files.build_file_name({"id": "task-01"})
             self.assertEquals(name, "filename.max")
 
+    def test_set_working_file_thumbnail(self):
+        pass
+
+    def test_new_working_file(self):
+        with requests_mock.mock() as mock:
+            mock.post(
+                gazu.client.get_full_url('project/tree/file'),
+                text=json.dumps(
+                    {"path": "U:/PROD/FX/S01/P01/Tree/filename.max"}
+                )
+            )
+            path = "data/working_files"
+            mock.post(
+                gazu.client.get_full_url(path),
+                text=json.dumps({"id": 1, "task_id": "task-01"})
+            )
+            task = {"id": "task-01"}
+            working_file = gazu.files.new_working_file(task)
+            self.assertEquals(working_file["id"], 1)
+
     def test_publish(self):
         with requests_mock.mock() as mock:
             mock.post(
@@ -77,3 +97,25 @@ class FilesTestCase(unittest.TestCase):
             task = {"id": "task-01"}
             revision = gazu.files.get_last_output_revision(task)
             self.assertEquals(revision, 2)
+
+    def test_get_last_working_files(self):
+        with requests_mock.mock() as mock:
+            path = "/data/tasks/task-01/last-working-files"
+            print(gazu.client.get_full_url(path))
+            mock.get(
+                gazu.client.get_full_url(path),
+                text=json.dumps({
+                    "main": {"id": "working-file-1"},
+                    "hotfix": {"id": "working-file-7"}
+                })
+            )
+            task = {"id": "task-01"}
+            working_files_dict = gazu.files.get_last_working_files(task)
+            self.assertEquals(
+                working_files_dict["main"]["id"],
+                "working-file-1"
+            )
+            self.assertEquals(
+                working_files_dict["hotfix"]["id"],
+                "working-file-7"
+            )

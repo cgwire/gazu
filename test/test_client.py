@@ -1,5 +1,4 @@
 import unittest
-import json
 import requests_mock
 import datetime
 
@@ -17,6 +16,11 @@ class ClientTestCase(unittest.TestCase):
 
 class BaseFuncTestCase(ClientTestCase):
 
+    def test_host_is_up(self):
+        with requests_mock.mock() as mock:
+            mock.head(client.get_host())
+            self.assertTrue(client.host_is_up())
+
     def test_get_host(self):
         self.assertEquals(client.get_host(), client.HOST)
 
@@ -25,6 +29,12 @@ class BaseFuncTestCase(ClientTestCase):
         self.assertEquals(client.get_host(), "newhost")
         client.set_host("http://gazu-server/")
         self.assertEquals(client.get_host(), client.HOST)
+
+    def test_set_tokens(self):
+        pass
+
+    def test_make_auth_header(self):
+        pass
 
     def test_url_path_join(self):
         root = client.get_host()
@@ -132,5 +142,15 @@ class BaseFuncTestCase(ClientTestCase):
 
     def test_hash(self):
         with requests_mock.mock() as mock:
-            mock.get(client.get_host(), text='{"git_hash": "aubly123"}')
-            self.assertEquals(client.fetch_api_git_hash(), "aubly123")
+            mock.get(client.get_host(), text='{"version": "0.2.0"}')
+            self.assertEquals(client.get_api_version(), "0.2.0")
+
+    def test_make_auth_token(self):
+        tokens = {"access_token": "token_test"}
+        client.set_tokens(tokens)
+        self.assertEquals(client.make_auth_header(), {
+            "Authorization": "Bearer token_test"
+        })
+
+    def test_upload(self):
+        pass

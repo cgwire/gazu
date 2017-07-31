@@ -16,3 +16,7 @@ class ServerErrorException(Exception):
 
 class NotAuthenticatedException(Exception):
     pass
+
+
+class AuthFailedException(Exception):
+    pass
