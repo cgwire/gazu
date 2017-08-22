@@ -11,7 +11,7 @@ shot and many more. To make it short, it will boost your pipeline tools!
 It is made to be used with the [Zou API](https://zou.cg-wire.com). It requires
 an up and running instance of Zou to run properly.
 
-![Build status](https://api.travis-ci.org/cgwire/gazu.svg?branch=master)
+[![Build status](https://api.travis-ci.org/cgwire/gazu.svg?branch=master)](https://travis-ci.org/cgwire/gazu)
 
 [![Gitter badge](https://badges.gitter.im/cgwire/Lobby.png)](https://gitter.im/cgwire/Lobby)
 
