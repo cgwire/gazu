@@ -1,47 +1,109 @@
 from . import client
 
 
-def build_folder_path(task, mode="working", sep="/"):
+def all_output_types():
     """
-    For a given task_type, shot and/or asset, it returns the expected folder
-    path.
+    Return all output types list in database.
+    """
+    return client.fetch_all("output_types")
+
+
+def all_softwares():
+    """
+    Return all softwares listed in database.
+    """
+    return client.fetch_all("softwares")
+
+
+def build_folder_path(
+    task,
+    name="main",
+    mode="working",
+    software=None,
+    output_type=None,
+    scene=1,
+    sep="/"
+):
+    """
+    For a given task and options it returns the expected folder path.
     """
     data = {
         "mode": mode,
-        "task_id": task["id"],
+        "scene": scene,
+        "name": name,
         "sep": sep
     }
-    result = client.post("project/tree/folder", data)
-    return result["path"].replace(" ","_")
+    if output_type is not None:
+        data["output_type_id"] = output_type["id"]
+    if software is not None:
+        data["software_id"] = software["id"]
+
+    result = client.post("data/tasks/%s/folder-path" % task["id"], data)
+    return result["path"].replace(" ", "_")
 
 
-def build_file_path(task, mode="working", comment="", version=1, sep="/"):
+def build_file_path(
+    task,
+    name="main",
+    mode="working",
+    software=None,
+    output_type=None,
+    scene=1,
+    comment="",
+    version=1,
+    sep="/"
+):
     """
-    For a given task_type, shot and/or asset, it returns the expected file path.
+    For a given task and options, it returns the expected file path.
     """
     data = {
         "mode": mode,
-        "task_id": task["id"],
+        "scene": 1,
+        "name": name,
+        "comment": comment,
+        "version": version
+    }
+    if output_type is not None:
+        data["output_type_id"] = output_type["id"]
+    if software is not None:
+        data["software_id"] = software["id"]
+
+    result = client.post("data/tasks/%s/file-path" % task["id"], data)
+    return "%s%s%s" % (
+        result["path"].replace(" ", "_"),
+        sep,
+        result["name"].replace(" ", "_")
+    )
+
+
+def build_file_name(
+    task,
+    name="main",
+    mode="working",
+    software=None,
+    output_type=None,
+    scene=1,
+    comment="",
+    version=1,
+    sep="/"
+):
+    """
+    For a given task and options, it returns the expected file name.
+    """
+    data = {
+        "mode": mode,
+        "scene": scene,
+        "name": name,
         "comment": comment,
         "version": version,
         "sep": sep
     }
-    result = client.post("project/tree/file", data)
-    return result["path"].replace(" ","_")
+    if output_type is not None:
+        data["output_type_id"] = output_type["id"]
+    if output_type is not None:
+        data["software_id"] = software["id"]
 
-
-def build_file_name(task, mode="working", comment="", version=1, sep="/"):
-    """
-    For a given task_type, shot and/or asset, it returns the expected file name.
-    """
-    data = {
-        "mode": mode,
-        "task_id": task["id"],
-        "comment": comment,
-        "version": version,
-        "sep": sep
-    }
-    result = client.post("project/tree/file", data)
+    result = client.post("data/tasks/%s/file-path" % task["id"], data)
     return result["name"].replace(" ", "_")
 
 
@@ -52,27 +114,133 @@ def set_working_file_thumbnail(working_file, th_path):
     return client.upload("thumbnails/working-files/%s.png" % working_file["id"])
 
 
-def publish_file(task, person, comment, sep="/"):
+def new_working_file(
+    task,
+    name="main",
+    mode="working",
+    software=None,
+    comment="",
+    person=None,
+    scene=1,
+    version=0,
+    sep="/"
+):
     """
-    Create a new output file in the database and returns information related
-    to that newly created file.
+    Create a new working_file for given task. It generates and store the
+    expected path for given task and options.
     """
-    path = "project/files/working-files/publish"
-    return client.post(path, {
+    data = {
+        "name": name,
+        "comment": comment,
+        "scene": scene,
         "task_id": task["id"],
+        "revision": version
+    }
+    if person is not None:
+        data["person_id"] = person["id"]
+    if software is not None:
+        data["software_id"] = software["id"]
+
+    return client.post("data/tasks/%s/working-files/new" % task["id"], data)
+
+
+def new_output_file(
+    task,
+    working_file,
+    person,
+    comment,
+    output_type=None,
+    scene=1,
+    sep="/"
+):
+    path = "data/tasks/%s/working-files/%s/output-files/new" % (
+        task["id"],
+        working_file["id"]
+    )
+
+    data = {
         "person_id": person["id"],
         "comment": comment,
+        "scene": scene,
         "separator": sep
-    })
+    }
+    if output_type is not None:
+        data["output_type_id"] = output_type["id"],
+
+    return client.post(path, data)
 
 
-def get_next_output_revision(task):
-    path = "project/tasks/%s/output_files/next-revision" % task["id"]
+def get_next_output_revision(task, output_type):
+    """
+    Generate next expected output revision for given task.
+    """
+    path = "data/tasks/%s/output-types/%s/next-revision" % (
+        task["id"],
+        output_type["id"]
+    )
     return client.get(path)["next_revision"]
 
 
-def get_last_output_revision(task):
-    revision = get_next_output_revision(task)
+def get_last_output_revision(task, output_type):
+    """
+    Generate last output revision for given task.
+    """
+    revision = get_next_output_revision(task, output_type)
     if revision != 1:
         revision -= 1
     return revision
+
+
+def get_working_files_for_task(task):
+    """
+    List of all working files related to given task.
+    """
+    path = "data/tasks/%s/working-files" % task["id"]
+    return client.get(path)
+
+
+def get_last_working_files(task):
+    """
+    Generate a dict of last working files. One working file entry for each
+    working file name.
+    """
+    path = "data/tasks/%s/last-working-files" % task["id"]
+    return client.get(path)
+
+
+def get_last_working_file_revision(task, name="main"):
+    """
+    Get last revision stored in the API for given task and given file name.
+    """
+    path = "data/tasks/%s/last-working-files" % task["id"]
+    working_files_dict = client.get(path)
+    return working_files_dict.get(name, 0)
+
+
+def get_output_type_by_name(output_type_name):
+    """
+    Return output type object matching given name.
+    """
+    output_types = client.fetch_all("output-types?name=%s" % output_type_name)
+    if len(output_types) > 0:
+        return output_types[0]
+    else:
+        return None
+
+
+def get_software(software_id):
+    """
+    Return software object corresponding to given ID.
+    """
+    return client.fetch_one("softwares", software_id)
+
+
+def get_software_by_name(software_name):
+    """
+    Return software object corresponding to given name.
+    """
+    softwares = client.fetch_all("softwares?name=%s" % software_name)
+    if len(softwares) > 0:
+        return softwares[0]
+    else:
+        return None

@@ -10,15 +10,15 @@ def all():
     return sort_by_name(client.fetch_all('projects'))
 
 
-def fetch_project(project_id):
-    """
-    Returns project corresponding to given id
-    """
-    return client.fetch_one('projects', project_id)
-
-
-def open_projects():
+def all_open_projects():
     """
     Returns all the open projects stored in the database.
     """
     return sort_by_name(client.fetch_all('projects/open'))
+
+
+def get_project(project_id):
+    """
+    Returns project corresponding to given id.
+    """
+    return client.fetch_one('projects', project_id)
