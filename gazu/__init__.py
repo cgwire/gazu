@@ -11,6 +11,10 @@ from .exception import AuthFailedException
 __version__ = '0.3.0'
 
 
+def get_host():
+    return client.get_host()
+
+
 def set_host(url):
     client.set_host(url)
 
