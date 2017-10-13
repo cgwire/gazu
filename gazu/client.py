@@ -7,7 +7,8 @@ from .encoder import CustomJSONEncoder
 from .exception import (
     RouteNotFoundException,
     ServerErrorException,
-    NotAuthenticatedException
+    NotAuthenticatedException,
+    NotAllowedException
 )
 
 # Little hack to allow json encoder to manage dates.
@@ -95,19 +96,12 @@ def post(path, data):
     """
     Run a post request toward given path for configured host.
     """
-    response = requests.post(
+    response = requests_session.post(
         get_full_url(path),
         json=data,
         headers=make_auth_header()
     )
-
-    if (response.status_code == 404):
-        raise RouteNotFoundException(path)
-    elif (response.status_code in [401, 422]):
-        raise NotAuthenticatedException(path)
-    elif (response.status_code in [500, 502]):
-        raise ServerErrorException(path)
-
+    check_status(response.status_code, path)
     return response.json()
 
 
@@ -115,19 +109,12 @@ def put(path, data):
     """
     Run a put request toward given path for configured host.
     """
-    response = requests.put(
+    response = requests_session.put(
         get_full_url(path),
         json=data,
         headers=make_auth_header()
     )
-
-    if (response.status_code == 404):
-        raise RouteNotFoundException(path)
-    elif (response.status_code in [401, 422]):
-        raise NotAuthenticatedException(path)
-    elif (response.status_code in [500, 502]):
-        raise ServerErrorException(path)
-
+    check_status(response.status_code, path)
     return response.json()
 
 
@@ -135,16 +122,28 @@ def delete(path):
     """
     Run a get request toward given path for configured host.
     """
-    response = requests.delete(get_full_url(path), headers=make_auth_header())
-
-    if (response.status_code == 404):
-        raise RouteNotFoundException(path)
-    elif (response.status_code in [401, 422]):
-        raise NotAuthenticatedException(path)
-    elif (response.status_code in [500, 502]):
-        raise ServerErrorException(path)
-
+    response = requests_session.delete(
+        get_full_url(path),
+        headers=make_auth_header()
+    )
+    check_status(response.status_code, path)
     return response.text
+
+
+def check_status(status_code, path):
+    """
+    Raise an exception related to status code, if the status code does not match
+    a success code.
+    """
+    if (status_code == 404):
+        raise RouteNotFoundException(path)
+    elif (status_code == 403):
+        raise NotAllowedException(path)
+    elif (status_code in [401, 422]):
+        raise NotAuthenticatedException(path)
+    elif (status_code in [500, 502]):
+        raise ServerErrorException(path)
+    return status_code
 
 
 def fetch_all(model):
