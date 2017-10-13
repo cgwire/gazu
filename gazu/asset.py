@@ -47,8 +47,8 @@ def all_types_for_project(project):
     Retrieve all asset types from assets listed in given project.
     """
     return sort_by_name(client.fetch_all(
-        "projects/%s/asset-types" % project["id"])
-    )
+        "projects/%s/asset-types" % project["id"]
+    ))
 
 
 def all_types_for_shot(shot):
@@ -56,8 +56,8 @@ def all_types_for_shot(shot):
     Retrieve all asset types from assets casted in given shot.
     """
     return sort_by_name(client.fetch_all(
-        "shots/%s/asset-types" % shot["id"])
-    )
+        "shots/%s/asset-types" % shot["id"]
+    ))
 
 
 def get_asset(asset_id):
@@ -103,3 +103,10 @@ def remove_asset(asset):
 def task_types_for_asset(asset):
     task_types = client.fetch_all("assets/%s/task-types" % asset['id'])
     return sort_by_name(task_types)
+
+
+def get_asset_by_name(project, name):
+    result = client.fetch_all("entities?project_id=%s&name=%s" % (
+        project["id"], name
+    ))
+    return next(iter(result or []), None)
