@@ -5,7 +5,62 @@ def all_output_types():
     """
     Return all output types list in database.
     """
-    return client.fetch_all("output_types")
+    return client.fetch_all("output-types")
+
+
+def get_output_type(output_type_id):
+    """
+    Return output type object corresponding to the given id.
+    """
+    return client.fetch_one("output-types", output_type_id)
+
+
+def get_output_type_by_name(output_type_name):
+    """
+    Return software object corresponding to the given id.
+    """
+    result = client.fetch_all("output-types?name=%s" % output_type_name)
+    return next(iter(result or []), None)
+
+
+def get_output_file(output_file_id):
+    """
+    Returns the file corresponding to the given id.
+    """
+    path = "data/output-files/%s/" % (output_file_id)
+    return client.get(path)
+
+
+def get_output_files_for_entity(entity):
+    """
+    Retrieves all the outputs of a given asset
+    """
+    path = "data/output-files?entity_id=%s" % (entity["id"])
+    return client.get(path)
+
+
+def get_last_outputs_for_entity(entity):
+    """
+    Retrieves the last outputs of a given asset an store them by
+    output_type+file_name
+
+    :returns: the last outputs
+    :rtype: dict
+    """
+    all_entity_outputs = get_output_files_for_entity(entity)
+    last_entity_outputs = dict()
+    for output in all_entity_outputs:
+        if output['source_file'] is None:  # old cases
+            continue
+        key = '{0}{1}'.format(
+            output['output_type_id'],
+            output['source_file']['name'])
+        if key not in last_entity_outputs.keys():
+            last_entity_outputs[key] = output
+            continue
+        if last_entity_outputs[key]['revision'] < output['revision']:
+            last_entity_outputs[key] = output
+    return last_entity_outputs
 
 
 def all_softwares():
@@ -100,7 +155,7 @@ def build_file_name(
     }
     if output_type is not None:
         data["output_type_id"] = output_type["id"]
-    if output_type is not None:
+    if software is not None:
         data["software_id"] = software["id"]
 
     result = client.post("data/tasks/%s/file-path" % task["id"], data)
@@ -122,7 +177,7 @@ def new_working_file(
     comment="",
     person=None,
     scene=1,
-    version=0,
+    revision=0,
     sep="/"
 ):
     """
@@ -134,7 +189,7 @@ def new_working_file(
         "comment": comment,
         "scene": scene,
         "task_id": task["id"],
-        "revision": version
+        "revision": revision
     }
     if person is not None:
         data["person_id"] = person["id"]
@@ -151,6 +206,7 @@ def new_output_file(
     comment,
     output_type=None,
     scene=1,
+    revision=0,
     sep="/"
 ):
     path = "data/tasks/%s/working-files/%s/output-files/new" % (
@@ -162,6 +218,7 @@ def new_output_file(
         "person_id": person["id"],
         "comment": comment,
         "scene": scene,
+        "revision": revision,
         "separator": sep
     }
     if output_type is not None:
@@ -191,6 +248,15 @@ def get_last_output_revision(task, output_type):
     return revision
 
 
+def get_last_output_files(task):
+    """
+    Generate a dict of last output files. One working file entry for each
+    output file type.
+    """
+    path = "data/tasks/%s/last-output-files" % task["id"]
+    return client.get(path)
+
+
 def get_working_files_for_task(task):
     """
     List of all working files related to given task.
@@ -217,22 +283,18 @@ def get_last_working_file_revision(task, name="main"):
     return working_files_dict.get(name, 0)
 
 
-def get_output_type_by_name(output_type_name):
-    """
-    Return output type object matching given name.
-    """
-    output_types = client.fetch_all("output-types?name=%s" % output_type_name)
-    if len(output_types) > 0:
-        return output_types[0]
-    else:
-        return None
-
-
 def get_software(software_id):
     """
     Return software object corresponding to given ID.
     """
     return client.fetch_one("softwares", software_id)
+
+
+def get_working_file(workfile_id):
+    """
+    Return workfile object corresponding to given ID.
+    """
+    return client.fetch_one("working-files", workfile_id)
 
 
 def get_software_by_name(software_name):
@@ -244,3 +306,22 @@ def get_software_by_name(software_name):
         return softwares[0]
     else:
         return None
+
+
+def update_modification_date(working_file):
+    """
+    Update modification date of given working file with current time (now).
+    """
+    return client.put(
+        "/actions/working-files/%s/modified" % working_file['id'],
+        {}
+    )
+
+
+def set_project_file_tree(project, file_tree_name):
+    """
+    Use given file tree to generate files for given project.
+    """
+    data = {"tree_name": file_tree_name}
+    path = "actions/projects/%s/set-file-tree" % project["id"]
+    return client.post(path, data)

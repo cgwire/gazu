@@ -140,3 +140,31 @@ class ShotTestCase(unittest.TestCase):
             )
             shot = gazu.shot.get_shot('shot-1')
             self.assertEquals(shot["name"], "Shot 01")
+
+    def test_get_shot_by_name(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url(
+                    "data/entities?parent_id=sequence-1&name=Shot01"
+                ),
+                text=json.dumps([
+                    {"name": "Shot01", "project_id": "project-1"}
+                ])
+            )
+            sequence = {"id": "sequence-1"}
+            shot = gazu.shot.get_shot_by_name(sequence, "Shot01")
+            self.assertEquals(shot["name"], "Shot01")
+
+    def test_get_sequence_by_name(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url(
+                    "data/entities?project_id=project-1&name=Sequence01"
+                ),
+                text=json.dumps([
+                    {"name": "Sequence01", "project_id": "project-1"}
+                ])
+            )
+            project = {"id": "project-1"}
+            sequence = gazu.shot.get_sequence_by_name(project, "Sequence01")
+            self.assertEquals(sequence["name"], "Sequence01")

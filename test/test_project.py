@@ -1,6 +1,7 @@
 import unittest
 import requests_mock
 import gazu
+import json
 
 
 class ProjectTestCase(unittest.TestCase):
@@ -33,3 +34,12 @@ class ProjectTestCase(unittest.TestCase):
             )
             project = gazu.project.get_project("project-1")
             self.assertEquals(project["name"], "The Crew")
+
+    def test_get_project_by_name(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url('data/projects?name=Test'),
+                text=json.dumps([{"name": "Test", "id": "project_1"}])
+            )
+            project = gazu.project.get_project_by_name("Test")
+            self.assertEquals(project["name"], "Test")

@@ -2,11 +2,27 @@ from . import client
 from .sorting import sort_by_name
 
 
+def all_task_types():
+    """
+    Return task types
+    """
+    task_types = client.fetch_all("task-types")
+    return sort_by_name(task_types)
+
+
 def all_for_shot(shot):
     """
     Return tasks linked to given shot.
     """
     tasks = client.fetch_all("shots/%s/tasks" % shot['id'])
+    return sort_by_name(tasks)
+
+
+def all_for_sequence(sequence):
+    """
+    Return tasks linked to given sequence.
+    """
+    tasks = client.fetch_all("sequences/%s/tasks" % sequence['id'])
     return sort_by_name(tasks)
 
 
@@ -23,6 +39,14 @@ def all_task_types_for_shot(shot):
     Return task types of task linked to given shot.
     """
     task_types = client.fetch_all("shots/%s/task-types" % shot['id'])
+    return sort_by_name(task_types)
+
+
+def all_task_types_for_sequence(sequence):
+    """
+    Return task types of tasks linked directly to given sequence.
+    """
+    task_types = client.fetch_all("sequences/%s/task-types" % sequence['id'])
     return sort_by_name(task_types)
 
 
@@ -74,10 +98,7 @@ def get_task_by_path(project, file_path, entity_type="shot"):
         "project_id": project["id"],
         "type": entity_type
     }
-    try:
-        return client.post("data/tasks/from-path/", data)
-    except:
-        return None
+    return client.post("data/tasks/from-path/", data)
 
 
 def get_task_status(task):
@@ -85,7 +106,7 @@ def get_task_status(task):
     Retrieves status object corresponding to status set on given task.
     """
     task_status = client.fetch_all(
-        "task_status?id={task_status_id}".format(
+        "task-status?id={task_status_id}".format(
             task_status_id=task['task_status_id']
         )
     )
@@ -96,16 +117,16 @@ def start_task(task):
     """
     Change a task status to WIP and set its real start date to now.
     """
-    path = client.url_path_join(
-        "data", "tasks", task["id"], "start"
-    )
+    path = "actions/tasks/%s/start" % task["id"]
     return client.put(path, {})
 
 
 def task_to_review(
     task,
     person,
-    comment
+    comment,
+    working_file=None,
+    revision=1
 ):
     """
     Mark given task as pending, waiting for approval.
@@ -113,6 +134,53 @@ def task_to_review(
     path = "actions/tasks/%s/to-review" % task["id"]
     data = {
         "person_id": person["id"],
-        "comment": comment
+        "comment": comment,
     }
+    if working_file is not None:
+        data["working_file_id"] = working_file["id"]
+
     return client.put(path, data)
+
+
+def get_time_spent(task, date):
+    """
+    Get the time spent by CG artists on a task at a given date.
+    It returns a dict with person ID as key and time spent object as value.
+    A field contains the total time spent.
+    Durations must be set in seconds.
+    Date format is YYYY-MM-DD.
+    """
+    path = "actions/tasks/%s/time-spents/%s" % (
+        task["id"],
+        date
+    )
+    return client.get(path)
+
+
+def set_time_spent(task, person, date, duration):
+    """
+    Set the time spent by a CG artist on a given task at a given date.
+    Durations must be set in seconds.
+    Date format is YYYY-MM-DD.
+    """
+    path = "actions/tasks/%s/time-spents/%s/persons/%s" % (
+        task["id"],
+        date,
+        person["id"]
+    )
+    return client.post(path, {"duration": duration})
+
+
+def add_time_spent(task, person, date, duration):
+    """
+    Add given duration to the already logged duration for given task and person
+    at a given date.
+    Durations must be set in seconds.
+    Date format is YYYY-MM-DD.
+    """
+    path = "actions/tasks/%s/time-spents/%s/persons/%s/add" % (
+        task["id"],
+        date,
+        person["id"]
+    )
+    return client.post(path, {"duration": duration})

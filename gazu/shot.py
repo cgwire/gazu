@@ -59,3 +59,25 @@ def get_shot(shot_id):
     Return shot corresponding to given shot ID.
     """
     return client.fetch_one('entities', shot_id)
+
+
+def get_sequence_by_name(project, sequence_name):
+    """
+    Returns sequence corresponding to given name and project.
+    """
+    result = client.fetch_all("entities?project_id=%s&name=%s" % (
+        project["id"],
+        sequence_name
+    ))
+    return next(iter(result or []), None)
+
+
+def get_shot_by_name(sequence, shot_name):
+    """
+    Returns shot corresponding to given sequence and name.
+    """
+    result = client.fetch_all("entities?parent_id=%s&name=%s" % (
+        sequence["id"],
+        shot_name
+    ))
+    return next(iter(result or []), None)

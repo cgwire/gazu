@@ -98,6 +98,30 @@ class AssetTestCase(unittest.TestCase):
             asset_instance = asset_types[0]
             self.assertEquals(asset_instance["name"], "Asset Type 01")
 
+    def test_all_types_for_project(self):
+        path = "data/projects/project-01/asset-types"
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url(path),
+                text='[{"name": "Asset Type 01"}]'
+            )
+            project = {"id": "project-01"}
+            asset_types = gazu.asset.all_types_for_project(project)
+            asset_instance = asset_types[0]
+            self.assertEquals(asset_instance["name"], "Asset Type 01")
+
+    def test_all_task_types_for_asset(self):
+        path = "data/assets/asset-01/task-types"
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url(path),
+                text='[{"name": "Modeling"}]'
+            )
+            asset = {"id": "asset-01"}
+            asset_types = gazu.asset.task_types_for_asset(asset)
+            asset_instance = asset_types[0]
+            self.assertEquals(asset_instance["name"], "Modeling")
+
     def test_get_asset(self):
         with requests_mock.mock() as mock:
             mock.get(
@@ -105,6 +129,20 @@ class AssetTestCase(unittest.TestCase):
                 text='{"name": "Asset 01", "project_id": "project-1"}'
             )
             asset = gazu.asset.get_asset('asset-1')
+            self.assertEquals(asset["name"], "Asset 01")
+
+    def test_get_asset_by_name(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url(
+                    "data/entities?project_id=project-1&name=test"
+                ),
+                text=json.dumps([
+                    {"name": "Asset 01", "project_id": "project-1"}
+                ])
+            )
+            project = {"id": "project-1"}
+            asset = gazu.asset.get_asset_by_name(project, "test")
             self.assertEquals(asset["name"], "Asset 01")
 
     def test_get_asset_type(self):
