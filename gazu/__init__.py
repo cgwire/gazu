@@ -6,6 +6,7 @@ from . import task
 from . import shot
 from . import asset
 from . import files
+from . import user
 
 from .exception import AuthFailedException
 
