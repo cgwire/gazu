@@ -113,6 +113,53 @@ def task_to_review(
     path = "actions/tasks/%s/to-review" % task["id"]
     data = {
         "person_id": person["id"],
-        "comment": comment
+        "comment": comment,
     }
+    if working_file is not None:
+        data["working_file_id"] = working_file["id"]
+
     return client.put(path, data)
+
+
+def get_time_spent(task, date):
+    """
+    Get the time spent by CG artists on a task at a given date.
+    It returns a dict with person ID as key and time spent object as value.
+    A field contains the total time spent.
+    Durations must be set in seconds.
+    Date format is YYYY-MM-DD.
+    """
+    path = "actions/tasks/%s/time-spents/%s" % (
+        task["id"],
+        date
+    )
+    return client.get(path)
+
+
+def set_time_spent(task, person, date, duration):
+    """
+    Set the time spent by a CG artist on a given task at a given date.
+    Durations must be set in seconds.
+    Date format is YYYY-MM-DD.
+    """
+    path = "actions/tasks/%s/time-spents/%s/persons/%s" % (
+        task["id"],
+        date,
+        person["id"]
+    )
+    return client.post(path, {"duration": duration})
+
+
+def add_time_spent(task, person, date, duration):
+    """
+    Add given duration to the already logged duration for given task and person
+    at a given date.
+    Durations must be set in seconds.
+    Date format is YYYY-MM-DD.
+    """
+    path = "actions/tasks/%s/time-spents/%s/persons/%s/add" % (
+        task["id"],
+        date,
+        person["id"]
+    )
+    return client.post(path, {"duration": duration})

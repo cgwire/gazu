@@ -127,25 +127,81 @@ class TaskTestCase(unittest.TestCase):
     def test_start_task(self):
         with requests_mock.mock() as mock:
             mock.put(
-                gazu.client.get_full_url(
-                    'data/tasks/task-1/start'
+                pipeline.client.get_full_url(
+                    "actions/tasks/task-1/start"
                 ),
                 text='{"name": "Task 01", "task_status_id": "wip-1"}'
             )
-            test_task = gazu.task.start_task({"id": "task-1"})
+            test_task = pipeline.task.start_task({"id": "task-1"})
             self.assertEquals(test_task["task_status_id"], "wip-1")
 
     def test_to_review(self):
         with requests_mock.mock() as mock:
             mock.put(
-                gazu.client.get_full_url(
-                    'actions/tasks/task-1/to-review'
+                pipeline.client.get_full_url(
+                    "actions/tasks/task-1/to-review"
                 ),
                 text='{"name": "Task 01", "task_status_id": "wfa-1"}'
             )
-            test_task = gazu.task.task_to_review(
+            test_task = pipeline.task.task_to_review(
+                {"id": "task-1"},
+                {"id": "person-1"},
+                "my comment",
+                working_file={"id": "working-file-1"}
+            )
+            self.assertEquals(test_task["task_status_id"], "wfa-1")
+            test_task = pipeline.task.task_to_review(
                 {"id": "task-1"},
                 {"id": "person-1"},
                 "my comment"
             )
             self.assertEquals(test_task["task_status_id"], "wfa-1")
+
+
+    def test_get_time_spent(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                pipeline.client.get_full_url(
+                    "actions/tasks/task-1/time-spents/2017-09-23"
+                ),
+                text=json.dumps({"person1": {"duration": 3600}, "total": 3600})
+            )
+            time_spents = pipeline.task.get_time_spent(
+                {"id": "task-1"},
+                "2017-09-23"
+            )
+            self.assertEquals(time_spents["total"], 3600)
+
+    def test_set_time_spent(self):
+        with requests_mock.mock() as mock:
+            mock.post(
+                pipeline.client.get_full_url(
+                    "actions/tasks/task-1/time-spents/2017-09-23/"
+                    "persons/person-1"
+                ),
+                text=json.dumps({"id": "time-spent-1", "duration": 3600})
+            )
+            time_spents = pipeline.task.set_time_spent(
+                {"id": "task-1"},
+                {"id": "person-1"},
+                "2017-09-23",
+                3600
+            )
+            self.assertEquals(time_spents["duration"], 3600)
+
+    def test_add_time_spent(self):
+        with requests_mock.mock() as mock:
+            mock.post(
+                pipeline.client.get_full_url(
+                    "actions/tasks/task-1/time-spents/2017-09-23/"
+                    "persons/person-1/add"
+                ),
+                text=json.dumps({"id": "time-spent-1", "duration": 7200})
+            )
+            time_spent = pipeline.task.add_time_spent(
+                {"id": "task-1"},
+                {"id": "person-1"},
+                "2017-09-23",
+                7200
+            )
+            self.assertEquals(time_spent["duration"], 7200)
