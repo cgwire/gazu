@@ -1,8 +1,16 @@
 import unittest
 import requests_mock
 import datetime
+import json
+import gazu
 
 from gazu import client
+from gazu.exception import (
+    RouteNotFoundException,
+    AuthFailedException,
+    NotAuthenticatedException,
+    NotAllowedException
+)
 
 
 class ClientTestCase(unittest.TestCase):
@@ -153,3 +161,39 @@ class BaseFuncTestCase(ClientTestCase):
 
     def test_upload(self):
         pass
+
+    def test_check_status(self):
+        self.assertRaises(NotAllowedException, client.check_status, 403, "/")
+        self.assertRaises(
+            NotAuthenticatedException, client.check_status, 401, "/")
+        self.assertRaises(RouteNotFoundException, client.check_status, 404, "/")
+
+    def test_init_host(self):
+        gazu.set_host("newhost")
+        self.assertEquals(gazu.get_host(), "newhost")
+        gazu.set_host("http://gazu-server/")
+        self.assertEquals(gazu.get_host(), gazu.client.HOST)
+
+    def test_init_log_in(self):
+        with requests_mock.mock() as mock:
+            mock.post(
+                client.get_full_url("auth/login"),
+                text=json.dumps(
+                    {"login": True, "tokens": {"access_token": "tokentest"}}
+                )
+            )
+            gazu.log_in("frank", "test")
+        self.assertEquals(client.tokens["tokens"]["access_token"], "tokentest")
+
+    def test_init_log_in_fail(self):
+        with requests_mock.mock() as mock:
+            mock.post(
+                client.get_full_url("auth/login"),
+                text=json.dumps({"login": False})
+            )
+            self.assertRaises(
+                AuthFailedException,
+                gazu.log_in,
+                "frank",
+                "test"
+            )
