@@ -23,7 +23,7 @@ requests.models.complexjson.dumps = functools.partial(
 requests_session = requests.Session()
 
 
-HOST = "http://pipeline-server.unit.local/"
+HOST = "http://gazu.change.serverhost/api"
 tokens = {
     "access_token": "",
     "refresh_token": ""

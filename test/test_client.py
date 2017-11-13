@@ -149,7 +149,7 @@ class BaseFuncTestCase(ClientTestCase):
 
     def test_hash(self):
         with requests_mock.mock() as mock:
-            mock.get(client.get_host(), text='{"version": "0.2.0"}')
+            mock.get(client.get_host() + '/', text='{"version": "0.2.0"}')
             self.assertEquals(client.get_api_version(), "0.2.0")
 
     def test_make_auth_token(self):
