@@ -26,7 +26,8 @@ Here is a non exhaustive list of use cases that allows Gazu:
 * Make sure that every artist workstations are on the same page when dealing
   with the file system.
 * Build a todo list for artists of the project.
-* Publication of files for validation.
+* Get working file path and output file paths for a given task.
+* Get next available working revision for a given task.
 * Manage automatic validition changes.
 
 ## Install 
@@ -45,7 +46,7 @@ to know where is located the API server:
 ```python
 import gazu
 
-gazu.client.set_host("https://zou-server-url")
+gazu.client.set_host("https://zou-server-url/api")
 ```
 
 ## Usage
