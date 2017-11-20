@@ -18,6 +18,7 @@ The client is divided in seven modules:
 * *shot*: functions related to shots, sequences and episodes.
 * *task*: functions related to tasks, task types and assignations.
 * *files*: functions related to file path generation.
+* *user*: functions related to current user data.
 * *client*: generic functions to deal with the API.
 
 ## Available data
@@ -29,10 +30,12 @@ The client is divided in seven modules:
 * Persons
 * Tasks
 * Task status
-* Departments 
 * Task types
+* Departments 
+* Time spents
 * Working files
 * Output files
+* Software and output types
 * File status
 * Comments
 
@@ -44,6 +47,12 @@ Retrieve all persons listed in database:
 persons = gazu.person.all()
 ```
 
+Get a person by full name:
+
+```python
+person = gazu.person.get_person_by_full_name("John Doe")
+person = gazu.person.get_person_by_desktop_login("john.doe")
+```
 
 ## Projects 
 
@@ -59,24 +68,21 @@ Retrieve all open projects:
 projects = gazu.projects.open_projects()
 ```
 
+Retrieve given project:
+
+```python
+project = gazu.projects.get_project(project_id)
+project = gazu.projects.get_project_by_name("Agent 327")
+```
+
 
 ## Assets 
 
-Retrieve all assets for a given project:
+Retrieve all assets for a given project, shot or asset type:
 
 ```python
-assets = gazu.asset.all_for_project(project_dict)
-```
-
-Retrieve all assets used in a given shot:
-
-```python
+assets = gazu.asset.all(project_dict)
 assets = gazu.asset.all_for_shot(shot_dict)
-```
-
-Retrieve all assets for a given asset type and a given project:
-
-```python
 assets = gazu.asset.all_for_project_and_type(project_dict, asset_type_dict)
 ```
 
@@ -84,18 +90,21 @@ Retrieve all asset types:
 
 ```python
 asset_types = gazu.asset.all_types()
+asset_types = gazu.asset.all_asset_types_for_project(project_dict) 
+asset_types = gazu.asset.all_asset_types_for_shot(shot_dict) 
 ```
 
-Retrieve all tasks related to given asset:
+Get a given asset:
 
 ```python
-tasks = gazu.asset.all_tasks_for_asset(asset_dict)
+asset = gazu.asset.get_asset(asset_id)
+asset = gazu.asset.get_asset_by_name(asset_name)
 ```
 
 Create an asset related to given project:
 
 ```python
-assets = gazu.asset.create(
+assets = gazu.asset.new_asset(
     project_dict, 
     asset_type_dict, 
     "My new asset",
@@ -103,54 +112,75 @@ assets = gazu.asset.create(
 )
 ```
 
-Delete an asset related:
+Delete an asset:
 
 ```python
-assets = gazu.asset.remove(asset_dict)
+assets = gazu.asset.remove_asset(asset_dict)
 ```
+
 
 ## Shots 
 
-Retrieve all shots for given project:
+Retrieve all shots for given project or sequence:
 
 ```python
-shots = gazu.shot.all_for_project(project_dict)
-```
-
-Retrieve all shots for given sequence:
-
-```python
+shots = gazu.shot.all(project_dict)
 shots = gazu.shot.all_for_sequence(sequence_dict)
 ```
 
-Retrieve all sequences for given project
+Retrieve all sequences for given project or episode
 
 ```python
-sequences = gazu.shot.all_sequences_for_project(sequence_dict)
-```
-
-Retrieve all sequences for given episode:
-
-```python
+sequences = gazu.shot.all_sequences(project_id)
 sequences = gazu.shot.all_sequences_for_episode(episode_dict)
 ```
 
 Retrieve all episodes for given project:
 
 ```python
-episodes = gazu.shot.all_episodes_for_project(project_dict)
+episodes = gazu.shot.all_episodes(project_dict)
 ```
 
-Retrieve all tasks for given shot:
+Retrieve given shot:
 
 ```python
-tasks = gazu.shot.all_tasks_for_shot(shot_dict)
+shot = gazu.shot.get_shot(shot_id)
+shot = gazu.shot.get_shot_by_name(sequence_dict, "SH01")
 ```
 
+Retrieve given sequence:
+
+```python
+shot = gazu.shot.get_sequence_by_name(project_dict, "SE01")
+```
 
 ## Tasks
 
-Change task status to Work In Progress and set its real start date to now.
+Retrieve all tasks related to given asset, shot or sequence:
+
+```python
+tasks = gazu.task.all_for_asset(asset_dict)
+tasks = gazu.shot.all_for_shot(shot_dict)
+tasks = gazu.shot.all_for_sequence(sequence)
+```
+
+Retrieve all task types or task types for shot or sequence:
+
+```python
+tasks = gazu.task.all_task_types()
+tasks = gazu.shot.all_task_types_for_shot(shot_dict)
+tasks = gazu.shot.all_task_types_for_sequence(sequence)
+```
+
+Retrieve a given task:
+
+```python
+task = gazu.shot.get_task_by_task_type(entity, task_type_dict)
+task = gazu.task.get_task_by_name(entity, "main")
+```
+
+
+Set a given task status as work in progress:
 
 ```python
 gazu.task.start_task(task_dict)
@@ -173,25 +203,192 @@ task = gazu.task.get_task_from_path(
 )
 ```
 
+
 ## Files
 
-Generate file path from a given task:
+Get all output types:
 
 ```python
-file_path = gazu.files.build_file_path(task_dict, mode="working", version=1)
+output_types = gazu.files.all_output_types()
 ```
+
+Retrieve given output type:
+
+```python
+output_types = gazu.files.get_output_type(output_type_id)
+output_types = gazu.files.get_output_type_by_name("Cache")
+```
+
+Get all softwares:
+
+```python
+softwares = gazu.files.all_softwares()
+```
+
+Retrieve given software:
+
+```python
+softwares = gazu.files.get_software(output_type_id)
+softwares = gazu.files.get_software_by_name("Cache")
+```
+
+Retrieve given output file:
+
+```python
+output_file = gazu.files.get_output_file(output_file_id)
+```
+
+Retrieve output files related to give entity:
+
+```python
+output_files = gazu.files.get_output_files_for_entity(entity)
+output_files_dict = gazu.files.get_last_output_files(task)
+output_files_dict = gazu.files.get_last_output_files_for_entity(entity)
+```
+
+Manage output files revisions:
+
+```python
+next_revision = gazu.files.get_next_ouput_revision(task_dict, output_type_dict)
+last_revision = gazu.files.get_last_ouput_revision(task_dict, output_type_dict)
+```
+
+Create new output file:
+
+```python
+output_file = gazu.files.new_output_file(
+    task_dict,
+    source_working_file_dict,
+    person_dict, # author
+    comment,
+    output_type=output_type_dict,
+    revision=1,
+    sep="/"
+    
+)
+```
+
+Get working files:
+
+```python
+working_files = gazu.files.get_working_files_for_task(task_dict)
+working_files_dict = gazu.files.get_last_working_files(task_dict)
+```
+
+Get a given working file:
+
+```python
+working_files = gazu.files.get_working_file(working_id)
+```
+
+Get working files revision:
+
+```python
+working_files = gazu.files.get_last_working_file_revision(
+    task_dict, 
+    name="main"
+)
+```
+
+Create a new working file:
+
+```python
+working_file = gazu.files.new_working_file(
+    task_dict,
+    name="main",
+    software=software_dict,
+    comment="",
+    person=person_dict, # Automatically set as current user if set to None
+    scene=1,
+    revision=0, # If revision == 0, it is set as latest revision + 1
+    sep="/"
+)
+```
+
+Change file tree template for given project:
+
+```python
+gazu.files.set_project_file_tree(project_id, file_tree_template_name)
+```
+
 
 Generate folder path from a given task:
 
 ```python
-folder_path = gazu.files.build_folder_path(task_dict, mode="working", version=3)
+file_path = gazu.files.build_folder_path(
+    task_dict, 
+    name="main",
+    mode="working", 
+    software=software_dict,
+    output_type=output_type_dict,
+    sep="/"
+)
 ```
 
-Generate folder path for an output file from a given task:
+Generate file path from a given task:
 
 ```python
-folder_path = gazu.files.build_folder_path(task_dict, mode="output", version=3)
+file_path = gazu.files.build_file_path(
+    task_dict, 
+    name="main",
+    mode="output", 
+    software=software_dict,
+    output_type=output_type_dict,
+    version=1,
+    sep="/"
+)
 ```
+
+Generate file name from a given task:
+
+```python
+file_path = gazu.files.build_file_path(
+    task_dict, 
+    name="main",
+    mode="output", 
+    software=software_dict,
+    output_type=output_type_dict,
+    version=1
+)
+```
+
+## User
+
+This routes returns data related to currently logged user (for which he has
+assigned tasks linked to expected result):
+
+Projects:
+
+```python
+projects = gazu.user.all_open_projects()
+```
+
+Assets and asset types:
+
+```python
+asset_types = gazu.user.all_asset_types_for_project(project_dict)
+assets = gazu.user.all_assets_for_asset_type_project(
+    project_dict,
+    asset_type_dict
+)
+```
+
+Sequences and shots:
+
+```python
+sequences = gazu.user.all_sequences_for_project(project_dict)
+shots = gazu.user.all_shots_for_sequence(shot_dict)
+```
+
+Tasks:
+
+```python
+tasks = gazu.user.all_tasks_for_shot(shot_dict)
+tasks = gazu.user.all_tasks_for_asset(asset_dict)
+task_types = gazu.user.all_task_types_for_asset(asset_dict)
+task_types = gazu.user.all_task_types_for_shot(shot_dict)
+```
+
 
 ## Generic functions
 
@@ -213,6 +410,11 @@ Set API server hostname:
 gazu.client.set_host("pipeline-api")
 ```
 
+Get currently logged user:
+
+```python
+gazu.client.get_current_user()
+```
 
 Performs a GET request on given path of the API:
 
