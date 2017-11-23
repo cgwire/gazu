@@ -410,6 +410,18 @@ Set API server hostname:
 gazu.client.set_host("pipeline-api")
 ```
 
+Log in you script:
+
+```python
+gazu.client.log_in("user@mail.com", "default")
+```
+
+Log out your script:
+
+```python
+gazu.client.log_out()
+```
+
 Get currently logged user:
 
 ```python

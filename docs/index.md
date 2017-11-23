@@ -49,6 +49,11 @@ import gazu
 gazu.client.set_host("https://zou-server-url/api")
 ```
 
+Then authenticate the script:
+```python
+gazu.client.log_in("user@mail.com", "default")
+```
+
 ## Usage
  
 Jump directly to the usage section to see the many examples of what is possible
