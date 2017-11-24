@@ -59,20 +59,20 @@ person = gazu.person.get_person_by_desktop_login("john.doe")
 Retrieve all projects listed in database:
 
 ```python
-projects = gazu.projects.all()
+projects = gazu.project.all()
 ```
 
 Retrieve all open projects:
 
 ```python
-projects = gazu.projects.open_projects()
+projects = gazu.project.open_projects()
 ```
 
 Retrieve given project:
 
 ```python
-project = gazu.projects.get_project(project_id)
-project = gazu.projects.get_project_by_name("Agent 327")
+project = gazu.project.get_project(project_id)
+project = gazu.project.get_project_by_name("Agent 327")
 ```
 
 
@@ -160,16 +160,16 @@ Retrieve all tasks related to given asset, shot or sequence:
 
 ```python
 tasks = gazu.task.all_for_asset(asset_dict)
-tasks = gazu.shot.all_for_shot(shot_dict)
-tasks = gazu.shot.all_for_sequence(sequence)
+tasks = gazu.task.all_for_shot(shot_dict)
+tasks = gazu.task.all_for_sequence(sequence)
 ```
 
 Retrieve all task types or task types for shot or sequence:
 
 ```python
 tasks = gazu.task.all_task_types()
-tasks = gazu.shot.all_task_types_for_shot(shot_dict)
-tasks = gazu.shot.all_task_types_for_sequence(sequence)
+tasks = gazu.task.all_task_types_for_shot(shot_dict)
+tasks = gazu.task.all_task_types_for_sequence(sequence)
 ```
 
 Retrieve a given task:
@@ -408,6 +408,18 @@ Set API server hostname:
 
 ```python
 gazu.client.set_host("pipeline-api")
+```
+
+Log in you script:
+
+```python
+gazu.client.log_in("user@mail.com", "default")
+```
+
+Log out your script:
+
+```python
+gazu.client.log_out()
 ```
 
 Get currently logged user:
