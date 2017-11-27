@@ -42,7 +42,7 @@ def get_output_files_for_entity(entity):
 def get_last_outputs_for_entity(entity):
     """
     Retrieves the last outputs of a given asset an store them by
-    output_type+file_name
+    output_type
 
     :returns: the last outputs
     :rtype: dict
@@ -52,9 +52,7 @@ def get_last_outputs_for_entity(entity):
     for output in all_entity_outputs:
         if output['source_file'] is None:  # old cases
             continue
-        key = '{0}{1}'.format(
-            output['output_type_id'],
-            output['source_file']['name'])
+        key = output['output_type_id']
         if key not in last_entity_outputs.keys():
             last_entity_outputs[key] = output
             continue
@@ -76,7 +74,6 @@ def build_folder_path(
     mode="working",
     software=None,
     output_type=None,
-    scene=1,
     sep="/"
 ):
     """
@@ -84,7 +81,6 @@ def build_folder_path(
     """
     data = {
         "mode": mode,
-        "scene": scene,
         "name": name,
         "sep": sep
     }
@@ -103,7 +99,6 @@ def build_file_path(
     mode="working",
     software=None,
     output_type=None,
-    scene=1,
     comment="",
     version=1,
     sep="/"
@@ -113,7 +108,6 @@ def build_file_path(
     """
     data = {
         "mode": mode,
-        "scene": 1,
         "name": name,
         "comment": comment,
         "version": version
@@ -137,7 +131,6 @@ def build_file_name(
     mode="working",
     software=None,
     output_type=None,
-    scene=1,
     comment="",
     version=1,
     sep="/"
@@ -147,7 +140,6 @@ def build_file_name(
     """
     data = {
         "mode": mode,
-        "scene": scene,
         "name": name,
         "comment": comment,
         "version": version,
@@ -176,7 +168,6 @@ def new_working_file(
     software=None,
     comment="",
     person=None,
-    scene=1,
     revision=0,
     sep="/"
 ):
@@ -187,7 +178,6 @@ def new_working_file(
     data = {
         "name": name,
         "comment": comment,
-        "scene": scene,
         "task_id": task["id"],
         "revision": revision
     }
@@ -205,7 +195,6 @@ def new_output_file(
     person,
     comment,
     output_type=None,
-    scene=1,
     revision=0,
     sep="/"
 ):
@@ -217,7 +206,6 @@ def new_output_file(
     data = {
         "person_id": person["id"],
         "comment": comment,
-        "scene": scene,
         "revision": revision,
         "separator": sep
     }
@@ -227,7 +215,7 @@ def new_output_file(
     return client.post(path, data)
 
 
-def get_next_output_revision(task, output_type):
+def get_next_output_revision(task, output_type, name="main"):
     """
     Generate next expected output revision for given task.
     """
@@ -235,7 +223,12 @@ def get_next_output_revision(task, output_type):
         task["id"],
         output_type["id"]
     )
-    return client.get(path)["next_revision"]
+
+    data = {
+        "name": name,
+    }
+
+    return client.post(path, data)["next_revision"]
 
 
 def get_last_output_revision(task, output_type):

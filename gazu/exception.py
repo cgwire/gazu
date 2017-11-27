@@ -22,5 +22,9 @@ class NotAllowedException(Exception):
     pass
 
 
+class MethodNotAllowedException(Exception):
+    pass
+
+
 class AuthFailedException(Exception):
     pass

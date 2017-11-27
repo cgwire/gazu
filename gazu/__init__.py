@@ -10,7 +10,7 @@ from . import user
 
 from .exception import AuthFailedException
 
-__version__ = '0.3.1'
+__version__ = '0.3.2'
 
 
 def get_host():
@@ -23,10 +23,11 @@ def set_host(url):
 
 def log_in(email, password):
     tokens = client.post("auth/login", {
-        "email": email,
+        "email":email,
         "password": password
     })
     if "login" in tokens and tokens["login"] == False:
         raise AuthFailedException
     else:
         client.set_tokens(tokens)
+    return tokens

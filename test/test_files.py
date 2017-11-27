@@ -95,7 +95,7 @@ class FilesTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             path = "data/tasks/task-01/output-types/output-type-01/" \
                    "next-revision"
-            mock.get(
+            mock.post(
                 gazu.client.get_full_url(path),
                 text=json.dumps({"next_revision": 3})
             )
@@ -111,7 +111,7 @@ class FilesTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             path = "data/tasks/task-01/output-types/output-type-01/" \
                    "next-revision"
-            mock.get(
+            mock.post(
                 gazu.client.get_full_url(path),
                 text=json.dumps({"next_revision": 3})
             )
