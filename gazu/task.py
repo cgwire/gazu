@@ -42,6 +42,14 @@ def all_task_types_for_shot(shot):
     return sort_by_name(task_types)
 
 
+def all_task_types_for_scene(scene):
+    """
+    Return task types of task linked to given scene.
+    """
+    task_types = client.fetch_all("scenes/%s/task-types" % scene['id'])
+    return sort_by_name(task_types)
+
+
 def all_task_types_for_sequence(sequence):
     """
     Return task types of tasks linked directly to given sequence.
