@@ -8,6 +8,7 @@ from gazu import client
 from gazu.exception import (
     RouteNotFoundException,
     AuthFailedException,
+    MethodNotAllowedException,
     NotAuthenticatedException,
     NotAllowedException
 )
@@ -125,6 +126,26 @@ class BaseFuncTestCase(ClientTestCase):
                 [{"first_name": "John"}]
             )
 
+    def test_fetch_first(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                client.get_full_url("data/persons"),
+                text=json.dumps([
+                    {"first_name": "John"},
+                    {"first_name": "Jane"}
+                ])
+            )
+            self.assertEquals(
+                client.fetch_first("persons"),
+                {"first_name": "John"}
+            )
+
+            mock.get(
+                client.get_full_url("data/persons"),
+                text=json.dumps([])
+            )
+            self.assertIsNone(client.fetch_first("persons"))
+
     def test_fetch_one(self):
         with requests_mock.mock() as mock:
             mock.get(
@@ -163,10 +184,12 @@ class BaseFuncTestCase(ClientTestCase):
         pass
 
     def test_check_status(self):
-        self.assertRaises(NotAllowedException, client.check_status, 403, "/")
         self.assertRaises(
             NotAuthenticatedException, client.check_status, 401, "/")
+        self.assertRaises(NotAllowedException, client.check_status, 403, "/")
         self.assertRaises(RouteNotFoundException, client.check_status, 404, "/")
+        self.assertRaises(
+            MethodNotAllowedException, client.check_status, 405, "/")
 
     def test_init_host(self):
         gazu.set_host("newhost")
@@ -197,3 +220,12 @@ class BaseFuncTestCase(ClientTestCase):
                 "frank",
                 "test"
             )
+
+    def test_get_current_user(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                client.get_full_url("auth/authenticated"),
+                text=json.dumps({"user": {"id": "123"}})
+            )
+            current_user = client.get_current_user()
+            self.assertEquals(current_user["id"], "123")

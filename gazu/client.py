@@ -11,7 +11,8 @@ from .exception import (
     RouteNotFoundException,
     ServerErrorException,
     NotAuthenticatedException,
-    NotAllowedException
+    NotAllowedException,
+    MethodNotAllowedException
 )
 
 # Little hack to allow json encoder to manage dates.
@@ -154,6 +155,8 @@ def check_status(status_code, path):
         raise RouteNotFoundException(path)
     elif (status_code == 403):
         raise NotAllowedException(path)
+    elif (status_code == 405):
+        raise MethodNotAllowedException(path)
     elif (status_code in [401, 422]):
         raise NotAuthenticatedException(path)
     elif (status_code in [500, 502]):
@@ -166,6 +169,17 @@ def fetch_all(model):
     Get all entries for a given model.
     """
     return get(url_path_join('data', model))
+
+
+def fetch_first(path):
+    """
+    Get all entries for a given subpath.
+    """
+    entries = get(url_path_join('data', path))
+    if len(entries) > 0:
+        return entries[0]
+    else:
+        return None
 
 
 def fetch_one(model, id):
@@ -196,3 +210,10 @@ def upload(path, file_path):
     url = get_full_url(path)
     files = {"file": open(file_path, "rb")}
     return requests_session.post(url, files=files).json()
+
+
+def get_current_user():
+    """
+    Return current user database information.
+    """
+    return get("auth/authenticated")["user"]
