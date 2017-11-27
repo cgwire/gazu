@@ -23,10 +23,11 @@ def set_host(url):
 
 def log_in(email, password):
     tokens = client.post("auth/login", {
-        "email": email,
+        "email":email,
         "password": password
     })
     if "login" in tokens and tokens["login"] == False:
         raise AuthFailedException
     else:
         client.set_tokens(tokens)
+    return tokens
