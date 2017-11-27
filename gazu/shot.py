@@ -83,6 +83,17 @@ def get_shot_by_name(sequence, shot_name):
     return next(iter(result or []), None)
 
 
+def all_scenes(project=None):
+    """
+    Retrieve all scenes.
+    """
+    if project is not None:
+        scenes = client.fetch_all("projects/%s/scenes" % project["id"])
+    else:
+        scenes = client.fetch_all("scenes")
+    return sort_by_name(scenes)
+
+
 def all_scenes_for_project(project):
     """
     Retrieve all scenes for given project.

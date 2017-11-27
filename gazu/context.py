@@ -1,8 +1,8 @@
-from . import user as pipeline_user
-from . import project as pipeline_project
-from . import asset as pipeline_asset
-from . import task as pipeline_task
-from . import shot as pipeline_shot
+from . import user as gazu_user
+from . import project as gazu_project
+from . import asset as gazu_asset
+from . import task as gazu_task
+from . import shot as gazu_shot
 
 
 def all_open_projects(user_context=False):
@@ -10,9 +10,9 @@ def all_open_projects(user_context=False):
     Return the list of projects for which the user has a task.
     """
     if user_context:
-        return pipeline_user.all_open_projects()
+        return gazu_user.all_open_projects()
     else:
-        return pipeline_project.all_open_projects()
+        return gazu_project.all_open_projects()
 
 
 def all_asset_types_for_project(project, user_context=False):
@@ -20,9 +20,9 @@ def all_asset_types_for_project(project, user_context=False):
     Return the list of asset types for which the user has a task.
     """
     if user_context:
-        return pipeline_user.all_asset_types_for_project(project)
+        return gazu_user.all_asset_types_for_project(project)
     else:
-        return pipeline_asset.all_types_for_project(project)
+        return gazu_asset.all_types_for_project(project)
 
 
 def all_assets_for_asset_type_and_project(project, asset_type, user_context=False):
@@ -31,9 +31,9 @@ def all_assets_for_asset_type_and_project(project, asset_type, user_context=Fals
     the user has a task.
     """
     if user_context:
-        return pipeline_user.all_assets_for_asset_type_and_project(project, asset_type)
+        return gazu_user.all_assets_for_asset_type_and_project(project, asset_type)
     else:
-        return pipeline_asset.all_for_project_and_type(project, asset_type)
+        return gazu_asset.all_for_project_and_type(project, asset_type)
 
 
 def all_task_types_for_asset(asset, user_context=False):
@@ -41,9 +41,9 @@ def all_task_types_for_asset(asset, user_context=False):
     Return the list of tasks for given asset and current user.
     """
     if user_context:
-        return pipeline_user.all_task_types_for_asset(asset)
+        return gazu_user.all_task_types_for_asset(asset)
     else:
-        return pipeline_asset.task_types_for_asset(asset)
+        return gazu_asset.task_types_for_asset(asset)
 
 
 def all_task_types_for_shot(shot, user_context=False):
@@ -51,9 +51,19 @@ def all_task_types_for_shot(shot, user_context=False):
     Return the list of tasks for given asset and current user.
     """
     if user_context:
-        return pipeline_user.all_task_types_for_shot(shot)
+        return gazu_user.all_task_types_for_shot(shot)
     else:
-        return pipeline_task.all_task_types_for_shot(shot)
+        return gazu_task.all_task_types_for_shot(shot)
+
+
+def all_task_types_for_scene(scene, user_context=False):
+    """
+    Return the list of tasks for given asset and current user.
+    """
+    if user_context:
+        return gazu_user.all_task_types_for_scene(scene)
+    else:
+        return gazu_task.all_task_types_for_scene(scene)
 
 
 def all_sequences_for_project(project, user_context=False):
@@ -61,9 +71,19 @@ def all_sequences_for_project(project, user_context=False):
     Return the list of sequences for given project and current user.
     """
     if user_context:
-        return pipeline_user.all_sequences_for_project(project)
+        return gazu_user.all_sequences_for_project(project)
     else:
-        return pipeline_shot.all_sequences(project)
+        return gazu_shot.all_sequences(project)
+
+
+def all_scenes_for_project(project, user_context=False):
+    """
+    Return the list of scenes for given project and current user.
+    """
+    if user_context:
+        return gazu_user.all_scenes_for_project(project)
+    else:
+        return gazu_shot.all_scenes(project)
 
 
 def all_shots_for_sequence(sequence, user_context=False):
@@ -71,6 +91,6 @@ def all_shots_for_sequence(sequence, user_context=False):
     Return the list of shots for given sequence and current user.
     """
     if user_context:
-        return pipeline_user.all_shots_for_sequence(sequence)
+        return gazu_user.all_shots_for_sequence(sequence)
     else:
-        return pipeline_shot.all_for_sequence(sequence)
+        return gazu_shot.all_for_sequence(sequence)
