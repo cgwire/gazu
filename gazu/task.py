@@ -57,9 +57,9 @@ def get_task_by_task_type(entity, task_type):
     task_type_id = task_type["id"]
     entity_id = entity["id"]
     tasks = client.fetch_all(
-        "tasks?task_type_id={task_type_id}&entity_id={entity_id}".format(
-            task_type_id=task_type_id,
-            entity_id=entity_id
+        "entities/%s/task-types/%s/tasks" % (
+            entity_id,
+            task_type_id
         )
     )
     return tasks
