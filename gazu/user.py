@@ -50,6 +50,15 @@ def all_tasks_for_shot(shot):
     return sort_by_name(tasks)
 
 
+def all_tasks_for_scene(scene):
+    """
+    Return the list of tasks for given asset and current user.
+    """
+    path = "user/scene/%s/tasks" % scene["id"]
+    tasks = client.fetch_all(path)
+    return sort_by_name(tasks)
+
+
 def all_task_types_for_asset(asset):
     """
     Return the list of task types for given asset and current user.
@@ -61,11 +70,20 @@ def all_task_types_for_asset(asset):
 
 def all_task_types_for_shot(shot):
     """
-    Return the list of task_tyes for given asset and current user.
+    return the list of task_tyes for given asset and current user.
     """
     path = "user/shots/%s/task-types" % shot["id"]
-    tasks = client.fetch_all(path)
-    return sort_by_name(tasks)
+    task_types = client.fetch_all(path)
+    return sort_by_name(task_types)
+
+
+def all_task_types_for_scene(scene):
+    """
+    return the list of task_tyes for given asset and current user.
+    """
+    path = "user/scenes/%s/task-types" % scene["id"]
+    task_types = client.fetch_all(path)
+    return sort_by_name(task_types)
 
 
 def all_sequences_for_project(project):
@@ -84,3 +102,12 @@ def all_shots_for_sequence(sequence):
     path = "user/sequences/%s/shots" % sequence["id"]
     shots = client.fetch_all(path)
     return sort_by_name(shots)
+
+
+def all_scenes_for_sequence(sequence):
+    """
+    Return the list of scenes for given sequence and current user.
+    """
+    path = "user/sequences/%s/scenes" % sequence["id"]
+    scenes = client.fetch_all(path)
+    return sort_by_name(scenes)

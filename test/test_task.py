@@ -93,7 +93,7 @@ class TaskTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/tasks?task_type_id=type-1&entity_id=entity-1"
+                    "data/entities/entity-1/task-types/type-1/tasks"
                 ),
                 text=json.dumps(
                     [{"name": "Task 01", "project_id": "project-1"}]
@@ -196,7 +196,6 @@ class TaskTestCase(unittest.TestCase):
                 "my comment"
             )
             self.assertEquals(test_task["task_status_id"], "wfa-1")
-
 
     def test_get_time_spent(self):
         with requests_mock.mock() as mock:
