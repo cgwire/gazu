@@ -2,6 +2,15 @@ from . import client
 
 from .sorting import sort_by_name
 
+from cachetools import cached
+
+from .cache import cache
+
+
+def clear_cache():
+    cache.clear()
+
+
 
 def all():
     """
@@ -10,6 +19,7 @@ def all():
     return sort_by_name(client.fetch_all("projects"))
 
 
+@cached(cache)
 def all_open_projects():
     """
     Returns all the open projects stored in the database.
