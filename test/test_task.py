@@ -1,7 +1,8 @@
 import unittest
 import json
 import requests_mock
-import gazu
+import gazu.client
+import gazu.task
 
 
 class TaskTestCase(unittest.TestCase):
