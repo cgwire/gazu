@@ -1,2 +1,1 @@
-requests
-cachecontrol
+-e .[dev,test]
