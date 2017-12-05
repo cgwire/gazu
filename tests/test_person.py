@@ -2,7 +2,8 @@ import unittest
 import requests_mock
 import json
 
-import gazu
+import gazu.client
+import gazu.person
 
 
 class PersonTestCase(unittest.TestCase):

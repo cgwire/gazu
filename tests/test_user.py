@@ -1,6 +1,7 @@
 import unittest
 import requests_mock
-import gazu
+import gazu.client
+import gazu.user
 
 
 class ProjectTestCase(unittest.TestCase):

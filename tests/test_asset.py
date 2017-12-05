@@ -2,7 +2,8 @@ import unittest
 import json
 import requests_mock
 
-import gazu
+import gazu.asset
+import gazu.client
 
 
 class AssetTestCase(unittest.TestCase):
