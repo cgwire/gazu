@@ -1,6 +1,10 @@
 import functools
-import requests
 import json
+
+try:
+    import requests
+except:
+    print("Warning, running in setup mode!")
 
 from cachecontrol import CacheControlAdapter
 from cachecontrol.heuristics import ExpiresAfter
