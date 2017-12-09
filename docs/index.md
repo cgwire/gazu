@@ -32,9 +32,19 @@ Here is a non exhaustive list of use cases that allows Gazu:
 
 ## Install 
 
-Installation is pretty simple and straightforward:
+Installation is made through pip:
 
 ```bash
+pip install gazu
+```
+
+### Development version 
+
+If you interested in the currently developed version, install it from the git
+repository: 
+
+```bash
+pip install --upgrade setuptools 
 pip install git+https://github.com/cgwire/cgwire-api-client.git
 ```
 
