@@ -1,7 +1,6 @@
 .. figure:: https://gazu.cg-wire.com/gazu.png
    :alt: Gazu Logo
 
-   Gazu Logo
 
 Gazu, steroïds for your CG tools
 ================================
