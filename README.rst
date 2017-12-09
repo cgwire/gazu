@@ -30,13 +30,14 @@ Install Gazu in your application environment via pip:
     pip install gazu
 
 The client requires a few extra configuration before being used. It
-needs to know where is located the API server:
+needs to know where is located the API server and to log in:
 
 .. code:: python
 
     import gazu
 
     gazu.client.set_host("https://zou-server-url")
+    gazu.client.log_in("user@yourdomain.com", "password")
 
 Let's finish with an example. Fetch all the open projects:
 
