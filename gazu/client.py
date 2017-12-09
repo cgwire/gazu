@@ -6,9 +6,6 @@ try:
 except:
     print("Warning, running in setup mode!")
 
-from cachecontrol import CacheControlAdapter
-from cachecontrol.heuristics import ExpiresAfter
-
 from .encoder import CustomJSONEncoder
 
 from .exception import (
@@ -41,17 +38,6 @@ def host_is_up():
     """
     response = requests_session.head(HOST)
     return response.status_code == 200
-
-
-def set_cache_expiration_delay(seconds):
-    """
-    Set a cache for requests with a given expiration time.
-    """
-    adapter = CacheControlAdapter(
-        heuristic=ExpiresAfter(seconds=seconds)
-    )
-    session.mount('http://', adapter)
-    return session
 
 
 def get_host():
