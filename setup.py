@@ -6,5 +6,5 @@ from gazu import __version__
 setup(
     name="gazu",
     version=__version__,
-    install_requires=["requests==2.18.4"]
+    install_requires=["requests"]
 )
