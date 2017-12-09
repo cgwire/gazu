@@ -1,11 +1,6 @@
 import functools
 import json
 
-try:
-    import requests
-except:
-    print("Warning, running in setup mode!")
-
 from .encoder import CustomJSONEncoder
 
 from .exception import (
@@ -15,14 +10,16 @@ from .exception import (
     NotAllowedException,
     MethodNotAllowedException
 )
-
-# Little hack to allow json encoder to manage dates.
-requests.models.complexjson.dumps = functools.partial(
-    json.dumps,
-    cls=CustomJSONEncoder
-)
-
-requests_session = requests.Session()
+try:
+    import requests
+    # Little hack to allow json encoder to manage dates.
+    requests.models.complexjson.dumps = functools.partial(
+        json.dumps,
+        cls=CustomJSONEncoder
+    )
+    requests_session = requests.Session()
+except:
+    print("Warning, running in setup mode!")
 
 
 HOST = "http://gazu.change.serverhost/api"
