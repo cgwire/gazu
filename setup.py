@@ -3,8 +3,4 @@ from setuptools import setup
 
 from gazu import __version__
 
-setup(
-    name="gazu",
-    version=__version__,
-    install_requires=["requests"]
-)
+setup()
