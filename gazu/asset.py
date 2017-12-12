@@ -93,11 +93,7 @@ def remove_asset(asset):
     """
     Remove given asset from database.
     """
-    return client.delete("data/projects/%s/asset-types/%s/assets/%s" % (
-        asset["project_id"],
-        asset["entity_type_id"],
-        asset["id"]
-    ))
+    return client.delete("data/assets/%s" % asset["id"])
 
 
 def task_types_for_asset(asset):

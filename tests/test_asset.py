@@ -174,16 +174,9 @@ class AssetTestCase(unittest.TestCase):
     def test_remove_asset(self):
         with requests_mock.mock() as mock:
             mock.delete(
-                gazu.client.get_full_url(
-                    "data/projects/project-id/asset-types/"
-                    "asset-type-id/assets/asset-id"
-                ),
+                gazu.client.get_full_url("data/assets/asset-id"),
                 text=''
             )
-            asset = {
-                "id": "asset-id",
-                "project_id": "project-id",
-                "entity_type_id": "asset-type-id"
-            }
+            asset = {"id": "asset-id"}
             response = gazu.asset.remove_asset(asset)
             self.assertEquals(response, "")
