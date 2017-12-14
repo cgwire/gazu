@@ -1,7 +1,10 @@
 from . import client
 from .sorting import sort_by_name
 
+from .cache import cache
 
+
+@cache
 def all_task_types():
     """
     Return task types
@@ -10,6 +13,7 @@ def all_task_types():
     return sort_by_name(task_types)
 
 
+@cache
 def all_for_shot(shot):
     """
     Return tasks linked to given shot.
@@ -18,6 +22,7 @@ def all_for_shot(shot):
     return sort_by_name(tasks)
 
 
+@cache
 def all_for_sequence(sequence):
     """
     Return tasks linked to given sequence.
@@ -26,6 +31,7 @@ def all_for_sequence(sequence):
     return sort_by_name(tasks)
 
 
+@cache
 def all_for_asset(asset):
     """
     Retrieve all tasks directly linked to given asset.
@@ -34,6 +40,7 @@ def all_for_asset(asset):
     return sort_by_name(tasks)
 
 
+@cache
 def all_task_types_for_shot(shot):
     """
     Return task types of task linked to given shot.
@@ -42,6 +49,7 @@ def all_task_types_for_shot(shot):
     return sort_by_name(task_types)
 
 
+@cache
 def all_task_types_for_scene(scene):
     """
     Return task types of task linked to given scene.
@@ -50,6 +58,7 @@ def all_task_types_for_scene(scene):
     return sort_by_name(task_types)
 
 
+@cache
 def all_task_types_for_sequence(sequence):
     """
     Return task types of tasks linked directly to given sequence.
@@ -58,6 +67,7 @@ def all_task_types_for_sequence(sequence):
     return sort_by_name(task_types)
 
 
+@cache
 def get_task_by_task_type(entity, task_type):
     """
     Find a task by looking for it through its task type and its entity.
@@ -73,6 +83,7 @@ def get_task_by_task_type(entity, task_type):
     return tasks
 
 
+@cache
 def get_task_by_name(entity, name):
     """
     Find a task by looking for it through its name and its entity.
@@ -87,6 +98,7 @@ def get_task_by_name(entity, name):
     return tasks[0] if tasks else None
 
 
+@cache
 def get_task_type_by_name(task_type_name):
     """
     Return task type object for given name.
@@ -96,6 +108,7 @@ def get_task_type_by_name(task_type_name):
     return task_types[0] if task_types else None
 
 
+@cache
 def get_task_by_path(project, file_path, entity_type="shot"):
     """
     Retrieve a task from given file path. This function requires context, the
@@ -109,6 +122,7 @@ def get_task_by_path(project, file_path, entity_type="shot"):
     return client.post("data/tasks/from-path/", data)
 
 
+@cache
 def get_task_status(task):
     """
     Retrieves status object corresponding to status set on given task.
@@ -150,6 +164,7 @@ def task_to_review(
     return client.put(path, data)
 
 
+@cache
 def get_time_spent(task, date):
     """
     Get the time spent by CG artists on a task at a given date.

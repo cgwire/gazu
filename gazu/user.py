@@ -1,7 +1,10 @@
 from . import client
 from .sorting import sort_by_name
 
+from .cache import cache
 
+
+@cache
 def all_open_projects():
     """
     Return the list of projects for which the user has a task.
@@ -10,6 +13,7 @@ def all_open_projects():
     return sort_by_name(projects)
 
 
+@cache
 def all_asset_types_for_project(project):
     """
     Return the list of asset types for which the user has a task.
@@ -19,6 +23,7 @@ def all_asset_types_for_project(project):
     return sort_by_name(asset_types)
 
 
+@cache
 def all_assets_for_asset_type_and_project(project, asset_type):
     """
     Return the list of assets for given project and asset_type and for which
@@ -32,6 +37,7 @@ def all_assets_for_asset_type_and_project(project, asset_type):
     return sort_by_name(assets)
 
 
+@cache
 def all_tasks_for_asset(asset):
     """
     Return the list of tasks for given asset and current user.
@@ -41,6 +47,7 @@ def all_tasks_for_asset(asset):
     return sort_by_name(tasks)
 
 
+@cache
 def all_tasks_for_shot(shot):
     """
     Return the list of tasks for given asset and current user.
@@ -50,6 +57,7 @@ def all_tasks_for_shot(shot):
     return sort_by_name(tasks)
 
 
+@cache
 def all_tasks_for_scene(scene):
     """
     Return the list of tasks for given asset and current user.
@@ -59,6 +67,7 @@ def all_tasks_for_scene(scene):
     return sort_by_name(tasks)
 
 
+@cache
 def all_task_types_for_asset(asset):
     """
     Return the list of task types for given asset and current user.
@@ -68,6 +77,7 @@ def all_task_types_for_asset(asset):
     return sort_by_name(tasks)
 
 
+@cache
 def all_task_types_for_shot(shot):
     """
     return the list of task_tyes for given asset and current user.
@@ -77,6 +87,7 @@ def all_task_types_for_shot(shot):
     return sort_by_name(task_types)
 
 
+@cache
 def all_task_types_for_scene(scene):
     """
     return the list of task_tyes for given asset and current user.
@@ -86,6 +97,7 @@ def all_task_types_for_scene(scene):
     return sort_by_name(task_types)
 
 
+@cache
 def all_sequences_for_project(project):
     """
     Return the list of sequences for given project and current user.
@@ -95,6 +107,7 @@ def all_sequences_for_project(project):
     return sort_by_name(tasks)
 
 
+@cache
 def all_shots_for_sequence(sequence):
     """
     Return the list of shots for given sequence and current user.
@@ -104,6 +117,7 @@ def all_shots_for_sequence(sequence):
     return sort_by_name(shots)
 
 
+@cache
 def all_scenes_for_sequence(sequence):
     """
     Return the list of scenes for given sequence and current user.
