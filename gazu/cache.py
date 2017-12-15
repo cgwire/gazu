@@ -1,3 +1,4 @@
+import copy
 import datetime
 import json
 
@@ -54,11 +55,22 @@ def insert_value(function, cache_store, args, kwargs):
     Serialize arguments and store function result in given cache store.
     """
     returned_value = function(*args, **kwargs)
-    cache_store[get_cache_key(args, kwargs)] = {
+    key = get_cache_key(args, kwargs)
+    cache_store[key] = {
         "date_accessed": datetime.datetime.now(),
         "value": returned_value
     }
-    return returned_value
+    return get_value(cache_store, key)
+
+
+def get_value(cache_store, key):
+    """
+    Generate a deep copy of the requested value. It's needed because if a
+    pointer is returned, the value can be changed. Which leads to a modified
+    cache and unexpected results.
+    """
+    value = cache_store[key]["value"]
+    return copy.deepcopy(value)
 
 
 def is_cache_enabled(state):
@@ -116,7 +128,7 @@ def cache(function, maxsize=300, expire=0):
                 if is_cache_expired(cache_store, state, key):
                     return insert_value(function, cache_store, args, kwargs)
                 else:
-                    return cache_store[key]["value"]
+                    return get_value(cache_store, key)
 
             else:
                 returned_value = insert_value(
