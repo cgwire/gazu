@@ -2,7 +2,10 @@ from . import client
 
 from .sorting import sort_by_name
 
+from .cache import cache
 
+
+@cache
 def all(project=None):
     """
     Retrieve all shots from database or for given project.
@@ -15,6 +18,7 @@ def all(project=None):
     return sort_by_name(shots)
 
 
+@cache
 def all_for_sequence(sequence):
     """
     Retrieve all shots which are children from given sequence.
@@ -22,6 +26,7 @@ def all_for_sequence(sequence):
     return sort_by_name(client.fetch_all("sequences/%s/shots" % sequence["id"]))
 
 
+@cache
 def all_sequences(project=None):
     """
     Retrieve all sequences from database or for given project.
@@ -34,6 +39,7 @@ def all_sequences(project=None):
     return sort_by_name(sequences)
 
 
+@cache
 def all_sequences_for_episode(episode):
     """
     Retrieve all sequences which are children of given episode.
@@ -42,6 +48,7 @@ def all_sequences_for_episode(episode):
     return sort_by_name(sequences)
 
 
+@cache
 def all_episodes(project=None):
     """
     Retrieve all episodes from database or for given project.
@@ -54,6 +61,7 @@ def all_episodes(project=None):
     return sort_by_name(episodes)
 
 
+@cache
 def get_sequence_by_name(project, sequence_name):
     """
     Returns sequence corresponding to given name and project.
@@ -65,6 +73,7 @@ def get_sequence_by_name(project, sequence_name):
     return next(iter(result or []), None)
 
 
+@cache
 def get_shot(shot_id):
     """
     Return shot corresponding to given shot ID.
@@ -72,6 +81,7 @@ def get_shot(shot_id):
     return client.fetch_one('entities', shot_id)
 
 
+@cache
 def get_shot_by_name(sequence, shot_name):
     """
     Returns shot corresponding to given sequence and name.
@@ -83,6 +93,7 @@ def get_shot_by_name(sequence, shot_name):
     return next(iter(result or []), None)
 
 
+@cache
 def all_scenes(project=None):
     """
     Retrieve all scenes.
@@ -94,6 +105,7 @@ def all_scenes(project=None):
     return sort_by_name(scenes)
 
 
+@cache
 def all_scenes_for_project(project):
     """
     Retrieve all scenes for given project.
@@ -102,6 +114,7 @@ def all_scenes_for_project(project):
     return sort_by_name(scenes)
 
 
+@cache
 def all_scenes_for_sequence(sequence):
     """
     Retrieve all scenes which are children from given sequence.
@@ -111,6 +124,7 @@ def all_scenes_for_sequence(sequence):
     )
 
 
+@cache
 def get_scene(scene_id):
     """
     Return scene corresponding to given scene ID.
@@ -118,6 +132,7 @@ def get_scene(scene_id):
     return client.fetch_one('scenes', scene_id)
 
 
+@cache
 def get_scene_by_name(sequence, scene_name):
     """
     Returns scene corresponding to given sequence and name.

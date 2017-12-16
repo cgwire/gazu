@@ -2,7 +2,10 @@ from . import client
 
 from .sorting import sort_by_name
 
+from .cache import cache
 
+
+@cache
 def all(project=None):
     """
     Retrieve all assets stored in the database or for given project.
@@ -15,6 +18,7 @@ def all(project=None):
         )
 
 
+@cache
 def all_for_shot(shot):
     """
     Retrieve all assets casted in given shot.
@@ -22,6 +26,7 @@ def all_for_shot(shot):
     return sort_by_name(client.fetch_all("shots/%s/assets" % shot["id"]))
 
 
+@cache
 def all_for_project_and_type(project, asset_type):
     """
     Retrieve all assets for given project and given asset type.
@@ -35,6 +40,7 @@ def all_for_project_and_type(project, asset_type):
     return sort_by_name(assets)
 
 
+@cache
 def all_types():
     """
     Retrieve all asset types stored in the database.
@@ -42,6 +48,7 @@ def all_types():
     return sort_by_name(client.fetch_all("asset-types"))
 
 
+@cache
 def all_types_for_project(project):
     """
     Retrieve all asset types from assets listed in given project.
@@ -51,6 +58,7 @@ def all_types_for_project(project):
     ))
 
 
+@cache
 def all_types_for_shot(shot):
     """
     Retrieve all asset types from assets casted in given shot.
@@ -60,6 +68,7 @@ def all_types_for_shot(shot):
     ))
 
 
+@cache
 def get_asset(asset_id):
     """
     Retrieve given asset.
@@ -67,6 +76,7 @@ def get_asset(asset_id):
     return client.fetch_one('assets', asset_id)
 
 
+@cache
 def get_asset_type(asset_id):
     """
     Retrieve given asset type.
@@ -96,11 +106,13 @@ def remove_asset(asset):
     return client.delete("data/assets/%s" % asset["id"])
 
 
+@cache
 def task_types_for_asset(asset):
     task_types = client.fetch_all("assets/%s/task-types" % asset['id'])
     return sort_by_name(task_types)
 
 
+@cache
 def get_asset_by_name(project, name):
     result = client.fetch_all("entities?project_id=%s&name=%s" % (
         project["id"], name

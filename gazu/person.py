@@ -1,7 +1,10 @@
 from . import client
 from .sorting import sort_by_name
 
+from .cache import cache
 
+
+@cache
 def all():
     """
     Return all person listed in database.
@@ -9,6 +12,7 @@ def all():
     return sort_by_name(client.fetch_all("persons"))
 
 
+@cache
 def get_person_by_desktop_login(desktop_login):
     """
     Returns person corresponding to given login.
@@ -16,6 +20,7 @@ def get_person_by_desktop_login(desktop_login):
     return client.fetch_first("persons?desktop_login=%s" % desktop_login)
 
 
+@cache
 def get_person_by_full_name(full_name):
     """
     Returns person corresponding to given name.
@@ -28,6 +33,7 @@ def get_person_by_full_name(full_name):
             return person
 
 
+@cache
 def get_simple_person_list():
     """
     Person list with very few information, accessible without manager or admin

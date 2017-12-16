@@ -1,6 +1,9 @@
 from . import client
 
+from .cache import cache
 
+
+@cache
 def all_output_types():
     """
     Return all output types list in database.
@@ -8,6 +11,7 @@ def all_output_types():
     return client.fetch_all("output-types")
 
 
+@cache
 def get_output_type(output_type_id):
     """
     Return output type object corresponding to the given id.
@@ -15,6 +19,7 @@ def get_output_type(output_type_id):
     return client.fetch_one("output-types", output_type_id)
 
 
+@cache
 def get_output_type_by_name(output_type_name):
     """
     Return software object corresponding to the given id.
@@ -23,6 +28,7 @@ def get_output_type_by_name(output_type_name):
     return next(iter(result or []), None)
 
 
+@cache
 def get_output_file(output_file_id):
     """
     Returns the file corresponding to the given id.
@@ -31,6 +37,7 @@ def get_output_file(output_file_id):
     return client.get(path)
 
 
+@cache
 def get_output_files_for_entity(entity):
     """
     Retrieves all the outputs of a given asset
@@ -39,6 +46,7 @@ def get_output_files_for_entity(entity):
     return client.get(path)
 
 
+@cache
 def get_last_outputs_for_entity(entity):
     """
     Retrieves the last outputs of a given asset an store them by
@@ -61,6 +69,7 @@ def get_last_outputs_for_entity(entity):
     return last_entity_outputs
 
 
+@cache
 def all_softwares():
     """
     Return all softwares listed in database.
@@ -68,6 +77,7 @@ def all_softwares():
     return client.fetch_all("softwares")
 
 
+@cache
 def build_folder_path(
     task,
     name="main",
@@ -93,6 +103,7 @@ def build_folder_path(
     return result["path"].replace(" ", "_")
 
 
+@cache
 def build_file_path(
     task,
     name="main",
@@ -125,6 +136,7 @@ def build_file_path(
     )
 
 
+@cache
 def build_file_name(
     task,
     name="main",
@@ -241,6 +253,7 @@ def get_last_output_revision(task, output_type):
     return revision
 
 
+@cache
 def get_last_output_files(task):
     """
     Generate a dict of last output files. One working file entry for each
@@ -250,6 +263,7 @@ def get_last_output_files(task):
     return client.get(path)
 
 
+@cache
 def get_working_files_for_task(task):
     """
     List of all working files related to given task.
@@ -258,6 +272,7 @@ def get_working_files_for_task(task):
     return client.get(path)
 
 
+@cache
 def get_last_working_files(task):
     """
     Generate a dict of last working files. One working file entry for each
@@ -267,6 +282,7 @@ def get_last_working_files(task):
     return client.get(path)
 
 
+@cache
 def get_last_working_file_revision(task, name="main"):
     """
     Get last revision stored in the API for given task and given file name.
@@ -276,6 +292,7 @@ def get_last_working_file_revision(task, name="main"):
     return working_files_dict.get(name, 0)
 
 
+@cache
 def get_software(software_id):
     """
     Return software object corresponding to given ID.
@@ -283,6 +300,7 @@ def get_software(software_id):
     return client.fetch_one("softwares", software_id)
 
 
+@cache
 def get_working_file(workfile_id):
     """
     Return workfile object corresponding to given ID.
@@ -290,6 +308,7 @@ def get_working_file(workfile_id):
     return client.fetch_one("working-files", workfile_id)
 
 
+@cache
 def get_software_by_name(software_name):
     """
     Return software object corresponding to given name.

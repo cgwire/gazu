@@ -7,7 +7,7 @@ from . import shot
 from . import asset
 from . import files
 from . import user
-
+from . import cache
 
 from .exception import AuthFailedException
 
@@ -24,7 +24,7 @@ def set_host(url):
 
 def log_in(email, password):
     tokens = client.post("auth/login", {
-        "email":email,
+        "email": email,
         "password": password
     })
     if "login" in tokens and tokens["login"] == False:
