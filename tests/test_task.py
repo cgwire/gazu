@@ -165,6 +165,16 @@ class TaskTestCase(unittest.TestCase):
             })
             self.assertEquals(status["id"], "status-01")
 
+    def test_get_task(self):
+        with requests_mock.mock() as mock:
+            path = "data/tasks/task-01/full"
+            mock.get(
+                gazu.client.get_full_url(path),
+                text=json.dumps({"id": "task-01"})
+            )
+            task = gazu.task.get_task("task-01")
+            self.assertEquals(task["id"], "task-01")
+
     def test_start_task(self):
         with requests_mock.mock() as mock:
             mock.put(

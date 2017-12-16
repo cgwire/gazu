@@ -135,6 +135,13 @@ def get_task_status(task):
     return task_status[0] if task_status else None
 
 
+def get_task(task_id):
+    """
+    Return task corresponding to given task ID.
+    """
+    return client.get('data/tasks/%s/full' % task_id)
+
+
 def start_task(task):
     """
     Change a task status to WIP and set its real start date to now.

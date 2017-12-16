@@ -62,6 +62,22 @@ def all_episodes(project=None):
 
 
 @cache
+def get_episode(episode_id):
+    """
+    Return episode corresponding to given episode ID.
+    """
+    return client.fetch_one('episodes', episode_id)
+
+
+@cache
+def get_sequence(sequence_id):
+    """
+    Return sequence corresponding to given sequence ID.
+    """
+    return client.fetch_one('sequences', sequence_id)
+
+
+@cache
 def get_sequence_by_name(project, sequence_name):
     """
     Returns sequence corresponding to given name and project.
@@ -78,7 +94,7 @@ def get_shot(shot_id):
     """
     Return shot corresponding to given shot ID.
     """
-    return client.fetch_one('entities', shot_id)
+    return client.fetch_one('shots', shot_id)
 
 
 @cache
@@ -91,6 +107,72 @@ def get_shot_by_name(sequence, shot_name):
         shot_name
     ))
     return next(iter(result or []), None)
+
+
+def new_episode(project, name):
+    """
+    Create an episode for given project.
+    """
+    shot = {
+        "name": name
+    }
+    return client.post('data/projects/%s/episodes' % project["id"], shot)
+
+
+def new_sequence(
+    project,
+    episode,
+    name
+):
+    """
+    Create a sequence for given episode.
+    """
+    sequence = {
+        "name": name,
+        "episode_id": episode["id"]
+    }
+    return client.post('data/projects/%s/sequences' % project["id"], sequence)
+
+
+def new_shot(
+    project,
+    sequence,
+    name,
+    frame_in=None,
+    frame_out=None,
+    data={}
+):
+    """
+    Create a shot for given sequence. Add frame in and frame out parameters to
+    extra data.
+    """
+    if frame_in is not None:
+        data["frame_in"] = data
+    if frame_out is not None:
+        data["frame_out"] = data
+
+    shot = {
+        "name": name,
+        "data": data,
+        "sequence_id": sequence["id"]
+    }
+
+    return client.post('data/projects/%s/shots' % project["id"], shot)
+
+
+def new_scene(
+    project,
+    sequence,
+    name
+):
+    """
+    Create a scene for given sequence.
+    """
+    shot = {
+        "name": name,
+        "sequence_id": sequence["id"]
+    }
+    return client.post('data/projects/%s/scenes' % project["id"], shot)
 
 
 @cache
@@ -126,6 +208,7 @@ def all_scenes_for_sequence(sequence):
 
 @cache
 def get_scene(scene_id):
+
     """
     Return scene corresponding to given scene ID.
     """
