@@ -147,9 +147,9 @@ def new_shot(
     extra data.
     """
     if frame_in is not None:
-        data["frame_in"] = data
+        data["frame_in"] = frame_in
     if frame_out is not None:
-        data["frame_out"] = data
+        data["frame_out"] = frame_out
 
     shot = {
         "name": name,
