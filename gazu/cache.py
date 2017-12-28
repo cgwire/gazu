@@ -5,6 +5,7 @@ import json
 from functools import wraps
 
 cache_settings = {"enabled": False}
+cached_functions = []
 
 
 def enable():
@@ -19,6 +20,14 @@ def disable():
     Disable caching on all decorated functions.
     """
     cache_settings["enabled"] = False
+
+
+def clear_all():
+    """
+    Clear all cached functions.
+    """
+    for function in cached_functions:
+        function.clear_cache()
 
 
 def remove_oldest_entry(memo, maxsize):
@@ -149,4 +158,5 @@ def cache(function, maxsize=300, expire=0):
     wrapper.enable_cache = enable_cache
     wrapper.disable_cache = disable_cache
 
+    cached_functions.append(wrapper)
     return wrapper
