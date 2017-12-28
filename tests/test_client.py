@@ -37,7 +37,6 @@ class BaseFuncTestCase(ClientTestCase):
         client.set_host("newhost")
         self.assertEquals(client.get_host(), "newhost")
         client.set_host("http://gazu-server/")
-        self.assertEquals(client.get_host(), client.HOST)
 
     def test_set_tokens(self):
         pass
@@ -168,9 +167,9 @@ class BaseFuncTestCase(ClientTestCase):
                 {"id": "person-1", "first_name": "John"}
             )
 
-    def test_hash(self):
+    def test_version(self):
         with requests_mock.mock() as mock:
-            mock.get(client.get_host() + '/', text='{"version": "0.2.0"}')
+            mock.get(client.get_host(), text='{"version": "0.2.0"}')
             self.assertEquals(client.get_api_version(), "0.2.0")
 
     def test_make_auth_token(self):
