@@ -180,3 +180,56 @@ class AssetTestCase(unittest.TestCase):
             asset = {"id": "asset-id"}
             response = gazu.asset.remove_asset(asset)
             self.assertEquals(response, "")
+
+    def test_get_asset_instance(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url("data/asset-instances/instance-1"),
+                text=json.dumps({
+                    "asset_id": "asset-1",
+                    "shot_id": "shot-1",
+                    "number": 1
+                })
+            )
+            asset_instance = gazu.asset.get_asset_instance("instance-1")
+            self.assertEquals(asset_instance["asset_id"], "asset-1")
+            self.assertEquals(asset_instance["shot_id"], "shot-1")
+            self.assertEquals(asset_instance["number"], 1)
+
+    def test_get_asset_instances_for_asset(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url(
+                    "data/assets/asset-1/asset-instances"
+                ),
+                text=json.dumps([{
+                    "asset_id": "asset-1",
+                    "shot_id": "shot-1",
+                    "number": 1
+                }])
+            )
+            asset_instance = gazu.asset.all_asset_instances_for_asset(
+                {"id": "asset-1"}
+            )[0]
+            self.assertEquals(asset_instance["asset_id"], "asset-1")
+            self.assertEquals(asset_instance["shot_id"], "shot-1")
+            self.assertEquals(asset_instance["number"], 1)
+
+    def test_get_asset_instances_for_shot(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url(
+                    "data/shots/shot-1/asset-instances"
+                ),
+                text=json.dumps([{
+                    "asset_id": "asset-1",
+                    "shot_id": "shot-1",
+                    "number": 1
+                }])
+            )
+            shot_instance = gazu.asset.all_asset_instances_for_shot(
+                {"id": "shot-1"}
+            )[0]
+            self.assertEquals(shot_instance["asset_id"], "asset-1")
+            self.assertEquals(shot_instance["shot_id"], "shot-1")
+            self.assertEquals(shot_instance["number"], 1)
