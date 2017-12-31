@@ -183,13 +183,6 @@ def create(model, data):
     return post(url_path_join('data', model), data)
 
 
-def get_api_version():
-    """
-    Get current version of the API.
-    """
-    return get('')['version']
-
-
 def upload(path, file_path):
     """
     Upload file located at *file_path* to given url *path*.
@@ -202,6 +195,13 @@ def upload(path, file_path):
         files=files
     ).json()
     return requests_session.post(url, files=files).json()
+
+
+def get_api_version():
+    """
+    Get current version of the API.
+    """
+    return get('')['version']
 
 
 def get_current_user():
