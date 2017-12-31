@@ -297,3 +297,17 @@ class ShotTestCase(unittest.TestCase):
             sequence = {"id": "sequence-1"}
             scene = gazu.shot.new_scene(project, sequence, 'Scene 01')
             self.assertEquals(scene["id"], "scene-01")
+
+    def test_add_asset_instance(self):
+        with requests_mock.mock() as mock:
+            result = {"id": "asset-instance-01"}
+            mock = mock.post(
+                gazu.client.get_full_url(
+                    "data/shots/shot-1/asset-instances"
+                ),
+                text=json.dumps(result)
+            )
+            shot = {"id": "shot-1"}
+            asset = {"id": "asset-1"}
+            asset_instance = gazu.shot.new_asset_instance(shot, asset)
+            self.assertEquals(asset_instance, result)

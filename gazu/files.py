@@ -153,6 +153,29 @@ def build_file_name(
     return result["name"].replace(" ", "_")
 
 
+@cache
+def build_asset_instance_file_path(
+    asset_instance,
+    output_type,
+    name="main",
+    mode="output",
+    version=1,
+    sep="/"
+):
+    result = client.post(
+        "data/asset-instances/%s/output-files/%s/file-path" % (
+            asset_instance["id"],
+            output_type["id"]
+        ),
+        {}
+    )
+    return "%s%s%s" % (
+        result["path"].replace(" ", "_"),
+        sep,
+        result["name"].replace(" ", "_")
+    )
+
+
 def set_working_file_thumbnail(working_file, th_path):
     """
     Upload a thumbnail for given working file.

@@ -225,3 +225,17 @@ def get_scene_by_name(sequence, scene_name):
         scene_name
     ))
     return next(iter(result or []), None)
+
+
+@cache
+def new_asset_instance(shot, asset, description=""):
+    """
+    Creates a new asset instance on given shot. The instance number is
+    automatically generated (increment highest number).
+    """
+    data = {
+        "asset_id": asset["id"],
+        "description": description
+    }
+    result = client.post("data/shots/%s/asset-instances" % shot["id"], data)
+    return result

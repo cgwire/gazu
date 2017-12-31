@@ -328,3 +328,25 @@ class FilesTestCase(unittest.TestCase):
                 "standard"
             )
             self.assertEquals(file_tree["name"], "standard file tree")
+
+    def test_build_asset_instance_file_path(self):
+        with requests_mock.mock() as mock:
+            result_path = "/path/to/instance/file_name.cache"
+            mock.post(
+                gazu.client.get_full_url(
+                    "data/asset-instances/asset-instance-1/"
+                    "output-files/output-type-1/"
+                    "file-path"
+                ),
+                text=json.dumps({
+                    "path": "/path/to/instance",
+                    "name": "file_name.cache"
+                })
+            )
+            asset_instance = {"id": "asset-instance-1"}
+            output_type = {"id": "output-type-1"}
+            path = gazu.files.build_asset_instance_file_path(
+                asset_instance,
+                output_type
+            )
+            self.assertEquals(path, result_path)
