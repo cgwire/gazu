@@ -160,6 +160,13 @@ def new_shot(
     return client.post('data/projects/%s/shots' % project["id"], shot)
 
 
+def update_shot(shot):
+    """
+    Save given shot data into the API.
+    """
+    return client.put('data/entities/%s' % shot["id"], shot)
+
+
 def new_scene(
     project,
     sequence,
@@ -208,7 +215,6 @@ def all_scenes_for_sequence(sequence):
 
 @cache
 def get_scene(scene_id):
-
     """
     Return scene corresponding to given scene ID.
     """

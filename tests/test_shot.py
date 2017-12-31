@@ -250,7 +250,9 @@ class ShotTestCase(unittest.TestCase):
     def test_new_episode(self):
         with requests_mock.mock() as mock:
             mock.post(
-                gazu.client.get_full_url("data/projects/project-1/episodes"),
+                gazu.client.get_full_url(
+                    "data/projects/project-1/episodes"
+                ),
                 text=json.dumps({"id": "episode-01", "project_id": "project-1"})
             )
             project = {"id": "project-1"}
@@ -260,8 +262,13 @@ class ShotTestCase(unittest.TestCase):
     def test_new_sequence(self):
         with requests_mock.mock() as mock:
             mock.post(
-                gazu.client.get_full_url("data/projects/project-1/sequences"),
-                text=json.dumps({"id": "sequence-01", "project_id": "project-1"})
+                gazu.client.get_full_url(
+                    "data/projects/project-1/sequences"
+                ),
+                text=json.dumps({
+                    "id": "sequence-01",
+                    "project_id": "project-1"
+                })
             )
             project = {"id": "project-1"}
             episode = {"id": "episode-1"}
@@ -297,6 +304,19 @@ class ShotTestCase(unittest.TestCase):
             sequence = {"id": "sequence-1"}
             scene = gazu.shot.new_scene(project, sequence, 'Scene 01')
             self.assertEquals(scene["id"], "scene-01")
+
+    def test_update_shot(self):
+        with requests_mock.mock() as mock:
+            mock = mock.put(
+                gazu.client.get_full_url("data/entities/shot-1"),
+                text=json.dumps({"id": "shot-01", "project_id": "project-1"})
+            )
+            shot = {
+                "id": "shot-1",
+                "name": "S02"
+            }
+            shot = gazu.shot.update_shot(shot)
+            self.assertEquals(shot["id"], "shot-01")
 
     def test_add_asset_instance(self):
         with requests_mock.mock() as mock:
