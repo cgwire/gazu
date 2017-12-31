@@ -147,9 +147,9 @@ def new_shot(
     extra data.
     """
     if frame_in is not None:
-        data["frame_in"] = data
+        data["frame_in"] = frame_in
     if frame_out is not None:
-        data["frame_out"] = data
+        data["frame_out"] = frame_out
 
     shot = {
         "name": name,
@@ -158,6 +158,13 @@ def new_shot(
     }
 
     return client.post('data/projects/%s/shots' % project["id"], shot)
+
+
+def update_shot(shot):
+    """
+    Save given shot data into the API.
+    """
+    return client.put('data/entities/%s' % shot["id"], shot)
 
 
 def new_scene(
@@ -208,7 +215,6 @@ def all_scenes_for_sequence(sequence):
 
 @cache
 def get_scene(scene_id):
-
     """
     Return scene corresponding to given scene ID.
     """
@@ -225,3 +231,17 @@ def get_scene_by_name(sequence, scene_name):
         scene_name
     ))
     return next(iter(result or []), None)
+
+
+@cache
+def new_asset_instance(shot, asset, description=""):
+    """
+    Creates a new asset instance on given shot. The instance number is
+    automatically generated (increment highest number).
+    """
+    data = {
+        "asset_id": asset["id"],
+        "description": description
+    }
+    result = client.post("data/shots/%s/asset-instances" % shot["id"], data)
+    return result

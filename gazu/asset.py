@@ -69,6 +69,15 @@ def all_types_for_shot(shot):
 
 
 @cache
+def task_types_for_asset(asset):
+    """
+    Return all task types of tasks related to given asset.
+    """
+    task_types = client.fetch_all("assets/%s/task-types" % asset['id'])
+    return sort_by_name(task_types)
+
+
+@cache
 def get_asset(asset_id):
     """
     Retrieve given asset.
@@ -107,14 +116,35 @@ def remove_asset(asset):
 
 
 @cache
-def task_types_for_asset(asset):
-    task_types = client.fetch_all("assets/%s/task-types" % asset['id'])
-    return sort_by_name(task_types)
-
-
-@cache
 def get_asset_by_name(project, name):
+    """
+    Retrieve first asset matching given name.
+    """
     result = client.fetch_all("entities?project_id=%s&name=%s" % (
         project["id"], name
     ))
     return next(iter(result or []), None)
+
+
+@cache
+def get_asset_instance(asset_instance_id):
+    """
+    Retrieve given asset instance
+    """
+    return client.fetch_one('asset-instances', asset_instance_id)
+
+
+@cache
+def all_asset_instances_for_asset(asset):
+    """
+    Retrieve all asset instances existing for a given asset.
+    """
+    return client.fetch_all("assets/%s/asset-instances" % asset['id'])
+
+
+@cache
+def all_asset_instances_for_shot(shot):
+    """
+    Retrieve all asset instances existing for a given shot.
+    """
+    return client.fetch_all("shots/%s/asset-instances" % shot['id'])

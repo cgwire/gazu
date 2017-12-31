@@ -103,8 +103,8 @@ def all_sequences_for_project(project):
     Return the list of sequences for given project and current user.
     """
     path = "user/projects/%s/sequences" % project["id"]
-    tasks = client.fetch_all(path)
-    return sort_by_name(tasks)
+    sequences = client.fetch_all(path)
+    return sort_by_name(sequences)
 
 
 @cache

@@ -33,7 +33,7 @@ def get_output_file(output_file_id):
     """
     Returns the file corresponding to the given id.
     """
-    path = "data/output-files/%s/" % (output_file_id)
+    path = "data/output-files/%s" % (output_file_id)
     return client.get(path)
 
 
@@ -42,31 +42,18 @@ def get_output_files_for_entity(entity):
     """
     Retrieves all the outputs of a given asset
     """
-    path = "data/output-files?entity_id=%s" % (entity["id"])
+    path = "data/entities/%s/output-files" % (entity["id"])
     return client.get(path)
 
 
 @cache
 def get_last_outputs_for_entity(entity):
     """
-    Retrieves the last outputs of a given asset an store them by
-    output_type
-
-    :returns: the last outputs
-    :rtype: dict
+    Retrieves the last outputs of a given asset grouped by output types and
+    names.
     """
-    all_entity_outputs = get_output_files_for_entity(entity)
-    last_entity_outputs = dict()
-    for output in all_entity_outputs:
-        if output['source_file'] is None:  # old cases
-            continue
-        key = output['output_type_id']
-        if key not in last_entity_outputs.keys():
-            last_entity_outputs[key] = output
-            continue
-        if last_entity_outputs[key]['revision'] < output['revision']:
-            last_entity_outputs[key] = output
-    return last_entity_outputs
+    path = "data/entities/%s/last-output-files" % (entity["id"])
+    return client.get(path)
 
 
 @cache
@@ -166,6 +153,29 @@ def build_file_name(
     return result["name"].replace(" ", "_")
 
 
+@cache
+def build_asset_instance_file_path(
+    asset_instance,
+    output_type,
+    name="main",
+    mode="output",
+    version=1,
+    sep="/"
+):
+    result = client.post(
+        "data/asset-instances/%s/output-files/%s/file-path" % (
+            asset_instance["id"],
+            output_type["id"]
+        ),
+        {}
+    )
+    return "%s%s%s" % (
+        result["path"].replace(" ", "_"),
+        sep,
+        result["name"].replace(" ", "_")
+    )
+
+
 def set_working_file_thumbnail(working_file, th_path):
     """
     Upload a thumbnail for given working file.
@@ -202,7 +212,6 @@ def new_working_file(
 
 
 def new_output_file(
-    task,
     working_file,
     person,
     comment,
@@ -210,10 +219,7 @@ def new_output_file(
     revision=0,
     sep="/"
 ):
-    path = "data/tasks/%s/working-files/%s/output-files/new" % (
-        task["id"],
-        working_file["id"]
-    )
+    path = "data/working-files/%s/output-files/new" % working_file["id"]
 
     data = {
         "person_id": person["id"],
@@ -227,12 +233,12 @@ def new_output_file(
     return client.post(path, data)
 
 
-def get_next_output_revision(task, output_type, name="main"):
+def get_next_output_revision(entity, output_type, name="main"):
     """
-    Generate next expected output revision for given task.
+    Generate next expected output revision for given entity.
     """
-    path = "data/tasks/%s/output-types/%s/next-revision" % (
-        task["id"],
+    path = "data/entities/%s/output-types/%s/next-revision" % (
+        entity["id"],
         output_type["id"]
     )
 
@@ -243,23 +249,32 @@ def get_next_output_revision(task, output_type, name="main"):
     return client.post(path, data)["next_revision"]
 
 
-def get_last_output_revision(task, output_type):
+def get_last_output_revision(entity, output_type):
     """
-    Generate last output revision for given task.
+    Generate last output revision for given entity.
     """
-    revision = get_next_output_revision(task, output_type)
+    revision = get_next_output_revision(entity, output_type)
     if revision != 1:
         revision -= 1
     return revision
 
 
 @cache
-def get_last_output_files(task):
+def get_entity_output_types(entity):
+    """
+    Return list of output types related to given entity.
+    """
+    path = "data/entities/%s/output-types" % entity["id"]
+    return client.get(path)
+
+
+@cache
+def get_last_output_files(entity):
     """
     Generate a dict of last output files. One working file entry for each
     output file type.
     """
-    path = "data/tasks/%s/last-output-files" % task["id"]
+    path = "data/entities/%s/last-output-files" % entity["id"]
     return client.get(path)
 
 

@@ -84,6 +84,20 @@ def get_task_by_task_type(entity, task_type):
 
 
 @cache
+def all_tasks_for_status(project, task_type, task_status):
+    """
+    Return all tasks set at given status for given project and task type.
+    """
+    return client.fetch_all(
+        "tasks?project_id=%s&task_type_id=%s&task_status_id=%s" % (
+            project["id"],
+            task_type["id"],
+            task_status["id"]
+        )
+    )
+
+
+@cache
 def get_task_by_name(entity, name):
     """
     Find a task by looking for it through its name and its entity.
@@ -135,11 +149,48 @@ def get_task_status(task):
     return task_status[0] if task_status else None
 
 
+@cache
+def get_task_status_by_name(task_status_name):
+    """
+    Return task type status for given name.
+    """
+    return client.fetch_first("task-status?name=%s" % task_status_name)
+
+
+@cache
 def get_task(task_id):
     """
     Return task corresponding to given task ID.
     """
     return client.get('data/tasks/%s/full' % task_id)
+
+
+def new_task(
+    entity,
+    task_type,
+    name="main",
+    task_status=None,
+    assigner=None
+):
+    """
+    Create a new task for given entity and task type. It requires a task status
+    to run properly.
+    """
+    if task_status is None:
+        task_status = get_task_status_by_name("Todo")
+
+    data = {
+        "project_id": entity["project_id"],
+        "entity_id": entity["id"],
+        "task_type_id": task_type["id"],
+        "task_status_id": task_status["id"],
+        "name": name
+    }
+
+    if assigner is not None:
+        data["assigner_id"] = assigner["id"]
+
+    return client.post("data/tasks", data)
 
 
 def start_task(task):

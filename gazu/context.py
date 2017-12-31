@@ -94,3 +94,33 @@ def all_shots_for_sequence(sequence, user_context=False):
         return gazu_user.all_shots_for_sequence(sequence)
     else:
         return gazu_shot.all_for_sequence(sequence)
+
+
+def all_scenes_for_sequence(sequence, user_context=False):
+    """
+    Return the list of scenes for given sequence and current user.
+    """
+    if user_context:
+        return gazu_user.all_scenes_for_sequence(sequence)
+    else:
+        return gazu_shot.all_scenes_for_sequence(sequence)
+
+
+def all_sequences_for_episode(episode, user_context=False):
+    """
+    Return the list of shots for given sequence and current user.
+    """
+    if user_context:
+        return gazu_user.all_sequences_for_episode(episode)
+    else:
+        return gazu_shot.all_sequences_for_episode(episode)
+
+
+def all_episodes_for_project(project, user_context=False):
+    """
+    Return the list of shots for given sequence and current user.
+    """
+    if user_context:
+        return gazu_user.all_episodes_for_project(project)
+    else:
+        return gazu_shot.all_episodes(project)

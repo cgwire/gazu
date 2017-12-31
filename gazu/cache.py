@@ -5,6 +5,7 @@ import json
 from functools import wraps
 
 cache_settings = {"enabled": False}
+cached_functions = []
 
 
 def enable():
@@ -21,13 +22,21 @@ def disable():
     cache_settings["enabled"] = False
 
 
+def clear_all():
+    """
+    Clear all cached functions.
+    """
+    for function in cached_functions:
+        function.clear_cache()
+
+
 def remove_oldest_entry(memo, maxsize):
     """
     Remove the oldest cache entry if there is more value stored than allowed.
     """
     oldest_entry = None
     if maxsize > 0 and len(memo) > maxsize:
-        oldest_entry_key = memo.keys()[0]
+        oldest_entry_key = list(memo.keys())[0]
         for entry_key in memo.keys():
             oldest_date = memo[oldest_entry_key]["date_accessed"]
             if memo[entry_key]["date_accessed"] < oldest_date:
@@ -43,9 +52,9 @@ def get_cache_key(args, kwargs):
     if len(args) == 0 and len(kwargs) == 0:
         return ""
     elif len(args) == 0:
-        return json.dumps(args)
+        return json.dumps(kwargs)
     elif len(kwargs) == 0:
-        return json.dumps(args, kwargs)
+        return json.dumps(args)
     else:
         return json.dumps([args, kwargs])
 
@@ -77,6 +86,7 @@ def is_cache_enabled(state):
     """
     Return true if cache is enabled for given state.
     """
+    print("hi", cache_settings["enabled"] and state["enabled"])
     return cache_settings["enabled"] and state["enabled"]
 
 
@@ -149,4 +159,5 @@ def cache(function, maxsize=300, expire=0):
     wrapper.enable_cache = enable_cache
     wrapper.disable_cache = disable_cache
 
+    cached_functions.append(wrapper)
     return wrapper
