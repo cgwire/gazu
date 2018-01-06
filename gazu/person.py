@@ -1,3 +1,5 @@
+from deprecated import deprecated
+
 from . import client
 from .sorting import sort_by_name
 
@@ -5,7 +7,7 @@ from .cache import cache
 
 
 @cache
-def all():
+def all_persons():
     """
     Return all person listed in database.
     """
@@ -26,7 +28,7 @@ def get_person_by_full_name(full_name):
     Returns person corresponding to given name.
     """
     first_name, last_name = full_name.lower().split(" ")
-    for person in all():
+    for person in all_persons():
         is_right_first_name = first_name == person["first_name"].lower()
         is_right_last_name = last_name == person["last_name"].lower()
         if is_right_first_name and is_right_last_name:
@@ -40,3 +42,8 @@ def get_simple_person_list():
     rights.
     """
     return sort_by_name(client.get("auth/person-list"))
+
+
+@deprecated
+def all():
+    return all_persons

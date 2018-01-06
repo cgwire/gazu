@@ -1,3 +1,5 @@
+from deprecated import deprecated
+
 from . import client
 
 from .sorting import sort_by_name
@@ -6,20 +8,17 @@ from .cache import cache
 
 
 @cache
-def all(project=None):
+def all_shots_for_project(project):
     """
     Retrieve all shots from database or for given project.
     """
-    if project is not None:
-        shots = client.fetch_all("projects/%s/shots" % project["id"])
-    else:
-        shots = client.fetch_all("shots/all")
+    shots = client.fetch_all("projects/%s/shots" % project["id"])
 
     return sort_by_name(shots)
 
 
 @cache
-def all_for_sequence(sequence):
+def all_shots_for_sequence(sequence):
     """
     Retrieve all shots which are children from given sequence.
     """
@@ -74,11 +73,10 @@ def get_episode_by_name(project, episode_name):
     """
     Returns episode corresponding to given name and project.
     """
-    result = client.fetch_all("entities?project_id=%s&name=%s" % (
+    result = client.fetch_first("entities?project_id=%s&name=%s" % (
         project["id"],
         episode_name
     ))
-    return next(iter(result or []), None)
 
 
 @cache
@@ -94,11 +92,10 @@ def get_sequence_by_name(project, sequence_name):
     """
     Returns sequence corresponding to given name and project.
     """
-    result = client.fetch_all("entities?project_id=%s&name=%s" % (
+    return client.fetch_first("entities?project_id=%s&name=%s" % (
         project["id"],
         sequence_name
     ))
-    return next(iter(result or []), None)
 
 
 @cache
@@ -119,16 +116,6 @@ def get_shot_by_name(sequence, shot_name):
         shot_name
     ))
     return next(iter(result or []), None)
-
-
-def new_episode(project, name):
-    """
-    Create an episode for given project.
-    """
-    shot = {
-        "name": name
-    }
-    return client.post('data/projects/%s/episodes' % project["id"], shot)
 
 
 def new_sequence(
@@ -190,6 +177,16 @@ def update_shot_data(shot, data={}):
     update_shot(updated_shot)
 
 
+def new_episode(project, name):
+    """
+    Create an episode for given project.
+    """
+    shot = {
+        "name": name
+    }
+    return client.post('data/projects/%s/episodes' % project["id"], shot)
+
+
 @cache
 def get_asset_instances_for_shot(shot):
     """
@@ -209,3 +206,13 @@ def new_shot_asset_instance(shot, asset, description=""):
         "description": description
     }
     return client.post("data/shots/%s/asset-instances" % shot["id"], data)
+
+
+@deprecated
+def all(project=None):
+    return all_shots_for_project(project)
+
+
+@deprecated
+def all_for_sequence(project=None):
+    return all_shots_for_sequence(project)

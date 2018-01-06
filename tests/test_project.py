@@ -13,7 +13,7 @@ class ProjectTestCase(unittest.TestCase):
                 gazu.client.get_full_url('data/projects'),
                 text='[{"name": "Agent 327", "id": "project_1"}]'
             )
-            projects = gazu.project.all()
+            projects = gazu.project.all_projects()
             project_instance = projects[0]
             self.assertEquals(project_instance["name"], "Agent 327")
 

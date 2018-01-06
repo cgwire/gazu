@@ -8,17 +8,7 @@ import gazu.shot
 
 class ShotTestCase(unittest.TestCase):
 
-    def test_all(self):
-        with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url('data/shots/all'),
-                text='[{"name": "Shot 01", "project_id": "project-1"}]'
-            )
-            shots = gazu.shot.all()
-            shot_instance = shots[0]
-            self.assertEquals(shot_instance["name"], "Shot 01")
-
-    def test_all_for_project(self):
+    def test_all_shots_for_project(self):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url('data/projects/project-1/shots'),
@@ -27,13 +17,13 @@ class ShotTestCase(unittest.TestCase):
             project = {
                 "id": "project-1"
             }
-            shots = gazu.shot.all(project=project)
+            shots = gazu.shot.all_shots_for_project(project)
             self.assertEquals(len(shots), 1)
             shot_instance = shots[0]
             self.assertEquals(shot_instance["name"], "Shot 01")
             self.assertEquals(shot_instance["project_id"], "project-1")
 
-    def test_all_for_sequence(self):
+    def test_all_shots_for_sequence(self):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url('data/sequences/sequence-1/shots'),
@@ -50,7 +40,7 @@ class ShotTestCase(unittest.TestCase):
             sequence = {
                 "id": "sequence-1"
             }
-            shots = gazu.shot.all_for_sequence(sequence=sequence)
+            shots = gazu.shot.all_shots_for_sequence(sequence)
             self.assertEquals(len(shots), 1)
             shot_instance = shots[0]
             self.assertEquals(shot_instance["name"], "Shot 01")

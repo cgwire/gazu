@@ -14,7 +14,7 @@ class PersonTestCase(unittest.TestCase):
                 gazu.client.get_full_url("data/persons"),
                 text=json.dumps([{"first_name": "John", "id": "person-1"}])
             )
-            persons = gazu.person.all()
+            persons = gazu.person.all_persons()
             person_instance = persons[0]
             self.assertEquals(person_instance["first_name"], "John")
 

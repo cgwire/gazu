@@ -18,7 +18,7 @@ class TaskTestCase(unittest.TestCase):
             )
 
             shot = {"id": "shot-01"}
-            tasks = gazu.task.all_for_shot(shot)
+            tasks = gazu.task.all_tasks_for_shot(shot)
             task = tasks[0]
             self.assertEquals(task["name"], "Master Animation")
 
@@ -35,7 +35,7 @@ class TaskTestCase(unittest.TestCase):
             )
 
             sequence = {"id": "sequence-01"}
-            tasks = gazu.task.all_for_sequence(sequence)
+            tasks = gazu.task.all_tasks_for_sequence(sequence)
             task = tasks[0]
             self.assertEquals(task["name"], "Master Animation")
 
@@ -50,7 +50,7 @@ class TaskTestCase(unittest.TestCase):
             )
 
             asset = {"id": "asset-01"}
-            tasks = gazu.task.all_for_asset(asset)
+            tasks = gazu.task.all_tasks_for_asset(asset)
             task = tasks[0]
             self.assertEquals(task["name"], "Master Modeling")
 
@@ -255,6 +255,18 @@ class TaskTestCase(unittest.TestCase):
                 7200
             )
             self.assertEquals(time_spent["duration"], 7200)
+
+    def test_all_task_types_for_asset(self):
+        path = "data/assets/asset-01/task-types"
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url(path),
+                text='[{"name": "Modeling"}]'
+            )
+            asset = {"id": "asset-01"}
+            asset_types = gazu.task.task_types_for_asset(asset)
+            asset_instance = asset_types[0]
+            self.assertEquals(asset_instance["name"], "Modeling")
 
     def test_all_tasks_for_status(self):
         with requests_mock.mock() as mock:

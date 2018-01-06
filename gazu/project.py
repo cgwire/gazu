@@ -1,3 +1,5 @@
+from deprecated import deprecated
+
 from . import client
 
 from .sorting import sort_by_name
@@ -6,7 +8,7 @@ from .cache import cache
 
 
 @cache
-def all():
+def all_projects():
     """
     Returns all the projects stored in the database.
     """
@@ -36,3 +38,8 @@ def get_project_by_name(project_name):
     """
     result = client.fetch_all("projects?name=%s" % project_name)
     return next(iter(result or []), None)
+
+
+@deprecated
+def all():
+    return all_projects()

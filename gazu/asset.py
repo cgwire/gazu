@@ -1,3 +1,5 @@
+from deprecated import deprecated
+
 from . import client
 
 from .sorting import sort_by_name
@@ -6,7 +8,7 @@ from .cache import cache
 
 
 @cache
-def all(project=None):
+def all_assets_for_project(project):
     """
     Retrieve all assets stored in the database or for given project.
     """
@@ -19,7 +21,7 @@ def all(project=None):
 
 
 @cache
-def all_for_shot(shot):
+def all_assets_for_shot(shot):
     """
     Retrieve all assets casted in given shot.
     """
@@ -27,54 +29,27 @@ def all_for_shot(shot):
 
 
 @cache
-def all_for_project_and_type(project, asset_type):
+def all_assets_for_project_and_type(project, asset_type):
     """
     Retrieve all assets for given project and given asset type.
     """
     project_id = project["id"]
     asset_type_id = asset_type["id"]
-    path = "/data/projects/{project_id}/asset-types/{asset_type_id}/assets"
+    path = "projects/{project_id}/asset-types/{asset_type_id}/assets"
     path = path.format(project_id=project_id, asset_type_id=asset_type_id)
 
-    assets = client.get(path)
+    assets = client.fetch_all(path)
     return sort_by_name(assets)
 
 
 @cache
-def all_types():
+def get_asset_by_name(project, name):
     """
-    Retrieve all asset types stored in the database.
+    Retrieve first asset matching given name.
     """
-    return sort_by_name(client.fetch_all("asset-types"))
-
-
-@cache
-def all_types_for_project(project):
-    """
-    Retrieve all asset types from assets listed in given project.
-    """
-    return sort_by_name(client.fetch_all(
-        "projects/%s/asset-types" % project["id"]
+    return client.fetch_first("entities?project_id=%s&name=%s" % (
+        project["id"], name
     ))
-
-
-@cache
-def all_types_for_shot(shot):
-    """
-    Retrieve all asset types from assets casted in given shot.
-    """
-    return sort_by_name(client.fetch_all(
-        "shots/%s/asset-types" % shot["id"]
-    ))
-
-
-@cache
-def task_types_for_asset(asset):
-    """
-    Return all task types of tasks related to given asset.
-    """
-    task_types = client.fetch_all("assets/%s/task-types" % asset['id'])
-    return sort_by_name(task_types)
 
 
 @cache
@@ -151,14 +126,39 @@ def remove_asset_type(asset_type):
 
 
 @cache
-def get_asset_by_name(project, name):
+def all_asset_types():
     """
-    Retrieve first asset matching given name.
+    Retrieve all asset types stored in the database.
     """
-    result = client.fetch_all("entities?project_id=%s&name=%s" % (
-        project["id"], name
+    return sort_by_name(client.fetch_all("asset-types"))
+
+
+@cache
+def all_asset_types_for_project(project):
+    """
+    Retrieve all asset types from assets listed in given project.
+    """
+    return sort_by_name(client.fetch_all(
+        "projects/%s/asset-types" % project["id"]
     ))
-    return next(iter(result or []), None)
+
+
+@cache
+def all_asset_types_for_shot(shot):
+    """
+    Retrieve all asset types from assets casted in given shot.
+    """
+    return sort_by_name(client.fetch_all(
+        "shots/%s/asset-types" % shot["id"]
+    ))
+
+
+@cache
+def get_asset_type(asset_id):
+    """
+    Retrieve given asset type.
+    """
+    return client.fetch_one('asset-types', asset_id)
 
 
 @cache
@@ -183,3 +183,33 @@ def all_asset_instances_for_shot(shot):
     Retrieve all asset instances existing for a given shot.
     """
     return client.fetch_all("shots/%s/asset-instances" % shot['id'])
+
+
+@deprecated
+def all(project=None):
+    return all_assets_for_project(project)
+
+
+@deprecated
+def all_for_shot(shot):
+    return all_assets_for_shot(shot)
+
+
+@deprecated
+def all_for_project_and_type(project, asset_type):
+    return all_assets_for_project_and_type(project, asset_type)
+
+
+@deprecated
+def all_types(project):
+    return all_asset_types()
+
+
+@deprecated
+def all_types_for_project(project):
+    return all_asset_types_for_project(project)
+
+
+@deprecated
+def all_types_for_shot(shot):
+    return all_asset_types_for_shot(shot)
