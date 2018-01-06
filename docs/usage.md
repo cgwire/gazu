@@ -159,24 +159,24 @@ shot = gazu.shot.get_sequence_by_name(project_dict, "SE01")
 Retrieve all tasks related to given asset, shot or sequence:
 
 ```python
-tasks = gazu.task.all_for_asset(asset_dict)
-tasks = gazu.task.all_for_shot(shot_dict)
-tasks = gazu.task.all_for_sequence(sequence)
+tasks = gazu.task.all_tasks_for_asset(asset_dict)
+tasks = gazu.task.all_tasks_for_shot(shot_dict)
+tasks = gazu.task.all_tasks_for_sequence(sequence)
 ```
 
 Retrieve all task types or task types for shot or sequence:
 
 ```python
 tasks = gazu.task.all_task_types()
-tasks = gazu.task.all_task_types_for_shot(shot_dict)
+tasks = gazu.task.all_task_types_for_shot(shot)
 tasks = gazu.task.all_task_types_for_sequence(sequence)
 ```
 
 Retrieve a given task:
 
 ```python
-task = gazu.shot.get_task_by_task_type(entity, task_type_dict)
-task = gazu.task.get_task_by_name(entity, "main")
+task = gazu.shot.get_task_by_task_type(asset, task_type)
+task = gazu.task.get_task_by_name(asset, "main")
 ```
 
 
