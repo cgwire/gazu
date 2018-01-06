@@ -44,10 +44,10 @@ The client is divided in seven modules:
 Retrieve all persons listed in database:
 
 ```python
-persons = gazu.person.all()
+persons = gazu.person.all_persons()
 ```
 
-Get a person by full name:
+Get a person by full name or login used on his desktop machine:
 
 ```python
 person = gazu.person.get_person_by_full_name("John Doe")
@@ -59,13 +59,13 @@ person = gazu.person.get_person_by_desktop_login("john.doe")
 Retrieve all projects listed in database:
 
 ```python
-projects = gazu.project.all()
+projects = gazu.project.all_projects()
 ```
 
 Retrieve all open projects:
 
 ```python
-projects = gazu.project.open_projects()
+projects = gazu.project.all_open_projects()
 ```
 
 Retrieve given project:
@@ -81,15 +81,15 @@ project = gazu.project.get_project_by_name("Agent 327")
 Retrieve all assets for a given project, shot or asset type:
 
 ```python
-assets = gazu.asset.all(project_dict)
-assets = gazu.asset.all_for_shot(shot_dict)
-assets = gazu.asset.all_for_project_and_type(project_dict, asset_type_dict)
+assets = gazu.asset.all_assets(project_dict)
+assets = gazu.asset.all_assets_for_shot(shot_dict)
+assets = gazu.asset.all_assets_for_project_and_type(project_dict, asset_type_dict)
 ```
 
 Retrieve all asset types:
 
 ```python
-asset_types = gazu.asset.all_types()
+asset_types = gazu.asset.all_asset_types()
 asset_types = gazu.asset.all_asset_types_for_project(project_dict) 
 asset_types = gazu.asset.all_asset_types_for_shot(shot_dict) 
 ```
@@ -124,8 +124,8 @@ assets = gazu.asset.remove_asset(asset_dict)
 Retrieve all shots for given project or sequence:
 
 ```python
-shots = gazu.shot.all(project_dict)
-shots = gazu.shot.all_for_sequence(sequence_dict)
+shots = gazu.shot.all_shots(project_dict)
+shots = gazu.shot.all_shots_for_sequence(sequence_dict)
 ```
 
 Retrieve all sequences for given project or episode
@@ -217,6 +217,7 @@ Retrieve given output type:
 ```python
 output_types = gazu.files.get_output_type(output_type_id)
 output_types = gazu.files.get_output_type_by_name("Cache")
+output_types = gazu.files.get_output_type_by_entity(asset)
 ```
 
 Get all softwares:
@@ -229,7 +230,7 @@ Retrieve given software:
 
 ```python
 softwares = gazu.files.get_software(output_type_id)
-softwares = gazu.files.get_software_by_name("Cache")
+softwares = gazu.files.get_software_by_name("Maya")
 ```
 
 Retrieve given output file:
@@ -241,16 +242,16 @@ output_file = gazu.files.get_output_file(output_file_id)
 Retrieve output files related to give entity:
 
 ```python
-output_files = gazu.files.get_output_files_for_entity(entity)
+output_files = gazu.files.get_output_files_for_entity(asset)
 output_files_dict = gazu.files.get_last_output_files(task)
-output_files_dict = gazu.files.get_last_output_files_for_entity(entity)
+output_files_dict = gazu.files.get_last_output_files_for_entity(asset)
 ```
 
 Manage output files revisions:
 
 ```python
-next_revision = gazu.files.get_next_ouput_revision(task_dict, output_type_dict)
-last_revision = gazu.files.get_last_ouput_revision(task_dict, output_type_dict)
+next_revision = gazu.files.get_next_ouput_revision(task, output_type)
+last_revision = gazu.files.get_last_ouput_revision(task, output_type)
 ```
 
 Create new output file:
@@ -271,8 +272,8 @@ output_file = gazu.files.new_output_file(
 Get working files:
 
 ```python
-working_files = gazu.files.get_working_files_for_task(task_dict)
-working_files_dict = gazu.files.get_last_working_files(task_dict)
+working_files = gazu.files.get_working_files_for_task(task)
+working_files = gazu.files.get_last_working_files(task)
 ```
 
 Get a given working file:
