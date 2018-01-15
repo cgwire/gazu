@@ -70,6 +70,18 @@ def get_episode(episode_id):
 
 
 @cache
+def get_episode_by_name(project, episode_name):
+    """
+    Returns episode corresponding to given name and project.
+    """
+    result = client.fetch_all("entities?project_id=%s&name=%s" % (
+        project["id"],
+        episode_name
+    ))
+    return next(iter(result or []), None)
+
+
+@cache
 def get_sequence(sequence_id):
     """
     Return sequence corresponding to given sequence ID.
