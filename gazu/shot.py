@@ -181,6 +181,17 @@ def update_shot(shot):
     return client.put('data/entities/%s' % shot["id"], shot)
 
 
+def update_shot_data(shot, data={}):
+    """
+    Update the data for the provided shot.
+    Keys not provided are not updated while update_shot() delete them
+    """
+    current_shot = get_shot(shot["id"])
+    updated_shot = {'id': current_shot['id'], 'data': current_shot['data']}
+    updated_shot['data'].update(data)
+    update_shot(updated_shot)
+
+
 def new_scene(
     project,
     sequence,

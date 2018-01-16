@@ -108,6 +108,24 @@ def new_asset(project, asset_type, name, description=""):
     ), data)
 
 
+def update_asset(asset):
+    """
+    Save given asset data into the API.
+    """
+    return client.put('data/entities/%s' % asset["id"], asset)
+
+
+def update_asset_data(asset, data={}):
+    """
+    Update the data for the provided asset.
+    Keys not provided are not updated while update_assset() delete them
+    """
+    current_asset = get_asset(asset["id"])
+    updated_asset = {'id': current_asset['id'], 'data': current_asset['data']}
+    updated_asset['data'].update(data)
+    update_asset(updated_asset)
+
+
 def remove_asset(asset):
     """
     Remove given asset from database.
