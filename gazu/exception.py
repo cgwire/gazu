@@ -28,3 +28,7 @@ class MethodNotAllowedException(Exception):
 
 class AuthFailedException(Exception):
     pass
+
+
+class ParameterException(Exception):
+    pass
