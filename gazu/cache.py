@@ -53,7 +53,7 @@ def get_cache_key(args, kwargs):
         return ""
     elif len(args) == 0:
         return json.dumps(kwargs)
-    elif len(kwargs) == 0:
+    elif len(kwargs.keys()) == 0:
         return json.dumps(args)
     else:
         return json.dumps([args, kwargs])
@@ -86,7 +86,6 @@ def is_cache_enabled(state):
     """
     Return true if cache is enabled for given state.
     """
-    print("hi", cache_settings["enabled"] and state["enabled"])
     return cache_settings["enabled"] and state["enabled"]
 
 
