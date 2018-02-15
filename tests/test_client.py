@@ -2,10 +2,10 @@ import unittest
 import requests_mock
 import datetime
 import json
-import gazu
+import pipeline
 
-from gazu import client
-from gazu.exception import (
+from pipeline import client
+from pipeline.exception import (
     RouteNotFoundException,
     AuthFailedException,
     MethodNotAllowedException,
@@ -36,7 +36,7 @@ class BaseFuncTestCase(ClientTestCase):
     def test_set_host(self):
         client.set_host("newhost")
         self.assertEquals(client.get_host(), "newhost")
-        client.set_host("http://gazu-server/")
+        client.set_host("http://pipeline-server/")
 
     def test_set_tokens(self):
         pass
@@ -183,18 +183,22 @@ class BaseFuncTestCase(ClientTestCase):
         pass
 
     def test_check_status(self):
+        class Request(object):
+            def __init__(self, status_code):
+                self.status_code = status_code
+
         self.assertRaises(
-            NotAuthenticatedException, client.check_status, 401, "/")
-        self.assertRaises(NotAllowedException, client.check_status, 403, "/")
-        self.assertRaises(RouteNotFoundException, client.check_status, 404, "/")
+            NotAuthenticatedException, client.check_status, Request(401), "/")
+        self.assertRaises(NotAllowedException, client.check_status, Request(403), "/")
+        self.assertRaises(RouteNotFoundException, client.check_status, Request(404), "/")
         self.assertRaises(
-            MethodNotAllowedException, client.check_status, 405, "/")
+            MethodNotAllowedException, client.check_status, Request(405), "/")
 
     def test_init_host(self):
-        gazu.set_host("newhost")
-        self.assertEquals(gazu.get_host(), "newhost")
-        gazu.set_host("http://gazu-server/")
-        self.assertEquals(gazu.get_host(), gazu.client.HOST)
+        pipeline.set_host("newhost")
+        self.assertEquals(pipeline.get_host(), "newhost")
+        pipeline.set_host("http://pipeline-server/")
+        self.assertEquals(pipeline.get_host(), pipeline.client.HOST)
 
     def test_init_log_in(self):
         with requests_mock.mock() as mock:
@@ -204,7 +208,7 @@ class BaseFuncTestCase(ClientTestCase):
                     {"login": True, "tokens": {"access_token": "tokentest"}}
                 )
             )
-            gazu.log_in("frank", "test")
+            pipeline.log_in("frank", "test")
         self.assertEquals(client.tokens["tokens"]["access_token"], "tokentest")
 
     def test_init_log_in_fail(self):
@@ -215,7 +219,7 @@ class BaseFuncTestCase(ClientTestCase):
             )
             self.assertRaises(
                 AuthFailedException,
-                gazu.log_in,
+                pipeline.log_in,
                 "frank",
                 "test"
             )
