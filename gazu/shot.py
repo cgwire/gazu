@@ -90,15 +90,13 @@ def get_sequence(sequence_id):
 
 
 @cache
-def get_sequence_by_name(project, sequence_name, episode=None):
+def get_sequence_by_name(project, sequence_name):
     """
     Returns sequence corresponding to given name and project.
-    Optionnaly you can specify an episode
     """
-    result = client.fetch_all("entities?project_id=%s&name=%s%s" % (
+    result = client.fetch_all("entities?project_id=%s&name=%s" % (
         project["id"],
-        sequence_name,
-        "&parent_id=%s" % episode['id'] if episode else ""
+        sequence_name
     ))
     return next(iter(result or []), None)
 
@@ -192,74 +190,16 @@ def update_shot_data(shot, data={}):
     update_shot(updated_shot)
 
 
-def new_scene(
-    project,
-    sequence,
-    name
-):
+@cache
+def get_asset_instances_for_shot(shot):
     """
-    Create a scene for given sequence.
+    Return the list of asset instances listed in a shot.
     """
-    shot = {
-        "name": name,
-        "sequence_id": sequence["id"]
-    }
-    return client.post('data/projects/%s/scenes' % project["id"], shot)
+    return client.get("data/shots/%s/asset-instances" % shot["id"])
 
 
 @cache
-def all_scenes(project=None):
-    """
-    Retrieve all scenes.
-    """
-    if project is not None:
-        scenes = client.fetch_all("projects/%s/scenes" % project["id"])
-    else:
-        scenes = client.fetch_all("scenes")
-    return sort_by_name(scenes)
-
-
-@cache
-def all_scenes_for_project(project):
-    """
-    Retrieve all scenes for given project.
-    """
-    scenes = client.fetch_all("projects/%s/scenes" % project["id"])
-    return sort_by_name(scenes)
-
-
-@cache
-def all_scenes_for_sequence(sequence):
-    """
-    Retrieve all scenes which are children from given sequence.
-    """
-    return sort_by_name(
-        client.fetch_all("sequences/%s/scenes" % sequence["id"])
-    )
-
-
-@cache
-def get_scene(scene_id):
-    """
-    Return scene corresponding to given scene ID.
-    """
-    return client.fetch_one('scenes', scene_id)
-
-
-@cache
-def get_scene_by_name(sequence, scene_name):
-    """
-    Returns scene corresponding to given sequence and name.
-    """
-    result = client.fetch_all("entities?parent_id=%s&name=%s" % (
-        sequence["id"],
-        scene_name
-    ))
-    return next(iter(result or []), None)
-
-
-@cache
-def new_asset_instance(shot, asset, description=""):
+def new_shot_asset_instance(shot, asset, description=""):
     """
     Creates a new asset instance on given shot. The instance number is
     automatically generated (increment highest number).
@@ -268,5 +208,4 @@ def new_asset_instance(shot, asset, description=""):
         "asset_id": asset["id"],
         "description": description
     }
-    result = client.post("data/shots/%s/asset-instances" % shot["id"], data)
-    return result
+    return client.post("data/shots/%s/asset-instances" % shot["id"], data)
