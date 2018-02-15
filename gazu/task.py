@@ -32,6 +32,15 @@ def all_for_sequence(sequence):
 
 
 @cache
+def all_for_scene(scene):
+    """
+    Return tasks linked to given scene.
+    """
+    tasks = client.fetch_all("scenes/%s/tasks" % scene['id'])
+    return sort_by_name(tasks)
+
+
+@cache
 def all_for_asset(asset):
     """
     Retrieve all tasks directly linked to given asset.
