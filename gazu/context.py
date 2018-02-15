@@ -3,6 +3,7 @@ from . import project as gazu_project
 from . import asset as gazu_asset
 from . import task as gazu_task
 from . import shot as gazu_shot
+from . import scene as gazu_scene
 
 
 def all_open_projects(user_context=False):
@@ -83,7 +84,7 @@ def all_scenes_for_project(project, user_context=False):
     if user_context:
         return gazu_user.all_scenes_for_project(project)
     else:
-        return gazu_shot.all_scenes(project)
+        return gazu_scene.all_scenes(project)
 
 
 def all_shots_for_sequence(sequence, user_context=False):
@@ -103,7 +104,7 @@ def all_scenes_for_sequence(sequence, user_context=False):
     if user_context:
         return gazu_user.all_scenes_for_sequence(sequence)
     else:
-        return gazu_shot.all_scenes_for_sequence(sequence)
+        return gazu_scene.all_scenes_for_sequence(sequence)
 
 
 def all_sequences_for_episode(episode, user_context=False):
