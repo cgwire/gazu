@@ -12,6 +12,24 @@ def all_output_types():
 
 
 @cache
+def all_output_types_for_entity(entity):
+    """
+    Return all output types for given entity.
+    """
+    return client.fetch_all("entities/%s/output-types" % entity["id"])
+
+
+@cache
+def all_output_types_for_asset_instance(asset_instance):
+    """
+    Return all output types for given asset instance.
+    """
+    return client.fetch_all(
+        "asset-instances/%s/output-types" % asset_instance["id"]
+    )
+
+
+@cache
 def get_output_type(output_type_id):
     """
     Return output type object corresponding to the given id.
@@ -38,21 +56,28 @@ def get_output_file(output_file_id):
 
 
 @cache
-def get_output_files_for_entity(entity):
+def all_output_files_for_entity(entity, output_type):
     """
-    Retrieves all the outputs of a given asset
+    Retrieves all the outputs of a given entity (asset or shot)
+    and output type.
     """
-    path = "data/entities/%s/output-files" % (entity["id"])
+    path = "data/entities/%s/output-types/%s/output-files" % (
+        entity["id"],
+        output_type["id"]
+    )
     return client.get(path)
 
 
 @cache
-def get_last_outputs_for_entity(entity):
+def all_output_files_for_asset_instance(asset_instance, output_type):
     """
-    Retrieves the last outputs of a given asset grouped by output types and
-    names.
+    Retrieves all the outputs of a given asset_instance (asset or shot)
+    and output type.
     """
-    path = "data/entities/%s/last-output-files" % (entity["id"])
+    path = "data/asset-instances/%s/output-types/%s/output-files" % (
+        asset_instance["id"],
+        output_type["id"]
+    )
     return client.get(path)
 
 
@@ -65,40 +90,32 @@ def all_softwares():
 
 
 @cache
-def build_folder_path(
-    task,
-    name="main",
-    mode="working",
-    software=None,
-    output_type=None,
-    sep="/"
-):
+def get_software(software_id):
     """
-    For a given task and options it returns the expected folder path.
+    Return software object corresponding to given ID.
     """
-    data = {
-        "mode": mode,
-        "name": name,
-        "sep": sep
-    }
-    if output_type is not None:
-        data["output_type_id"] = output_type["id"]
-    if software is not None:
-        data["software_id"] = software["id"]
-
-    result = client.post("data/tasks/%s/folder-path" % task["id"], data)
-    return result["path"].replace(" ", "_")
+    return client.fetch_one("softwares", software_id)
 
 
 @cache
-def build_file_path(
+def get_software_by_name(software_name):
+    """
+    Return software object corresponding to given name.
+    """
+    softwares = client.fetch_all("softwares?name=%s" % software_name)
+    if len(softwares) > 0:
+        return softwares[0]
+    else:
+        return None
+
+
+@cache
+def build_working_file_path(
     task,
     name="main",
     mode="working",
     software=None,
-    output_type=None,
-    comment="",
-    version=1,
+    revision=1,
     sep="/"
 ):
     """
@@ -107,15 +124,11 @@ def build_file_path(
     data = {
         "mode": mode,
         "name": name,
-        "comment": comment,
-        "version": version
+        "revision": revision
     }
-    if output_type is not None:
-        data["output_type_id"] = output_type["id"]
     if software is not None:
         data["software_id"] = software["id"]
-
-    result = client.post("data/tasks/%s/file-path" % task["id"], data)
+    result = client.post("data/tasks/%s/working-file-path" % task["id"], data)
     return "%s%s%s" % (
         result["path"].replace(" ", "_"),
         sep,
@@ -124,55 +137,59 @@ def build_file_path(
 
 
 @cache
-def build_file_name(
-    task,
+def build_entity_output_file_path(
+    entity,
+    output_type,
+    task_type,
     name="main",
-    mode="working",
-    software=None,
-    output_type=None,
-    comment="",
-    version=1,
+    mode="output",
+    revision=0,
     sep="/"
 ):
     """
     For a given task and options, it returns the expected file name.
     """
     data = {
+        "task_type_id": task_type["id"],
+        "output_type_id": output_type["id"],
         "mode": mode,
         "name": name,
-        "comment": comment,
-        "version": version,
-        "sep": sep
+        "revision": revision,
+        "separator": sep
     }
-    if output_type is not None:
-        data["output_type_id"] = output_type["id"]
-    if software is not None:
-        data["software_id"] = software["id"]
-
-    result = client.post("data/tasks/%s/file-path" % task["id"], data)
-    return result["name"].replace(" ", "_")
+    path = "data/entities/%s/output-file-path" % entity["id"]
+    result = client.post(path, data)
+    return "%s%s%s" % (
+        result["folder_path"].replace(" ", "_"),
+        sep,
+        result["file_name"].replace(" ", "_")
+    )
 
 
 @cache
-def build_asset_instance_file_path(
+def build_asset_instance_output_file_path(
     asset_instance,
     output_type,
+    task_type,
     name="main",
     mode="output",
     version=1,
     sep="/"
 ):
-    result = client.post(
-        "data/asset-instances/%s/output-files/%s/file-path" % (
-            asset_instance["id"],
-            output_type["id"]
-        ),
-        {}
-    )
+    data = {
+        "task_type_id": task_type["id"],
+        "output_type_id": output_type["id"],
+        "mode": mode,
+        "name": name,
+        "version": version,
+        "sep": sep
+    }
+    path = "data/asset-instances/%s/output-file-path" % asset_instance["id"]
+    result = client.post(path, data)
     return "%s%s%s" % (
-        result["path"].replace(" ", "_"),
+        result["folder_path"].replace(" ", "_"),
         sep,
-        result["name"].replace(" ", "_")
+        result["file_name"].replace(" ", "_")
     )
 
 
@@ -201,7 +218,8 @@ def new_working_file(
         "name": name,
         "comment": comment,
         "task_id": task["id"],
-        "revision": revision
+        "revision": revision,
+        "mode": mode
     }
     if person is not None:
         data["person_id"] = person["id"]
@@ -211,70 +229,136 @@ def new_working_file(
     return client.post("data/tasks/%s/working-files/new" % task["id"], data)
 
 
-def new_output_file(
+def new_entity_output_file(
+    entity,
+    output_type,
+    task_type,
     working_file,
-    person,
     comment,
-    output_type=None,
+    name="main",
+    person=None,
     revision=0,
+    mode="output",
     sep="/"
 ):
-    path = "data/working-files/%s/output-files/new" % working_file["id"]
-
+    """
+    Generate a new output file from a working file for a given entity.
+    """
+    path = "data/entities/%s/output-files/new" % entity["id"]
     data = {
-        "person_id": person["id"],
+        "output_type_id": output_type["id"],
+        "task_type_id": task_type["id"],
+        "working_file_id": working_file["id"],
         "comment": comment,
         "revision": revision,
-        "separator": sep
+        "sep": sep
     }
-    if output_type is not None:
-        data["output_type_id"] = output_type["id"],
+
+    if person is not None:
+        data["person_id"] = person["id"]
 
     return client.post(path, data)
 
 
-def get_next_output_revision(entity, output_type, name="main"):
+def new_asset_instance_output_file(
+    asset_instance,
+    output_type,
+    task_type,
+    working_file,
+    comment,
+    representation="",
+    person=None,
+    name="master",
+    revision=0,
+    mode="output",
+    sep="/"
+):
+    """
+    Generate a new output file from a working file for a given asset instance.
+    """
+    path = "data/asset-instances/%s/output-files/new" % asset_instance["id"]
+    data = {
+        "output_type_id": output_type["id"],
+        "task_type_id": task_type["id"],
+        "working_file_id": working_file["id"],
+        "comment": comment,
+        "name": name,
+        "revision": revision,
+        "representation": representation,
+        "sep": sep
+    }
+    if person is not None:
+        data["person_id"] = person["id"]
+
+    return client.post(path, data)
+
+
+def get_next_entity_output_revision(
+    entity,
+    output_type,
+    task_type,
+    name="main"
+):
     """
     Generate next expected output revision for given entity.
     """
-    path = "data/entities/%s/output-types/%s/next-revision" % (
-        entity["id"],
-        output_type["id"]
-    )
-
+    path = "data/entities/%s/output-files/next-revision" % entity["id"]
     data = {
         "name": name,
+        "output_type_id": output_type["id"],
+        "task_type_id": task_type["id"],
+        "name": name
     }
-
     return client.post(path, data)["next_revision"]
 
 
-def get_last_output_revision(entity, output_type):
+def get_next_asset_instance_output_revision(
+    entity,
+    output_type,
+    task_type,
+    name="master"
+):
+    """
+    Generate next expected output revision for given entity.
+    """
+    path = "data/asset-instances/%s/output-files/next-revision" % entity["id"]
+    data = {
+        "name": name,
+        "output_type_id": output_type["id"],
+        "task_type_id": task_type["id"],
+        "name": name
+    }
+    return client.post(path, data)["next_revision"]
+
+
+def get_last_entity_output_revision(entity, output_type, task_type):
     """
     Generate last output revision for given entity.
     """
-    revision = get_next_output_revision(entity, output_type)
+    revision = get_next_entity_output_revision(entity, output_type, task_type)
     if revision != 1:
         revision -= 1
     return revision
 
 
 @cache
-def get_entity_output_types(entity):
+def get_last_output_files_for_entity(entity):
     """
-    Return list of output types related to given entity.
+    Generate a dict of last output files. One output file entry for each
+    output file type and name.
     """
-    path = "data/entities/%s/output-types" % entity["id"]
+    path = "data/entities/%s/output-files/last-revisions" % entity["id"]
     return client.get(path)
 
 
 @cache
-def get_last_output_files(entity):
+def get_last_output_files_for_asset_instance(asset_instance):
     """
-    Generate a dict of last output files. One working file entry for each
-    output file type.
+    Generate a dict of last output files. One output file entry for each
+    output file type and name.
     """
-    path = "data/entities/%s/last-output-files" % entity["id"]
+    path = "data/asset-instances/%s/" \
+           "output-files/last-revisions" % asset_instance["id"]
     return client.get(path)
 
 
@@ -293,7 +377,7 @@ def get_last_working_files(task):
     Generate a dict of last working files. One working file entry for each
     working file name.
     """
-    path = "data/tasks/%s/last-working-files" % task["id"]
+    path = "data/tasks/%s/working-files/last-revisions" % task["id"]
     return client.get(path)
 
 
@@ -302,17 +386,9 @@ def get_last_working_file_revision(task, name="main"):
     """
     Get last revision stored in the API for given task and given file name.
     """
-    path = "data/tasks/%s/last-working-files" % task["id"]
+    path = "data/tasks/%s/working-files/last-revisions" % task["id"]
     working_files_dict = client.get(path)
     return working_files_dict.get(name, 0)
-
-
-@cache
-def get_software(software_id):
-    """
-    Return software object corresponding to given ID.
-    """
-    return client.fetch_one("softwares", software_id)
 
 
 @cache
@@ -321,18 +397,6 @@ def get_working_file(workfile_id):
     Return workfile object corresponding to given ID.
     """
     return client.fetch_one("working-files", workfile_id)
-
-
-@cache
-def get_software_by_name(software_name):
-    """
-    Return software object corresponding to given name.
-    """
-    softwares = client.fetch_all("softwares?name=%s" % software_name)
-    if len(softwares) > 0:
-        return softwares[0]
-    else:
-        return None
 
 
 def update_modification_date(working_file):
@@ -345,6 +409,17 @@ def update_modification_date(working_file):
     )
 
 
+def update_output_file(output_file, data):
+    """
+    Update the data of given output file.
+    """
+    path = "/data/output-files/%s" % output_file['id']
+    return client.put(
+        path,
+        data
+    )
+
+
 def set_project_file_tree(project, file_tree_name):
     """
     Use given file tree to generate files for given project.
@@ -352,3 +427,8 @@ def set_project_file_tree(project, file_tree_name):
     data = {"tree_name": file_tree_name}
     path = "actions/projects/%s/set-file-tree" % project["id"]
     return client.post(path, data)
+
+
+def new_output_type(name, short_name):
+    data = {"name": name, "short_name": short_name}
+    return client.create("output-types", data)

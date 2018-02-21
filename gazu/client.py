@@ -4,6 +4,7 @@ import json
 from .encoder import CustomJSONEncoder
 
 from .exception import (
+    ParameterException,
     RouteNotFoundException,
     ServerErrorException,
     NotAuthenticatedException,
@@ -23,6 +24,7 @@ except:
 
 
 HOST = "http://gazu.change.serverhost/api"
+
 tokens = {
     "access_token": "",
     "refresh_token": ""
@@ -91,7 +93,7 @@ def get(path):
         get_full_url(path),
         headers=make_auth_header()
     )
-    check_status(response.status_code, path)
+    check_status(response, path)
     return response.json()
 
 
@@ -104,7 +106,7 @@ def post(path, data):
         json=data,
         headers=make_auth_header()
     )
-    check_status(response.status_code, path)
+    check_status(response, path)
     return response.json()
 
 
@@ -117,7 +119,7 @@ def put(path, data):
         json=data,
         headers=make_auth_header()
     )
-    check_status(response.status_code, path)
+    check_status(response, path)
     return response.json()
 
 
@@ -129,19 +131,23 @@ def delete(path):
         get_full_url(path),
         headers=make_auth_header()
     )
-    check_status(response.status_code, path)
+    check_status(response, path)
     return response.text
 
 
-def check_status(status_code, path):
+def check_status(request, path):
     """
     Raise an exception related to status code, if the status code does not match
     a success code.
     """
+    status_code = request.status_code
     if (status_code == 404):
         raise RouteNotFoundException(path)
     elif (status_code == 403):
         raise NotAllowedException(path)
+    elif (status_code == 400):
+        text = request.json().get("message", "No additional information")
+        raise ParameterException(path, text)
     elif (status_code == 405):
         raise MethodNotAllowedException(path)
     elif (status_code in [401, 422]):

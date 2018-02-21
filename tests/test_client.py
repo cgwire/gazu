@@ -183,12 +183,16 @@ class BaseFuncTestCase(ClientTestCase):
         pass
 
     def test_check_status(self):
+        class Request(object):
+            def __init__(self, status_code):
+                self.status_code = status_code
+
         self.assertRaises(
-            NotAuthenticatedException, client.check_status, 401, "/")
-        self.assertRaises(NotAllowedException, client.check_status, 403, "/")
-        self.assertRaises(RouteNotFoundException, client.check_status, 404, "/")
+            NotAuthenticatedException, client.check_status, Request(401), "/")
+        self.assertRaises(NotAllowedException, client.check_status, Request(403), "/")
+        self.assertRaises(RouteNotFoundException, client.check_status, Request(404), "/")
         self.assertRaises(
-            MethodNotAllowedException, client.check_status, 405, "/")
+            MethodNotAllowedException, client.check_status, Request(405), "/")
 
     def test_init_host(self):
         gazu.set_host("newhost")

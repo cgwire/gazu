@@ -93,13 +93,14 @@ def get_asset_type(asset_id):
     return client.fetch_one('asset-types', asset_id)
 
 
-def new_asset(project, asset_type, name, description=""):
+def new_asset(project, asset_type, name, description="", extra_data={}):
     """
     Create a new asset in the database.
     """
     data = {
         "name": name,
-        "description": description
+        "description": description,
+        "data": extra_data
     }
 
     return client.post("data/projects/%s/asset-types/%s/assets/new" % (
@@ -115,22 +116,38 @@ def update_asset(asset):
     return client.put('data/entities/%s' % asset["id"], asset)
 
 
-def update_asset_data(asset, data={}):
-    """
-    Update the data for the provided asset.
-    Keys not provided are not updated while update_assset() delete them
-    """
-    current_asset = get_asset(asset["id"])
-    updated_asset = {'id': current_asset['id'], 'data': current_asset['data']}
-    updated_asset['data'].update(data)
-    update_asset(updated_asset)
-
-
 def remove_asset(asset):
     """
     Remove given asset from database.
     """
     return client.delete("data/assets/%s" % asset["id"])
+
+
+def new_asset_type(name):
+    """
+    Create a new asset type in the database.
+    """
+    data = {
+        "name": name
+    }
+    return client.create("entity-types", data)
+
+
+def update_asset_type(asset_type):
+    """
+    Modify asset type name in the database.
+    """
+    data = {
+        "name": asset_type["name"]
+    }
+    return client.put("data/asset-types/%s" % asset_type["id"], data)
+
+
+def remove_asset_type(asset_type):
+    """
+    Remove given asset type from database.
+    """
+    return client.delete("data/asset-types/%s" % asset_type["id"])
 
 
 @cache

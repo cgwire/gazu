@@ -40,7 +40,9 @@ class PersonTestCase(unittest.TestCase):
                     }
                 ])
             )
+            print("yo")
             person = gazu.person.get_person_by_full_name("John Did")
+            print("ya")
             self.assertEquals(person["id"], "person-2")
 
     def test_get_person_by_desktop_login(self):

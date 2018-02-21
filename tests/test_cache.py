@@ -8,10 +8,6 @@ import gazu.project
 
 class CacheTestCase(unittest.TestCase):
 
-    def tearDown(self):
-        gazu.cache.clear_all()
-        gazu.cache.disable()
-
     def test_enable_disable(self):
         with requests_mock.mock() as mock:
             mock_open = mock.get(
@@ -48,6 +44,8 @@ class CacheTestCase(unittest.TestCase):
             gazu.project.all_open_projects()
             self.assertEquals(mock_open.call_count, 4)
             self.assertEquals(mock_all.call_count, 5)
+            gazu.project.all_open_projects.enable_cache()
+            gazu.project.all_open_projects.clear_cache()
 
     def test_max_size(self):
         with requests_mock.mock() as mock:
@@ -81,3 +79,4 @@ class CacheTestCase(unittest.TestCase):
             gazu.project.get_project("project-1")
             self.assertEquals(mock_3.call_count, 1)
             self.assertEquals(mock_1.call_count, 2)
+            gazu.cache.disable()
