@@ -68,6 +68,14 @@ def get_asset_type(asset_id):
     return client.fetch_one('asset-types', asset_id)
 
 
+@cache
+def get_asset_type_by_name(name):
+    """
+    Retrieve first asset matching given name.
+    """
+    return client.fetch_first("entity-types?name=%s" % name)
+
+
 def new_asset(project, asset_type, name, description="", extra_data={}):
     """
     Create a new asset in the database.
