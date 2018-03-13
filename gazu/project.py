@@ -36,8 +36,15 @@ def get_project_by_name(project_name):
     """
     Returns project corresponding to given name.
     """
-    result = client.fetch_all("projects?name=%s" % project_name)
-    return next(iter(result or []), None)
+    return client.fetch_first("projects?name=%s" % project_name)
+
+
+@cache
+def new_project(name):
+    data = {
+        "name": name
+    }
+    return client.create("projects", data)
 
 
 @deprecated
