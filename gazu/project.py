@@ -44,7 +44,10 @@ def new_project(name):
     data = {
         "name": name
     }
-    return client.create("projects", data)
+    project = get_project_by_name(name)
+    if project is None:
+        project = client.create("projects", data)
+    return project
 
 
 @deprecated
