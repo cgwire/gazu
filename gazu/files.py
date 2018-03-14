@@ -103,6 +103,14 @@ def get_output_file(output_file_id):
 
 
 @cache
+def get_output_file_by_path(path):
+    """
+    Return output file object corresponding to given path.
+    """
+    return client.fetch_first("output-files?path=%s" % path)
+
+
+@cache
 def all_output_files_for_entity(entity, output_type):
     """
     Retrieves all the outputs of a given entity (asset or shot)
@@ -134,6 +142,7 @@ def new_output_file(
     comment,
     output_type=None,
     revision=0,
+    representation="",
     sep="/"
 ):
     path = "data/working-files/%s/output-files/new" % working_file["id"]
@@ -142,6 +151,7 @@ def new_output_file(
         "person_id": person["id"],
         "comment": comment,
         "revision": revision,
+        "representation": representation,
         "separator": sep
     }
     if output_type is not None:
@@ -239,6 +249,7 @@ def new_entity_output_file(
     person=None,
     revision=0,
     mode="output",
+    representation="",
     sep="/"
 ):
     """
@@ -251,6 +262,8 @@ def new_entity_output_file(
         "working_file_id": working_file["id"],
         "comment": comment,
         "revision": revision,
+        "representation": representation,
+        "name": name,
         "sep": sep
     }
 
@@ -422,6 +435,7 @@ def build_entity_output_file_path(
     task_type,
     name="main",
     mode="output",
+    representation="",
     revision=0,
     sep="/"
 ):
@@ -434,6 +448,7 @@ def build_entity_output_file_path(
         "mode": mode,
         "name": name,
         "revision": revision,
+        "representation": representation,
         "separator": sep
     }
     path = "data/entities/%s/output-file-path" % entity["id"]
@@ -452,6 +467,7 @@ def build_asset_instance_output_file_path(
     task_type,
     name="main",
     mode="output",
+    representation="",
     version=1,
     sep="/"
 ):
@@ -461,6 +477,7 @@ def build_asset_instance_output_file_path(
         "mode": mode,
         "name": name,
         "version": version,
+        "representation": representation,
         "sep": sep
     }
     path = "data/asset-instances/%s/output-file-path" % asset_instance["id"]
