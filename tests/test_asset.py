@@ -135,12 +135,18 @@ class AssetTestCase(unittest.TestCase):
 
     def test_create_asset(self):
         with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url(
+                    "data/entities?project_id=project-id&name=Car"
+                ),
+                text=json.dumps([])
+            )
             mock.post(
                 gazu.client.get_full_url(
                     "data/projects/project-id/asset-types/"
                     "asset-type-id/assets/new"
                 ),
-                text='{"name": "Car"}'
+                text=json.dumps({"name": "Car"})
             )
             project = {"id": "project-id"}
             asset_type = {"id": "asset-type-id"}

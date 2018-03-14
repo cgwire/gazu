@@ -90,33 +90,19 @@ class TaskTestCase(unittest.TestCase):
             task_type = task_types[0]
             self.assertEquals(task_type["name"], "Modeling")
 
-    def test_get_task_by_task_type(self):
-        with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url(
-                    "data/entities/entity-1/task-types/type-1/tasks"
-                ),
-                text=json.dumps(
-                    [{"name": "Task 01", "project_id": "project-1"}]
-                )
-            )
-            test_task = gazu.task.get_task_by_task_type(
-                {"id": "entity-1"}, {"id": "type-1"}
-            )
-            self.assertEquals(test_task[0]["name"], "Task 01")
-
     def test_get_task_by_name(self):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/tasks?name=Modeling&entity_id=entity-1"
+                    "data/tasks?name=Task%2001&entity_id=entity-1&" +
+                    "task_type_id=modeling-1"
                 ),
                 text=json.dumps(
                     [{"name": "Task 01", "project_id": "project-1"}]
                 )
             )
             test_task = gazu.task.get_task_by_name(
-                {"id": "entity-1"}, "Modeling"
+                {"id": "entity-1"}, {"id": "modeling-1"}, "Task 01"
             )
             self.assertEquals(test_task["name"], "Task 01")
 
@@ -300,6 +286,13 @@ class TaskTestCase(unittest.TestCase):
     def test_new_task(self):
         with requests_mock.mock() as mock:
             result = {"id": "task-1"}
+            mock.get(
+                gazu.client.get_full_url(
+                    "data/tasks?name=main&entity_id=asset-1" +
+                    "&task_type_id=task-type-1"
+                ),
+                text=json.dumps([])
+            )
             mock.get(
                 gazu.client.get_full_url("data/task-status?name=Todo"),
                 text=json.dumps([{"id": "task-status-1"}])
