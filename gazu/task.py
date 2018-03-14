@@ -1,3 +1,5 @@
+from deprecated import deprecated
+
 from . import client
 from .sorting import sort_by_name
 
@@ -14,7 +16,7 @@ def all_task_types():
 
 
 @cache
-def all_for_shot(shot):
+def all_tasks_for_shot(shot):
     """
     Return tasks linked to given shot.
     """
@@ -23,7 +25,7 @@ def all_for_shot(shot):
 
 
 @cache
-def all_for_sequence(sequence):
+def all_tasks_for_sequence(sequence):
     """
     Return tasks linked to given sequence.
     """
@@ -32,7 +34,7 @@ def all_for_sequence(sequence):
 
 
 @cache
-def all_for_scene(scene):
+def all_tasks_for_scene(scene):
     """
     Return tasks linked to given scene.
     """
@@ -41,7 +43,7 @@ def all_for_scene(scene):
 
 
 @cache
-def all_for_asset(asset):
+def all_tasks_for_asset(asset):
     """
     Retrieve all tasks directly linked to given asset.
     """
@@ -55,6 +57,15 @@ def all_task_types_for_shot(shot):
     Return task types of task linked to given shot.
     """
     task_types = client.fetch_all("shots/%s/task-types" % shot['id'])
+    return sort_by_name(task_types)
+
+
+@cache
+def task_types_for_asset(asset):
+    """
+    Return all task types of tasks related to given asset.
+    """
+    task_types = client.fetch_all("assets/%s/task-types" % asset['id'])
     return sort_by_name(task_types)
 
 
@@ -77,19 +88,18 @@ def all_task_types_for_sequence(sequence):
 
 
 @cache
-def get_task_by_task_type(entity, task_type):
+def all_tasks_for_entity_and_task_type(entity, task_type):
     """
     Find a task by looking for it through its task type and its entity.
     """
     task_type_id = task_type["id"]
     entity_id = entity["id"]
-    tasks = client.fetch_all(
+    return client.fetch_all(
         "entities/%s/task-types/%s/tasks" % (
             entity_id,
             task_type_id
         )
     )
-    return tasks
 
 
 @cache
@@ -107,18 +117,18 @@ def all_tasks_for_status(project, task_type, task_status):
 
 
 @cache
-def get_task_by_name(entity, name):
+def get_task_by_name(entity, task_type, name):
     """
     Find a task by looking for it through its name and its entity.
     """
-    entity_id = entity["id"]
-    tasks = client.fetch_all(
-        "tasks?name={name}&entity_id={entity_id}".format(
+    return client.fetch_first(
+        "tasks?name={name}&entity_id={entity_id}&task_type_id={task_type_id}"
+        .format(
             name=name,
-            entity_id=entity_id
+            task_type_id=task_type["id"],
+            entity_id=entity["id"]
         )
     )
-    return tasks[0] if tasks else None
 
 
 @cache
@@ -150,12 +160,11 @@ def get_task_status(task):
     """
     Retrieves status object corresponding to status set on given task.
     """
-    task_status = client.fetch_all(
+    return client.fetch_first(
         "task-status?id={task_status_id}".format(
             task_status_id=task['task_status_id']
         )
     )
-    return task_status[0] if task_status else None
 
 
 @cache
@@ -179,7 +188,8 @@ def new_task(
     task_type,
     name="main",
     task_status=None,
-    assigner=None
+    assigner=None,
+    assignees=None
 ):
     """
     Create a new task for given entity and task type. It requires a task status
@@ -199,7 +209,15 @@ def new_task(
     if assigner is not None:
         data["assigner_id"] = assigner["id"]
 
-    return client.post("data/tasks", data)
+    if assignees is not None:
+        data["assignees"] = [person["id"] for person in assignees]
+    else:
+        data["assignees"] = []
+
+    task = get_task_by_name(entity, task_type, name)
+    if task is None:
+        task = client.post("data/tasks", data)
+    return task
 
 
 def start_task(task):
@@ -274,3 +292,23 @@ def add_time_spent(task, person, date, duration):
         person["id"]
     )
     return client.post(path, {"duration": duration})
+
+
+@deprecated
+def all_for_shot(shot):
+    return all_tasks_for_shot(shot)
+
+
+@deprecated
+def all_for_sequence(sequence):
+    return all_tasks_for_sequence(sequence)
+
+
+@deprecated
+def all_for_scene(scene):
+    return all_tasks_for_scene(scene)
+
+
+@deprecated
+def all_for_asset(asset):
+    return all_tasks_for_asset(asset)

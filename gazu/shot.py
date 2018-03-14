@@ -1,3 +1,5 @@
+from deprecated import deprecated
+
 from . import client
 
 from .sorting import sort_by_name
@@ -6,20 +8,17 @@ from .cache import cache
 
 
 @cache
-def all(project=None):
+def all_shots_for_project(project):
     """
     Retrieve all shots from database or for given project.
     """
-    if project is not None:
-        shots = client.fetch_all("projects/%s/shots" % project["id"])
-    else:
-        shots = client.fetch_all("shots/all")
+    shots = client.fetch_all("projects/%s/shots" % project["id"])
 
     return sort_by_name(shots)
 
 
 @cache
-def all_for_sequence(sequence):
+def all_shots_for_sequence(sequence):
     """
     Retrieve all shots which are children from given sequence.
     """
@@ -49,15 +48,11 @@ def all_sequences_for_episode(episode):
 
 
 @cache
-def all_episodes(project=None):
+def all_episodes_for_project(project):
     """
     Retrieve all episodes from database or for given project.
     """
-    if project is not None:
-        episodes = client.fetch_all("projects/%s/episodes" % project["id"])
-    else:
-        episodes = client.fetch_all("episodes")
-
+    episodes = client.fetch_all("projects/%s/episodes" % project["id"])
     return sort_by_name(episodes)
 
 
@@ -74,11 +69,10 @@ def get_episode_by_name(project, episode_name):
     """
     Returns episode corresponding to given name and project.
     """
-    result = client.fetch_all("entities?project_id=%s&name=%s" % (
+    return client.fetch_first("entities?project_id=%s&name=%s" % (
         project["id"],
         episode_name
     ))
-    return next(iter(result or []), None)
 
 
 @cache
@@ -90,15 +84,16 @@ def get_sequence(sequence_id):
 
 
 @cache
-def get_sequence_by_name(project, sequence_name):
+def get_sequence_by_name(project, sequence_name, episode=None):
     """
     Returns sequence corresponding to given name and project.
     """
-    result = client.fetch_all("entities?project_id=%s&name=%s" % (
-        project["id"],
-        sequence_name
-    ))
-    return next(iter(result or []), None)
+    if episode is None:
+        path = "entities?project_id=%s&name=%s" % (project["id"], sequence_name)
+    else:
+        path = "entities?parent_id=%s&name=%s" % (episode["id"], sequence_name)
+
+    return client.fetch_first(path)
 
 
 @cache
@@ -114,21 +109,10 @@ def get_shot_by_name(sequence, shot_name):
     """
     Returns shot corresponding to given sequence and name.
     """
-    result = client.fetch_all("entities?parent_id=%s&name=%s" % (
+    return client.fetch_first("entities?parent_id=%s&name=%s" % (
         sequence["id"],
         shot_name
     ))
-    return next(iter(result or []), None)
-
-
-def new_episode(project, name):
-    """
-    Create an episode for given project.
-    """
-    shot = {
-        "name": name
-    }
-    return client.post('data/projects/%s/episodes' % project["id"], shot)
 
 
 def new_sequence(
@@ -139,11 +123,15 @@ def new_sequence(
     """
     Create a sequence for given episode.
     """
-    sequence = {
+    data = {
         "name": name,
         "episode_id": episode["id"]
     }
-    return client.post('data/projects/%s/sequences' % project["id"], sequence)
+    sequence = get_sequence_by_name(project, name, episode=episode)
+    if sequence is None:
+        return client.post('data/projects/%s/sequences' % project["id"], data)
+    else:
+        return sequence
 
 
 def new_shot(
@@ -163,13 +151,17 @@ def new_shot(
     if frame_out is not None:
         data["frame_out"] = frame_out
 
-    shot = {
+    data = {
         "name": name,
         "data": data,
         "sequence_id": sequence["id"]
     }
 
-    return client.post('data/projects/%s/shots' % project["id"], shot)
+    shot = get_shot_by_name(sequence, name)
+    if shot is None:
+        return client.post('data/projects/%s/shots' % project["id"], data)
+    else:
+        return shot
 
 
 def update_shot(shot):
@@ -188,6 +180,20 @@ def update_shot_data(shot, data={}):
     updated_shot = {'id': current_shot['id'], 'data': current_shot['data']}
     updated_shot['data'].update(data)
     update_shot(updated_shot)
+
+
+def new_episode(project, name):
+    """
+    Create an episode for given project.
+    """
+    data = {
+        "name": name
+    }
+    episode = get_episode_by_name(project, name)
+    if episode is None:
+        return client.post('data/projects/%s/episodes' % project["id"], data)
+    else:
+        return episode
 
 
 @cache
@@ -209,3 +215,13 @@ def new_shot_asset_instance(shot, asset, description=""):
         "description": description
     }
     return client.post("data/shots/%s/asset-instances" % shot["id"], data)
+
+
+@deprecated
+def all(project=None):
+    return all_shots_for_project(project)
+
+
+@deprecated
+def all_for_sequence(project=None):
+    return all_shots_for_sequence(project)
