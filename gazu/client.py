@@ -153,6 +153,7 @@ def check_status(request, path):
     elif (status_code in [401, 422]):
         raise NotAuthenticatedException(path)
     elif (status_code in [500, 502]):
+        print(request.text)
         raise ServerErrorException(path)
     return status_code
 
