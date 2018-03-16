@@ -64,7 +64,7 @@ def get_scene_by_name(sequence, scene_name):
     """
     Returns scene corresponding to given sequence and name.
     """
-    result = client.fetch_all("entities?parent_id=%s&name=%s" % (
+    result = client.fetch_all("scenes/all?parent_id=%s&name=%s" % (
         sequence["id"],
         scene_name
     ))

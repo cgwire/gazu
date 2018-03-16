@@ -48,9 +48,11 @@ def get_asset_by_name(project, name, asset_type=None):
     Retrieve first asset matching given name.
     """
     if asset_type is None:
-        path = "entities?project_id=%s&name=%s" % (project["id"], name)
+        path = "assets/all?project_id=%s&name=%s" % (project["id"], name)
     else:
-        path = "entities?project_id=%s&name=%s" % (project["id"], name)
+        path = "assets/all?project_id=%s&name=%s&entity_type_id=%s" % (
+            project["id"], name, asset_type["id"]
+        )
     return client.fetch_first(path)
 
 
@@ -88,11 +90,13 @@ def new_asset(project, asset_type, name, description="", extra_data={}):
         "data": extra_data
     }
 
-    get_asset_by_name(project, name, asset_type)
-    return client.post("data/projects/%s/asset-types/%s/assets/new" % (
-        project["id"],
-        asset_type["id"]
-    ), data)
+    asset = get_asset_by_name(project, name, asset_type)
+    if asset is None:
+        asset = client.post("data/projects/%s/asset-types/%s/assets/new" % (
+            project["id"],
+            asset_type["id"]
+        ), data)
+    return asset
 
 
 def update_asset(asset):

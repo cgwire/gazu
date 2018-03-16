@@ -144,7 +144,7 @@ class ShotTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/entities?parent_id=sequence-1&name=Shot01"
+                    "data/shots/all?parent_id=sequence-1&name=Shot01"
                 ),
                 text=json.dumps([
                     {"name": "Shot01", "project_id": "project-1"}
@@ -158,7 +158,7 @@ class ShotTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/entities?project_id=project-1&name=Sequence01"
+                    "data/sequences?project_id=project-1&name=Sequence01"
                 ),
                 text=json.dumps([
                     {"name": "Sequence01", "project_id": "project-1"}
@@ -172,7 +172,7 @@ class ShotTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/entities?project_id=project-1&name=Episode 01"
+                    "data/episodes?project_id=project-1&name=Episode 01"
                 ),
                 text=json.dumps([])
             )
@@ -190,7 +190,7 @@ class ShotTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/entities?parent_id=episode-1&name=Sequence 01"
+                    "data/sequences?parent_id=episode-1&name=Sequence 01"
                 ),
                 text=json.dumps([])
             )
@@ -212,7 +212,7 @@ class ShotTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/entities?parent_id=sequence-1&name=Shot 01"
+                    "data/shots/all?parent_id=sequence-1&name=Shot 01"
                 ),
                 text=json.dumps([])
             )
