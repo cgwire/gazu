@@ -224,7 +224,7 @@ def get_next_entity_output_revision(
 
 
 def get_next_asset_instance_output_revision(
-    entity,
+    asset_instance,
     output_type,
     task_type,
     name="master"
@@ -232,7 +232,8 @@ def get_next_asset_instance_output_revision(
     """
     Generate next expected output revision for given entity.
     """
-    path = "data/asset-instances/%s/output-files/next-revision" % entity["id"]
+    path = "data/asset-instances/%s" % asset_instance["id"] + \
+           "/output-files/next-revision"
     data = {
         "name": name,
         "output_type_id": output_type["id"],
