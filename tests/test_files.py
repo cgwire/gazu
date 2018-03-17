@@ -407,6 +407,22 @@ class FilesTestCase(unittest.TestCase):
                 {"id": "asset-1"},
                 {"id": "output-type-1"},
             )
+
+            path = "/data/entities/asset-1/output-types/utput-type-1/" \
+                   "output-files?representation=obj"
+            mock.get(
+                gazu.client.get_full_url(path),
+                text=json.dumps([{
+                    "id": "output-file-01",
+                    "name": "main",
+                    "representation": "obj"
+                }])
+            )
+            output_type = gazu.files.all_output_files_for_entity(
+                {"id": "asset-1"},
+                {"id": "output-type-1"},
+                representation="obj"
+            )
             self.assertEquals(output_type[0]["name"], "main")
 
     def test_get_output_files_for_asset_instance(self):

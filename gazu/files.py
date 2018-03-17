@@ -111,20 +111,31 @@ def get_output_file_by_path(path):
 
 
 @cache
-def all_output_files_for_entity(entity, output_type):
+def all_output_files_for_entity(
+    entity,
+    output_type,
+    representation=None
+):
     """
     Retrieves all the outputs of a given entity (asset or shot)
     and output type.
+    A representation can be given to filter output files on this parameter.
     """
     path = "data/entities/%s/output-types/%s/output-files" % (
         entity["id"],
         output_type["id"]
     )
+    if representation is not None:
+        path += "?representation=%s" % representation
     return client.get(path)
 
 
 @cache
-def all_output_files_for_asset_instance(asset_instance, output_type):
+def all_output_files_for_asset_instance(
+    asset_instance,
+    output_type,
+    representation=None
+):
     """
     Retrieves all the outputs of a given asset_instance (asset or shot)
     and output type.
@@ -133,6 +144,8 @@ def all_output_files_for_asset_instance(asset_instance, output_type):
         asset_instance["id"],
         output_type["id"]
     )
+    if representation is not None:
+        path += "?representation=%s" % representation
     return client.get(path)
 
 
@@ -248,6 +261,7 @@ def new_entity_output_file(
     name="main",
     person=None,
     revision=0,
+    nb_elements=1,
     mode="output",
     representation="",
     sep="/"
@@ -263,6 +277,7 @@ def new_entity_output_file(
         "comment": comment,
         "revision": revision,
         "representation": representation,
+        "nb_elements": nb_elements,
         "name": name,
         "sep": sep
     }
@@ -283,6 +298,7 @@ def new_asset_instance_output_file(
     person=None,
     name="master",
     revision=0,
+    nb_elements=1,
     mode="output",
     sep="/"
 ):
@@ -297,6 +313,7 @@ def new_asset_instance_output_file(
         "comment": comment,
         "name": name,
         "revision": revision,
+        "nb_elements": nb_elements,
         "representation": representation,
         "sep": sep
     }
@@ -437,6 +454,7 @@ def build_entity_output_file_path(
     mode="output",
     representation="",
     revision=0,
+    nb_elements=1,
     sep="/"
 ):
     """
@@ -468,7 +486,8 @@ def build_asset_instance_output_file_path(
     name="main",
     mode="output",
     representation="",
-    version=1,
+    revision=0,
+    nb_elements=1,
     sep="/"
 ):
     data = {
@@ -476,7 +495,8 @@ def build_asset_instance_output_file_path(
         "output_type_id": output_type["id"],
         "mode": mode,
         "name": name,
-        "version": version,
+        "revision": revision,
+        "nb_elements": nb_elements,
         "representation": representation,
         "sep": sep
     }
