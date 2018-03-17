@@ -8,6 +8,17 @@ from .cache import cache
 
 
 @cache
+def all_assets_for_open_projects():
+    """
+    Retrieve all assets stored in the database or for open projects.
+    """
+    all_assets = []
+    for project in pipeline_project.all_open_projects():
+        all_assets.extend(pipeline_asset.all_assets_for_project(project))
+    return sort_by_name(all_assets)
+
+
+@cache
 def all_assets_for_project(project):
     """
     Retrieve all assets stored in the database or for given project.
@@ -48,9 +59,11 @@ def get_asset_by_name(project, name, asset_type=None):
     Retrieve first asset matching given name.
     """
     if asset_type is None:
-        path = "entities?project_id=%s&name=%s" % (project["id"], name)
+        path = "assets/all?project_id=%s&name=%s" % (project["id"], name)
     else:
-        path = "entities?project_id=%s&name=%s" % (project["id"], name)
+        path = "assets/all?project_id=%s&name=%s&entity_type_id=%s" % (
+            project["id"], name, asset_type["id"]
+        )
     return client.fetch_first(path)
 
 
@@ -60,22 +73,6 @@ def get_asset(asset_id):
     Retrieve given asset.
     """
     return client.fetch_one('assets', asset_id)
-
-
-@cache
-def get_asset_type(asset_id):
-    """
-    Retrieve given asset type.
-    """
-    return client.fetch_one('asset-types', asset_id)
-
-
-@cache
-def get_asset_type_by_name(name):
-    """
-    Retrieve first asset matching given name.
-    """
-    return client.fetch_first("entity-types?name=%s" % name)
 
 
 def new_asset(project, asset_type, name, description="", extra_data={}):
@@ -88,11 +85,13 @@ def new_asset(project, asset_type, name, description="", extra_data={}):
         "data": extra_data
     }
 
-    get_asset_by_name(project, name, asset_type)
-    return client.post("data/projects/%s/asset-types/%s/assets/new" % (
-        project["id"],
-        asset_type["id"]
-    ), data)
+    asset = get_asset_by_name(project, name, asset_type)
+    if asset is None:
+        asset = client.post("data/projects/%s/asset-types/%s/assets/new" % (
+            project["id"],
+            asset_type["id"]
+        ), data)
+    return asset
 
 
 def update_asset(asset):
@@ -170,6 +169,14 @@ def get_asset_type(asset_id):
     Retrieve given asset type.
     """
     return client.fetch_one('asset-types', asset_id)
+
+
+@cache
+def get_asset_type_by_name(name):
+    """
+    Retrieve first asset matching given name.
+    """
+    return client.fetch_first("entity-types?name=%s" % name)
 
 
 @cache

@@ -21,7 +21,7 @@ class SceneTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/entities?parent_id=sequence-1&name=Scene01"
+                    "data/scenes/all?parent_id=sequence-1&name=Scene01"
                 ),
                 text=json.dumps([
                     {"name": "Scene01", "project_id": "project-1"}

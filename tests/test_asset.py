@@ -114,7 +114,7 @@ class AssetTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/entities?project_id=project-1&name=test"
+                    "data/assets/all?project_id=project-1&name=test"
                 ),
                 text=json.dumps([
                     {"name": "Asset 01", "project_id": "project-1"}
@@ -137,7 +137,7 @@ class AssetTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/entities?project_id=project-id&name=Car"
+                    "data/assets/all?project_id=project-id&name=Car"
                 ),
                 text=json.dumps([])
             )

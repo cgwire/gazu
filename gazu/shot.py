@@ -69,7 +69,7 @@ def get_episode_by_name(project, episode_name):
     """
     Returns episode corresponding to given name and project.
     """
-    return client.fetch_first("entities?project_id=%s&name=%s" % (
+    return client.fetch_first("episodes?project_id=%s&name=%s" % (
         project["id"],
         episode_name
     ))
@@ -89,9 +89,9 @@ def get_sequence_by_name(project, sequence_name, episode=None):
     Returns sequence corresponding to given name and project.
     """
     if episode is None:
-        path = "entities?project_id=%s&name=%s" % (project["id"], sequence_name)
+        path = "sequences?project_id=%s&name=%s" % (project["id"], sequence_name)
     else:
-        path = "entities?parent_id=%s&name=%s" % (episode["id"], sequence_name)
+        path = "sequences?parent_id=%s&name=%s" % (episode["id"], sequence_name)
 
     return client.fetch_first(path)
 
@@ -109,7 +109,7 @@ def get_shot_by_name(sequence, shot_name):
     """
     Returns shot corresponding to given sequence and name.
     """
-    return client.fetch_first("entities?parent_id=%s&name=%s" % (
+    return client.fetch_first("shots/all?parent_id=%s&name=%s" % (
         sequence["id"],
         shot_name
     ))
