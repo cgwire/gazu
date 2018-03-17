@@ -132,6 +132,14 @@ def get_task_by_name(entity, task_type, name):
 
 
 @cache
+def get_task_type(task_type_id):
+    """
+    Return task type object for given name.
+    """
+    return client.fetch_one("task-types", task_type_id)
+
+
+@cache
 def get_task_type_by_name(task_type_name):
     """
     Return task type object for given name.
