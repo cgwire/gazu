@@ -8,6 +8,17 @@ from .cache import cache
 
 
 @cache
+def all_assets_for_open_projects():
+    """
+    Retrieve all assets stored in the database or for open projects.
+    """
+    all_assets = []
+    for project in pipeline_project.all_open_projects():
+        all_assets.extend(pipeline_asset.all_assets_for_project(project))
+    return sort_by_name(all_assets)
+
+
+@cache
 def all_assets_for_project(project):
     """
     Retrieve all assets stored in the database or for given project.
