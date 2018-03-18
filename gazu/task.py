@@ -52,6 +52,20 @@ def all_tasks_for_asset(asset):
 
 
 @cache
+def all_tasks_for_task_status(project, task_type, task_status):
+    """
+    Return all tasks set at given status for given project and task type.
+    """
+    return client.fetch_all(
+        "tasks?project_id=%s&task_type_id=%s&task_status_id=%s" % (
+            project["id"],
+            task_type["id"],
+            task_status["id"]
+        )
+    )
+
+
+@cache
 def all_task_types_for_shot(shot):
     """
     Return task types of task linked to given shot.
@@ -61,7 +75,7 @@ def all_task_types_for_shot(shot):
 
 
 @cache
-def task_types_for_asset(asset):
+def all_task_types_for_asset(asset):
     """
     Return all task types of tasks related to given asset.
     """
@@ -98,20 +112,6 @@ def all_tasks_for_entity_and_task_type(entity, task_type):
         "entities/%s/task-types/%s/tasks" % (
             entity_id,
             task_type_id
-        )
-    )
-
-
-@cache
-def all_tasks_for_status(project, task_type, task_status):
-    """
-    Return all tasks set at given status for given project and task type.
-    """
-    return client.fetch_all(
-        "tasks?project_id=%s&task_type_id=%s&task_status_id=%s" % (
-            project["id"],
-            task_type["id"],
-            task_status["id"]
         )
     )
 

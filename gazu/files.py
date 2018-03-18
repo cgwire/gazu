@@ -30,20 +30,6 @@ def get_software_by_name(software_name):
 
 
 @cache
-def get_output_types_for_entity(entity):
-    """
-    Return list of output types related to given entity.
-    """
-    path = "data/entities/%s/output-types" % entity["id"]
-    return client.get(path)
-
-
-@deprecated
-def get_entity_output_types(entity):
-    return get_output_types_for_entity(entity)
-
-
-@cache
 def all_output_types():
     """
     Return all output types list in database.
@@ -171,16 +157,6 @@ def new_output_file(
         data["output_type_id"] = output_type["id"],
 
     return client.post(path, data)
-
-
-@cache
-def get_last_output_files(entity):
-    """
-    Generate a dict of last output files. One working file entry for each
-    output file type.
-    """
-    path = "data/entities/%s/last-output-files" % entity["id"]
-    return client.get(path)
 
 
 @cache
@@ -508,3 +484,8 @@ def build_asset_instance_output_file_path(
         sep,
         result["file_name"].replace(" ", "_")
     )
+
+
+@deprecated
+def get_entity_output_types(entity):
+    return all_output_types_for_entity(entity)
