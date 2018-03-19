@@ -128,15 +128,15 @@ assets = gazu.asset.new_asset(
 )
 
 asset = gazu.asset.update_asset(new_values_dict)
-assets = gazu.asset.remove_asset(asset_dict)
+gazu.asset.remove_asset(asset_dict)
 ```
 
 Create/update/delete an asset type:
 
 ```python
-assets = gazu.asset.new_asset_type("my new asset_type")
-asset = gazu.asset.update_asset_type(new_values_dict)
-assets = gazu.asset.remove_asset_type(asset_dict)
+asset_types = gazu.asset.new_asset_type("my new asset_type")
+asset_type = gazu.asset.update_asset_type(new_values_dict)
+gazu.asset.remove_asset_type(asset_dict)
 ```
 
 Asset instance helpers:
@@ -180,16 +180,16 @@ shot = gazu.shot.get_shot_by_name(sequence_dict, "SH01")
 Retrieve given sequence:
 
 ```python
-shot = gazu.shot.get_sequence(shot_id)
-shot = gazu.shot.get_sequence_by_name(
+sequence = gazu.shot.get_sequence(shot_id)
+sequence = gazu.shot.get_sequence_by_name(
     project_dict, "SE01", episode=episode_dict)
 ```
 
 Retrieve given episode:
 
 ```python
-shot = gazu.shot.get_episode(shot_id)
-shot = gazu.shot.get_episode_by_name(project_dict, "SE01")
+episode = gazu.shot.get_episode(shot_id)
+episode = gazu.shot.get_episode_by_name(project_dict, "SE01")
 ```
 
 Create shot, sequence and episode:
@@ -241,11 +241,11 @@ tasks = gazu.task.all_tasks_for_task_status(
 Retrieve all task types or task types for shot or sequence:
 
 ```python
-tasks = gazu.task.all_task_types()
-tasks = gazu.task.all_task_types_for_shot(asset)
-tasks = gazu.task.all_task_types_for_shot(shot)
-tasks = gazu.task.all_task_types_for_scene(scene)
-tasks = gazu.task.all_task_types_for_sequence(sequence)
+task_types = gazu.task.all_task_types()
+task_types = gazu.task.all_task_types_for_shot(asset)
+task_types = gazu.task.all_task_types_for_shot(shot)
+task_types = gazu.task.all_task_types_for_scene(scene)
+task_types = gazu.task.all_task_types_for_sequence(sequence)
 ```
 
 Retrieve a given task:
@@ -258,8 +258,8 @@ task = gazu.task.get_task_by_name(asset, "main")
 Retrieve a given task type:
 
 ```python
-task_status = gazu.shot.get_task_type(task_status_id)
-task_status = gazu.shot.get_task_type_by_name(task_status_name)
+task_type = gazu.shot.get_task_type(task_status_id)
+task_type = gazu.shot.get_task_type_by_name(task_status_name)
 ```
 
 Retrieve a given task status:
@@ -320,8 +320,8 @@ softwares = gazu.files.all_softwares()
 Retrieve given software:
 
 ```python
-softwares = gazu.files.get_software(output_type_id)
-softwares = gazu.files.get_software_by_name("Maya")
+software = gazu.files.get_software(output_type_id)
+software = gazu.files.get_software_by_name("Maya")
 ```
 
 Retrieve given output file:
@@ -397,13 +397,13 @@ working_files = gazu.files.get_last_working_files(task)
 Get a given working file:
 
 ```python
-working_files = gazu.files.get_working_file(working_id)
+working_file = gazu.files.get_working_file(working_id)
 ```
 
 Get working files revision:
 
 ```python
-working_files = gazu.files.get_last_working_file_revision(
+working_file = gazu.files.get_last_working_file_revision(
     task_dict, 
     name="main"
 )
