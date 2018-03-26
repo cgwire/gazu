@@ -17,7 +17,7 @@ requires an up and running instance of Zou to run properly.
 
 |Build status|
 
-|Gitter badge|
+|Slackin badge|
 
 Quickstart
 ----------
@@ -80,7 +80,7 @@ Visit `cg-wire.com <https://cg-wire.com>`__ for more information.
 
 .. |Build status| image:: https://api.travis-ci.org/cgwire/gazu.svg?branch=master
    :target: https://travis-ci.org/cgwire/gazu
-.. |Gitter badge| image:: https://badges.gitter.im/cgwire/Lobby.png
-   :target: https://gitter.im/cgwire/Lobby
+.. |Slackin badge| image:: https://slack.cg-wire.com/badge.svg
+   :target: https://slack.cg-wire.com
 .. |CGWire Logo| image:: https://gazu.cg-wire.com/cgwire.png
    :target: https://cg-wire.com
