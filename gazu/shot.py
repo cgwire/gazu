@@ -197,7 +197,7 @@ def new_episode(project, name):
 
 
 @cache
-def get_asset_instances_for_shot(shot):
+def all_asset_instances_for_shot(shot):
     """
     Return the list of asset instances listed in a shot.
     """

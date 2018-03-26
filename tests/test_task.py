@@ -250,11 +250,11 @@ class TaskTestCase(unittest.TestCase):
                 text='[{"name": "Modeling"}]'
             )
             asset = {"id": "asset-01"}
-            asset_types = gazu.task.task_types_for_asset(asset)
+            asset_types = gazu.task.all_task_types_for_asset(asset)
             asset_instance = asset_types[0]
             self.assertEquals(asset_instance["name"], "Modeling")
 
-    def test_all_tasks_for_status(self):
+    def test_all_tasks_for_task_status(self):
         with requests_mock.mock() as mock:
             result = [{"id": "task-status-1"}, {"id": "task-status-2"}]
             mock.get(
@@ -268,7 +268,7 @@ class TaskTestCase(unittest.TestCase):
             project = {"id": "project-1"}
             task_type = {"id": "task-type-1"}
             task_status = {"id": "task-status-1"}
-            task_status = gazu.task.all_tasks_for_status(
+            task_status = gazu.task.all_tasks_for_task_status(
                 project, task_type, task_status
             )
             self.assertEquals(task_status, result)
