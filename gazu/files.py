@@ -305,10 +305,7 @@ def update_output_file(output_file, data):
     Update the data of given output file.
     """
     path = "/data/output-files/%s" % output_file['id']
-    return client.put(
-        path,
-        data
-    )
+    return client.put(path, data)
 
 
 @cache
@@ -374,6 +371,17 @@ def new_working_file(
         data["software_id"] = software["id"]
 
     return client.post("data/tasks/%s/working-files/new" % task["id"], data)
+
+
+def update_working_file(working_file):
+    """
+    Update the data of given working file.
+    """
+    path = "/data/working-files/%s" % working_file["id"]
+    data = {
+        "comment": working_file["comment"]
+    }
+    return client.put(path, data)
 
 
 def update_modification_date(working_file):
