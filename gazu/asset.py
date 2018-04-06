@@ -1,6 +1,7 @@
 from deprecated import deprecated
 
 from . import client
+from . import project as gazu_project
 
 from .sorting import sort_by_name
 
@@ -13,8 +14,8 @@ def all_assets_for_open_projects():
     Retrieve all assets stored in the database or for open projects.
     """
     all_assets = []
-    for project in pipeline_project.all_open_projects():
-        all_assets.extend(pipeline_asset.all_assets_for_project(project))
+    for project in gazu_project.all_open_projects():
+        all_assets.extend(all_assets_for_project(project))
     return sort_by_name(all_assets)
 
 
@@ -184,7 +185,23 @@ def get_asset_instance(asset_instance_id):
     """
     Retrieve given asset instance
     """
-    return client.fetch_one('asset-instances', asset_instance_id)
+    return client.fetch_one("asset-instances", asset_instance_id)
+
+
+def enable_asset_instance(asset_instance):
+    """
+    Set active flag of given asset instance to True.
+    """
+    data = {"active": True}
+    return client.put("asset-instances/%s" % asset_instance["id"], data)
+
+
+def disable_asset_instance(asset_instance):
+    """
+    Set active flag of given asset instance to False.
+    """
+    data = {"active": False}
+    return client.put("asset-instances/%s" % asset_instance["id"], data)
 
 
 @cache
