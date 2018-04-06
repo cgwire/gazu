@@ -117,19 +117,49 @@ class ShotTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/episodes/episode-1"),
-                text='{"name": "Shot 01", "project_id": "project-1"}'
+                text='{"name": "Episode 01", "project_id": "project-1"}'
             )
             episode = gazu.shot.get_episode('episode-1')
-            self.assertEquals(episode["name"], "Shot 01")
+            self.assertEquals(episode["name"], "Episode 01")
+
+    def test_get_episode_from_sequence(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url("data/episodes/episode-1"),
+                text=json.dumps(
+                    {"name": "Episode 01", "project_id": "project-1"}
+                )
+            )
+            episode = gazu.shot.get_episode_from_sequence({
+                "id": "shot-1",
+                "parent_id": "episode-1"
+            })
+            self.assertEquals(episode["name"], "Episode 01")
 
     def test_get_sequence(self):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/sequences/sequence-1"),
-                text='{"name": "Shot 01", "project_id": "project-1"}'
+                text=json.dumps(
+                    {"name": "Sequence 01", "project_id": "project-1"}
+                )
             )
-            sequence = gazu.shot.get_sequence('sequence-1')
-            self.assertEquals(sequence["name"], "Shot 01")
+            sequence = gazu.shot.get_sequence("sequence-1")
+            self.assertEquals(sequence["name"], "Sequence 01")
+
+    def test_get_sequence_from_shot(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url("data/sequences/sequence-1"),
+                text=json.dumps(
+                    {"name": "Sequence 01", "project_id": "project-1"}
+                )
+            )
+            sequence = gazu.shot.get_sequence_from_shot({
+                "id": "shot-1",
+                "parent_id": "sequence-1"
+            })
+            self.assertEquals(sequence["name"], "Sequence 01")
 
     def test_get_shot(self):
         with requests_mock.mock() as mock:

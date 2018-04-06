@@ -76,6 +76,14 @@ def get_episode_by_name(project, episode_name):
 
 
 @cache
+def get_episode_from_sequence(sequence):
+    """
+    Return episode which is parent of given sequence.
+    """
+    return get_episode(sequence["parent_id"])
+
+
+@cache
 def get_sequence(sequence_id):
     """
     Return sequence corresponding to given sequence ID.
@@ -89,11 +97,21 @@ def get_sequence_by_name(project, sequence_name, episode=None):
     Returns sequence corresponding to given name and project.
     """
     if episode is None:
-        path = "sequences?project_id=%s&name=%s" % (project["id"], sequence_name)
+        path = "sequences?project_id=%s&name=%s" % (
+            project["id"],
+            sequence_name
+        )
     else:
         path = "sequences?parent_id=%s&name=%s" % (episode["id"], sequence_name)
-
     return client.fetch_first(path)
+
+
+@cache
+def get_sequence_from_shot(shot):
+    """
+    Return sequence which is parent of given shot.
+    """
+    return get_sequence(shot["parent_id"])
 
 
 @cache
