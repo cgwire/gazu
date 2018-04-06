@@ -144,9 +144,7 @@ def get_task_type_by_name(task_type_name):
     """
     Return task type object for given name.
     """
-    task_types = client.fetch_all("task-types")
-    task_types = [x for x in task_types if x["name"] == task_type_name]
-    return task_types[0] if task_types else None
+    return client.fetch_first("task-types?name=%s" % task_type_name)
 
 
 @cache
