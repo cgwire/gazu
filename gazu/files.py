@@ -300,12 +300,12 @@ def new_asset_instance_output_file(
     return client.post(path, data)
 
 
-def update_output_file(output_file, data):
+def update_output_file(output_file):
     """
     Update the data of given output file.
     """
-    path = "/data/output-files/%s" % output_file['id']
-    return client.put(path, data)
+    path = "/data/output-files/%s" % output_file["id"]
+    return client.put(path, output_file)
 
 
 @cache
