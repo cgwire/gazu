@@ -18,5 +18,17 @@ class NotAuthenticatedException(Exception):
     pass
 
 
+class NotAllowedException(Exception):
+    pass
+
+
+class MethodNotAllowedException(Exception):
+    pass
+
+
 class AuthFailedException(Exception):
+    pass
+
+
+class ParameterException(Exception):
     pass
