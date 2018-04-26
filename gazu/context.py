@@ -134,4 +134,4 @@ def all_episodes_for_project(project, user_context=False):
     if user_context:
         return gazu_user.all_episodes_for_project(project)
     else:
-        return gazu_shot.all_episodes(project)
+        return gazu_shot.all_episodes_for_project(project)
