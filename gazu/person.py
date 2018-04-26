@@ -44,6 +44,14 @@ def get_simple_person_list():
     return sort_by_name(client.get("auth/person-list"))
 
 
+def get_presence_log(year, month):
+    """
+    Return the presence log table for given month.
+    """
+    path = "data/persons/presence-logs/%s-%s" % (year, str(month).zfill(2))
+    return client.get(path, json_response=False)
+
+
 @deprecated
 def all():
     return all_persons

@@ -133,6 +133,6 @@ def log_desktop_session_log_in():
     """
     Add a log entry to mention that the user logged in his computer.
     """
-    path = "/data/user/login-desktop-logs"
+    path = "/data/user/desktop-login-logs"
     data = {"date": datetime.datetime.now().isoformat()}
     return client.post(path, data)
