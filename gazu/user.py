@@ -15,6 +15,14 @@ def all_open_projects():
     projects = client.fetch_all("user/projects/open")
     return sort_by_name(projects)
 
+@cache
+def all_episodes_for_project(project):
+    """
+    Return the list of episodes for which the user has a task.
+    """
+    path = "user/projects/%s/episodes" % project["id"]
+    asset_types = client.fetch_all(path)
+    return sort_by_name(asset_types)
 
 @cache
 def all_asset_types_for_project(project):
