@@ -44,7 +44,7 @@ def all_assets_for_asset_type_and_project(project, asset_type, user_context=Fals
     if user_context:
         return gazu_user.all_assets_for_asset_type_and_project(project, asset_type)
     else:
-        return gazu_asset.all_for_project_and_type(project, asset_type)
+        return gazu_asset.all_assets_for_project_and_type(project, asset_type)
 
 
 def all_task_types_for_asset(asset, user_context=False):
@@ -104,7 +104,7 @@ def all_shots_for_sequence(sequence, user_context=False):
     if user_context:
         return gazu_user.all_shots_for_sequence(sequence)
     else:
-        return gazu_shot.all_for_sequence(sequence)
+        return gazu_shot.all_shots_for_sequence(sequence)
 
 
 def all_scenes_for_sequence(sequence, user_context=False):
