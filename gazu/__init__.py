@@ -1,14 +1,23 @@
 from . import client
+from . import cache
+
+from . import asset
+from . import context
+from . import entity
+from . import files
 from . import project
 from . import person
-from . import task
 from . import shot
-from . import asset
-from . import files
+from . import task
+from . import user
 
 from .exception import AuthFailedException
 
-__version__ = '0.3.0'
+__version__ = '0.5.0'
+
+
+def get_host():
+    return client.get_host()
 
 
 def set_host(url):
@@ -24,3 +33,4 @@ def log_in(email, password):
         raise AuthFailedException
     else:
         client.set_tokens(tokens)
+    return tokens

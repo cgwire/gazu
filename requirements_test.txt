@@ -1,3 +1,2 @@
-requests_mock
 pytest
-pytest-cov
+requests_mock
