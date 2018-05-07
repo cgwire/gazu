@@ -106,7 +106,7 @@ Get a given asset:
 
 ```python
 asset = gazu.asset.get_asset(asset_id)
-asset = gazu.asset.get_asset_by_name(asset_name)
+asset = gazu.asset.get_asset_by_name(project_dict, asset_name)
 ```
 
 Get a given asset type:
@@ -251,8 +251,7 @@ task_types = gazu.task.all_task_types_for_sequence(sequence)
 Retrieve a given task:
 
 ```python
-task = gazu.shot.get_task_by_task_type(asset, task_type)
-task = gazu.task.get_task_by_name(asset, "main")
+task = gazu.task.get_task_by_name(asset, task_type, "main")
 ```
 
 Retrieve a given task type:

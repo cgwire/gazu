@@ -1,2 +1,7 @@
 site_name: Gazu (Client for CGWire API)
 theme: readthedocs
+
+
+markdown_extensions:
+    - admonition
+    - def_list
