@@ -1,5 +1,7 @@
 from deprecated import deprecated
 
+from .helpers import normalize_model_parameter
+
 from . import client
 from . import project as gazu_project
 
@@ -24,6 +26,8 @@ def all_assets_for_project(project):
     """
     Retrieve all assets stored in the database or for given project.
     """
+    project = normalize_model_parameter(project)
+
     if project is None:
         return sort_by_name(client.fetch_all("assets/all"))
     else:
@@ -37,6 +41,7 @@ def all_assets_for_shot(shot):
     """
     Retrieve all assets casted in given shot.
     """
+    shot = normalize_model_parameter(shot)
     return sort_by_name(client.fetch_all("shots/%s/assets" % shot["id"]))
 
 
@@ -45,6 +50,9 @@ def all_assets_for_project_and_type(project, asset_type):
     """
     Retrieve all assets for given project and given asset type.
     """
+    project = normalize_model_parameter(project)
+    asset_type = normalize_model_parameter(asset_type)
+
     project_id = project["id"]
     asset_type_id = asset_type["id"]
     path = "projects/{project_id}/asset-types/{asset_type_id}/assets"
@@ -59,9 +67,12 @@ def get_asset_by_name(project, name, asset_type=None):
     """
     Retrieve first asset matching given name.
     """
+    project = normalize_model_parameter(project)
+
     if asset_type is None:
         path = "assets/all?project_id=%s&name=%s" % (project["id"], name)
     else:
+        asset_type = normalize_model_parameter(asset_type)
         path = "assets/all?project_id=%s&name=%s&entity_type_id=%s" % (
             project["id"], name, asset_type["id"]
         )
@@ -80,6 +91,9 @@ def new_asset(project, asset_type, name, description="", extra_data={}):
     """
     Create a new asset in the database.
     """
+    project = normalize_model_parameter(project)
+    asset_type = normalize_model_parameter(asset_type)
+
     data = {
         "name": name,
         "description": description,
@@ -106,6 +120,7 @@ def remove_asset(asset):
     """
     Remove given asset from database.
     """
+    asset = normalize_model_parameter(asset)
     return client.delete("data/assets/%s" % asset["id"])
 
 
@@ -133,6 +148,7 @@ def remove_asset_type(asset_type):
     """
     Remove given asset type from database.
     """
+    asset_type = normalize_model_parameter(asset_type)
     return client.delete("data/asset-types/%s" % asset_type["id"])
 
 
@@ -192,6 +208,7 @@ def enable_asset_instance(asset_instance):
     """
     Set active flag of given asset instance to True.
     """
+    asset_instance = normalize_model_parameter(asset_instance)
     data = {"active": True}
     return client.put("asset-instances/%s" % asset_instance["id"], data)
 
@@ -200,6 +217,7 @@ def disable_asset_instance(asset_instance):
     """
     Set active flag of given asset instance to False.
     """
+    asset_instance = normalize_model_parameter(asset_instance)
     data = {"active": False}
     return client.put("asset-instances/%s" % asset_instance["id"], data)
 
@@ -209,6 +227,7 @@ def all_asset_instances_for_asset(asset):
     """
     Retrieve all asset instances existing for a given asset.
     """
+    asset = normalize_model_parameter(asset)
     return client.fetch_all("assets/%s/asset-instances" % asset['id'])
 
 
@@ -217,6 +236,7 @@ def all_asset_instances_for_shot(shot):
     """
     Retrieve all asset instances existing for a given shot.
     """
+    shot = normalize_model_parameter(shot)
     return client.fetch_all("shots/%s/asset-instances" % shot['id'])
 
 

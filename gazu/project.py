@@ -3,7 +3,6 @@ from deprecated import deprecated
 from . import client
 
 from .sorting import sort_by_name
-
 from .cache import cache
 
 
