@@ -247,6 +247,7 @@ def get_asset_instances_for_shot(shot):
     """
     Return the list of asset instances linked to given shot.
     """
+    shot = normalize_model_parameter(shot)
     return client.get("data/shots/%s/asset-instances" % shot["id"])
 
 
@@ -254,6 +255,8 @@ def add_asset_instance_to_shot(shot, asset_instance):
     """
     Link a new asset instance to given shot.
     """
+    shot = normalize_model_parameter(shot)
+    asset_instance = normalize_model_parameter(asset_instance)
     data = {
         "asset_instance_id": asset_instance["id"]
     }
@@ -264,6 +267,8 @@ def remove_asset_instance_from_shot(shot, asset_instance):
     """
     Link a new asset instance to given shot.
     """
+    shot = normalize_model_parameter(shot)
+    asset_instance = normalize_model_parameter(asset_instance)
     path = "data/shots/%s/asset-instances/%s" % (
         shot["id"],
         asset_instance["id"]
@@ -276,6 +281,7 @@ def update_casting(shot, casting):
     Change casting of given shot with given casting (list of asset ids displayed
     into the shot).
     """
+    shot = normalize_model_parameter(shot)
     return client.put("data/shots/%s/casting" % shot["id"], casting)
 
 
