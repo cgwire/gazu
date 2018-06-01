@@ -248,7 +248,6 @@ def all_asset_instances_for_shot(shot):
     """
     Retrieve all asset instances existing for a given shot.
     """
-    shot = normalize_model_parameter(shot)
     return client.fetch_all("shots/%s/asset-instances" % shot['id'])
 
 
