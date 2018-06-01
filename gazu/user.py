@@ -121,6 +121,16 @@ def all_sequences_for_project(project):
 
 
 @cache
+def all_episodes_for_project(project):
+    """
+    Return the list of episodes for which the user has a task.
+    """
+    path = "user/projects/%s/episodes" % project["id"]
+    asset_types = client.fetch_all(path)
+    return sort_by_name(asset_types)
+
+
+@cache
 def all_shots_for_sequence(sequence):
     """
     Return the list of shots for given sequence and current user.

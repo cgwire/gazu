@@ -204,31 +204,20 @@ def get_asset_instance(asset_instance_id):
     return client.fetch_one("asset-instances", asset_instance_id)
 
 
-def enable_asset_instance(asset_instance):
-    """
-    Set active flag of given asset instance to True.
-    """
-    asset_instance = normalize_model_parameter(asset_instance)
-    data = {"active": True}
-    return client.put("asset-instances/%s" % asset_instance["id"], data)
-
-
-def disable_asset_instance(asset_instance):
-    """
-    Set active flag of given asset instance to False.
-    """
-    asset_instance = normalize_model_parameter(asset_instance)
-    data = {"active": False}
-    return client.put("asset-instances/%s" % asset_instance["id"], data)
-
-
 @cache
-def all_asset_instances_for_asset(asset):
+def all_shot_asset_instances_for_asset(asset):
     """
     Retrieve all asset instances existing for a given asset.
     """
-    asset = normalize_model_parameter(asset)
-    return client.fetch_all("assets/%s/asset-instances" % asset['id'])
+    return client.fetch_all("assets/%s/shot-asset-instances" % asset['id'])
+
+
+@cache
+def all_scene_asset_instances_for_asset(asset):
+    """
+    Retrieve all asset instances existing for a given asset.
+    """
+    return client.fetch_all("assets/%s/scene-asset-instances" % asset['id'])
 
 
 @cache
@@ -236,7 +225,6 @@ def all_asset_instances_for_shot(shot):
     """
     Retrieve all asset instances existing for a given shot.
     """
-    shot = normalize_model_parameter(shot)
     return client.fetch_all("shots/%s/asset-instances" % shot['id'])
 
 

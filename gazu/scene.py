@@ -144,3 +144,23 @@ def remove_shot_from_scene(scene, shot):
     scene = normalize_model_parameter(scene)
     shot = normalize_model_parameter(shot)
     return client.delete("data/scenes/%s/shots/%s" % (scene["id"], shot["id"]))
+
+
+def asset_instance_name(asset_instance, name):
+    """
+    Update the name of given asset instance.
+    """
+    path = "/data/asset-instances/%s" % asset_instance['id']
+    return client.put(path, {
+        "name": name
+    })
+
+
+def update_asset_instance_data(asset_instance, data):
+    """
+    Update the extra data of given asset instance.
+    """
+    path = "/data/asset-instances/%s" % asset_instance['id']
+    return client.put(path, {
+        "data": data
+    })

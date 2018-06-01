@@ -38,7 +38,6 @@ def get_project_by_name(project_name):
     return client.fetch_first("projects?name=%s" % project_name)
 
 
-@cache
 def new_project(name):
     data = {
         "name": name

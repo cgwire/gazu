@@ -278,6 +278,19 @@ class ShotTestCase(unittest.TestCase):
             shot = gazu.shot.update_shot(shot)
             self.assertEquals(shot["id"], "shot-01")
 
+    def test_get_asset_instances(self):
+        with requests_mock.mock() as mock:
+            result = [{"id": "asset-instance-01"}]
+            mock = mock.get(
+                gazu.client.get_full_url(
+                    "data/shots/shot-1/asset-instances"
+                ),
+                text=json.dumps(result)
+            )
+            shot = {"id": "shot-1"}
+            asset_instances = gazu.shot.get_asset_instances_for_shot(shot)
+            self.assertEqual(asset_instances[0]["id"], "asset-instance-01")
+
     def test_add_asset_instance(self):
         with requests_mock.mock() as mock:
             result = {"id": "asset-instance-01"}
@@ -288,6 +301,21 @@ class ShotTestCase(unittest.TestCase):
                 text=json.dumps(result)
             )
             shot = {"id": "shot-1"}
-            asset = {"id": "asset-1"}
-            asset_instance = gazu.shot.new_shot_asset_instance(shot, asset)
+            asset_instance = {"id": "asset-instance-1"}
+            asset_instance = gazu.shot.add_asset_instance_to_shot(
+                shot, asset_instance
+            )
             self.assertEquals(asset_instance, result)
+
+    def test_remove_asset_instance(self):
+        with requests_mock.mock() as mock:
+            mock = mock.delete(
+                gazu.client.get_full_url(
+                    "data/shots/shot-1/asset-instances/asset-instance-1"
+                )
+            )
+            shot = {"id": "shot-1"}
+            asset_instance = {"id": "asset-instance-1"}
+            asset_instance = gazu.shot.remove_asset_instance_from_shot(
+                shot, asset_instance
+            )
