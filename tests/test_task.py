@@ -178,13 +178,14 @@ class TaskTestCase(unittest.TestCase):
                 gazu.client.get_full_url(
                     "actions/tasks/task-1/to-review"
                 ),
-                text='{"name": "Task 01", "task_status_id": "wfa-1"}'
+                text=json.dumps(
+                    {"name": "Task 01", "task_status_id": "wfa-1"}
+                )
             )
             test_task = gazu.task.task_to_review(
                 {"id": "task-1"},
                 {"id": "person-1"},
-                "my comment",
-                working_file={"id": "working-file-1"}
+                "my comment"
             )
             self.assertEquals(test_task["task_status_id"], "wfa-1")
             test_task = gazu.task.task_to_review(

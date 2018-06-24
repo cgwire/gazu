@@ -167,13 +167,19 @@ class AssetTestCase(unittest.TestCase):
 
     def test_create_asset_type(self):
         with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url(
+                    "data/entity-types?name=Characters"
+                ),
+                text=json.dumps([])
+            )
             mock.post(
                 gazu.client.get_full_url(
                     "data/entity-types/"
                 ),
-                text=json.dumps({"id": "asset-type-1", "name": "Modeling"})
+                text=json.dumps({"id": "asset-type-1", "name": "Characters"})
             )
-            name = "Modeling"
+            name = "Characters"
             asset_type = gazu.asset.new_asset_type(name)
             self.assertEquals(asset_type["name"], name)
 
