@@ -131,7 +131,10 @@ def new_asset_type(name):
     data = {
         "name": name
     }
-    return client.create("entity-types", data)
+    asset_type = client.fetch_first("entity-types?name=%s" % name)
+    if asset_type is None:
+        asset_type = client.create("entity-types", data)
+    return asset_type
 
 
 def update_asset_type(asset_type):
