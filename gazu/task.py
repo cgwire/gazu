@@ -311,7 +311,7 @@ def add_comment(task, task_status, comment=""):
         "task_status_id": task_status["id"],
         "comment": comment
     }
-    return client.post("./actions/tasks/%s/comment" % task["id"], data)
+    return client.post("actions/tasks/%s/comment" % task["id"], data)
 
 
 def add_preview(task, comment, preview_file_path, is_movie=False):
@@ -321,7 +321,7 @@ def add_preview(task, comment, preview_file_path, is_movie=False):
     """
     task = normalize_model_parameter(task)
     comment = normalize_model_parameter(comment)
-    path = "/actions/tasks/%s/comments/%s/add-preview" % (
+    path = "actions/tasks/%s/comments/%s/add-preview" % (
         task["id"],
         comment["id"]
     )
@@ -337,7 +337,7 @@ def set_main_preview(entity, preview_file):
     """
     entity = normalize_model_parameter(entity)
     preview_file = normalize_model_parameter(preview_file)
-    path = "/actions/entities/%s/set-main-preview/%s" % (
+    path = "actions/entities/%s/set-main-preview/%s" % (
         entity["id"],
         preview_file["id"]
     )
