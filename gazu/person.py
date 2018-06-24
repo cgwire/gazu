@@ -23,6 +23,14 @@ def get_person_by_desktop_login(desktop_login):
 
 
 @cache
+def get_person_by_email(email):
+    """
+    Returns person corresponding to given email.
+    """
+    return client.fetch_first("persons?email=%s" % email)
+
+
+@cache
 def get_person_by_full_name(full_name):
     """
     Returns person corresponding to given name.
@@ -33,6 +41,30 @@ def get_person_by_full_name(full_name):
         is_right_last_name = last_name == person["last_name"].lower()
         if is_right_first_name and is_right_last_name:
             return person
+
+
+def new_person(first_name, last_name, email, phone, role):
+    """
+    Create a new person based on given parameters. His/her password will be
+    default.
+    """
+    person = get_person_by_email(email)
+    if person is None:
+        person = client.post("data/persons/new", {
+            "first_name": first_name,
+            "last_name": last_name,
+            "email": email,
+            "phone": phone,
+            "role": role
+        })
+    return person
+
+
+def set_avatar(person, file_path):
+    """
+    Upload an avatar for given person.
+    """
+    client.upload("/pictures/thumbnails/persons/%s" % person["id"], file_path)
 
 
 @cache
