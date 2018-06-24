@@ -238,7 +238,6 @@ def task_to_review(
     task,
     person,
     comment,
-    working_file=None,
     revision=1
 ):
     """
@@ -248,9 +247,8 @@ def task_to_review(
     data = {
         "person_id": person["id"],
         "comment": comment,
+        "revision": revision
     }
-    if working_file is not None:
-        data["working_file_id"] = working_file["id"]
 
     return client.put(path, data)
 
