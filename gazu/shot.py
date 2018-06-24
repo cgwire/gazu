@@ -271,6 +271,14 @@ def remove_asset_instance_from_shot(shot, asset_instance):
     return client.delete(path)
 
 
+def update_casting(shot, casting):
+    """
+    Change casting of given shot with given casting (list of asset ids displayed
+    into the shot).
+    """
+    return client.put("data/shots/%s/casting" % shot["id"], casting)
+
+
 @deprecated
 def all(project=None):
     return all_shots_for_project(project)
