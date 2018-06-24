@@ -58,8 +58,8 @@ class FilesTestCase(unittest.TestCase):
                 {"id": "asset-01"},
                 {"id": "output-type-01"},
                 {"id": "task-type-01"},
-                {"id": "working-file-01"},
                 "comment",
+                working_file={"id": "working-file-01"},
                 person={"id": "person-01"}
             )
             name = result["output_file"]["file_name"]
@@ -70,7 +70,7 @@ class FilesTestCase(unittest.TestCase):
             mock.post(
                 gazu.client.get_full_url(
                     "data/asset-instances/asset-instance-01/"
-                    "output-files/new"
+                    "entities/scene-01/output-files/new"
                 ),
                 text=json.dumps({
                     "output_file": {
@@ -80,10 +80,11 @@ class FilesTestCase(unittest.TestCase):
             )
             result = gazu.files.new_asset_instance_output_file(
                 {"id": "asset-instance-01"},
+                {"id": "scene-01"},
                 {"id": "output-type-01"},
                 {"id": "task-type-01"},
-                {"id": "working-file-01"},
                 "comment",
+                working_file={"id": "working-file-01"},
                 person={"id": "person-01"}
             )
             name = result["output_file"]["file_name"]
@@ -108,17 +109,19 @@ class FilesTestCase(unittest.TestCase):
 
     def test_next_asset_instance_output_revision(self):
         with requests_mock.mock() as mock:
-            path = "data/asset-instances/asset-instance-01/output-files/" \
-                   "next-revision"
+            path = "data/asset-instances/asset-instance-01/" \
+                   "entities/scene-01/output-files/next-revision"
             mock.post(
                 gazu.client.get_full_url(path),
                 text=json.dumps({"next_revision": 3})
             )
             asset_instance = {"id": "asset-instance-01"}
+            scene = {"id": "scene-01"}
             output_type = {"id": "output-type-01"}
             task_type = {"id": "task-type-01"}
             revision = gazu.files.get_next_asset_instance_output_revision(
                 asset_instance,
+                scene,
                 output_type,
                 task_type
             )
@@ -241,7 +244,8 @@ class FilesTestCase(unittest.TestCase):
 
     def test_get_last_output_files_for_asset_instance(self):
         with requests_mock.mock() as mock:
-            path = "/data/asset-instances/asset-instance-01/output-files/last-revisions"
+            path = "/data/asset-instances/asset-instance-01/" \
+                   "entities/scene-01/output-files/last-revisions"
             mock.get(
                 gazu.client.get_full_url(path),
                 text=json.dumps({
@@ -257,9 +261,11 @@ class FilesTestCase(unittest.TestCase):
                     }
                 })
             )
-            entity = {"id": "asset-instance-01"}
+            asset_instance = {"id": "asset-instance-01"}
+            scene = {"id": "scene-01"}
             output_files_dict = \
-                gazu.files.get_last_output_files_for_asset_instance(entity)
+                gazu.files.get_last_output_files_for_asset_instance(
+                    asset_instance, scene)
             self.assertEquals(
                 output_files_dict["output-type-01"]["main"]["id"],
                 "output-file-1"
@@ -339,7 +345,8 @@ class FilesTestCase(unittest.TestCase):
 
     def test_all_output_types_for_asset_instance(self):
         with requests_mock.mock() as mock:
-            path = "/data/asset-instances/asset-1/output-types/"
+            path = "/data/asset-instances/asset-instance-1/" \
+                   "entities/scene-1/output-types/"
             mock.get(
                 gazu.client.get_full_url(path),
                 text=json.dumps([{
@@ -347,9 +354,11 @@ class FilesTestCase(unittest.TestCase):
                     "name": "geometry"
                 }])
             )
-            asset_instance = {"id": "asset-1"}
+            asset_instance = {"id": "asset-instance-1"}
+            scene = {"id": "scene-1"}
             output_type = gazu.files.all_output_types_for_asset_instance(
-                asset_instance
+                asset_instance,
+                scene
             )
             self.assertEquals(output_type[0]["name"], "geometry")
 
@@ -407,8 +416,9 @@ class FilesTestCase(unittest.TestCase):
                 {"id": "asset-1"},
                 {"id": "output-type-1"},
             )
+            self.assertEquals(output_type[0]["name"], "main")
 
-            path = "/data/entities/asset-1/output-types/utput-type-1/" \
+            path = "/data/entities/asset-1/output-types/output-type-1/" \
                    "output-files?representation=obj"
             mock.get(
                 gazu.client.get_full_url(path),
@@ -427,8 +437,8 @@ class FilesTestCase(unittest.TestCase):
 
     def test_get_output_files_for_asset_instance(self):
         with requests_mock.mock() as mock:
-            path = "/data/asset-instances/asset-instance-1/output-types" \
-                   "/output-type-1/output-files"
+            path = "/data/asset-instances/asset-instance-1/" \
+                   "entities/scene-1/output-types/output-type-1/output-files"
             mock.get(
                 gazu.client.get_full_url(path),
                 text=json.dumps([{
@@ -438,6 +448,7 @@ class FilesTestCase(unittest.TestCase):
             )
             output_type = gazu.files.all_output_files_for_asset_instance(
                 {"id": "asset-instance-1"},
+                {"id": "scene-1"},
                 {"id": "output-type-1"},
             )
             self.assertEquals(output_type[0]["name"], "main")
@@ -502,7 +513,7 @@ class FilesTestCase(unittest.TestCase):
             mock.post(
                 gazu.client.get_full_url(
                     "data/asset-instances/asset-instance-1/"
-                    "output-file-path"
+                    "entities/scene-1/output-file-path"
                 ),
                 text=json.dumps({
                     "folder_path": "/path/to/instance",
@@ -510,10 +521,12 @@ class FilesTestCase(unittest.TestCase):
                 })
             )
             asset_instance = {"id": "asset-instance-1"}
+            scene = {"id": "scene-1"}
             output_type = {"id": "output-type-1"}
             task_type = {"id": "task-type-1"}
             path = gazu.files.build_asset_instance_output_file_path(
                 asset_instance,
+                scene,
                 output_type,
                 task_type
             )
@@ -521,6 +534,10 @@ class FilesTestCase(unittest.TestCase):
 
     def test_new_output_type(self):
         with requests_mock.mock() as mock:
+            mock.get(
+                "/data/output-types?name=Geometry",
+                text=json.dumps([])
+            )
             path = "/data/output-types"
             mock.post(
                 gazu.client.get_full_url(path),
@@ -530,3 +547,23 @@ class FilesTestCase(unittest.TestCase):
             )
             output_type = gazu.files.new_output_type("Geometry", "Geo")
             self.assertEquals(output_type["id"], "output-type-01")
+
+    def test_new_software(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url("/data/softwares?name=3DSMax"),
+                text=json.dumps([])
+            )
+            path = "/data/softwares"
+            mock.post(
+                gazu.client.get_full_url(path),
+                text=json.dumps({
+                    "id": "software-01"
+                })
+            )
+            output_type = gazu.files.new_software(
+                "3DSMax",
+                "max",
+                ".max"
+            )
+            self.assertEquals(output_type["id"], "software-01")
