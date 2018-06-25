@@ -189,6 +189,14 @@ def update_shot(shot):
     return client.put('data/entities/%s' % shot["id"], shot)
 
 
+@cache
+def get_asset_instances_for_shot(shot):
+    """
+    Return the list of asset instances linked to given shot.
+    """
+    return client.get("data/shots/%s/asset-instances" % shot["id"])
+
+
 def update_shot_data(shot, data={}):
     """
     Update the data for the provided shot.
@@ -243,3 +251,24 @@ def all(project=None):
 @deprecated
 def all_for_sequence(project=None):
     return all_shots_for_sequence(project)
+
+
+def add_asset_instance_to_shot(shot, asset_instance):
+    """
+    Link a new asset instance to given shot.
+    """
+    data = {
+        "asset_instance_id": asset_instance["id"]
+    }
+    return client.post("data/shots/%s/asset-instances" % shot["id"], data)
+
+
+def remove_asset_instance_from_shot(shot, asset_instance):
+    """
+    Link a new asset instance to given shot.
+    """
+    path = "data/shots/%s/asset-instances/%s" % (
+        shot["id"],
+        asset_instance["id"]
+    )
+    return client.delete(path)
