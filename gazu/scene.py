@@ -89,30 +89,6 @@ def new_scene_asset_instance(scene, asset, description=""):
 
 
 @cache
-def all_shots_for_scene(scene):
-    """
-    Return the list of shots issued from given scene.
-    """
-    return client.get("data/scenes/%s/shots" % scene["id"])
-
-
-def add_shot_to_scene(scene, shot):
-    """
-    Link a shot to a scene to mark the fact it was generated out from that
-    scene.
-    """
-    data = {"shot_id": shot["id"]}
-    return client.post("data/scenes/%s/shots" % scene["id"], data)
-
-
-def remove_shot_from_scene(scene, shot):
-    """
-    Remove link between a shot and a scene.
-    """
-    return client.delete("data/scenes/%s/shots/%s" % (scene["id"], shot["id"]))
-
-
-@cache
 def all_asset_instances_for_scene(scene):
     """
     Return the list of asset instances listed in a scene.
