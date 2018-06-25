@@ -54,7 +54,7 @@ def all_task_types_for_asset(asset, user_context=False):
     if user_context:
         return gazu_user.all_task_types_for_asset(asset)
     else:
-        return gazu_asset.task_types_for_asset(asset)
+        return gazu_task.all_task_types_for_asset(asset)
 
 
 def all_task_types_for_shot(shot, user_context=False):
