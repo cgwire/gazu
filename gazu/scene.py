@@ -92,6 +92,30 @@ def new_scene_asset_instance(scene, asset, description=""):
 
 
 @cache
+def all_shots_for_scene(scene):
+    """
+    Return the list of shots issued from given scene.
+    """
+    return client.get("data/scenes/%s/shots" % scene["id"])
+
+
+def add_shot_to_scene(scene, shot):
+    """
+    Link a shot to a scene to mark the fact it was generated out from that
+    scene.
+    """
+    data = {"shot_id": shot["id"]}
+    return client.post("data/scenes/%s/shots" % scene["id"], data)
+
+
+def remove_shot_from_scene(scene, shot):
+    """
+    Remove link between a shot and a scene.
+    """
+    return client.delete("data/scenes/%s/shots/%s" % (scene["id"], shot["id"]))
+
+
+@cache
 def all_asset_instances_for_scene(scene):
     """
     Return the list of asset instances listed in a scene.
@@ -100,8 +124,40 @@ def all_asset_instances_for_scene(scene):
 
 
 @cache
+def get_asset_instance_by_name(scene, name):
+    """
+    Returns the asset instance of the scene that has the given name.
+    """
+    instances = client.get(
+        "data/asset-instances?name=%s&scene_id=%s" % (name, scene["id"]))
+    if len(instances) > 0:
+        return instances[0]
+    return None
+
+
+@cache
 def all_camera_instances_for_scene(scene):
     """
     Return the list of camera instances listed in a scene.
     """
     return client.get("data/scenes/%s/camera-instances" % scene["id"])
+
+
+def update_asset_instance_name(asset_instance, name):
+    """
+    Update the name of given asset instance.
+    """
+    path = "/data/asset-instances/%s" % asset_instance['id']
+    return client.put(path, {
+        "name": name
+    })
+
+
+def update_asset_instance_data(asset_instance, data):
+    """
+    Update the data of given asset instance.
+    """
+    path = "/data/asset-instances/%s" % asset_instance['id']
+    return client.put(path, {
+        "data": data
+    })
