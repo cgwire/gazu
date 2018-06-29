@@ -61,7 +61,7 @@ gazu.client.set_host("https://zou-server-url/api")
 
 Then authenticate the script:
 ```python
-gazu.client.log_in("user@mail.com", "default")
+gazu.log_in("user@mail.com", "default")
 ```
 
 ## Usage
