@@ -2,6 +2,7 @@ from deprecated import deprecated
 
 from . import client
 from .sorting import sort_by_name
+from .helpers import normalize_model_parameter
 
 from .cache import cache
 
@@ -117,7 +118,7 @@ def all_tasks_for_entity_and_task_type(entity, task_type):
 
 
 @cache
-def get_task_by_name(entity, task_type, name):
+def get_task_by_name(entity, task_type, name="main"):
     """
     Find a task by looking for it through its name and its entity.
     """
@@ -238,7 +239,6 @@ def task_to_review(
     task,
     person,
     comment,
-    working_file=None,
     revision=1
 ):
     """
@@ -248,9 +248,8 @@ def task_to_review(
     data = {
         "person_id": person["id"],
         "comment": comment,
+        "revision": revision
     }
-    if working_file is not None:
-        data["working_file_id"] = working_file["id"]
 
     return client.put(path, data)
 
@@ -298,6 +297,51 @@ def add_time_spent(task, person, date, duration):
         person["id"]
     )
     return client.post(path, {"duration": duration})
+
+
+def add_comment(task, task_status, comment=""):
+    """
+    Add comment to given task. Each comment requires a task_status. Since the
+    addition of comment triggers a task status change.
+    Comment can be empty.
+    """
+    task = normalize_model_parameter(task)
+    task_status = normalize_model_parameter(task_status)
+    data = {
+        "task_status_id": task_status["id"],
+        "comment": comment
+    }
+    return client.post("actions/tasks/%s/comment" % task["id"], data)
+
+
+def add_preview(task, comment, preview_file_path, is_movie=False):
+    """
+    Add a preview to given comment. It it's a movie, it must be mentioned
+    in the option.
+    """
+    task = normalize_model_parameter(task)
+    comment = normalize_model_parameter(comment)
+    path = "actions/tasks/%s/comments/%s/add-preview" % (
+        task["id"],
+        comment["id"]
+    )
+    preview_file = client.post(path, {"is_movie": is_movie})
+    path = "pictures/preview-files/%s" % preview_file["id"]
+    client.upload(path, preview_file_path)
+    return preview_file
+
+
+def set_main_preview(entity, preview_file):
+    """
+    Set given preview as thumbnail of given entity.
+    """
+    entity = normalize_model_parameter(entity)
+    preview_file = normalize_model_parameter(preview_file)
+    path = "actions/entities/%s/set-main-preview/%s" % (
+        entity["id"],
+        preview_file["id"]
+    )
+    return client.put(path, {})
 
 
 @deprecated

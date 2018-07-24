@@ -7,3 +7,6 @@ install:
   - "pip install -r requirements_test.txt"
   - "python setup.py install"
 script: py.test
+branches:
+  only:
+    - master

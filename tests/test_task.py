@@ -178,13 +178,14 @@ class TaskTestCase(unittest.TestCase):
                 gazu.client.get_full_url(
                     "actions/tasks/task-1/to-review"
                 ),
-                text='{"name": "Task 01", "task_status_id": "wfa-1"}'
+                text=json.dumps(
+                    {"name": "Task 01", "task_status_id": "wfa-1"}
+                )
             )
             test_task = gazu.task.task_to_review(
                 {"id": "task-1"},
                 {"id": "person-1"},
-                "my comment",
-                working_file={"id": "working-file-1"}
+                "my comment"
             )
             self.assertEquals(test_task["task_status_id"], "wfa-1")
             test_task = gazu.task.task_to_review(
@@ -305,3 +306,16 @@ class TaskTestCase(unittest.TestCase):
             task_type = {"id": "task-type-1"}
             task = gazu.task.new_task(asset, task_type)
             self.assertEquals(task, result)
+
+    def test_add_comment(self):
+        with requests_mock.mock() as mock:
+            result = {"id": "comment-1"}
+            print(gazu.client.get_full_url("actions/tasks/task-1/comment"))
+            mock.post(
+                gazu.client.get_full_url("actions/tasks/task-1/comment"),
+                text=json.dumps(result)
+            )
+            task = {"id": "task-1"}
+            task_status = {"id": "task-status-1"}
+            comment = "New comment"
+            task = gazu.task.add_comment(task, task_status, comment)
