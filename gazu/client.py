@@ -85,7 +85,7 @@ def get_full_url(path):
     return url_path_join(get_host(), path)
 
 
-def get(path):
+def get(path, json_response=True):
     """
     Run a get request toward given path for configured host.
     """
@@ -94,7 +94,11 @@ def get(path):
         headers=make_auth_header()
     )
     check_status(response, path)
-    return response.json()
+
+    if json_response:
+        return response.json()
+    else:
+        return response.text
 
 
 def post(path, data):

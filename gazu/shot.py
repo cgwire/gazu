@@ -3,8 +3,8 @@ from deprecated import deprecated
 from . import client
 
 from .sorting import sort_by_name
-
 from .cache import cache
+from .helpers import normalize_model_parameter
 
 
 @cache
@@ -12,6 +12,7 @@ def all_shots_for_project(project):
     """
     Retrieve all shots from database or for given project.
     """
+    project = normalize_model_parameter(project)
     shots = client.fetch_all("projects/%s/shots" % project["id"])
 
     return sort_by_name(shots)
@@ -22,6 +23,7 @@ def all_shots_for_sequence(sequence):
     """
     Retrieve all shots which are children from given sequence.
     """
+    sequence = normalize_model_parameter(sequence)
     return sort_by_name(client.fetch_all("sequences/%s/shots" % sequence["id"]))
 
 
@@ -31,6 +33,7 @@ def all_sequences(project=None):
     Retrieve all sequences from database or for given project.
     """
     if project is not None:
+        project = normalize_model_parameter(project)
         sequences = client.fetch_all("projects/%s/sequences" % project["id"])
     else:
         sequences = client.fetch_all("sequences")
@@ -43,6 +46,7 @@ def all_sequences_for_episode(episode):
     """
     Retrieve all sequences which are children of given episode.
     """
+    episode = normalize_model_parameter(episode)
     sequences = client.fetch_all("episodes/%s/sequences" % episode["id"])
     return sort_by_name(sequences)
 
@@ -52,6 +56,7 @@ def all_episodes_for_project(project):
     """
     Retrieve all episodes from database or for given project.
     """
+    project = normalize_model_parameter(project)
     episodes = client.fetch_all("projects/%s/episodes" % project["id"])
     return sort_by_name(episodes)
 
@@ -69,6 +74,7 @@ def get_episode_by_name(project, episode_name):
     """
     Returns episode corresponding to given name and project.
     """
+    project = normalize_model_parameter(project)
     return client.fetch_first("episodes?project_id=%s&name=%s" % (
         project["id"],
         episode_name
@@ -80,6 +86,7 @@ def get_episode_from_sequence(sequence):
     """
     Return episode which is parent of given sequence.
     """
+    sequence = normalize_model_parameter(sequence)
     return get_episode(sequence["parent_id"])
 
 
@@ -96,12 +103,14 @@ def get_sequence_by_name(project, sequence_name, episode=None):
     """
     Returns sequence corresponding to given name and project.
     """
+    project = normalize_model_parameter(project)
     if episode is None:
         path = "sequences?project_id=%s&name=%s" % (
             project["id"],
             sequence_name
         )
     else:
+        episode = normalize_model_parameter(episode)
         path = "sequences?parent_id=%s&name=%s" % (episode["id"], sequence_name)
     return client.fetch_first(path)
 
@@ -111,6 +120,7 @@ def get_sequence_from_shot(shot):
     """
     Return sequence which is parent of given shot.
     """
+    shot = normalize_model_parameter(shot)
     return get_sequence(shot["parent_id"])
 
 
@@ -127,6 +137,7 @@ def get_shot_by_name(sequence, shot_name):
     """
     Returns shot corresponding to given sequence and name.
     """
+    sequence = normalize_model_parameter(sequence)
     return client.fetch_first("shots/all?parent_id=%s&name=%s" % (
         sequence["id"],
         shot_name
@@ -141,10 +152,13 @@ def new_sequence(
     """
     Create a sequence for given episode.
     """
+    project = normalize_model_parameter(project)
+    episode = normalize_model_parameter(episode)
     data = {
         "name": name,
         "episode_id": episode["id"]
     }
+
     sequence = get_sequence_by_name(project, name, episode=episode)
     if sequence is None:
         return client.post('data/projects/%s/sequences' % project["id"], data)
@@ -164,6 +178,9 @@ def new_shot(
     Create a shot for given sequence. Add frame in and frame out parameters to
     extra data.
     """
+    project = normalize_model_parameter(project)
+    sequence = normalize_model_parameter(sequence)
+
     if frame_in is not None:
         data["frame_in"] = frame_in
     if frame_out is not None:
@@ -177,7 +194,7 @@ def new_shot(
 
     shot = get_shot_by_name(sequence, name)
     if shot is None:
-        return client.post('data/projects/%s/shots' % project["id"], data)
+        return client.post("data/projects/%s/shots" % project["id"], data)
     else:
         return shot
 
@@ -202,6 +219,7 @@ def update_shot_data(shot, data={}):
     Update the data for the provided shot.
     Keys not provided are not updated while update_shot() delete them
     """
+    shot = normalize_model_parameter(shot)
     current_shot = get_shot(shot["id"])
     updated_shot = {'id': current_shot['id'], 'data': current_shot['data']}
     updated_shot['data'].update(data)
@@ -212,6 +230,7 @@ def new_episode(project, name):
     """
     Create an episode for given project.
     """
+    project = normalize_model_parameter(project)
     data = {
         "name": name
     }
@@ -227,20 +246,45 @@ def all_asset_instances_for_shot(shot):
     """
     Return the list of asset instances listed in a shot.
     """
+    shot = normalize_model_parameter(shot)
     return client.get("data/shots/%s/asset-instances" % shot["id"])
 
 
 @cache
-def new_shot_asset_instance(shot, asset, description=""):
+def get_asset_instances_for_shot(shot):
     """
-    Creates a new asset instance on given shot. The instance number is
-    automatically generated (increment highest number).
+    Return the list of asset instances linked to given shot.
+    """
+    return client.get("data/shots/%s/asset-instances" % shot["id"])
+
+
+def add_asset_instance_to_shot(shot, asset_instance):
+    """
+    Link a new asset instance to given shot.
     """
     data = {
-        "asset_id": asset["id"],
-        "description": description
+        "asset_instance_id": asset_instance["id"]
     }
     return client.post("data/shots/%s/asset-instances" % shot["id"], data)
+
+
+def remove_asset_instance_from_shot(shot, asset_instance):
+    """
+    Link a new asset instance to given shot.
+    """
+    path = "data/shots/%s/asset-instances/%s" % (
+        shot["id"],
+        asset_instance["id"]
+    )
+    return client.delete(path)
+
+
+def update_casting(shot, casting):
+    """
+    Change casting of given shot with given casting (list of asset ids displayed
+    into the shot).
+    """
+    return client.put("data/shots/%s/casting" % shot["id"], casting)
 
 
 @deprecated

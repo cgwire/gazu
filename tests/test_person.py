@@ -61,6 +61,48 @@ class PersonTestCase(unittest.TestCase):
             person = gazu.person.get_person_by_desktop_login("john.doe")
             self.assertEquals(person["id"], "person-1")
 
+    def test_get_person_by_email(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url("data/persons?email=john@gmail.com"),
+                text=json.dumps([
+                    {
+                        "first_name": "John",
+                        "last_name": "Doe",
+                        "desktop_login": "john.doe",
+                        "id": "person-1"
+                    }
+                ])
+            )
+            person = gazu.person.get_person_by_email("john@gmail.com")
+            self.assertEquals(person["id"], "person-1")
+
+    def test_new_person(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url("data/persons?email=john@gmail.com"),
+                text=json.dumps([])
+            )
+            mock.post(
+                gazu.client.get_full_url("data/persons/new"),
+                text=json.dumps([{
+                    "first_name": "John",
+                    "last_name": "Doe",
+                    "email": "john@gmail.com",
+                    "desktop_login": "john.doe",
+                    "phone": "06 07 07 07 07",
+                    "role": "user",
+                    "id": "person-1"
+                }])
+            )
+            gazu.person.new_person(
+                "Jhon",
+                "Doe",
+                "john@gmail.com",
+                "+33 6 07 07 07 07",
+                "user"
+            ),
+
     def test_get_person_list(self):
         with requests_mock.mock() as mock:
             mock.get(
