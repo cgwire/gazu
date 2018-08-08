@@ -207,3 +207,25 @@ class SceneTestCase(unittest.TestCase):
             result = gazu.scene.get_asset_instance_by_name(
                 scene, "instance_name")
             self.assertEquals(instance, result)
+
+    def test_update_asset_instance_name(self):
+        updated_name = 'updated_name'
+        instance = {
+            "id": "instance-id",
+            "name": "original",
+            "number": "1",
+            "entity_id": "scene-1"
+        }
+        with requests_mock.mock() as mock:
+            mock = mock.put(
+                gazu.client.get_full_url("data/asset-instances/instance-id"),
+                text=json.dumps({
+                    "id": "instance-id",
+                    "name": updated_name,
+                    "number": "1",
+                    "entity_id": "scene-1"
+                })
+            )
+            instance = gazu.scene.update_asset_instance_name(
+                instance, updated_name)
+            self.assertEquals(instance["name"], updated_name)
