@@ -239,7 +239,8 @@ def task_to_review(
     task,
     person,
     comment,
-    revision=1
+    revision=1,
+    change_status=True
 ):
     """
     Mark given task as pending, waiting for approval.
@@ -248,7 +249,8 @@ def task_to_review(
     data = {
         "person_id": person["id"],
         "comment": comment,
-        "revision": revision
+        "revision": revision,
+        "change_status": change_status
     }
 
     return client.put(path, data)
