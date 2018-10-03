@@ -1,6 +1,7 @@
 from . import client
 
 from .cache import cache
+from .helpers import normalize_model_parameter
 
 
 @cache
@@ -521,3 +522,13 @@ def set_project_file_tree(project, file_tree_name):
     data = {"tree_name": file_tree_name}
     path = "actions/projects/%s/set-file-tree" % project["id"]
     return client.post(path, data)
+
+
+def update_project_file_tree(project, file_tree):
+    """
+    Set given dict as file tree to generate files for given project.
+    """
+    project = normalize_model_parameter(project)
+    data = {"file_tree": file_tree}
+    path = "data/projects/%s" % project["id"]
+    return client.put(path, data)

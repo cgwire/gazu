@@ -567,3 +567,23 @@ class FilesTestCase(unittest.TestCase):
                 ".max"
             )
             self.assertEquals(output_type["id"], "software-01")
+
+    def test_update_project_file_tree(self):
+        with requests_mock.mock() as mock:
+            file_tree = {
+                "name": "standard file tree",
+                "template": "<Project>/<AssetType>/<Asset>/<Task>"
+            }
+            path = "data/projects/project-01"
+            mock.put(
+                gazu.client.get_full_url(path),
+                text=json.dumps({
+                    "id": "project-id",
+                    "file_tree": file_tree
+                })
+            )
+            file_tree = gazu.files.update_project_file_tree(
+                "project-01",
+                file_tree
+            )["file_tree"]
+            self.assertEquals(file_tree["name"], "standard file tree")
