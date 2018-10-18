@@ -208,6 +208,21 @@ def upload(path, file_path):
     return requests_session.post(url, files=files).json()
 
 
+def download(path, file_path):
+    """
+    Upload file located at *file_path* to given url *path*.
+    """
+    url = get_full_url(path)
+    response = requests_session.get(
+        url,
+        headers=make_auth_header(),
+        stream=True
+    )
+    print(url)
+    with open(file_path, 'wb') as target_file:
+        target_file.write(response.content)
+
+
 def get_api_version():
     """
     Get current version of the API.
