@@ -469,6 +469,13 @@ file_path = gazu.files.build_asset_instance_output_file_path(
 )
 ```
 
+Download files related to a preview:
+
+```python
+gazu.files.download_preview_file(preview_file, "./target.mp4")
+gazu.files.download_preview_file_thumbnail(preview_file, "./target.png")
+```
+
 ## User
 
 This routes returns data related to currently logged user (for which he has
@@ -600,7 +607,12 @@ Upload a given file to given path:
 
 ```python
 gazu.client.upload("thumbnails/projects", "my_file.png")
-```
+
+Download a given file to given path:
+
+```python
+gazu.client.download("thumbnails/projects/project-id.png", "my_file.png")
+````
 
 Retrieve all data for a given data type:
 
