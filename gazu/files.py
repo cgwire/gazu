@@ -532,3 +532,25 @@ def update_project_file_tree(project, file_tree):
     data = {"file_tree": file_tree}
     path = "data/projects/%s" % project["id"]
     return client.put(path, data)
+
+
+def download_preview_file(preview_file, file_path):
+    """
+    Download given preview file.
+    """
+    preview_file = normalize_model_parameter(preview_file)
+    preview_file = client.fetch_one("preview-files", preview_file["id"])
+    return client.download("pictures/originals/preview-files/%s.%s" % (
+        preview_file["id"],
+        preview_file["extension"]
+    ), file_path)
+
+
+def download_preview_file_thumbnail(preview_file, file_path):
+    """
+    Download given preview file.
+    """
+    preview_file = normalize_model_parameter(preview_file)
+    return client.download("pictures/thumbnails/preview-files/%s.png" % (
+        preview_file["id"]
+    ), file_path)

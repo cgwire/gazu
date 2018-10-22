@@ -1,3 +1,4 @@
+import os
 import unittest
 import json
 import requests_mock
@@ -587,3 +588,47 @@ class FilesTestCase(unittest.TestCase):
                 file_tree
             )["file_tree"]
             self.assertEquals(file_tree["name"], "standard file tree")
+
+    def test_download_preview_file(self):
+        with open("./tests/fixtures/v1.png") as thumbnail_file:
+            with requests_mock.mock() as mock:
+                path = "data/preview-files/preview-1"
+                mock.get(
+                    gazu.client.get_full_url(path),
+                    text=json.dumps({
+                        "id": "preview-1",
+                        "extension": "png"
+                    })
+                )
+                path = "pictures/originals/preview-files/preview-1.png"
+                mock.get(
+                    gazu.client.get_full_url(path),
+                    body=thumbnail_file
+                )
+                gazu.files.download_preview_file(
+                    "preview-1",
+                    "./test.png"
+                )
+                self.assertTrue(os.path.exists("./test.png"))
+                self.assertEquals(
+                    os.path.getsize("./test.png"),
+                    os.path.getsize("./tests/fixtures/v1.png")
+                )
+
+    def test_download_preview_file_thumbnail(self):
+        with open("./tests/fixtures/v1.png") as thumbnail_file:
+            with requests_mock.mock() as mock:
+                path = "pictures/thumbnails/preview-files/preview-1.png"
+                mock.get(
+                    gazu.client.get_full_url(path),
+                    body=thumbnail_file
+                )
+                gazu.files.download_preview_file_thumbnail(
+                    "preview-1",
+                    "./test.png"
+                )
+                self.assertTrue(os.path.exists("./test.png"))
+                self.assertEquals(
+                    os.path.getsize("./test.png"),
+                    os.path.getsize("./tests/fixtures/v1.png")
+                )
