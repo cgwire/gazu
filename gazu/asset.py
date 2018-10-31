@@ -237,7 +237,7 @@ def disable_asset_instance(asset_instance):
 @cache
 def all_scene_asset_instances_for_asset(asset):
     """
-    Retrieve all asset instances existing for a given asset.
+    Retrieve all scene asset instances existing for a given asset.
     """
     asset = normalize_model_parameter(asset)
     return client.fetch_all("assets/%s/scene-asset-instances" % asset['id'])
@@ -249,6 +249,32 @@ def all_asset_instances_for_shot(shot):
     Retrieve all asset instances existing for a given shot.
     """
     return client.fetch_all("shots/%s/asset-instances" % shot['id'])
+
+
+@cache
+def all_asset_instances_for_asset(asset):
+    """
+    Retrieve all asset instances existing for a given asset.
+    """
+    asset = normalize_model_parameter(asset)
+    return client.fetch_all("assets/%s/asset-asset-instances" % asset['id'])
+
+
+def new_asset_asset_instance(asset, asset_to_instantiate, description=""):
+    """
+    Creates a new asset instance for given asset. The instance number is
+    automatically generated (increment highest number).
+    """
+    asset = normalize_model_parameter(asset)
+    asset_to_instantiate = normalize_model_parameter(asset_to_instantiate)
+    data = {
+        "asset_to_instantiate_id": asset_to_instantiate["id"],
+        "description": description
+    }
+    return client.post(
+        "data/assets/%s/asset-asset-instances" % asset["id"],
+        data
+    )
 
 
 @deprecated
