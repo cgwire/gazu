@@ -242,15 +242,6 @@ def all_asset_instances_for_shot(shot):
     return client.get("data/shots/%s/asset-instances" % shot["id"])
 
 
-@cache
-def get_asset_instances_for_shot(shot):
-    """
-    Return the list of asset instances linked to given shot.
-    """
-    shot = normalize_model_parameter(shot)
-    return client.get("data/shots/%s/asset-instances" % shot["id"])
-
-
 def add_asset_instance_to_shot(shot, asset_instance):
     """
     Link a new asset instance to given shot.

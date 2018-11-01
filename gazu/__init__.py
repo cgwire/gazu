@@ -1,6 +1,7 @@
 from . import client
 from . import cache
 from . import helpers
+from . import events
 
 from . import asset
 from . import context

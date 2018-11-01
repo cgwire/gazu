@@ -222,7 +222,7 @@ class AssetTestCase(unittest.TestCase):
             self.assertEquals(asset_instance["shot_id"], "shot-1")
             self.assertEquals(asset_instance["number"], 1)
 
-    def test_get_shot_asset_instances_for_asset(self):
+    def test_all_shot_asset_instances_for_asset(self):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
@@ -260,7 +260,7 @@ class AssetTestCase(unittest.TestCase):
             self.assertEquals(asset_instance["shot_id"], "shot-1")
             self.assertEquals(asset_instance["number"], 1)
 
-    def test_get_asset_instances_for_shot(self):
+    def test_all_asset_instances_for_shot(self):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
@@ -278,3 +278,44 @@ class AssetTestCase(unittest.TestCase):
             self.assertEquals(shot_instance["asset_id"], "asset-1")
             self.assertEquals(shot_instance["shot_id"], "shot-1")
             self.assertEquals(shot_instance["number"], 1)
+
+    def test_all_asset_instances_for_asset(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url(
+                    "data/assets/asset-1/asset-asset-instances"
+                ),
+                text=json.dumps([{
+                    "asset_id": "asset-2",
+                    "target_asset_id": "asset-1",
+                    "number": 1
+                }])
+            )
+            asset_instances = gazu.asset.all_asset_instances_for_asset(
+                "asset-1"
+            )
+            asset_instance = asset_instances[0]
+            self.assertEquals(asset_instance["asset_id"], "asset-2")
+            self.assertEquals(asset_instance["target_asset_id"], "asset-1")
+            self.assertEquals(asset_instance["number"], 1)
+
+    def test_new_asset_asset_instance(self):
+        with requests_mock.mock() as mock:
+            result = {
+                "id": "asset-instance-01",
+                "asset_id": "asset-1",
+                "target_asset_id": "asset-2"
+            }
+            mock = mock.post(
+                gazu.client.get_full_url(
+                    "data/assets/asset-1/asset-asset-instances"
+                ),
+                text=json.dumps(result)
+            )
+            asset = {"id": "asset-1"}
+            asset_to_instantiate = {"id": "asset-2"}
+            asset_instance = gazu.asset.new_asset_asset_instance(
+                asset,
+                asset_to_instantiate
+            )
+            self.assertEquals(asset_instance, result)

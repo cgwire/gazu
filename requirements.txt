@@ -1,2 +1,3 @@
-requests==2.18.4
+socketio-client==0.7.2
+requests==2.20.0
 deprecated==1.1.0
