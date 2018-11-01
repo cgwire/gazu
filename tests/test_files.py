@@ -25,7 +25,7 @@ class FilesTestCase(unittest.TestCase):
                 {"id": 'task-01'},
                 software={"id": "software-1"}
             )
-            self.assertEquals(path, "U:/PROD/FX/S01/P01/Tree/filename.max")
+            self.assertEqual(path, "U:/PROD/FX/S01/P01/Tree/filename.max")
 
     def test_new_working_file(self):
         with requests_mock.mock() as mock:
@@ -40,7 +40,7 @@ class FilesTestCase(unittest.TestCase):
                 person={"id": "person-1"},
                 software={"id": "software-1"}
             )
-            self.assertEquals(working_file["id"], 1)
+            self.assertEqual(working_file["id"], 1)
 
     def test_new_entity_output_file(self):
         with requests_mock.mock() as mock:
@@ -64,7 +64,7 @@ class FilesTestCase(unittest.TestCase):
                 person={"id": "person-01"}
             )
             name = result["output_file"]["file_name"]
-            self.assertEquals(name, "filename.max")
+            self.assertEqual(name, "filename.max")
 
     def test_new_instance_output_file(self):
         with requests_mock.mock() as mock:
@@ -89,7 +89,7 @@ class FilesTestCase(unittest.TestCase):
                 person={"id": "person-01"}
             )
             name = result["output_file"]["file_name"]
-            self.assertEquals(name, "filename.max")
+            self.assertEqual(name, "filename.max")
 
     def test_next_entity_output_revision(self):
         with requests_mock.mock() as mock:
@@ -106,7 +106,7 @@ class FilesTestCase(unittest.TestCase):
                 output_type,
                 task_type
             )
-            self.assertEquals(revision, 3)
+            self.assertEqual(revision, 3)
 
     def test_next_asset_instance_output_revision(self):
         with requests_mock.mock() as mock:
@@ -126,7 +126,7 @@ class FilesTestCase(unittest.TestCase):
                 output_type,
                 task_type
             )
-            self.assertEquals(revision, 3)
+            self.assertEqual(revision, 3)
 
     def test_last_output_revision(self):
         with requests_mock.mock() as mock:
@@ -143,7 +143,7 @@ class FilesTestCase(unittest.TestCase):
                 output_type,
                 task_type
             )
-            self.assertEquals(revision, 2)
+            self.assertEqual(revision, 2)
 
     def test_get_working_file(self):
         with requests_mock.mock() as mock:
@@ -153,7 +153,7 @@ class FilesTestCase(unittest.TestCase):
                 text=json.dumps({"id": "working-file-1"})
             )
             working_file = gazu.files.get_working_file("working-file-1")
-            self.assertEquals(
+            self.assertEqual(
                 working_file["id"],
                 "working-file-1"
             )
@@ -167,7 +167,7 @@ class FilesTestCase(unittest.TestCase):
             )
             task = {"id": "task-01"}
             working_files = gazu.files.get_working_files_for_task(task)
-            self.assertEquals(
+            self.assertEqual(
                 working_files[0]["id"],
                 "working-file-1"
             )
@@ -184,11 +184,11 @@ class FilesTestCase(unittest.TestCase):
             )
             task = {"id": "task-01"}
             working_files_dict = gazu.files.get_last_working_files(task)
-            self.assertEquals(
+            self.assertEqual(
                 working_files_dict["main"]["id"],
                 "working-file-1"
             )
-            self.assertEquals(
+            self.assertEqual(
                 working_files_dict["hotfix"]["id"],
                 "working-file-7"
             )
@@ -206,12 +206,12 @@ class FilesTestCase(unittest.TestCase):
             task = {"id": "task-01"}
 
             working_file = gazu.files.get_last_working_file_revision(task)
-            self.assertEquals(working_file["revision"], 2)
+            self.assertEqual(working_file["revision"], 2)
             working_file = gazu.files.get_last_working_file_revision(
                 task,
                 "hotfix",
             )
-            self.assertEquals(working_file["revision"], 4)
+            self.assertEqual(working_file["revision"], 4)
 
     def test_get_last_output_files_for_entity(self):
         with requests_mock.mock() as mock:
@@ -234,11 +234,11 @@ class FilesTestCase(unittest.TestCase):
             entity = {"id": "entity-01"}
             output_files_dict = gazu.files.get_last_output_files_for_entity(
                 entity)
-            self.assertEquals(
+            self.assertEqual(
                 output_files_dict["output-type-01"]["main"]["id"],
                 "output-file-1"
             )
-            self.assertEquals(
+            self.assertEqual(
                 output_files_dict["output-type-02"]["main"]["id"],
                 "output-file-7"
             )
@@ -267,11 +267,11 @@ class FilesTestCase(unittest.TestCase):
             output_files_dict = \
                 gazu.files.get_last_output_files_for_asset_instance(
                     asset_instance, scene)
-            self.assertEquals(
+            self.assertEqual(
                 output_files_dict["output-type-01"]["main"]["id"],
                 "output-file-1"
             )
-            self.assertEquals(
+            self.assertEqual(
                 output_files_dict["output-type-02"]["main"]["id"],
                 "output-file-7"
             )
@@ -287,7 +287,7 @@ class FilesTestCase(unittest.TestCase):
                 }])
             )
             softwares = gazu.files.all_softwares()
-            self.assertEquals(softwares[0]["name"], "3dsmax")
+            self.assertEqual(softwares[0]["name"], "3dsmax")
 
     def test_get_software(self):
         with requests_mock.mock() as mock:
@@ -301,7 +301,7 @@ class FilesTestCase(unittest.TestCase):
                 })
             )
             software = gazu.files.get_software("software-01")
-            self.assertEquals(software["name"], "3ds Max")
+            self.assertEqual(software["name"], "3ds Max")
 
     def test_get_software_by_name(self):
         with requests_mock.mock() as mock:
@@ -315,7 +315,7 @@ class FilesTestCase(unittest.TestCase):
                 }])
             )
             software = gazu.files.get_software_by_name("3ds Max")
-            self.assertEquals(software["name"], "3ds Max")
+            self.assertEqual(software["name"], "3ds Max")
 
     def test_all_output_types(self):
         with requests_mock.mock() as mock:
@@ -328,7 +328,7 @@ class FilesTestCase(unittest.TestCase):
                 }])
             )
             output_type = gazu.files.all_output_types()
-            self.assertEquals(output_type[0]["name"], "geometry")
+            self.assertEqual(output_type[0]["name"], "geometry")
 
     def test_all_output_types_for_entity(self):
         with requests_mock.mock() as mock:
@@ -342,7 +342,7 @@ class FilesTestCase(unittest.TestCase):
             )
             asset = {"id": "asset-1"}
             output_type = gazu.files.all_output_types_for_entity(asset)
-            self.assertEquals(output_type[0]["name"], "geometry")
+            self.assertEqual(output_type[0]["name"], "geometry")
 
     def test_all_output_types_for_asset_instance(self):
         with requests_mock.mock() as mock:
@@ -361,7 +361,7 @@ class FilesTestCase(unittest.TestCase):
                 asset_instance,
                 scene
             )
-            self.assertEquals(output_type[0]["name"], "geometry")
+            self.assertEqual(output_type[0]["name"], "geometry")
 
     def test_get_output_type(self):
         with requests_mock.mock() as mock:
@@ -374,7 +374,7 @@ class FilesTestCase(unittest.TestCase):
                 })
             )
             output_type = gazu.files.get_output_type("output-type-1")
-            self.assertEquals(output_type["name"], "geometry")
+            self.assertEqual(output_type["name"], "geometry")
 
     def test_get_output_type_by_name(self):
         with requests_mock.mock() as mock:
@@ -387,7 +387,7 @@ class FilesTestCase(unittest.TestCase):
                 }])
             )
             output_type = gazu.files.get_output_type_by_name("geometry")
-            self.assertEquals(output_type["name"], "geometry")
+            self.assertEqual(output_type["name"], "geometry")
 
     def test_get_output_file(self):
         with requests_mock.mock() as mock:
@@ -400,7 +400,7 @@ class FilesTestCase(unittest.TestCase):
                 })
             )
             output_type = gazu.files.get_output_file("output-file-1")
-            self.assertEquals(output_type["name"], "main")
+            self.assertEqual(output_type["name"], "main")
 
     def test_get_output_files_for_entity(self):
         with requests_mock.mock() as mock:
@@ -417,7 +417,7 @@ class FilesTestCase(unittest.TestCase):
                 {"id": "asset-1"},
                 {"id": "output-type-1"},
             )
-            self.assertEquals(output_type[0]["name"], "main")
+            self.assertEqual(output_type[0]["name"], "main")
 
             path = "/data/entities/asset-1/output-types/output-type-1/" \
                    "output-files?representation=obj"
@@ -434,7 +434,7 @@ class FilesTestCase(unittest.TestCase):
                 {"id": "output-type-1"},
                 representation="obj"
             )
-            self.assertEquals(output_type[0]["name"], "main")
+            self.assertEqual(output_type[0]["name"], "main")
 
     def test_get_output_files_for_asset_instance(self):
         with requests_mock.mock() as mock:
@@ -452,7 +452,7 @@ class FilesTestCase(unittest.TestCase):
                 {"id": "scene-1"},
                 {"id": "output-type-1"},
             )
-            self.assertEquals(output_type[0]["name"], "main")
+            self.assertEqual(output_type[0]["name"], "main")
 
     def test_update_modification_date(self):
         with requests_mock.mock() as mock:
@@ -466,7 +466,7 @@ class FilesTestCase(unittest.TestCase):
             )
             working_file = {"id": "working-file-01"}
             working_file = gazu.files.update_modification_date(working_file)
-            self.assertEquals(working_file["id"], "working-file-01")
+            self.assertEqual(working_file["id"], "working-file-01")
 
     def test_set_project_file_tree(self):
         with requests_mock.mock() as mock:
@@ -483,7 +483,7 @@ class FilesTestCase(unittest.TestCase):
                 project,
                 "standard"
             )
-            self.assertEquals(file_tree["name"], "standard file tree")
+            self.assertEqual(file_tree["name"], "standard file tree")
 
     def test_build_entity_output_file_path(self):
         with requests_mock.mock() as mock:
@@ -506,7 +506,7 @@ class FilesTestCase(unittest.TestCase):
                 output_type,
                 task_type
             )
-            self.assertEquals(path, result_path)
+            self.assertEqual(path, result_path)
 
     def test_build_asset_instance_file_path(self):
         with requests_mock.mock() as mock:
@@ -531,7 +531,7 @@ class FilesTestCase(unittest.TestCase):
                 output_type,
                 task_type
             )
-            self.assertEquals(path, result_path)
+            self.assertEqual(path, result_path)
 
     def test_new_output_type(self):
         with requests_mock.mock() as mock:
@@ -547,7 +547,7 @@ class FilesTestCase(unittest.TestCase):
                 })
             )
             output_type = gazu.files.new_output_type("Geometry", "Geo")
-            self.assertEquals(output_type["id"], "output-type-01")
+            self.assertEqual(output_type["id"], "output-type-01")
 
     def test_new_software(self):
         with requests_mock.mock() as mock:
@@ -567,7 +567,7 @@ class FilesTestCase(unittest.TestCase):
                 "max",
                 ".max"
             )
-            self.assertEquals(output_type["id"], "software-01")
+            self.assertEqual(output_type["id"], "software-01")
 
     def test_update_project_file_tree(self):
         with requests_mock.mock() as mock:
@@ -587,7 +587,7 @@ class FilesTestCase(unittest.TestCase):
                 "project-01",
                 file_tree
             )["file_tree"]
-            self.assertEquals(file_tree["name"], "standard file tree")
+            self.assertEqual(file_tree["name"], "standard file tree")
 
     def test_download_preview_file(self):
         with open("./tests/fixtures/v1.png") as thumbnail_file:
@@ -610,7 +610,7 @@ class FilesTestCase(unittest.TestCase):
                     "./test.png"
                 )
                 self.assertTrue(os.path.exists("./test.png"))
-                self.assertEquals(
+                self.assertEqual(
                     os.path.getsize("./test.png"),
                     os.path.getsize("./tests/fixtures/v1.png")
                 )
@@ -628,7 +628,7 @@ class FilesTestCase(unittest.TestCase):
                     "./test.png"
                 )
                 self.assertTrue(os.path.exists("./test.png"))
-                self.assertEquals(
+                self.assertEqual(
                     os.path.getsize("./test.png"),
                     os.path.getsize("./tests/fixtures/v1.png")
                 )

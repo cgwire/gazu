@@ -25,10 +25,10 @@ class AssetTestCase(unittest.TestCase):
                 "id": "shot-1"
             }
             assets = gazu.asset.all_assets_for_shot(shot)
-            self.assertEquals(len(assets), 1)
+            self.assertEqual(len(assets), 1)
             asset_instance = assets[0]
-            self.assertEquals(asset_instance["name"], "Asset 01")
-            self.assertEquals(asset_instance["project_id"], "project-1")
+            self.assertEqual(asset_instance["name"], "Asset 01")
+            self.assertEqual(asset_instance["project_id"], "project-1")
 
     def test_all_assets_for_project(self):
         with requests_mock.mock() as mock:
@@ -41,10 +41,10 @@ class AssetTestCase(unittest.TestCase):
                 "id": "project-1"
             }
             assets = gazu.asset.all_assets_for_project(project)
-            self.assertEquals(len(assets), 1)
+            self.assertEqual(len(assets), 1)
             asset = assets[0]
-            self.assertEquals(asset["name"], "Asset 01")
-            self.assertEquals(asset["project_id"], "project-1")
+            self.assertEqual(asset["name"], "Asset 01")
+            self.assertEqual(asset["project_id"], "project-1")
 
     def test_all_assets_for_project_and_type(self):
         with requests_mock.mock() as mock:
@@ -62,10 +62,10 @@ class AssetTestCase(unittest.TestCase):
             assets = gazu.asset.all_assets_for_project_and_type(
                 project, asset_type
             )
-            self.assertEquals(len(assets), 1)
+            self.assertEqual(len(assets), 1)
             asset = assets[0]
-            self.assertEquals(asset["name"], "Asset 01")
-            self.assertEquals(asset["project_id"], "project-1")
+            self.assertEqual(asset["name"], "Asset 01")
+            self.assertEqual(asset["project_id"], "project-1")
 
     def test_all_asset_types(self):
         with requests_mock.mock() as mock:
@@ -75,7 +75,7 @@ class AssetTestCase(unittest.TestCase):
             )
             asset_types = gazu.asset.all_asset_types()
             asset_type = asset_types[0]
-            self.assertEquals(asset_type["name"], "Asset Type 01")
+            self.assertEqual(asset_type["name"], "Asset Type 01")
 
     def test_all_asset_types_for_shot(self):
         path = "data/shots/shot-01/asset-types"
@@ -87,7 +87,7 @@ class AssetTestCase(unittest.TestCase):
             shot = {"id": "shot-01"}
             asset_types = gazu.asset.all_asset_types_for_shot(shot)
             asset_type = asset_types[0]
-            self.assertEquals(asset_type["name"], "Asset Type 01")
+            self.assertEqual(asset_type["name"], "Asset Type 01")
 
     def test_all_asset_types_for_project(self):
         path = "data/projects/project-01/asset-types"
@@ -99,7 +99,7 @@ class AssetTestCase(unittest.TestCase):
             project = {"id": "project-01"}
             asset_types = gazu.asset.all_asset_types_for_project(project)
             asset_type = asset_types[0]
-            self.assertEquals(asset_type["name"], "Asset Type 01")
+            self.assertEqual(asset_type["name"], "Asset Type 01")
 
     def test_get_asset(self):
         with requests_mock.mock() as mock:
@@ -108,7 +108,7 @@ class AssetTestCase(unittest.TestCase):
                 text='{"name": "Asset 01", "project_id": "project-1"}'
             )
             asset = gazu.asset.get_asset('asset-1')
-            self.assertEquals(asset["name"], "Asset 01")
+            self.assertEqual(asset["name"], "Asset 01")
 
     def test_get_asset_by_name(self):
         with requests_mock.mock() as mock:
@@ -122,7 +122,7 @@ class AssetTestCase(unittest.TestCase):
             )
             project = {"id": "project-1"}
             asset = gazu.asset.get_asset_by_name(project, "test")
-            self.assertEquals(asset["name"], "Asset 01")
+            self.assertEqual(asset["name"], "Asset 01")
 
     def test_get_asset_type(self):
         with requests_mock.mock() as mock:
@@ -131,7 +131,7 @@ class AssetTestCase(unittest.TestCase):
                 text='{"name": "Asset Type 01", "id": "asset-type-1"}'
             )
             asset = gazu.asset.get_asset_type('asset-type-1')
-            self.assertEquals(asset["name"], "Asset Type 01")
+            self.assertEqual(asset["name"], "Asset Type 01")
 
     def test_create_asset(self):
         with requests_mock.mock() as mock:
@@ -153,7 +153,7 @@ class AssetTestCase(unittest.TestCase):
             asset = gazu.asset.new_asset(
                 project, asset_type, "Car", "test description"
             )
-            self.assertEquals(asset["name"], "Car")
+            self.assertEqual(asset["name"], "Car")
 
     def test_remove_asset(self):
         with requests_mock.mock() as mock:
@@ -163,7 +163,7 @@ class AssetTestCase(unittest.TestCase):
             )
             asset = {"id": "asset-id"}
             response = gazu.asset.remove_asset(asset)
-            self.assertEquals(response, "")
+            self.assertEqual(response, "")
 
     def test_create_asset_type(self):
         with requests_mock.mock() as mock:
@@ -181,7 +181,7 @@ class AssetTestCase(unittest.TestCase):
             )
             name = "Characters"
             asset_type = gazu.asset.new_asset_type(name)
-            self.assertEquals(asset_type["name"], name)
+            self.assertEqual(asset_type["name"], name)
 
     def test_put_asset_type(self):
         with requests_mock.mock() as mock:
@@ -195,7 +195,7 @@ class AssetTestCase(unittest.TestCase):
             )
             asset_type = {"id": "asset-type-1", "name": name}
             response = gazu.asset.update_asset_type(asset_type)
-            self.assertEquals(response["name"], name)
+            self.assertEqual(response["name"], name)
 
     def test_remove_asset_type(self):
         with requests_mock.mock() as mock:
@@ -205,7 +205,7 @@ class AssetTestCase(unittest.TestCase):
             )
             asset_type = {"id": "asset-type-1", "name": "Modeling edited"}
             response = gazu.asset.remove_asset_type(asset_type)
-            self.assertEquals(response, "")
+            self.assertEqual(response, "")
 
     def test_get_asset_instance(self):
         with requests_mock.mock() as mock:
@@ -218,9 +218,9 @@ class AssetTestCase(unittest.TestCase):
                 })
             )
             asset_instance = gazu.asset.get_asset_instance("instance-1")
-            self.assertEquals(asset_instance["asset_id"], "asset-1")
-            self.assertEquals(asset_instance["shot_id"], "shot-1")
-            self.assertEquals(asset_instance["number"], 1)
+            self.assertEqual(asset_instance["asset_id"], "asset-1")
+            self.assertEqual(asset_instance["shot_id"], "shot-1")
+            self.assertEqual(asset_instance["number"], 1)
 
     def test_all_shot_asset_instances_for_asset(self):
         with requests_mock.mock() as mock:
@@ -237,9 +237,9 @@ class AssetTestCase(unittest.TestCase):
             asset_instance = gazu.asset.all_shot_asset_instances_for_asset(
                 {"id": "asset-1"}
             )[0]
-            self.assertEquals(asset_instance["asset_id"], "asset-1")
-            self.assertEquals(asset_instance["shot_id"], "shot-1")
-            self.assertEquals(asset_instance["number"], 1)
+            self.assertEqual(asset_instance["asset_id"], "asset-1")
+            self.assertEqual(asset_instance["shot_id"], "shot-1")
+            self.assertEqual(asset_instance["number"], 1)
 
     def test_get_scene_asset_instances_for_asset(self):
         with requests_mock.mock() as mock:
@@ -256,9 +256,9 @@ class AssetTestCase(unittest.TestCase):
             asset_instance = gazu.asset.all_scene_asset_instances_for_asset(
                 {"id": "asset-1"}
             )[0]
-            self.assertEquals(asset_instance["asset_id"], "asset-1")
-            self.assertEquals(asset_instance["shot_id"], "shot-1")
-            self.assertEquals(asset_instance["number"], 1)
+            self.assertEqual(asset_instance["asset_id"], "asset-1")
+            self.assertEqual(asset_instance["shot_id"], "shot-1")
+            self.assertEqual(asset_instance["number"], 1)
 
     def test_all_asset_instances_for_shot(self):
         with requests_mock.mock() as mock:
@@ -275,9 +275,9 @@ class AssetTestCase(unittest.TestCase):
             shot_instance = gazu.asset.all_asset_instances_for_shot(
                 {"id": "shot-1"}
             )[0]
-            self.assertEquals(shot_instance["asset_id"], "asset-1")
-            self.assertEquals(shot_instance["shot_id"], "shot-1")
-            self.assertEquals(shot_instance["number"], 1)
+            self.assertEqual(shot_instance["asset_id"], "asset-1")
+            self.assertEqual(shot_instance["shot_id"], "shot-1")
+            self.assertEqual(shot_instance["number"], 1)
 
     def test_all_asset_instances_for_asset(self):
         with requests_mock.mock() as mock:
@@ -295,9 +295,9 @@ class AssetTestCase(unittest.TestCase):
                 "asset-1"
             )
             asset_instance = asset_instances[0]
-            self.assertEquals(asset_instance["asset_id"], "asset-2")
-            self.assertEquals(asset_instance["target_asset_id"], "asset-1")
-            self.assertEquals(asset_instance["number"], 1)
+            self.assertEqual(asset_instance["asset_id"], "asset-2")
+            self.assertEqual(asset_instance["target_asset_id"], "asset-1")
+            self.assertEqual(asset_instance["number"], 1)
 
     def test_new_asset_asset_instance(self):
         with requests_mock.mock() as mock:
@@ -318,4 +318,4 @@ class AssetTestCase(unittest.TestCase):
                 asset,
                 asset_to_instantiate
             )
-            self.assertEquals(asset_instance, result)
+            self.assertEqual(asset_instance, result)

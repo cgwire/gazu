@@ -14,7 +14,7 @@ class ProjectTestCase(unittest.TestCase):
             )
             projects = gazu.user.all_open_projects()
             project_instance = projects[0]
-            self.assertEquals(project_instance["name"], "Big Buck Bunny")
+            self.assertEqual(project_instance["name"], "Big Buck Bunny")
 
     def test_asset_types_for_project(self):
         with requests_mock.mock() as mock:
@@ -28,7 +28,7 @@ class ProjectTestCase(unittest.TestCase):
             project = {"id": "project-1"}
             asset_types = gazu.user.all_asset_types_for_project(project)
             asset_type = asset_types[0]
-            self.assertEquals(asset_type["name"], "Props")
+            self.assertEqual(asset_type["name"], "Props")
 
     def test_asset_for_asset_type_and_project(self):
         with requests_mock.mock() as mock:
@@ -47,7 +47,7 @@ class ProjectTestCase(unittest.TestCase):
                 asset_type
             )
             asset = assets[0]
-            self.assertEquals(asset["name"], "Chair")
+            self.assertEqual(asset["name"], "Chair")
 
     def test_tasks_for_asset(self):
         with requests_mock.mock() as mock:
@@ -60,7 +60,7 @@ class ProjectTestCase(unittest.TestCase):
             asset = {"id": "asset-1"}
             tasks = gazu.user.all_tasks_for_asset(asset)
             task = tasks[0]
-            self.assertEquals(task["name"], "main")
+            self.assertEqual(task["name"], "main")
 
     def test_tasks_for_shot(self):
         with requests_mock.mock() as mock:
@@ -73,7 +73,7 @@ class ProjectTestCase(unittest.TestCase):
             shot = {"id": "shot-1"}
             tasks = gazu.user.all_tasks_for_shot(shot)
             task = tasks[0]
-            self.assertEquals(task["name"], "main")
+            self.assertEqual(task["name"], "main")
 
     def test_task_types_for_asset(self):
         with requests_mock.mock() as mock:
@@ -86,7 +86,7 @@ class ProjectTestCase(unittest.TestCase):
             asset = {"id": "asset-1"}
             task_types = gazu.user.all_task_types_for_asset(asset)
             task_type = task_types[0]
-            self.assertEquals(task_type["name"], "modeling")
+            self.assertEqual(task_type["name"], "modeling")
 
     def test_task_types_for_shot(self):
         with requests_mock.mock() as mock:
@@ -100,7 +100,7 @@ class ProjectTestCase(unittest.TestCase):
             shot = {"id": "shot-1"}
             tasks = gazu.user.all_task_types_for_shot(shot)
             task = tasks[0]
-            self.assertEquals(task["name"], "animation")
+            self.assertEqual(task["name"], "animation")
 
     def test_sequences_for_project(self):
         with requests_mock.mock() as mock:
@@ -113,7 +113,7 @@ class ProjectTestCase(unittest.TestCase):
             project = {"id": "project-1"}
             sequences = gazu.user.all_sequences_for_project(project)
             sequence = sequences[0]
-            self.assertEquals(sequence["name"], "SEQ01")
+            self.assertEqual(sequence["name"], "SEQ01")
 
     def test_shot_for_sequences(self):
         with requests_mock.mock() as mock:
@@ -126,4 +126,4 @@ class ProjectTestCase(unittest.TestCase):
             sequence = {"id": "sequence-1"}
             shots = gazu.user.all_shots_for_sequence(sequence)
             shot = shots[0]
-            self.assertEquals(shot["name"], "SEQ01")
+            self.assertEqual(shot["name"], "SEQ01")

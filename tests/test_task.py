@@ -20,7 +20,7 @@ class TaskTestCase(unittest.TestCase):
             shot = {"id": "shot-01"}
             tasks = gazu.task.all_tasks_for_shot(shot)
             task = tasks[0]
-            self.assertEquals(task["name"], "Master Animation")
+            self.assertEqual(task["name"], "Master Animation")
 
     def test_all_for_sequence(self):
         with requests_mock.mock() as mock:
@@ -37,7 +37,7 @@ class TaskTestCase(unittest.TestCase):
             sequence = {"id": "sequence-01"}
             tasks = gazu.task.all_tasks_for_sequence(sequence)
             task = tasks[0]
-            self.assertEquals(task["name"], "Master Animation")
+            self.assertEqual(task["name"], "Master Animation")
 
     def test_all_for_asset(self):
         with requests_mock.mock() as mock:
@@ -52,7 +52,7 @@ class TaskTestCase(unittest.TestCase):
             asset = {"id": "asset-01"}
             tasks = gazu.task.all_tasks_for_asset(asset)
             task = tasks[0]
-            self.assertEquals(task["name"], "Master Modeling")
+            self.assertEqual(task["name"], "Master Modeling")
 
     def test_all_task_types(self):
         with requests_mock.mock() as mock:
@@ -62,7 +62,7 @@ class TaskTestCase(unittest.TestCase):
             )
             task_types = gazu.task.all_task_types()
             task_type = task_types[0]
-            self.assertEquals(task_type["name"], "Modeling")
+            self.assertEqual(task_type["name"], "Modeling")
 
     def test_all_task_types_for_shot(self):
         with requests_mock.mock() as mock:
@@ -74,7 +74,7 @@ class TaskTestCase(unittest.TestCase):
             shot = {"id": "shot-1"}
             task_types = gazu.task.all_task_types_for_shot(shot)
             task_type = task_types[0]
-            self.assertEquals(task_type["name"], "Modeling")
+            self.assertEqual(task_type["name"], "Modeling")
 
     def test_all_task_types_for_sequence(self):
         with requests_mock.mock() as mock:
@@ -88,7 +88,7 @@ class TaskTestCase(unittest.TestCase):
             sequence = {"id": "sequence-1"}
             task_types = gazu.task.all_task_types_for_sequence(sequence)
             task_type = task_types[0]
-            self.assertEquals(task_type["name"], "Modeling")
+            self.assertEqual(task_type["name"], "Modeling")
 
     def test_get_task_by_name(self):
         with requests_mock.mock() as mock:
@@ -104,7 +104,7 @@ class TaskTestCase(unittest.TestCase):
             test_task = gazu.task.get_task_by_name(
                 {"id": "entity-1"}, {"id": "modeling-1"}, "Task 01"
             )
-            self.assertEquals(test_task["name"], "Task 01")
+            self.assertEqual(test_task["name"], "Task 01")
 
     def test_get_task_type_by_name(self):
         with requests_mock.mock() as mock:
@@ -116,7 +116,7 @@ class TaskTestCase(unittest.TestCase):
                 ])
             )
             task_type = gazu.task.get_task_type_by_name("FX")
-            self.assertEquals(task_type["name"], "FX")
+            self.assertEqual(task_type["name"], "FX")
 
     def test_get_task_by_path(self):
         with requests_mock.mock() as mock:
@@ -132,11 +132,11 @@ class TaskTestCase(unittest.TestCase):
             )
             request_body_string = mock.request_history[0].body.decode("utf-8")
             request_body = json.loads(request_body_string)
-            self.assertEquals(request_body["project_id"], "project-id")
-            self.assertEquals(request_body["type"], "shot")
-            self.assertEquals(request_body["file_path"], file_path)
+            self.assertEqual(request_body["project_id"], "project-id")
+            self.assertEqual(request_body["type"], "shot")
+            self.assertEqual(request_body["file_path"], file_path)
             self.assertIsNotNone(task)
-            self.assertEquals(task["id"], "task-id")
+            self.assertEqual(task["id"], "task-id")
 
     def test_get_task_status(self):
         with requests_mock.mock() as mock:
@@ -149,7 +149,7 @@ class TaskTestCase(unittest.TestCase):
                 "id": "task-01",
                 "task_status_id": "status-01"
             })
-            self.assertEquals(status["id"], "status-01")
+            self.assertEqual(status["id"], "status-01")
 
     def test_get_task(self):
         with requests_mock.mock() as mock:
@@ -159,7 +159,7 @@ class TaskTestCase(unittest.TestCase):
                 text=json.dumps({"id": "task-01"})
             )
             task = gazu.task.get_task("task-01")
-            self.assertEquals(task["id"], "task-01")
+            self.assertEqual(task["id"], "task-01")
 
     def test_start_task(self):
         with requests_mock.mock() as mock:
@@ -170,7 +170,7 @@ class TaskTestCase(unittest.TestCase):
                 text='{"name": "Task 01", "task_status_id": "wip-1"}'
             )
             test_task = gazu.task.start_task({"id": "task-1"})
-            self.assertEquals(test_task["task_status_id"], "wip-1")
+            self.assertEqual(test_task["task_status_id"], "wip-1")
 
     def test_to_review(self):
         with requests_mock.mock() as mock:
@@ -187,13 +187,13 @@ class TaskTestCase(unittest.TestCase):
                 {"id": "person-1"},
                 "my comment"
             )
-            self.assertEquals(test_task["task_status_id"], "wfa-1")
+            self.assertEqual(test_task["task_status_id"], "wfa-1")
             test_task = gazu.task.task_to_review(
                 {"id": "task-1"},
                 {"id": "person-1"},
                 "my comment"
             )
-            self.assertEquals(test_task["task_status_id"], "wfa-1")
+            self.assertEqual(test_task["task_status_id"], "wfa-1")
 
     def test_get_time_spent(self):
         with requests_mock.mock() as mock:
@@ -207,7 +207,7 @@ class TaskTestCase(unittest.TestCase):
                 {"id": "task-1"},
                 "2017-09-23"
             )
-            self.assertEquals(time_spents["total"], 3600)
+            self.assertEqual(time_spents["total"], 3600)
 
     def test_set_time_spent(self):
         with requests_mock.mock() as mock:
@@ -224,7 +224,7 @@ class TaskTestCase(unittest.TestCase):
                 "2017-09-23",
                 3600
             )
-            self.assertEquals(time_spents["duration"], 3600)
+            self.assertEqual(time_spents["duration"], 3600)
 
     def test_add_time_spent(self):
         with requests_mock.mock() as mock:
@@ -241,7 +241,7 @@ class TaskTestCase(unittest.TestCase):
                 "2017-09-23",
                 7200
             )
-            self.assertEquals(time_spent["duration"], 7200)
+            self.assertEqual(time_spent["duration"], 7200)
 
     def test_all_task_types_for_asset(self):
         path = "data/assets/asset-01/task-types"
@@ -253,7 +253,7 @@ class TaskTestCase(unittest.TestCase):
             asset = {"id": "asset-01"}
             asset_types = gazu.task.all_task_types_for_asset(asset)
             asset_instance = asset_types[0]
-            self.assertEquals(asset_instance["name"], "Modeling")
+            self.assertEqual(asset_instance["name"], "Modeling")
 
     def test_all_tasks_for_task_status(self):
         with requests_mock.mock() as mock:
@@ -272,7 +272,7 @@ class TaskTestCase(unittest.TestCase):
             task_status = gazu.task.all_tasks_for_task_status(
                 project, task_type, task_status
             )
-            self.assertEquals(task_status, result)
+            self.assertEqual(task_status, result)
 
     def test_get_task_status_by_name(self):
         with requests_mock.mock() as mock:
@@ -282,7 +282,7 @@ class TaskTestCase(unittest.TestCase):
                 text=json.dumps(result)
             )
             task_status = gazu.task.get_task_status_by_name("wip")
-            self.assertEquals(task_status, result[0])
+            self.assertEqual(task_status, result[0])
 
     def test_new_task(self):
         with requests_mock.mock() as mock:
@@ -305,7 +305,7 @@ class TaskTestCase(unittest.TestCase):
             asset = {"id": "asset-1", "project_id": "project-1"}
             task_type = {"id": "task-type-1"}
             task = gazu.task.new_task(asset, task_type)
-            self.assertEquals(task, result)
+            self.assertEqual(task, result)
 
     def test_add_comment(self):
         with requests_mock.mock() as mock:

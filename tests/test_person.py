@@ -16,7 +16,7 @@ class PersonTestCase(unittest.TestCase):
             )
             persons = gazu.person.all_persons()
             person_instance = persons[0]
-            self.assertEquals(person_instance["first_name"], "John")
+            self.assertEqual(person_instance["first_name"], "John")
 
     def test_get_person_by_full_name(self):
         with requests_mock.mock() as mock:
@@ -43,7 +43,7 @@ class PersonTestCase(unittest.TestCase):
             print("yo")
             person = gazu.person.get_person_by_full_name("John Did")
             print("ya")
-            self.assertEquals(person["id"], "person-2")
+            self.assertEqual(person["id"], "person-2")
 
     def test_get_person_by_desktop_login(self):
         with requests_mock.mock() as mock:
@@ -59,7 +59,7 @@ class PersonTestCase(unittest.TestCase):
                 ])
             )
             person = gazu.person.get_person_by_desktop_login("john.doe")
-            self.assertEquals(person["id"], "person-1")
+            self.assertEqual(person["id"], "person-1")
 
     def test_get_person_by_email(self):
         with requests_mock.mock() as mock:
@@ -75,7 +75,7 @@ class PersonTestCase(unittest.TestCase):
                 ])
             )
             person = gazu.person.get_person_by_email("john@gmail.com")
-            self.assertEquals(person["id"], "person-1")
+            self.assertEqual(person["id"], "person-1")
 
     def test_new_person(self):
         with requests_mock.mock() as mock:
@@ -123,4 +123,4 @@ class PersonTestCase(unittest.TestCase):
                 ])
             )
             persons = gazu.person.get_simple_person_list()
-            self.assertEquals(persons[0]["id"], "person-1")
+            self.assertEqual(persons[0]["id"], "person-1")

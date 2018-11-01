@@ -31,11 +31,11 @@ class BaseFuncTestCase(ClientTestCase):
             self.assertTrue(client.host_is_up())
 
     def test_get_host(self):
-        self.assertEquals(client.get_host(), client.HOST)
+        self.assertEqual(client.get_host(), client.HOST)
 
     def test_set_host(self):
         client.set_host("newhost")
-        self.assertEquals(client.get_host(), "newhost")
+        self.assertEqual(client.get_host(), "newhost")
         client.set_host("http://gazu-server/")
 
     def test_set_tokens(self):
@@ -51,13 +51,13 @@ class BaseFuncTestCase(ClientTestCase):
             host=client.get_host()
         )
 
-        self.assertEquals(client.url_path_join(root, *items), expected_url)
+        self.assertEqual(client.url_path_join(root, *items), expected_url)
 
     def test_get_full_url(self):
         test_route = "test_route"
         expected_url = client.url_path_join(client.get_host(), test_route)
 
-        self.assertEquals(client.get_full_url(test_route), expected_url)
+        self.assertEqual(client.get_full_url(test_route), expected_url)
 
     def test_get(self):
         with requests_mock.mock() as mock:
@@ -65,7 +65,7 @@ class BaseFuncTestCase(ClientTestCase):
                 client.get_full_url("data/persons"),
                 text='{"first_name": "John"}'
             )
-            self.assertEquals(
+            self.assertEqual(
                 client.get("data/persons"),
                 {"first_name": "John"}
             )
@@ -76,7 +76,7 @@ class BaseFuncTestCase(ClientTestCase):
                 client.get_full_url('data/persons'),
                 text='{"id": "person-1", "first_name": "John"}'
             )
-            self.assertEquals(
+            self.assertEqual(
                 client.post('data/persons', "person-1"),
                 {"id": "person-1", "first_name": "John"}
             )
@@ -88,7 +88,7 @@ class BaseFuncTestCase(ClientTestCase):
                 client.get_full_url('data/persons'),
                 text='{"id": "person-1", "first_name": "John"}'
             )
-            self.assertEquals(
+            self.assertEqual(
                 client.post("data/persons", {"birth_date": now}),
                 {"id": "person-1", "first_name": "John"}
             )
@@ -99,7 +99,7 @@ class BaseFuncTestCase(ClientTestCase):
                 client.get_full_url('data/persons'),
                 text='{"id": "person-1", "first_name": "John"}'
             )
-            self.assertEquals(
+            self.assertEqual(
                 client.put('data/persons', "person-1"),
                 {"id": "person-1", "first_name": "John"}
             )
@@ -110,7 +110,7 @@ class BaseFuncTestCase(ClientTestCase):
                 client.get_full_url("data/persons/person-1"),
                 text=''
             )
-            self.assertEquals(
+            self.assertEqual(
                 client.delete("data/persons/person-1"), ""
             )
 
@@ -120,7 +120,7 @@ class BaseFuncTestCase(ClientTestCase):
                 client.get_full_url("data/persons"),
                 text='[{"first_name": "John"}]'
             )
-            self.assertEquals(
+            self.assertEqual(
                 client.fetch_all("persons"),
                 [{"first_name": "John"}]
             )
@@ -134,7 +134,7 @@ class BaseFuncTestCase(ClientTestCase):
                     {"first_name": "Jane"}
                 ])
             )
-            self.assertEquals(
+            self.assertEqual(
                 client.fetch_first("persons"),
                 {"first_name": "John"}
             )
@@ -151,7 +151,7 @@ class BaseFuncTestCase(ClientTestCase):
                 client.get_full_url('data/persons/person-1'),
                 text='{"id": "person-1", "first_name": "John"}'
             )
-            self.assertEquals(
+            self.assertEqual(
                 client.fetch_one('persons', "person-1"),
                 {"id": "person-1", "first_name": "John"}
             )
@@ -162,7 +162,7 @@ class BaseFuncTestCase(ClientTestCase):
                 client.get_full_url('data/persons'),
                 text='{"id": "person-1", "first_name": "John"}'
             )
-            self.assertEquals(
+            self.assertEqual(
                 client.create('persons', {"first_name": "John"}),
                 {"id": "person-1", "first_name": "John"}
             )
@@ -170,12 +170,12 @@ class BaseFuncTestCase(ClientTestCase):
     def test_version(self):
         with requests_mock.mock() as mock:
             mock.get(client.get_host(), text='{"version": "0.2.0"}')
-            self.assertEquals(client.get_api_version(), "0.2.0")
+            self.assertEqual(client.get_api_version(), "0.2.0")
 
     def test_make_auth_token(self):
         tokens = {"access_token": "token_test"}
         client.set_tokens(tokens)
-        self.assertEquals(client.make_auth_header(), {
+        self.assertEqual(client.make_auth_header(), {
             "Authorization": "Bearer token_test"
         })
 
@@ -196,9 +196,9 @@ class BaseFuncTestCase(ClientTestCase):
 
     def test_init_host(self):
         gazu.set_host("newhost")
-        self.assertEquals(gazu.get_host(), "newhost")
+        self.assertEqual(gazu.get_host(), "newhost")
         gazu.set_host("http://gazu-server/")
-        self.assertEquals(gazu.get_host(), gazu.client.HOST)
+        self.assertEqual(gazu.get_host(), gazu.client.HOST)
 
     def test_init_log_in(self):
         with requests_mock.mock() as mock:
@@ -209,7 +209,7 @@ class BaseFuncTestCase(ClientTestCase):
                 )
             )
             gazu.log_in("frank", "test")
-        self.assertEquals(client.tokens["tokens"]["access_token"], "tokentest")
+        self.assertEqual(client.tokens["tokens"]["access_token"], "tokentest")
 
     def test_init_log_in_fail(self):
         with requests_mock.mock() as mock:
@@ -231,4 +231,4 @@ class BaseFuncTestCase(ClientTestCase):
                 text=json.dumps({"user": {"id": "123"}})
             )
             current_user = client.get_current_user()
-            self.assertEquals(current_user["id"], "123")
+            self.assertEqual(current_user["id"], "123")

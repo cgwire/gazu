@@ -18,10 +18,10 @@ class ShotTestCase(unittest.TestCase):
                 "id": "project-1"
             }
             shots = gazu.shot.all_shots_for_project(project)
-            self.assertEquals(len(shots), 1)
+            self.assertEqual(len(shots), 1)
             shot_instance = shots[0]
-            self.assertEquals(shot_instance["name"], "Shot 01")
-            self.assertEquals(shot_instance["project_id"], "project-1")
+            self.assertEqual(shot_instance["name"], "Shot 01")
+            self.assertEqual(shot_instance["project_id"], "project-1")
 
     def test_all_shots_for_sequence(self):
         with requests_mock.mock() as mock:
@@ -41,11 +41,11 @@ class ShotTestCase(unittest.TestCase):
                 "id": "sequence-1"
             }
             shots = gazu.shot.all_shots_for_sequence(sequence)
-            self.assertEquals(len(shots), 1)
+            self.assertEqual(len(shots), 1)
             shot_instance = shots[0]
-            self.assertEquals(shot_instance["name"], "Shot 01")
-            self.assertEquals(shot_instance["project_id"], "project-1")
-            self.assertEquals(shot_instance["parent_id"], "sequence-1")
+            self.assertEqual(shot_instance["name"], "Shot 01")
+            self.assertEqual(shot_instance["project_id"], "project-1")
+            self.assertEqual(shot_instance["parent_id"], "sequence-1")
 
     def test_all_sequences(self):
         with requests_mock.mock() as mock:
@@ -55,7 +55,7 @@ class ShotTestCase(unittest.TestCase):
             )
             sequences = gazu.shot.all_sequences()
             sequence_instance = sequences[0]
-            self.assertEquals(sequence_instance["name"], "Sequence 01")
+            self.assertEqual(sequence_instance["name"], "Sequence 01")
 
     def test_all_sequences_for_project(self):
         with requests_mock.mock() as mock:
@@ -69,10 +69,10 @@ class ShotTestCase(unittest.TestCase):
              "id": "project-1"
             }
             sequences = gazu.shot.all_sequences(project=project)
-            self.assertEquals(len(sequences), 1)
+            self.assertEqual(len(sequences), 1)
             sequence_instance = sequences[0]
-            self.assertEquals(sequence_instance["name"], "Sequence 01")
-            self.assertEquals(sequence_instance["project_id"], "project-1")
+            self.assertEqual(sequence_instance["name"], "Sequence 01")
+            self.assertEqual(sequence_instance["project_id"], "project-1")
 
     def test_all_sequences_for_episode(self):
         with requests_mock.mock() as mock:
@@ -90,11 +90,11 @@ class ShotTestCase(unittest.TestCase):
                 "id": "episode-1"
             }
             sequences = gazu.shot.all_sequences_for_episode(episode)
-            self.assertEquals(len(sequences), 1)
+            self.assertEqual(len(sequences), 1)
             sequence_instance = sequences[0]
-            self.assertEquals(sequence_instance["name"], "Sequence 01")
-            self.assertEquals(sequence_instance["project_id"], "project-1")
-            self.assertEquals(sequence_instance["parent_id"], "episode-1")
+            self.assertEqual(sequence_instance["name"], "Sequence 01")
+            self.assertEqual(sequence_instance["project_id"], "project-1")
+            self.assertEqual(sequence_instance["parent_id"], "episode-1")
 
     def test_all_episodes_for_project(self):
         with requests_mock.mock() as mock:
@@ -108,10 +108,10 @@ class ShotTestCase(unittest.TestCase):
                 "id": "project-1"
             }
             episodes = gazu.shot.all_episodes_for_project(project)
-            self.assertEquals(len(episodes), 1)
+            self.assertEqual(len(episodes), 1)
             episode_instance = episodes[0]
-            self.assertEquals(episode_instance["name"], "Episode 01")
-            self.assertEquals(episode_instance["project_id"], "project-1")
+            self.assertEqual(episode_instance["name"], "Episode 01")
+            self.assertEqual(episode_instance["project_id"], "project-1")
 
     def test_get_episode(self):
         with requests_mock.mock() as mock:
@@ -120,7 +120,7 @@ class ShotTestCase(unittest.TestCase):
                 text='{"name": "Episode 01", "project_id": "project-1"}'
             )
             episode = gazu.shot.get_episode('episode-1')
-            self.assertEquals(episode["name"], "Episode 01")
+            self.assertEqual(episode["name"], "Episode 01")
 
     def test_get_episode_from_sequence(self):
         with requests_mock.mock() as mock:
@@ -134,7 +134,7 @@ class ShotTestCase(unittest.TestCase):
                 "id": "shot-1",
                 "parent_id": "episode-1"
             })
-            self.assertEquals(episode["name"], "Episode 01")
+            self.assertEqual(episode["name"], "Episode 01")
 
     def test_get_sequence(self):
         with requests_mock.mock() as mock:
@@ -145,7 +145,7 @@ class ShotTestCase(unittest.TestCase):
                 )
             )
             sequence = gazu.shot.get_sequence("sequence-1")
-            self.assertEquals(sequence["name"], "Sequence 01")
+            self.assertEqual(sequence["name"], "Sequence 01")
 
     def test_get_sequence_from_shot(self):
         with requests_mock.mock() as mock:
@@ -159,7 +159,7 @@ class ShotTestCase(unittest.TestCase):
                 "id": "shot-1",
                 "parent_id": "sequence-1"
             })
-            self.assertEquals(sequence["name"], "Sequence 01")
+            self.assertEqual(sequence["name"], "Sequence 01")
 
     def test_get_shot(self):
         with requests_mock.mock() as mock:
@@ -168,7 +168,7 @@ class ShotTestCase(unittest.TestCase):
                 text='{"name": "Shot 01", "project_id": "project-1"}'
             )
             shot = gazu.shot.get_shot('shot-1')
-            self.assertEquals(shot["name"], "Shot 01")
+            self.assertEqual(shot["name"], "Shot 01")
 
     def test_get_shot_by_name(self):
         with requests_mock.mock() as mock:
@@ -182,7 +182,7 @@ class ShotTestCase(unittest.TestCase):
             )
             sequence = {"id": "sequence-1"}
             shot = gazu.shot.get_shot_by_name(sequence, "Shot01")
-            self.assertEquals(shot["name"], "Shot01")
+            self.assertEqual(shot["name"], "Shot01")
 
     def test_get_sequence_by_name(self):
         with requests_mock.mock() as mock:
@@ -196,7 +196,7 @@ class ShotTestCase(unittest.TestCase):
             )
             project = {"id": "project-1"}
             sequence = gazu.shot.get_sequence_by_name(project, "Sequence01")
-            self.assertEquals(sequence["name"], "Sequence01")
+            self.assertEqual(sequence["name"], "Sequence01")
 
     def test_new_episode(self):
         with requests_mock.mock() as mock:
@@ -214,7 +214,7 @@ class ShotTestCase(unittest.TestCase):
             )
             project = {"id": "project-1"}
             shot = gazu.shot.new_episode(project, 'Episode 01')
-            self.assertEquals(shot["id"], "episode-01")
+            self.assertEqual(shot["id"], "episode-01")
 
     def test_new_sequence(self):
         with requests_mock.mock() as mock:
@@ -236,7 +236,7 @@ class ShotTestCase(unittest.TestCase):
             project = {"id": "project-1"}
             episode = {"id": "episode-1"}
             shot = gazu.shot.new_sequence(project, episode, 'Sequence 01')
-            self.assertEquals(shot["id"], "sequence-01")
+            self.assertEqual(shot["id"], "sequence-01")
 
     def test_new_shot(self):
         with requests_mock.mock() as mock:
@@ -261,9 +261,9 @@ class ShotTestCase(unittest.TestCase):
                 frame_in=10,
                 frame_out=20
             )
-            self.assertEquals(shot["id"], "shot-01")
+            self.assertEqual(shot["id"], "shot-01")
             sent_data = json.loads(mock.request_history[0].text)
-            self.assertEquals(10, sent_data["data"]["frame_in"])
+            self.assertEqual(10, sent_data["data"]["frame_in"])
 
     def test_update_shot(self):
         with requests_mock.mock() as mock:
@@ -276,7 +276,7 @@ class ShotTestCase(unittest.TestCase):
                 "name": "S02"
             }
             shot = gazu.shot.update_shot(shot)
-            self.assertEquals(shot["id"], "shot-01")
+            self.assertEqual(shot["id"], "shot-01")
 
     def test_get_asset_instances(self):
         with requests_mock.mock() as mock:
@@ -305,7 +305,7 @@ class ShotTestCase(unittest.TestCase):
             asset_instance = gazu.shot.add_asset_instance_to_shot(
                 shot, asset_instance
             )
-            self.assertEquals(asset_instance, result)
+            self.assertEqual(asset_instance, result)
 
     def test_remove_asset_instance(self):
         with requests_mock.mock() as mock:

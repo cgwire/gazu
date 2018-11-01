@@ -15,7 +15,7 @@ class SceneTestCase(unittest.TestCase):
                 text='{"name": "Scene 01", "project_id": "project-1"}'
             )
             scene = gazu.scene.get_scene('scene-1')
-            self.assertEquals(scene["name"], "Scene 01")
+            self.assertEqual(scene["name"], "Scene 01")
 
     def test_get_scene_by_name(self):
         with requests_mock.mock() as mock:
@@ -29,7 +29,7 @@ class SceneTestCase(unittest.TestCase):
             )
             sequence = {"id": "sequence-1"}
             scene = gazu.scene.get_scene_by_name(sequence, "Scene01")
-            self.assertEquals(scene["name"], "Scene01")
+            self.assertEqual(scene["name"], "Scene01")
 
     def test_all_scenes_for_project(self):
         with requests_mock.mock() as mock:
@@ -41,10 +41,10 @@ class SceneTestCase(unittest.TestCase):
             )
             project = {"id": "project-1"}
             scenes = gazu.scene.all_scenes_for_project(project)
-            self.assertEquals(len(scenes), 1)
+            self.assertEqual(len(scenes), 1)
             scene_instance = scenes[0]
-            self.assertEquals(scene_instance["name"], "Scene 01")
-            self.assertEquals(scene_instance["project_id"], "project-1")
+            self.assertEqual(scene_instance["name"], "Scene 01")
+            self.assertEqual(scene_instance["project_id"], "project-1")
 
     def test_all_scenes_for_sequence(self):
         with requests_mock.mock() as mock:
@@ -61,11 +61,11 @@ class SceneTestCase(unittest.TestCase):
             )
             sequence = {"id": "sequence-1"}
             scenes = gazu.scene.all_scenes_for_sequence(sequence)
-            self.assertEquals(len(scenes), 1)
+            self.assertEqual(len(scenes), 1)
             scene_instance = scenes[0]
-            self.assertEquals(scene_instance["name"], "Scene 01")
-            self.assertEquals(scene_instance["project_id"], "project-1")
-            self.assertEquals(scene_instance["parent_id"], "sequence-1")
+            self.assertEqual(scene_instance["name"], "Scene 01")
+            self.assertEqual(scene_instance["project_id"], "project-1")
+            self.assertEqual(scene_instance["parent_id"], "sequence-1")
 
     def test_new_scene(self):
         with requests_mock.mock() as mock:
@@ -76,7 +76,7 @@ class SceneTestCase(unittest.TestCase):
             project = {"id": "project-1"}
             sequence = {"id": "sequence-1"}
             scene = gazu.scene.new_scene(project, sequence, 'Scene 01')
-            self.assertEquals(scene["id"], "scene-01")
+            self.assertEqual(scene["id"], "scene-01")
 
     def test_update_scene(self):
         with requests_mock.mock() as mock:
@@ -93,8 +93,8 @@ class SceneTestCase(unittest.TestCase):
                 "name": "S02"
             }
             scene = gazu.scene.update_scene(scene)
-            self.assertEquals(scene["id"], "scene-id")
-            self.assertEquals(scene["name"], "S02")
+            self.assertEqual(scene["id"], "scene-id")
+            self.assertEqual(scene["name"], "S02")
 
     def test_all_camera_instances_for_scene(self):
         with requests_mock.mock() as mock:
@@ -111,8 +111,8 @@ class SceneTestCase(unittest.TestCase):
             )
             scene = {"id": "scene-1"}
             instances = gazu.scene.all_camera_instances_for_scene(scene)
-            self.assertEquals(len(instances), 1)
-            self.assertEquals(instances[0]["id"], "scene-1-camera-instance-1")
+            self.assertEqual(len(instances), 1)
+            self.assertEqual(instances[0]["id"], "scene-1-camera-instance-1")
 
     def test_all_shots_for_scene(self):
         with requests_mock.mock() as mock:
@@ -129,8 +129,8 @@ class SceneTestCase(unittest.TestCase):
             )
             scene = {"id": "scene-1"}
             shots = gazu.scene.all_shots_for_scene(scene)
-            self.assertEquals(len(shots), 2)
-            self.assertEquals(shots[0]["id"], "shot-1")
+            self.assertEqual(len(shots), 2)
+            self.assertEqual(shots[0]["id"], "shot-1")
 
     def test_add_shot_to_scene(self):
         with requests_mock.mock() as mock:
@@ -143,7 +143,7 @@ class SceneTestCase(unittest.TestCase):
             scene = {"id": "scene-1"}
             shot = {"id": "shot-1"}
             shot = gazu.scene.add_shot_to_scene(scene, shot)
-            self.assertEquals(shot["id"], "shot-1")
+            self.assertEqual(shot["id"], "shot-1")
 
     def test_remove_shot_from_scene(self):
         with requests_mock.mock() as mock:
@@ -170,7 +170,7 @@ class SceneTestCase(unittest.TestCase):
                 scene,
                 asset
             )
-            self.assertEquals(asset_instance, result)
+            self.assertEqual(asset_instance, result)
 
     def test_all_asset_instances_for_scene(self):
         with requests_mock.mock() as mock:
@@ -187,8 +187,8 @@ class SceneTestCase(unittest.TestCase):
             )
             scene = {"id": "scene-1"}
             instances = gazu.scene.all_asset_instances_for_scene(scene)
-            self.assertEquals(len(instances), 1)
-            self.assertEquals(instances[0]["id"], "scene-1-instance-1")
+            self.assertEqual(len(instances), 1)
+            self.assertEqual(instances[0]["id"], "scene-1-instance-1")
 
     def test_get_asset_instance_by_name(self):
         instance = {
@@ -206,7 +206,7 @@ class SceneTestCase(unittest.TestCase):
             scene = {"id": "scene-1"}
             result = gazu.scene.get_asset_instance_by_name(
                 scene, "instance_name")
-            self.assertEquals(instance, result)
+            self.assertEqual(instance, result)
 
     def test_update_asset_instance_name(self):
         updated_name = 'updated_name'
@@ -228,4 +228,4 @@ class SceneTestCase(unittest.TestCase):
             )
             instance = gazu.scene.update_asset_instance_name(
                 instance, updated_name)
-            self.assertEquals(instance["name"], updated_name)
+            self.assertEqual(instance["name"], updated_name)

@@ -19,8 +19,8 @@ class AssetTestCase(unittest.TestCase):
                 })
             )
             entity = gazu.entity.get_entity("asset-1")
-            self.assertEquals(entity["name"], "Asset 01")
-            self.assertEquals(entity["project_id"], "project-1")
+            self.assertEqual(entity["name"], "Asset 01")
+            self.assertEqual(entity["project_id"], "project-1")
 
     def test_get_entity_type(self):
         with requests_mock.mock() as mock:
@@ -32,4 +32,4 @@ class AssetTestCase(unittest.TestCase):
                 })
             )
             entity = gazu.entity.get_entity_type("characters")
-            self.assertEquals(entity["name"], "Characters")
+            self.assertEqual(entity["name"], "Characters")
