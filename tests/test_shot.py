@@ -288,7 +288,7 @@ class ShotTestCase(unittest.TestCase):
                 text=json.dumps(result)
             )
             shot = {"id": "shot-1"}
-            asset_instances = gazu.shot.get_asset_instances_for_shot(shot)
+            asset_instances = gazu.shot.all_asset_instances_for_shot(shot)
             self.assertEqual(asset_instances[0]["id"], "asset-instance-01")
 
     def test_add_asset_instance(self):
@@ -320,7 +320,7 @@ class ShotTestCase(unittest.TestCase):
                 shot, asset_instance
             )
 
-    def test_get_shot(self):
+    def test_get_shot_casting(self):
         with requests_mock.mock() as mock:
             mock = mock.put(
                 gazu.client.get_full_url("data/shots/shot-1/casting"),
