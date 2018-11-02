@@ -1,10 +1,8 @@
-from socketIO_client import SocketIO, BaseNamespace
-
-
 def init():
     """
     Init configuration for SocketIO client.
     """
+    from socketIO_client import SocketIO, BaseNamespace
     from . import get_host
     path = get_host()
     socketIO = SocketIO(path, None)
