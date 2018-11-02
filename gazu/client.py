@@ -1,4 +1,5 @@
 import functools
+import shutil
 import json
 
 from .encoder import CustomJSONEncoder
@@ -218,9 +219,9 @@ def download(path, file_path):
         headers=make_auth_header(),
         stream=True
     )
-    print(url)
     with open(file_path, 'wb') as target_file:
-        target_file.write(response.content)
+        response.raw.decode_content = True
+        shutil.copyfileobj(response.raw, target_file)
 
 
 def get_api_version():
