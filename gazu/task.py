@@ -1,5 +1,3 @@
-from deprecated import deprecated
-
 from . import client
 from .sorting import sort_by_name
 from .helpers import normalize_model_parameter
@@ -344,23 +342,3 @@ def set_main_preview(entity, preview_file):
         preview_file["id"]
     )
     return client.put(path, {})
-
-
-@deprecated
-def all_for_shot(shot):
-    return all_tasks_for_shot(shot)
-
-
-@deprecated
-def all_for_sequence(sequence):
-    return all_tasks_for_sequence(sequence)
-
-
-@deprecated
-def all_for_scene(scene):
-    return all_tasks_for_scene(scene)
-
-
-@deprecated
-def all_for_asset(asset):
-    return all_tasks_for_asset(asset)

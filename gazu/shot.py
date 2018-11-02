@@ -1,5 +1,3 @@
-from deprecated import deprecated
-
 from . import client
 
 from .sorting import sort_by_name
@@ -274,13 +272,3 @@ def update_casting(shot, casting):
     """
     shot = normalize_model_parameter(shot)
     return client.put("data/shots/%s/casting" % shot["id"], casting)
-
-
-@deprecated
-def all(project=None):
-    return all_shots_for_project(project)
-
-
-@deprecated
-def all_for_sequence(project=None):
-    return all_shots_for_sequence(project)
