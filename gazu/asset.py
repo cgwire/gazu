@@ -1,5 +1,3 @@
-from deprecated import deprecated
-
 from .helpers import normalize_model_parameter
 
 from . import client
@@ -275,33 +273,3 @@ def new_asset_asset_instance(asset, asset_to_instantiate, description=""):
         "data/assets/%s/asset-asset-instances" % asset["id"],
         data
     )
-
-
-@deprecated
-def all(project=None):
-    return all_assets_for_project(project)
-
-
-@deprecated
-def all_for_shot(shot):
-    return all_assets_for_shot(shot)
-
-
-@deprecated
-def all_for_project_and_type(project, asset_type):
-    return all_assets_for_project_and_type(project, asset_type)
-
-
-@deprecated
-def all_types(project):
-    return all_asset_types()
-
-
-@deprecated
-def all_types_for_project(project):
-    return all_asset_types_for_project(project)
-
-
-@deprecated
-def all_types_for_shot(shot):
-    return all_asset_types_for_shot(shot)

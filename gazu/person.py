@@ -1,5 +1,3 @@
-from deprecated import deprecated
-
 from . import client
 from .sorting import sort_by_name
 
@@ -82,8 +80,3 @@ def get_presence_log(year, month):
     """
     path = "data/persons/presence-logs/%s-%s" % (year, str(month).zfill(2))
     return client.get(path, json_response=False)
-
-
-@deprecated
-def all():
-    return all_persons

@@ -1,5 +1,3 @@
-from deprecated import deprecated
-
 from . import client
 
 from .sorting import sort_by_name
@@ -46,8 +44,3 @@ def new_project(name):
     if project is None:
         project = client.create("projects", data)
     return project
-
-
-@deprecated
-def all():
-    return all_projects()
