@@ -36,9 +36,10 @@ def get_project_by_name(project_name):
     return client.fetch_first("projects?name=%s" % project_name)
 
 
-def new_project(name):
+def new_project(name, production_type="short"):
     data = {
-        "name": name
+        "name": name,
+        "production_type": production_type
     }
     project = get_project_by_name(name)
     if project is None:
