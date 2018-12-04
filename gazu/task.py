@@ -225,6 +225,14 @@ def new_task(
     return task
 
 
+def remove_task(task):
+    """
+    Remove given task from database.
+    """
+    task = normalize_model_parameter(task)
+    client.delete("data/tasks/%s?force=true" % task["id"])
+
+
 def start_task(task):
     """
     Change a task status to WIP and set its real start date to now.
