@@ -214,14 +214,13 @@ def download(path, file_path):
     Upload file located at *file_path* to given url *path*.
     """
     url = get_full_url(path)
-    response = requests_session.get(
+    with requests_session.get(
         url,
         headers=make_auth_header(),
         stream=True
-    )
-    with open(file_path, 'wb') as target_file:
-        response.raw.decode_content = True
-        shutil.copyfileobj(response.raw, target_file)
+    ) as response:
+        with open(file_path, 'wb') as target_file:
+            shutil.copyfileobj(response.raw, target_file)
 
 
 def get_api_version():

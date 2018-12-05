@@ -590,7 +590,7 @@ class FilesTestCase(unittest.TestCase):
             self.assertEqual(file_tree["name"], "standard file tree")
 
     def test_download_preview_file(self):
-        with open("./tests/fixtures/v1.png") as thumbnail_file:
+        with open("./tests/fixtures/v1.png", 'rb') as thumbnail_file:
             with requests_mock.mock() as mock:
                 path = "data/preview-files/preview-1"
                 mock.get(
@@ -616,7 +616,7 @@ class FilesTestCase(unittest.TestCase):
                 )
 
     def test_download_preview_file_thumbnail(self):
-        with open("./tests/fixtures/v1.png") as thumbnail_file:
+        with open("./tests/fixtures/v1.png", 'rb') as thumbnail_file:
             with requests_mock.mock() as mock:
                 path = "pictures/thumbnails/preview-files/preview-1.png"
                 mock.get(
