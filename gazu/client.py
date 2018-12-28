@@ -158,7 +158,20 @@ def check_status(request, path):
     elif (status_code in [401, 422]):
         raise NotAuthenticatedException(path)
     elif (status_code in [500, 502]):
-        print(request.text)
+        try:
+            stacktrace = request.json().get(
+                "stacktrace",
+                "No stacktrace sent by the server"
+            )
+            message = request.json().get(
+                "message",
+                "No message sent by the server"
+            )
+            print("A server error occured!\n")
+            print("Server stacktrace:\n%s" % stacktrace)
+            print("Error message:\n%s\n" % message)
+        except:
+            print(request.text)
         raise ServerErrorException(path)
     return status_code
 
