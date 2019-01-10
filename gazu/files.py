@@ -768,7 +768,7 @@ def get_last_working_file_revision(task, name="main"):
     task = normalize_model_parameter(task)
     path = "data/tasks/%s/working-files/last-revisions" % task["id"]
     working_files_dict = client.get(path)
-    return working_files_dict.get(name, 0)
+    return working_files_dict.get(name, 0)  # TODO: Inconsistent return type !
 
 
 @cache
