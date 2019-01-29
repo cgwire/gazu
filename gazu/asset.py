@@ -35,6 +35,18 @@ def all_assets_for_project(project):
 
 
 @cache
+def all_assets_for_episode(episode):
+    """
+    Retrieve all assets stored in the database or for given project.
+    """
+    episode = normalize_model_parameter(episode)
+
+    return sort_by_name(
+        client.fetch_all("assets?source_id=%s" % episode["id"])
+    )
+
+
+@cache
 def all_assets_for_shot(shot):
     """
     Retrieve all assets casted in given shot.
