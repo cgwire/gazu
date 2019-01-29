@@ -41,7 +41,14 @@ def get_person_by_full_name(full_name):
             return person
 
 
-def new_person(first_name, last_name, email, phone, role):
+def new_person(
+    first_name,
+    last_name,
+    email,
+    phone="",
+    role="user",
+    desktop_login=""
+):
     """
     Create a new person based on given parameters. His/her password will be
     default.
@@ -53,7 +60,8 @@ def new_person(first_name, last_name, email, phone, role):
             "last_name": last_name,
             "email": email,
             "phone": phone,
-            "role": role
+            "role": role,
+            "desktop_login": desktop_login
         })
     return person
 
