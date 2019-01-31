@@ -254,11 +254,19 @@ Retrieve a given task:
 task = gazu.task.get_task_by_name(asset, task_type, "main")
 ```
 
+Create a new task for a given asset: 
+
+```python
+task = gazu.task.new_task(asset, task_type)
+task = gazu.task.new_task(asset, task_type, task_status=wip)
+task = gazu.task.new_task(asset, task_type, assignees=[person_dict])
+```
+
 Retrieve a given task type:
 
 ```python
 task_type = gazu.shot.get_task_type(task_status_id)
-task_type = gazu.shot.get_task_type_by_name(task_status_name)
+task_type = gazu.shot.get_task_type_by_name(task_type_name)
 ```
 
 Retrieve a given task status:
