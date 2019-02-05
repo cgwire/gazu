@@ -11,12 +11,9 @@ Welcome to Gazu's documentation!
 Gazu is a Python client for Zou, the Kitsu API. It allows to fetch easily
 your CG production data. More than giving access to data, it allows
 to perform operations on it like marking a task as started or setting a
-thumbnail on a shot. It will boost your pipeline tools by adding extra
-features.
+thumbnail on a shot. 
 
-It requires an up and running instance of Zou to run properly.
-
-The source is available on Github_.
+*NB: It requires an up and running instance of Zou to run properly.*
 
 Who is it for?
 ==============
@@ -37,7 +34,10 @@ Here is a non exhaustive list of use cases that allows Gazu:
 * Get next available working revision for a given task.
 * Manage automatic validition changes.
 
+Sources
+=======
 
+The source is available on Github_.
 
 Contents
 ========
