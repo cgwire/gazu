@@ -1,48 +1,49 @@
-## Introduction
+# Examples
 
-In the Usage section we are going to describe what is possible to do with
-Gazu. We assume here that the `gazu` module is properly configured and
-imported.
+## Introduction
 
-The philosophy behind this client is to allow you to make common
-operation as simply as possible. We want to provide helpers to make your
-development faster. If you think that one is missing, feel free to ask for
-it in the [Github issues](https://github.com/cgwire/cgwire-api-client/issues).
-Even better, you can contribute by directly adding it to the code.
+In this section we are going to describe through examples what is possible to do
+with Gazu. We assume here that the `gazu` module is properly imported and
+configured.
 
-The client is divided in eight modules:
+## Get user todo list 
 
-* *person*: functions related to studio members
-* *project*: functions related to running productions
-* *asset*: functions related to asset and asset types.
-* *shot*: functions related to shots, sequences and episodes.
-* *scene*: functions related to layout scenes (which will lead to shots).
-* *task*: functions related to tasks, task types and assignations.
-* *files*: functions related to file path generation.
-* *user*: functions related to current user data.
-* *client*: generic functions to deal with the API.
+To get the todo list of the currently logged in user use the following code:
 
-## Available data
+```python
+tasks = gazu.user.all_tasks_to_do()
+```
 
-* Assets (constituants of a shot scene)
-* Asset types
-* Shots, layout scenes, sequences and episodes
-* Projects
-* Persons
-* Tasks
-* Task comments
-* Task status
-* Task types
-* Time spent
-* Departments 
-* Time spents
-* Working files
-* Output files
-* Software and output types
-* File status
-* Comments
+## Post a comment / change task status
 
-## Persons 
+To change task status, you have to post a new comment with the desired status.
+Comments without text are allowed
+
+```python
+modeling = gazu.asset.get_task_type_by_name(asset, "modeling")
+wip = gazu.asset.get_task_status_by_short_name(asset, "wip")
+
+project = gazu.project.get_project_by_name("Caminandes")
+asset = gazu.asset.get_asset_by_name(asset, "Lama")
+
+task = gazu.task.get_task_by_name(asset, modelinq)
+comment = gazu.task.add_comment(task, wip, "Change status to work in progress")
+```
+
+## Post a preview
+
+We assume here you already have comment task and comment information:
+
+```python
+preview_file = gazu.task.add_preview(
+    task,
+    comment,
+    "/path/to/my/file.mp4"
+)
+gazu.task.set_main_preview(asset, preview_file) #  Set preview as asset thumbnail
+```
+
+## Deal with Persons 
 
 Retrieve all persons listed in database:
 
@@ -57,7 +58,7 @@ person = gazu.person.get_person_by_full_name("John Doe")
 person = gazu.person.get_person_by_desktop_login("john.doe")
 ```
 
-## Projects 
+## Deal with Projects 
 
 Retrieve all projects listed in database:
 
@@ -84,7 +85,7 @@ Create a new project (open by default):
 project = gazu.project.new_project("Agent 327")
 ```
 
-## Assets 
+## Deal with Assets 
 
 Retrieve all assets for a given project, shot or asset type:
 
@@ -148,7 +149,7 @@ asset_instances = all_asset_instances_for_shot(shot_dict)
 ```
 
 
-## Shots 
+## Deal with Shots 
 
 Retrieve all shots for given project or sequence:
 
@@ -221,7 +222,7 @@ asset_instances = gazu.shot.all_asset_instances_for_shot(shot_dict)
 ```
 
 
-## Tasks
+## Deal with Tasks
 
 Retrieve all tasks related to given asset, shot or sequence:
 
@@ -294,7 +295,7 @@ time_spent = gazu.task.add_time_spent(
 ```
 
 
-## Files
+## Deal with Files
 
 Get all output types:
 
@@ -484,7 +485,7 @@ gazu.files.download_preview_file(preview_file, "./target.mp4")
 gazu.files.download_preview_file_thumbnail(preview_file, "./target.png")
 ```
 
-## User
+## Deal with User
 
 This routes returns data related to currently logged user (for which he has
 assigned tasks linked to expected result):
@@ -520,123 +521,4 @@ tasks = gazu.user.all_tasks_for_shot(shot_dict)
 tasks = gazu.user.all_tasks_for_asset(asset_dict)
 task_types = gazu.user.all_task_types_for_asset(asset_dict)
 task_types = gazu.user.all_task_types_for_shot(shot_dict)
-```
-
-## Cache functions
-
-Enable cache:
-
-
-```python
-gazu.cache.enable()
-```
-
-Clear all caches:
-
-```python
-gazu.cache.clear_all()
-```
-
-Clear cache for a single function:
-
-```python
-gazu.asset.all_assets.clear_cache()
-```
-
-Disable cache for a single function:
-
-```python
-gazu.asset.all_assets.disable_cache()
-```
-
-## Generic functions
-
-Check if API is up:
-
-```python
-gazu.client.is_host_up()
-```
-
-Get currently configured API server hostname:
-
-```python
-gazu.client.get_host()
-```
-
-Set API server hostname:
-
-```python
-gazu.client.set_host("pipeline-api")
-```
-
-Log in you script:
-
-```python
-gazu.client.log_in("user@mail.com", "default")
-```
-
-Log out your script:
-
-```python
-gazu.client.log_out()
-```
-
-Get currently logged user:
-
-```python
-gazu.client.get_current_user()
-```
-
-Performs a GET request on given path of the API:
-
-```python
-gazu.client.get("data/projects")
-```
-
-Performs a POST request on given path of the API:
-
-```python
-gazu.client.post("data/projects", {"name": "My new Project"})
-```
-
-Performs a PUT request on given path of the API:
-
-```python
-gazu.client.put("data/projects", {"name": "My new Project updated"})
-```
-
-Performs a DELETE request on given path of the API:
-
-```python
-gazu.client.delete("data/projects/project-id")
-```
-
-Upload a given file to given path:
-
-```python
-gazu.client.upload("thumbnails/projects", "my_file.png")
-
-Download a given file to given path:
-
-```python
-gazu.client.download("thumbnails/projects/project-id.png", "my_file.png")
-````
-
-Retrieve all data for a given data type:
-
-```python
-gazu.client.fecth("projects")
-gazu.client.fecth("tasks?page=2") # 100 entries per page.
-```
-
-Retrieve one entry for a given data type:
-
-```python
-gazu.client.fecth_one("projects?id=project-id")
-```
-
-Create an entry for a given data type:
-
-```python
-gazu.client.create("projects", {"name": "Cosmos Landromat"})
 ```
