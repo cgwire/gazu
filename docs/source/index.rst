@@ -8,19 +8,19 @@ Welcome to Gazu's documentation!
 
 |logo|
 
-Gazu is a Python client for Zou, the Kitsu API. It allows to fetch easily
+Gazu is a Python client for the Kitsu API. It allows fetching easily
 your CG production data. More than giving access to data, it allows
-to perform operations on it like marking a task as started or setting a
+performing operations on it like marking a task as started or setting a
 thumbnail on a shot. 
 
-*NB: It requires an up and running instance of Zou to run properly.*
+*NB: It requires an up and running instance of the Kitsu API to run properly.*
 
 Who is it for?
 ==============
 
-The audience for Gazu are Technical Artists, Technical Directors and
-Software Engineers from CG studios. With Gazu they can augment their tools with
-the CG production data. 
+The audience for this Python client is Technical Artists, Technical Directors
+and Software Engineers from CG studios. With Gazu they can augment their tools
+with the CG production data. 
 
 Use cases
 =========
@@ -30,7 +30,7 @@ Here is a non exhaustive list of use cases that allows Gazu:
 * Make sure that every artist workstations are on the same page when dealing
   with the file system.
 * Build a todo list for artists of the project.
-* Get working file path and output file paths for a given task.
+* Get working file paths and output file paths for a given task.
 * Get next available working revision for a given task.
 * Manage automatic validition changes.
 
@@ -67,7 +67,7 @@ About authors
 =============
 
 Gazu is written by CG Wire, a company based in France. We help small to
-midsize CG studios to manage their production efficiently.
+midsize CG studios to manage their production efficiently.
 We apply software craftmanship principles as much as possible. We love
 coding and consider that good developer experience matters.
 

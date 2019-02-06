@@ -1,6 +1,9 @@
-# Installation
 
-## Production version
+# How to get started
+
+## Installation
+
+### Production version
 
 Installation is made through pip:
 
@@ -8,10 +11,10 @@ Installation is made through pip:
 pip install gazu
 ```
 
-## Development version 
+### Development version 
 
-If you interested in the currently developed version, install it from the git
-repository: 
+If you are interested in the development version, install it from the
+git repository: 
 
 ```bash
 pip install --upgrade setuptools 
@@ -34,5 +37,5 @@ gazu.client.set_host("https://zou-server-url/api")
 Authenticate your library with the following function call:
 
 ```python
-gazu.log_in("user@mail.com", "default")
+gazu.log_in("user@mail.com", "userpassword")
 ```

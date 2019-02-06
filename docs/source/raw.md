@@ -109,7 +109,7 @@ gazu.client.fetch_all("tasks?page=2") # Paginate by using 100 entries per page.
 Retrieve one entry for a given data type:
 
 ```python
-gazu.client.fecth_one("projects?id=project-id")
+gazu.client.fecth_one("projects", "project-id")
 ```
 
 Get first entry of a given list:

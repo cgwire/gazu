@@ -1,28 +1,30 @@
 ## Available data
 
-Many kind of data can be queried through Gazu. Here is the list of all 
-available data:
+Here is the list of all available data you can access through the Python client:
 
 * Assets (constituants of a shot scene)
+* Asset instances
 * Asset types
-* Shots
-* Sequences 
+* Comments
 * Episodes
-* Projects
+* Events
+* File status
+* Metadata
+* Notifications
+* Output files
+* Output types
 * Persons
+* Playlists
+* Preview files
+* Projects
+* Search filters
+* Sequences 
+* Shots
+* Software
+* Subscriptions to notifications
 * Tasks
 * Task comments
 * Task status
 * Task types
 * Time spents
-* Comments
-* Preview files
 * Working files
-* Output files
-* Output types
-* Software
-* File status
-* Events
-* Asset instances
-* Notifications
-* Search filters

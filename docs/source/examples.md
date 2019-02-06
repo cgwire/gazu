@@ -3,8 +3,8 @@
 ## Introduction
 
 In this section we are going to describe through examples what is possible to do
-with Gazu. We assume here that the `gazu` module is properly imported and
-configured.
+with Kitsu client. We assume here that the `gazu` module is properly imported
+and configured.
 
 ## Get user todo list 
 
@@ -17,7 +17,7 @@ tasks = gazu.user.all_tasks_to_do()
 ## Post a comment / change task status
 
 To change task status, you have to post a new comment with the desired status.
-Comments without text are allowed
+Comments without text are allowed too:
 
 ```python
 modeling = gazu.asset.get_task_type_by_name(asset, "modeling")
@@ -32,7 +32,8 @@ comment = gazu.task.add_comment(task, wip, "Change status to work in progress")
 
 ## Post a preview
 
-We assume here you already have comment task and comment information:
+We assume here you already have retrieved related task and comment. To add a
+preview you need to specify you which to upload as a new preview:
 
 ```python
 preview_file = gazu.task.add_preview(
@@ -79,7 +80,7 @@ project = gazu.project.get_project(project_id)
 project = gazu.project.get_project_by_name("Agent 327")
 ```
 
-Create a new project (open by default):
+Create a new project (with *open* status by default):
 
 ```python
 project = gazu.project.new_project("Agent 327")
@@ -100,7 +101,7 @@ Retrieve all asset types:
 ```python
 asset_types = gazu.asset.all_asset_types()
 asset_types = gazu.asset.all_asset_types_for_project(project_dict) 
-asset_types = gazu.asset.all_asset_types_for_shot(shot_dict) 
+asset_types = gazu.asset.all_asset_types_for_shot(shot_dict) # casted in given shot
 ```
 
 Get a given asset:
@@ -113,15 +114,15 @@ asset = gazu.asset.get_asset_by_name(project_dict, asset_name)
 Get a given asset type:
 
 ```python
-asset = gazu.asset.get_asset_type(asset_type_id)
-asset = gazu.asset.get_asset_type_by_name(asset_type_name)
+asset_type = gazu.asset.get_asset_type(asset_type_id)
+asset_type = gazu.asset.get_asset_type_by_name(asset_type_name)
 ```
 
 
 Create/update/delete an asset:
 
 ```python
-assets = gazu.asset.new_asset(
+asset = gazu.asset.new_asset(
     project_dict, 
     asset_type_dict, 
     "My new asset",
@@ -129,15 +130,15 @@ assets = gazu.asset.new_asset(
 )
 
 asset = gazu.asset.update_asset(new_values_dict)
-gazu.asset.remove_asset(asset_dict)
+gazu.asset.remove_asset(asset)
 ```
 
 Create/update/delete an asset type:
 
 ```python
-asset_types = gazu.asset.new_asset_type("my new asset_type")
+asset_type = gazu.asset.new_asset_type("my new asset_type")
 asset_type = gazu.asset.update_asset_type(new_values_dict)
-gazu.asset.remove_asset_type(asset_dict)
+gazu.asset.remove_asset_type(asset)
 ```
 
 Asset instance helpers:
@@ -182,8 +183,7 @@ Retrieve given sequence:
 
 ```python
 sequence = gazu.shot.get_sequence(shot_id)
-sequence = gazu.shot.get_sequence_by_name(
-    project_dict, "SE01", episode=episode_dict)
+sequence = gazu.shot.get_sequence_by_name(project_dict, "SE01", episode=episode_dict)
 ```
 
 Retrieve given episode:
@@ -286,16 +286,37 @@ gazu.task.start_task(task_dict)
 Add and get time spent:
 
 ```python
-time_spent = gazu.task.get_time_spent(
-    task_dict, "2018-03-18")
-time_spent = gazu.task.set_time_spent(
-    task_dict, person_dict, "2018-03-18", 8 * 3600)
-time_spent = gazu.task.add_time_spent(
-    task_dict, person_dict, "2018-03-18", 3600)
+time_spent = gazu.task.get_time_spent(task_dict, "2018-03-18")
+time_spent = gazu.task.set_time_spent(task_dict, person_dict, "2018-03-18", 8 * 3600)
+time_spent = gazu.task.add_time_spent(task_dict, person_dict, "2018-03-18", 3600)
 ```
 
 
 ## Deal with Files
+
+Change file tree template for given project:
+
+```python
+gazu.files.set_project_file_tree(project_id, file_tree_template_name)
+gazu.files.update_project_file_tree(project_id, {
+  "working": {
+    "mountpoint": "/working_files",
+    "root": "productions",
+    "folder_path": {
+      "shot": "<Project>/shots/<Sequence>/<Shot>/<TaskType>",
+      "asset": "<Project>/assets/<AssetType>/<Asset>/<TaskType>",
+      "sequence": "<Project>/sequences/<Sequence>>/<TaskType>",
+      "style": "lowercase"
+    },
+    "file_name": {
+      "shot": "<Project>_<Sequence>_<Shot>_<TaskType>",
+      "asset": "<Project>_<AssetType>_<Asset>_<TaskType>",
+      "sequence": "<Project>_<Sequence>_<TaskType>",
+      "style": "lowercase"
+    }
+  }
+})
+```
 
 Get all output types:
 
@@ -430,12 +451,6 @@ working_file = gazu.files.new_working_file(
     revision=0, # If revision == 0, it is set as latest revision + 1
     sep="/"
 )
-```
-
-Change file tree template for given project:
-
-```python
-gazu.files.set_project_file_tree(project_id, file_tree_template_name)
 ```
 
 Generate working file path from a given task:
