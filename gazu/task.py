@@ -181,6 +181,24 @@ def get_task_status_by_name(task_status_name):
 
 
 @cache
+def get_task_status_by_short_name(task_status_short_name):
+    """
+    Return task type status for given short name.
+    """
+    return client.fetch_first(
+        "task-status?short_name=%s" % task_status_short_name
+    )
+
+
+def remove_task_status(task_status):
+    """
+    Remove given task status from database.
+    """
+    task_status = normalize_model_parameter(task_status)
+    return client.delete("data/task-status/%s?force=true" % task_status["id"])
+
+
+@cache
 def get_task(task_id):
     """
     Return task corresponding to given task ID.

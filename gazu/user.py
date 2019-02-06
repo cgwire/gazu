@@ -152,6 +152,14 @@ def all_scenes_for_sequence(sequence):
     return sort_by_name(scenes)
 
 
+@cache
+def all_tasks_to_do():
+    """
+    Return the list of tasks from the current user to-do list.
+    """
+    return client.fetch_all("/data/users/tasks")
+
+
 def log_desktop_session_log_in():
     """
     Add a log entry to mention that the user logged in his computer.
