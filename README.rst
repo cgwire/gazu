@@ -1,4 +1,4 @@
-.. figure:: https://gazu.cg-wire.com/gazu.png
+.. figure:: https://gazu.cg-wire.com/_images/gazu.png
    :alt: Gazu Logo
 
 
