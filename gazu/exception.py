@@ -48,4 +48,7 @@ class ParameterException(Exception):
 
 
 class TooBigFileException(Exception):
+    """
+    Error raised when a 413 error (payload too big error) is sent by the API.
+    """
     pass

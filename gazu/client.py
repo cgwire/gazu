@@ -5,7 +5,7 @@ import json
 from .encoder import CustomJSONEncoder
 
 from .exception import (
-    FileTooBigException,
+    TooBigFileException,
     NotAuthenticatedException,
     NotAllowedException,
     MethodNotAllowedException,
@@ -157,7 +157,7 @@ def check_status(request, path):
     elif (status_code == 405):
         raise MethodNotAllowedException(path)
     elif (status_code == 413):
-        raise FileTooBigException(
+        raise TooBigFileException(
             "%s: You send a too big file. "
             "Change your proxy configuration to allow bigger files." % path
         )
