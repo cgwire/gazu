@@ -6,6 +6,15 @@ from .cache import cache
 
 
 @cache
+def all_task_statuses():
+    """
+    Return task statuses
+    """
+    task_statuses = client.fetch_all("task-status")
+    return sort_by_name(task_statuses)
+
+
+@cache
 def all_task_types():
     """
     Return task types
