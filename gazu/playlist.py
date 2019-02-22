@@ -5,50 +5,40 @@ from .helpers import normalize_model_parameter
 from .sorting import sort_by_name
 
 
-def get_all_playlists():
+def all_playlists():
     """
-    Retrieve all playlists for all projects
-
     Returns:
-        dict: Playlists found
+        list: All playlists for all projects.
     """
 
     return sort_by_name(client.fetch_all("playlist"))
 
 
-def get_all_shots_on_playlist(playlist):
+def all_shots_for_playlist(playlist):
     """
-    Retrieve all shots assigned to the given playlist
-
     Args:
-        playlist (str / dict): The playlist id value
+        playlist (str / dict): The playlist dict or the playlist ID.
 
     Returns:
-        list: Playlists found on project
+        list: All shots linked to the given playlist
     """
 
     playlist = normalize_model_parameter(playlist)
+    playlist = client.fetch_one("playlists", playlist["id"])
     return sort_by_name(playlist["shots"])
 
 
-def get_playlists_for_project(project):
+def all_playlists_for_project(project):
     """
-    Retrieve all playlists for the given project
 
     Args:
-        project (str / dict): The project id value
+        project (str / dict): The project dict or the project ID.
 
     Returns:
-        dict: Playlists found on project
+        list: All playlists for the given project
     """
 
     project = normalize_model_parameter(project)
-
-    if project is None:
-        return sort_by_name(client.fetch_all("playlist"))
-
-    else:
-        return sort_by_name(
-            client.fetch_all("projects/%s/playlist" % project["id"])
-        )
-
+    return sort_by_name(
+        client.fetch_all("projects/%s/playlist" % project["id"])
+    )
