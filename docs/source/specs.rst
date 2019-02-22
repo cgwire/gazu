@@ -17,6 +17,7 @@ The client is divided in eight modules:
 * *task*: functions related to tasks, task types and assignations.
 * *files*: functions related to file path generation.
 * *user*: functions related to current user data.
+* *playlist*: functions related to project playlists.
 * *client*: generic functions to deal with the API.
 
 In the following, we are going to describe all functions available in the Gazu
@@ -75,6 +76,14 @@ gazu.user
 
 .. automodule:: gazu.user
     :members:
+
+
+gazu.playlist
+-------------
+
+.. automodule:: gazu.playlist
+    :members:
+
 
 gazu.exceptions
 ---------------
