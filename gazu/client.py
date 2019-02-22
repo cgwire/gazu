@@ -5,12 +5,13 @@ import json
 from .encoder import CustomJSONEncoder
 
 from .exception import (
-    ParameterException,
-    RouteNotFoundException,
-    ServerErrorException,
+    FileTooBigException,
     NotAuthenticatedException,
     NotAllowedException,
-    MethodNotAllowedException
+    MethodNotAllowedException,
+    ParameterException,
+    RouteNotFoundException,
+    ServerErrorException
 )
 try:
     import requests
@@ -155,6 +156,11 @@ def check_status(request, path):
         raise ParameterException(path, text)
     elif (status_code == 405):
         raise MethodNotAllowedException(path)
+    elif (status_code == 413):
+        raise FileTooBigException(
+            "%s: You send a too big file. "
+            "Change your proxy configuration to allow bigger files." % path
+        )
     elif (status_code in [401, 422]):
         raise NotAuthenticatedException(path)
     elif (status_code in [500, 502]):

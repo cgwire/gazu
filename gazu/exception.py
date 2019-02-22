@@ -45,3 +45,7 @@ class ParameterException(Exception):
     Error raised when a 400 error (argument error) is sent by the API.
     """
     pass
+
+
+class TooBigFileException(Exception):
+    pass
