@@ -11,7 +11,7 @@ from .cache import cache
 @cache
 def all_assets_for_open_projects():
     """
-    Retrieve all assets stored in the database or for open projects.
+    :returns: All assets stored in the database or for open projects.
     """
     all_assets = []
     for project in gazu_project.all_open_projects():
@@ -22,7 +22,8 @@ def all_assets_for_open_projects():
 @cache
 def all_assets_for_project(project):
     """
-    Retrieve all assets stored in the database or for given project.
+    :param project: Project dict or ID
+    :returns: Dict list of assets stored in the database or for given project.
     """
     project = normalize_model_parameter(project)
 
@@ -37,7 +38,8 @@ def all_assets_for_project(project):
 @cache
 def all_assets_for_episode(episode):
     """
-    Retrieve all assets stored in the database or for given project.
+    :param episode: Episode dict or ID
+    :returns: Dict list of assets stored in the database or for given episode.
     """
     episode = normalize_model_parameter(episode)
 
@@ -49,7 +51,8 @@ def all_assets_for_episode(episode):
 @cache
 def all_assets_for_shot(shot):
     """
-    Retrieve all assets casted in given shot.
+    :param episode: Shot dict or ID
+    :returns: Dict list of assets stored in the database or for given shot.
     """
     shot = normalize_model_parameter(shot)
     return sort_by_name(client.fetch_all("shots/%s/assets" % shot["id"]))
@@ -58,7 +61,10 @@ def all_assets_for_shot(shot):
 @cache
 def all_assets_for_project_and_type(project, asset_type):
     """
-    Retrieve all assets for given project and given asset type.
+    :param project: Shot dict or ID
+    :param asset_type: Asset type dict or ID
+    :returns: Dict list of assets stored in the database or for given project \
+    and asset type.
     """
     project = normalize_model_parameter(project)
     asset_type = normalize_model_parameter(asset_type)
@@ -75,7 +81,11 @@ def all_assets_for_project_and_type(project, asset_type):
 @cache
 def get_asset_by_name(project, name, asset_type=None):
     """
-    Retrieve first asset matching given name.
+    :param project: Shot dict or ID
+    :param name: Name (str)
+    :param asset_type: Asset type dict or ID (optional). Here to avoid \
+    duplicates
+    :returns: Dict of first asset matching given name
     """
     project = normalize_model_parameter(project)
 
@@ -92,14 +102,26 @@ def get_asset_by_name(project, name, asset_type=None):
 @cache
 def get_asset(asset_id):
     """
-    Retrieve given asset.
+    :param asset_id: Asset ID
+    :returns: Dict of asset matching given ID
     """
     return client.fetch_one('assets', asset_id)
 
 
 def new_asset(project, asset_type, name, description="", extra_data={}):
     """
-    Create a new asset in the database.
+    Create a new asset in the database for given project and asset type.
+
+    :param project: dict or ID
+    :param asset_type: dict or ID
+    :param name: Asset name
+    :type name: str
+    :param description: Asset briefing
+    :type description: str
+    :param extra_data: free metadata
+    :type extra_data: dict
+
+    :returns: Dict of created asset
     """
     project = normalize_model_parameter(project)
     asset_type = normalize_model_parameter(asset_type)
