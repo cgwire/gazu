@@ -41,8 +41,8 @@ All generic events provide the ID of related data.
 
 ### Special events
 
-Some actions on the database require to generate a special event. Here is the
-list of events generated that way:
+Some actions on the database generate a special event. Here is the list of
+events emitted that way:
 
 * asset-instance:add-to-shot
 * asset-instance:remove-from-shot
@@ -51,3 +51,12 @@ list of events generated that way:
 * shot:casting-update
 * task:unassign
 * task:assign
+
+## Event table
+
+You can access to most recent events by doing a classic request: 
+
+```
+events = gazu.client.get("data/events/last?page_size=100")
+events = gazu.client.get("data/events/last?page_size=100&before=2019-02-01")
+```
