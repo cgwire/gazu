@@ -7,7 +7,8 @@ from .cache import cache
 @cache
 def all_projects():
     """
-    Returns all the projects stored in the database.
+    Returns:
+        list: Projects stored in the database.
     """
     return sort_by_name(client.fetch_all("projects"))
 
@@ -15,7 +16,8 @@ def all_projects():
 @cache
 def all_open_projects():
     """
-    Returns all the open projects stored in the database.
+    Returns:
+        Open projects stored in the database.
     """
     return sort_by_name(client.fetch_all("projects/open"))
 
@@ -23,7 +25,11 @@ def all_open_projects():
 @cache
 def get_project(project_id):
     """
-    Returns project corresponding to given id.
+    Args:
+        project_id (str): ID of claimed project.
+
+    Returns:
+        dict: Project corresponding to given id.
     """
     return client.fetch_one("projects", project_id)
 
@@ -31,12 +37,26 @@ def get_project(project_id):
 @cache
 def get_project_by_name(project_name):
     """
-    Returns project corresponding to given name.
+    Args:
+        project_name (str): Name of claimed project.
+
+    Returns:
+        dict: Project corresponding to given name.
     """
     return client.fetch_first("projects?name=%s" % project_name)
 
 
 def new_project(name, production_type="short"):
+    """
+    Creates a new project.
+
+    Args:
+        name (str): Name of the project to create.
+        production_type (str): short, featurefilm, tvshow
+
+    Returns:
+        dict: Created project.
+    """
     data = {
         "name": name,
         "production_type": production_type

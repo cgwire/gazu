@@ -35,7 +35,8 @@ tokens = {
 
 def host_is_up():
     """
-    :return: True if the host is up
+    Returns:
+        True if the host is up
     """
     response = requests_session.head(HOST)
     return response.status_code == 200
@@ -43,14 +44,16 @@ def host_is_up():
 
 def get_host():
     """
-    Return host on which requests_session are sent.
+    Returns:
+        Host on which requests are sent.
     """
     return HOST
 
 
 def set_host(new_host):
     """
-    Get currently configured host on which requests_session are sent.
+    Returns:
+        Set currently configured host on which requests are sent.
     """
     global HOST
     HOST = new_host
@@ -58,13 +61,21 @@ def set_host(new_host):
 
 def set_tokens(new_tokens):
     """
-    Store authentication token to reuse them in all requests_session.
+    Store authentication token to reuse them for all requests.
+
+    Args:
+        new_tokens (dict): Tokens to use for authentication.
     """
     global tokens
     tokens = new_tokens
+    return tokens
 
 
 def make_auth_header():
+    """
+    Returns:
+        Headers required to authenticate.
+    """
     global tokens
     if "access_token" in tokens:
         return {"Authorization": "Bearer %s" % tokens["access_token"]}
@@ -76,13 +87,20 @@ def url_path_join(*items):
     """
     Make it easier to build url path by joining every arguments with a '/'
     character.
+
+    Args:
+        items (list): Path elements
     """
     return "/".join([item.lstrip('/').rstrip('/') for item in items])
 
 
 def get_full_url(path):
     """
-    Join configured host url with given path.
+    Args:
+        path (str): The path to integrate to host url.
+
+    Returns:
+        The result of joining configured host url with given path.
     """
     return url_path_join(get_host(), path)
 
@@ -90,6 +108,9 @@ def get_full_url(path):
 def get(path, json_response=True):
     """
     Run a get request toward given path for configured host.
+
+    Returns:
+        The request result.
     """
     response = requests_session.get(
         get_full_url(path),
@@ -106,6 +127,9 @@ def get(path, json_response=True):
 def post(path, data):
     """
     Run a post request toward given path for configured host.
+
+    Returns:
+        The request result.
     """
     response = requests_session.post(
         get_full_url(path),
@@ -119,6 +143,9 @@ def post(path, data):
 def put(path, data):
     """
     Run a put request toward given path for configured host.
+
+    Returns:
+        The request result.
     """
     response = requests_session.put(
         get_full_url(path),
@@ -132,6 +159,9 @@ def put(path, data):
 def delete(path):
     """
     Run a get request toward given path for configured host.
+
+    Returns:
+        The request result.
     """
     response = requests_session.delete(
         get_full_url(path),
@@ -144,7 +174,22 @@ def delete(path):
 def check_status(request, path):
     """
     Raise an exception related to status code, if the status code does not match
-    a success code.
+    a success code. Print error message when it's relevant.
+
+    Args:
+        request (Request): The request to validate.
+
+    Returns:
+        int: Status code
+
+    Raises:
+        ParameterException: when 400 response occurs
+        NotAuthenticatedException: when 401 response occurs
+        RouteNotFoundException: when 404 response occurs
+        NotAllowedException: when 403 response occurs
+        MethodNotAllowedException: when 405 response occurs
+        TooBigFileException: when 413 response occurs
+        ServerErrorException: when 500 response occurs
     """
     status_code = request.status_code
     if (status_code == 404):
@@ -182,16 +227,25 @@ def check_status(request, path):
     return status_code
 
 
-def fetch_all(model):
+def fetch_all(path):
     """
-    Get all entries for a given model.
+    Args:
+        path (str): The path for which we want to retrieve all entries.
+
+    Returns:
+        list: All entries stored in database for a given model. You can add a
+        filter to the model name like this: "tasks?project_id=project-id"
     """
-    return get(url_path_join('data', model))
+    return get(url_path_join('data', path))
 
 
 def fetch_first(path):
     """
-    Get all entries for a given subpath.
+    Args:
+        path (str): The path for which we want to retrieve the first entry.
+
+    Returns:
+        dict: The first entry for which a model is required.
     """
     entries = get(url_path_join('data', path))
     if len(entries) > 0:
@@ -200,23 +254,40 @@ def fetch_first(path):
         return None
 
 
-def fetch_one(model, id):
+def fetch_one(model_name, id):
     """
-    Get one entry for given model.
+    Function dedicated at targeting routes that returns a single model instance.
+
+    Args:
+        model_name (str): Model type name.
+        id (str): Model instance ID.
+
+    Returns:
+        dict: The model instance matching id and model name.
     """
-    return get(url_path_join('data', model, id))
+    return get(url_path_join('data', model_name, id))
 
 
-def create(model, data):
+def create(model_name, data):
     """
-    Get a new entry for given model.
+    Create an entry for given model and data.
+
+    Returns:
+        dict: Created entry
     """
-    return post(url_path_join('data', model), data)
+    return post(url_path_join('data', model_name), data)
 
 
 def upload(path, file_path):
     """
     Upload file located at *file_path* to given url *path*.
+
+    Args:
+        path (str): The url path to upload file.
+        file_path (str): The file location on the hard drive.
+
+    Returns:
+        Response: Request response object.
     """
     url = get_full_url(path)
     files = {"file": open(file_path, "rb")}
@@ -230,7 +301,15 @@ def upload(path, file_path):
 
 def download(path, file_path):
     """
-    Upload file located at *file_path* to given url *path*.
+    Download file located at *file_path* to given url *path*.
+
+    Args:
+        path (str): The url path to download file from.
+        file_path (str): The location to store the file on the hard drive.
+
+    Returns:
+        Response: Request response object.
+
     """
     url = get_full_url(path)
     with requests_session.get(
@@ -244,13 +323,15 @@ def download(path, file_path):
 
 def get_api_version():
     """
-    Get current version of the API.
+    Returns:
+        str: Current version of the API.
     """
     return get('')['version']
 
 
 def get_current_user():
     """
-    Return current user database information.
+    Returns:
+        dict: User database information for user linked to auth tokens.
     """
     return get("auth/authenticated")["user"]

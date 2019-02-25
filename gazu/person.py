@@ -1,13 +1,15 @@
 from . import client
-from .sorting import sort_by_name
 
+from .sorting import sort_by_name
+from .helpers import normalize_model_parameter
 from .cache import cache
 
 
 @cache
 def all_persons():
     """
-    Return all person listed in database.
+    Returns:
+        list: Persons listed in database.
     """
     return sort_by_name(client.fetch_all("persons"))
 
@@ -15,7 +17,11 @@ def all_persons():
 @cache
 def get_person_by_desktop_login(desktop_login):
     """
-    Returns person corresponding to given login.
+    Args:
+        desktop_login (str): Login used to sign in on the desktop computer.
+
+    Returns:
+        dict: Person corresponding to given desktop computer login.
     """
     return client.fetch_first("persons?desktop_login=%s" % desktop_login)
 
@@ -23,7 +29,11 @@ def get_person_by_desktop_login(desktop_login):
 @cache
 def get_person_by_email(email):
     """
-    Returns person corresponding to given email.
+    Args:
+        email (str): User's email.
+
+    Returns:
+        dict:  Person corresponding to given email.
     """
     return client.fetch_first("persons?email=%s" % email)
 
@@ -31,7 +41,11 @@ def get_person_by_email(email):
 @cache
 def get_person_by_full_name(full_name):
     """
-    Returns person corresponding to given name.
+    Args:
+        full_name (str): User's full name
+
+    Returns:
+        dict: Person corresponding to given name.
     """
     first_name, last_name = full_name.lower().split(" ")
     for person in all_persons():
@@ -50,8 +64,20 @@ def new_person(
     desktop_login=""
 ):
     """
-    Create a new person based on given parameters. His/her password will be
-    default.
+    Create a new person based on given parameters. His/her password will is
+    set automatically to default.
+
+    Args:
+        first_name (str):
+        last_name (str):
+        email (str):
+        phone (str):
+        role (str): user, manager, admin (wich match CG artist, Supervisor
+                    and studio manager)
+        desktop_login (str): The login the users uses to log on its computer.
+
+    Returns:
+        dict: Created person.
     """
     person = get_person_by_email(email)
     if person is None:
@@ -68,23 +94,28 @@ def new_person(
 
 def set_avatar(person, file_path):
     """
-    Upload an avatar for given person.
-    """
-    client.upload("/pictures/thumbnails/persons/%s" % person["id"], file_path)
+    Upload picture and set it as avatar for given person.
 
-
-@cache
-def get_simple_person_list():
+    Args:
+        person (str / dict): The person dict or the person ID.
+        file_path (str): Path where the avatar file is located on the hard
+                         drive.
     """
-    Person list with very few information, accessible without manager or admin
-    rights.
-    """
-    return sort_by_name(client.get("auth/person-list"))
+    person = normalize_model_parameter(person)
+    return client.upload(
+        "/pictures/thumbnails/persons/%s" % person["id"],
+        file_path
+    )
 
 
 def get_presence_log(year, month):
     """
-    Return the presence log table for given month.
+    Args:
+        year (int):
+        month (int):
+
+    Returns:
+        The presence log table for given month and year.
     """
     path = "data/persons/presence-logs/%s-%s" % (year, str(month).zfill(2))
     return client.get(path, json_response=False)
