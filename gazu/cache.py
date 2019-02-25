@@ -13,6 +13,7 @@ def enable():
     Enable caching on all decorated functions.
     """
     cache_settings["enabled"] = True
+    return cache_settings["enabled"]
 
 
 def disable():
@@ -20,6 +21,7 @@ def disable():
     Disable caching on all decorated functions.
     """
     cache_settings["enabled"] = False
+    return cache_settings["enabled"]
 
 
 def clear_all():
@@ -33,6 +35,13 @@ def clear_all():
 def remove_oldest_entry(memo, maxsize):
     """
     Remove the oldest cache entry if there is more value stored than allowed.
+
+    Params:
+        memo (dict): Cache used for function memoization.
+        maxsize (int): Maximum number of entries for the cache.
+
+    Returns:
+        Oldest entry for given cache.
     """
     oldest_entry = None
     if maxsize > 0 and len(memo) > maxsize:
@@ -47,7 +56,11 @@ def remove_oldest_entry(memo, maxsize):
 
 def get_cache_key(args, kwargs):
     """
-    Serialize arguments to get a cache key.
+    Serialize arguments to get a cache key. It will be used to store function
+    results.
+
+    Returns:
+        str: generated key
     """
     if len(args) == 0 and len(kwargs) == 0:
         return ""
@@ -61,7 +74,16 @@ def get_cache_key(args, kwargs):
 
 def insert_value(function, cache_store, args, kwargs):
     """
-    Serialize arguments and store function result in given cache store.
+    Serialize function call arguments and store function result in given cache
+    store.
+
+    Args:
+        function (func): The function to cache value for.
+        cache_store (dict): The cache which will contain the value to cache.
+        args, kwargs: The arguments for which a cache must be set.
+
+    Returns:
+        The cached value.
     """
     returned_value = function(*args, **kwargs)
     key = get_cache_key(args, kwargs)
@@ -74,9 +96,12 @@ def insert_value(function, cache_store, args, kwargs):
 
 def get_value(cache_store, key):
     """
-    Generate a deep copy of the requested value. It's needed because if a
+    It generates a deep copy of the requested value. It's needed because if a
     pointer is returned, the value can be changed. Which leads to a modified
     cache and unexpected results.
+
+    Returns:
+        Value matching given key inside given cache store
     """
     value = cache_store[key]["value"]
     return copy.deepcopy(value)
@@ -84,7 +109,11 @@ def get_value(cache_store, key):
 
 def is_cache_enabled(state):
     """
-    Return true if cache is enabled for given state.
+    Args:
+        state: The state describing the cache state.
+
+    Returns:
+        True if cache is enabled for given state.
     """
     return cache_settings["enabled"] and state["enabled"]
 
@@ -92,6 +121,15 @@ def is_cache_enabled(state):
 def is_cache_expired(memo, state, key):
     """
     Check if cache is expired (outdated) for given wrapper state and cache key.
+
+    Args:
+        memo (dict): The function cache
+        state (dict): The parameters of the cache (enabled, expire, maxsize)
+        key: The key to check
+
+    Returns:
+        True if cache value is expired.
+
     """
     date = memo[key]["date_accessed"]
     expire = state["expire"]
@@ -104,6 +142,11 @@ def cache(function, maxsize=300, expire=0):
     Decorator that generate cache wrapper and that adds cache feature to
     target function. A max cache size and and expiration time (in seconds) can
     be set too.
+
+    Args:
+        function (func): Decorated function:
+        maxsize: Number of value stored in cache (300 by default).
+        expire: Time to live in seconds of stored value (disabled by default)
     """
     cache_store = {}
     state = {

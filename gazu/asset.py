@@ -132,8 +132,8 @@ def new_asset(project, asset_type, name, description="", extra_data={}):
     Args:
         project (str / dict): The project dict or the project ID.
         asset_type (str / dict): The asset type dict or the asset type ID.
-        name (str): Asset name
-        description (str): Additional information
+        name (str): Asset name.
+        description (str): Additional information.
         extra_data (dict): Free field to add any kind of metadata.
 
     Returns:
@@ -235,7 +235,7 @@ def get_asset_type_by_name(name):
         asset_type_id (str): Id of claimed asset type.
 
     Returns:
-        dict: Asset Type matching given matching given name.
+        dict: Asset Type matching given name.
     """
     return client.fetch_first("entity-types?name=%s" % name)
 
