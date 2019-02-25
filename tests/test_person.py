@@ -101,26 +101,4 @@ class PersonTestCase(unittest.TestCase):
                 "john@gmail.com",
                 "+33 6 07 07 07 07",
                 "user"
-            ),
-
-    def test_get_person_list(self):
-        with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url("auth/person-list"),
-                text=json.dumps([
-                    {
-                        "first_name": "John",
-                        "last_name": "Doe",
-                        "desktop_login": "john.doe",
-                        "id": "person-1"
-                    },
-                    {
-                        "first_name": "Jane",
-                        "last_name": "Doe",
-                        "desktop_login": "jane.doe",
-                        "id": "person-1"
-                    }
-                ])
             )
-            persons = gazu.person.get_simple_person_list()
-            self.assertEqual(persons[0]["id"], "person-1")

@@ -47,16 +47,6 @@ class ShotTestCase(unittest.TestCase):
             self.assertEqual(shot_instance["project_id"], "project-1")
             self.assertEqual(shot_instance["parent_id"], "sequence-1")
 
-    def test_all_sequences(self):
-        with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url('data/sequences'),
-                text='[{"name": "Sequence 01", "project_id": "project-1"}]'
-            )
-            sequences = gazu.shot.all_sequences()
-            sequence_instance = sequences[0]
-            self.assertEqual(sequence_instance["name"], "Sequence 01")
-
     def test_all_sequences_for_project(self):
         with requests_mock.mock() as mock:
             mock.get(
@@ -68,7 +58,7 @@ class ShotTestCase(unittest.TestCase):
             project = {
              "id": "project-1"
             }
-            sequences = gazu.shot.all_sequences(project=project)
+            sequences = gazu.shot.all_sequences_for_project(project)
             self.assertEqual(len(sequences), 1)
             sequence_instance = sequences[0]
             self.assertEqual(sequence_instance["name"], "Sequence 01")
