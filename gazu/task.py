@@ -516,7 +516,7 @@ def add_preview(task, comment, preview_file_path):
         task["id"],
         comment["id"]
     )
-    preview_file = client.post(path)
+    preview_file = client.post(path, {})
     path = "pictures/preview-files/%s" % preview_file["id"]
     client.upload(path, preview_file_path)
     return preview_file
