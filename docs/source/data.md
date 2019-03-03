@@ -2,7 +2,7 @@
 
 ### Model instances as dict
 
-For the sake of simplicity and easy interoperability, all model instances are 
+To make things simple and allow easy interoperability, all model instances are
 returned as Python dicts. When you perform a query through the client you
 retrieve either a list of dicts or a dict depending on the query.
 
@@ -20,7 +20,8 @@ Each model instance provides at least the same three fields:
 
 ### Models
 
-Here is the list of all available data tables you can access through the Python client:
+Here is the list of all available data tables (and related fields) you can
+access through the Python client:
 
 * Assets (constituants of a shot scene)
     * name
