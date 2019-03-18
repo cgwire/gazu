@@ -42,7 +42,7 @@ Let's finish with an example. Fetch all the open projects:
 
 ::
 
-    projects = gazu.projects.open_projects()
+    projects = gazu.project.all_open_projects()
 
 Then jump to the `documentation <https://gazu.cg-wire.com>`__ to see
 what features are available!
