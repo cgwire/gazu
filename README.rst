@@ -35,7 +35,7 @@ needs to know where is located the API server and to log in:
 
     import gazu
 
-    gazu.set_host("https://zou-server-url")
+    gazu.set_host("https://zou-server-url/api")
     gazu.log_in("user@yourdomain.com", "password")
 
 Let's finish with an example. Fetch all the open projects:
