@@ -82,7 +82,7 @@ doing software and focus more on the artistic work.
 
 Visit `cg-wire.com <https://cg-wire.com>`__ for more information.
 
-[![CGWire Logo](https://zou.cg-wire.com/cgwire.png)](https://cg-wire.com)
+|CGWire Logo|
 
 .. |Build status| image:: https://api.travis-ci.org/cgwire/gazu.svg?branch=master
    :target: https://travis-ci.org/cgwire/gazu
