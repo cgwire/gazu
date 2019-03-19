@@ -210,7 +210,7 @@ def all_tasks_to_do():
     Returns:
         list: Tasks assigned to current user which are not complete.
     """
-    return client.fetch_all("/data/users/tasks")
+    return client.fetch_all("user/tasks")
 
 
 def log_desktop_session_log_in():
