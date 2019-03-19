@@ -68,6 +68,16 @@ Sponsors
 |Unit Image Logo|
 |Les Fées Spéciales Logo|
 
+Contributors
+------------
+
+* @BigRoy (Colorbleed)
+* @col-one (Allegorithmic)
+* @flablog (Les Fées Spéciales)
+* @frankrousseau (CGWire) - *maintainer*
+* @g-Lul (TNZPV)
+* @jdrese (HEAJ)
+
 About authors
 -------------
 
