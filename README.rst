@@ -88,7 +88,7 @@ Visit `cg-wire.com <https://cg-wire.com>`__ for more information.
    :target: https://travis-ci.org/cgwire/gazu
 .. |Slackin badge| image:: https://slack.cg-wire.com/badge.svg
    :target: https://slack.cg-wire.com
-.. |CGWire Logo| image:: https://gazu.cg-wire.com/cgwire.png
+.. |CGWire Logo| image:: https://zou.cg-wire.com/cgwire.png
    :target: https://cg-wire.com
 .. |Unit Image Logo| image:: https://www.cg-wire.com/images/logo-unit-image.png
    :target: https://www.unit-image.fr
