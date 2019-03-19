@@ -15,7 +15,7 @@ from . import user
 
 from .exception import AuthFailedException
 
-__version__ = '0.6.10'
+__version__ = '0.6.11'
 
 
 def get_host():
