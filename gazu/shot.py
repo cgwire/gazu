@@ -149,7 +149,7 @@ def get_sequence_by_name(project, sequence_name, episode=None):
         )
     else:
         episode = normalize_model_parameter(episode)
-        path = "sequences?parent_id=%s&name=%s" % (episode["id"], sequence_name)
+        path = "sequences?episode_id=%s&name=%s" % (episode["id"], sequence_name)
     return client.fetch_first(path)
 
 
@@ -189,7 +189,7 @@ def get_shot_by_name(sequence, shot_name):
         dict: Shot corresponding to given name and sequence.
     """
     sequence = normalize_model_parameter(sequence)
-    return client.fetch_first("shots/all?parent_id=%s&name=%s" % (
+    return client.fetch_first("shots/all?sequence_id=%s&name=%s" % (
         sequence["id"],
         shot_name
     ))
