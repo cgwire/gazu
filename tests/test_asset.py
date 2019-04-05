@@ -155,16 +155,6 @@ class AssetTestCase(unittest.TestCase):
             )
             self.assertEqual(asset["name"], "Car")
 
-    def test_remove_asset(self):
-        with requests_mock.mock() as mock:
-            mock.delete(
-                gazu.client.get_full_url("data/assets/asset-id"),
-                text=''
-            )
-            asset = {"id": "asset-id"}
-            response = gazu.asset.remove_asset(asset)
-            self.assertEqual(response, "")
-
     def test_create_asset_type(self):
         with requests_mock.mock() as mock:
             mock.get(
@@ -206,6 +196,27 @@ class AssetTestCase(unittest.TestCase):
             asset_type = {"id": "asset-type-1", "name": "Modeling edited"}
             response = gazu.asset.remove_asset_type(asset_type)
             self.assertEqual(response, "")
+
+    def test_remove_asset(self):
+        with requests_mock.mock() as mock:
+            mock.delete(
+                gazu.client.get_full_url("data/assets/asset-1"),
+                status_code=204
+            )
+            asset = {
+                "id": "asset-1",
+                "name": "Table"
+            }
+            gazu.asset.remove_asset(asset)
+            mock.delete(
+                gazu.client.get_full_url("data/assets/asset-1?force=true"),
+                status_code=204
+            )
+            asset = {
+                "id": "asset-1",
+                "name": "Table"
+            }
+            gazu.asset.remove_asset(asset, True)
 
     def test_get_asset_instance(self):
         with requests_mock.mock() as mock:

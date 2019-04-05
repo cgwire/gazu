@@ -299,6 +299,20 @@ def update_shot_data(shot, data={}):
     update_shot(updated_shot)
 
 
+def remove_shot(shot, force=False):
+    """
+    Remove given shot from database.
+
+    Args:
+        shot (dict / str): Shot to remove.
+    """
+    shot = normalize_model_parameter(shot)
+    path = "data/shots/%s" % shot["id"]
+    if force:
+        path += "?force=true"
+    return client.delete(path)
+
+
 def new_episode(project, name):
     """
     Create an episode for given project.
@@ -319,6 +333,30 @@ def new_episode(project, name):
         return client.post('data/projects/%s/episodes' % project["id"], data)
     else:
         return episode
+
+
+def remove_episode(episode):
+    """
+    Remove given episode and related from database.
+
+    Args:
+        episode (dict / str): Episode to remove.
+    """
+    episode = normalize_model_parameter(episode)
+    path = "data/entities/%s" % episode["id"]
+    return client.delete(path)
+
+
+def remove_sequence(sequence):
+    """
+    Remove given sequence and related from database.
+
+    Args:
+        sequence (dict / str): Sequence to remove.
+    """
+    sequence = normalize_model_parameter(sequence)
+    path = "data/entities/%s" % sequence["id"]
+    return client.delete(path)
 
 
 @cache

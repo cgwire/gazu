@@ -2,6 +2,7 @@ from . import client
 
 from .sorting import sort_by_name
 from .cache import cache
+from .helpers import normalize_model_parameter
 
 
 @cache
@@ -65,3 +66,16 @@ def new_project(name, production_type="short"):
     if project is None:
         project = client.create("projects", data)
     return project
+
+
+def remove_project(project):
+    """
+    Remove given project from database. (Prior to do that, make sure, there
+    is no asset or shot left).
+
+    Args:
+        project (dict / str): Project to remove.
+    """
+    project = normalize_model_parameter(project)
+    path = "data/projects/%s" % project["id"]
+    return client.delete(path)
