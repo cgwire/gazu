@@ -44,3 +44,15 @@ class ProjectTestCase(unittest.TestCase):
             )
             project = gazu.project.get_project_by_name("Test")
             self.assertEqual(project["name"], "Test")
+
+    def test_remove_project(self):
+        with requests_mock.mock() as mock:
+            mock = mock.delete(
+                gazu.client.get_full_url("data/projects/project-1"),
+                status_code=204
+            )
+            project = {
+                "id": "project-1",
+                "name": "S02"
+            }
+            gazu.project.remove_project(project)

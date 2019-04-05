@@ -168,7 +168,7 @@ def update_asset(asset):
     return client.put('data/entities/%s' % asset["id"], asset)
 
 
-def remove_asset(asset):
+def remove_asset(asset, force=False):
     """
     Remove given asset from database.
 
@@ -176,7 +176,10 @@ def remove_asset(asset):
         asset (dict): Asset to remove.
     """
     asset = normalize_model_parameter(asset)
-    return client.delete("data/assets/%s" % asset["id"])
+    path = "data/assets/%s" % asset["id"]
+    if force:
+        path += "?force=true"
+    return client.delete(path)
 
 
 @cache
