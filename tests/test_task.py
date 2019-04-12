@@ -310,7 +310,6 @@ class TaskTestCase(unittest.TestCase):
     def test_add_comment(self):
         with requests_mock.mock() as mock:
             result = {"id": "comment-1"}
-            print(gazu.client.get_full_url("actions/tasks/task-1/comment"))
             mock.post(
                 gazu.client.get_full_url("actions/tasks/task-1/comment"),
                 text=json.dumps(result)
@@ -319,3 +318,17 @@ class TaskTestCase(unittest.TestCase):
             task_status = {"id": "task-status-1"}
             comment = "New comment"
             task = gazu.task.add_comment(task, task_status, comment)
+
+    def test_comments_for_task(self):
+        with requests_mock.mock() as mock:
+            result = [{"id": "comment-1"}]
+            mock.get(
+                gazu.client.get_full_url("data/tasks/task-1/comments"),
+                text=json.dumps(result)
+            )
+            task = {"id": "task-1"}
+            comments = gazu.task.all_comments_for_task(task)
+            self.assertEquals(comments[0]["id"], result[0]["id"])
+
+            comment = gazu.task.get_last_comment_for_task(task)
+            self.assertEquals(comment["id"], result[0]["id"])

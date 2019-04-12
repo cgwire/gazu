@@ -34,6 +34,7 @@ def all_tasks_for_shot(shot):
     Returns:
         list: Tasks linked to given shot.
     """
+    shot = normalize_model_parameter(shot)
     tasks = client.fetch_all("shots/%s/tasks" % shot['id'])
     return sort_by_name(tasks)
 
@@ -47,6 +48,7 @@ def all_tasks_for_sequence(sequence):
     Returns
         list: Tasks linked to given sequence.
     """
+    sequence = normalize_model_parameter(sequence)
     tasks = client.fetch_all("sequences/%s/tasks" % sequence['id'])
     return sort_by_name(tasks)
 
@@ -60,6 +62,7 @@ def all_tasks_for_scene(scene):
     Returns:
         list: Tasks linked to given scene.
     """
+    scene = normalize_model_parameter(scene)
     tasks = client.fetch_all("scenes/%s/tasks" % scene['id'])
     return sort_by_name(tasks)
 
@@ -73,6 +76,7 @@ def all_tasks_for_asset(asset):
     Returns:
         list: Tasks directly linked to given asset.
     """
+    asset = normalize_model_parameter(asset)
     tasks = client.fetch_all("assets/%s/tasks" % asset["id"])
     return sort_by_name(tasks)
 
@@ -88,6 +92,9 @@ def all_tasks_for_task_status(project, task_type, task_status):
     Returns:
         list: Tasks set at given status for given project and task type.
     """
+    project = normalize_model_parameter(project)
+    task_type = normalize_model_parameter(task_type)
+    task_status = normalize_model_parameter(task_status)
     return client.fetch_all(
         "tasks?project_id=%s&task_type_id=%s&task_status_id=%s" % (
             project["id"],
@@ -106,6 +113,7 @@ def all_task_types_for_shot(shot):
     Returns
         list: Task types of task linked to given shot.
     """
+    shot = normalize_model_parameter(shot)
     task_types = client.fetch_all("shots/%s/task-types" % shot['id'])
     return sort_by_name(task_types)
 
@@ -119,6 +127,7 @@ def all_task_types_for_asset(asset):
     Returns:
         list: Task types of tasks related to given asset.
     """
+    asset = normalize_model_parameter(asset)
     task_types = client.fetch_all("assets/%s/task-types" % asset['id'])
     return sort_by_name(task_types)
 
@@ -132,6 +141,7 @@ def all_task_types_for_scene(scene):
     Returns:
         list: Task types of tasks linked to given scene.
     """
+    scene = normalize_model_parameter(scene)
     task_types = client.fetch_all("scenes/%s/task-types" % scene['id'])
     return sort_by_name(task_types)
 
@@ -145,6 +155,7 @@ def all_task_types_for_sequence(sequence):
     Returns:
         Task types of tasks linked directly to given sequence.
     """
+    sequence = normalize_model_parameter(sequence)
     task_types = client.fetch_all("sequences/%s/task-types" % sequence['id'])
     return sort_by_name(task_types)
 
@@ -159,6 +170,8 @@ def all_tasks_for_entity_and_task_type(entity, task_type):
     Returns:
         list: Tasks for given entity or task type.
     """
+    entity = normalize_model_parameter(entity)
+    task_type = normalize_model_parameter(task_type)
     task_type_id = task_type["id"]
     entity_id = entity["id"]
     return client.fetch_all(
@@ -182,6 +195,8 @@ def get_task_by_name(entity, task_type, name="main"):
     Returns:
         Task matching given name for given entity and task type.
     """
+    entity = normalize_model_parameter(entity)
+    task_type = normalize_model_parameter(task_type)
     return client.fetch_first(
         "tasks?name={name}&entity_id={entity_id}&task_type_id={task_type_id}"
         .format(
@@ -228,6 +243,7 @@ def get_task_by_path(project, file_path, entity_type="shot"):
         dict: A task from given file path. This function requires context:
         the project related to the given path and the related entity type.
     """
+    project = normalize_model_parameter(project)
     data = {
         "file_path": file_path,
         "project_id": project["id"],
@@ -323,6 +339,8 @@ def new_task(
     Returns:
         Created task.
     """
+    entity = normalize_model_parameter(entity)
+    task_type = normalize_model_parameter(task_type)
     if task_status is None:
         task_status = get_task_status_by_name("Todo")
 
@@ -369,6 +387,7 @@ def start_task(task):
     Returns:
         dict: Modified task.
     """
+    task = normalize_model_parameter(task)
     path = "actions/tasks/%s/start" % task["id"]
     return client.put(path, {})
 
@@ -422,6 +441,7 @@ def get_time_spent(task, date):
     Returns:
         dict: A dict with person ID as key and time spent object as value.
     """
+    task = normalize_model_parameter(task)
     path = "actions/tasks/%s/time-spents/%s" % (
         task["id"],
         date
@@ -443,6 +463,8 @@ def set_time_spent(task, person, date, duration):
     Returns:
         dict: Created time spent entry.
     """
+    task = normalize_model_parameter(task)
+    person = normalize_model_parameter(person)
     path = "actions/tasks/%s/time-spents/%s/persons/%s" % (
         task["id"],
         date,
@@ -466,6 +488,8 @@ def add_time_spent(task, person, date, duration):
     Returns:
         dict: Updated time spent entry.
     """
+    task = normalize_model_parameter(task)
+    person = normalize_model_parameter(person)
     path = "actions/tasks/%s/time-spents/%s/persons/%s/add" % (
         task["id"],
         date,
@@ -540,3 +564,29 @@ def set_main_preview(entity, preview_file):
         preview_file["id"]
     )
     return client.put(path, {})
+
+
+@cache
+def all_comments_for_task(task):
+    """
+    Args:
+        task (str / dict): The task dict or the task ID.
+
+    Returns:
+        Comments linked to the given task.
+    """
+    task = normalize_model_parameter(task)
+    return client.fetch_all("tasks/%s/comments" % task["id"])
+
+
+@cache
+def get_last_comment_for_task(task):
+    """
+    Args:
+        task (str / dict): The task dict or the task ID.
+
+    Returns:
+        Last comment posted for given task.
+    """
+    task = normalize_model_parameter(task)
+    return client.fetch_first("tasks/%s/comments" % task["id"])
