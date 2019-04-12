@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from setuptools import setup
 
-from gazu import __version__
+from gazu.__version__ import __version__
 
 setup()
