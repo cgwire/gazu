@@ -540,3 +540,29 @@ def set_main_preview(entity, preview_file):
         preview_file["id"]
     )
     return client.put(path, {})
+
+
+@cache
+def all_comments_for_task(task):
+    """
+    Args:
+        task (str / dict): The task dict or the task ID.
+
+    Returns:
+        Comments linked to the given task.
+    """
+    task = normalize_model_parameter(task)
+    return client.fetch_all("tasks/%s/comments" % task["id"])
+
+
+@cache
+def get_last_comment_for_task(task):
+    """
+    Args:
+        task (str / dict): The task dict or the task ID.
+
+    Returns:
+        Last comment posted for given task.
+    """
+    task = normalize_model_parameter(task)
+    return client.fetch_first("tasks/%s/comments" % task["id"])
