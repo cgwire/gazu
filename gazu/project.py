@@ -79,3 +79,32 @@ def remove_project(project):
     project = normalize_model_parameter(project)
     path = "data/projects/%s" % project["id"]
     return client.delete(path)
+
+
+def update_project(project):
+    """
+    Save given project data into the API. Metadata are fully replaced by the
+    ones set on given project.
+
+    Returns:
+        dict: Updated project.
+    """
+    return client.put("data/projects/%s" % project["id"], project)
+
+
+def update_project_data(project, data={}):
+    """
+    Update the metadata for the provided project. Keys that are not provided
+    are not changed.
+
+    Args:
+        project (dict): The project to save in database.
+        data (dict): Free field to set metadata of any kind.
+
+    Returns:
+        dict: Updated project.
+    """
+    project = normalize_model_parameter(project)
+    project = get_project(project["id"])
+    project.update(data)
+    update_project(project)
