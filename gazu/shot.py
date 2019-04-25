@@ -84,7 +84,7 @@ def get_episode(episode_id):
     Returns:
         dict: Episode corresponding to given episode ID.
     """
-    return client.fetch_one('episodes', episode_id)
+    return client.fetch_one("episodes", episode_id)
 
 
 @cache
@@ -126,7 +126,7 @@ def get_sequence(sequence_id):
     Returns:
         dict: Sequence corresponding to given sequence ID.
     """
-    return client.fetch_one('sequences', sequence_id)
+    return client.fetch_one("sequences", sequence_id)
 
 
 @cache
@@ -175,7 +175,7 @@ def get_shot(shot_id):
     Returns:
         dict: Shot corresponding to given shot ID.
     """
-    return client.fetch_one('shots', shot_id)
+    return client.fetch_one("shots", shot_id)
 
 
 @cache
@@ -220,7 +220,7 @@ def new_sequence(
 
     sequence = get_sequence_by_name(project, name, episode=episode)
     if sequence is None:
-        return client.post('data/projects/%s/sequences' % project["id"], data)
+        return client.post("data/projects/%s/sequences" % project["id"], data)
     else:
         return sequence
 
@@ -274,10 +274,13 @@ def update_shot(shot):
     Save given shot data into the API. Metadata are fully replaced by the ones
     set on given shot.
 
+    Args:
+        shot (dict): The shot dict to update.
+
     Returns:
         dict: Updated shot.
     """
-    return client.put('data/entities/%s' % shot["id"], shot)
+    return client.put("data/entities/%s" % shot["id"], shot)
 
 
 def update_shot_data(shot, data={}):
@@ -286,7 +289,7 @@ def update_shot_data(shot, data={}):
     not changed.
 
     Args:
-        shot (dict): The shot to save in database.
+        shot (dict / ID): The shot dicto or ID to save in database.
         data (dict): Free field to set metadata of any kind.
 
     Returns:
@@ -294,8 +297,8 @@ def update_shot_data(shot, data={}):
     """
     shot = normalize_model_parameter(shot)
     current_shot = get_shot(shot["id"])
-    updated_shot = {'id': current_shot['id'], 'data': current_shot['data']}
-    updated_shot['data'].update(data)
+    updated_shot = {"id": current_shot["id"], "data": current_shot["data"]}
+    updated_shot["data"].update(data)
     update_shot(updated_shot)
 
 
@@ -330,7 +333,7 @@ def new_episode(project, name):
     }
     episode = get_episode_by_name(project, name)
     if episode is None:
-        return client.post('data/projects/%s/episodes' % project["id"], data)
+        return client.post("data/projects/%s/episodes" % project["id"], data)
     else:
         return episode
 

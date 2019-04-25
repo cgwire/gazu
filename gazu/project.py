@@ -86,6 +86,9 @@ def update_project(project):
     Save given project data into the API. Metadata are fully replaced by the
     ones set on given project.
 
+    Args:
+        project (dict): The project to update.
+
     Returns:
         dict: Updated project.
     """
@@ -98,7 +101,7 @@ def update_project_data(project, data={}):
     are not changed.
 
     Args:
-        project (dict): The project to save in database.
+        project (dict / ID): The project dict or id to save in database.
         data (dict): Free field to set metadata of any kind.
 
     Returns:
@@ -106,5 +109,7 @@ def update_project_data(project, data={}):
     """
     project = normalize_model_parameter(project)
     project = get_project(project["id"])
-    project.update(data)
+    if "data" not in project or project["data"] is None:
+        project["data"] = {}
+    project["data"].update(data)
     update_project(project)
