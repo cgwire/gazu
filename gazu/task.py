@@ -28,6 +28,15 @@ def all_task_types():
 
 
 @cache
+def all_task_statuses():
+    """
+    Return task statuses
+    """
+    task_statuses = client.fetch_all("task-status")
+    return sort_by_name(task_statuses)
+
+
+@cache
 def all_tasks_for_shot(shot):
     """
     Args:
