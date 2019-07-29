@@ -590,3 +590,23 @@ def get_last_comment_for_task(task):
     """
     task = normalize_model_parameter(task)
     return client.fetch_first("tasks/%s/comments" % task["id"])
+
+
+@cache
+def assign_task(task, person):
+    """
+    Assign one Person to a Task.
+    Args:
+        task (str / dict): The task dict or the task ID.
+        person (str / dict): The person dict or the person ID.
+
+    Returns:
+        (dict) the affected Task
+    """
+    person = normalize_model_parameter(person)
+    task = normalize_model_parameter(task)
+    route = "/actions/persons/%s/assign" % person['id']
+    return client.put(route, {'task_ids': task['id']})
+
+    
+
