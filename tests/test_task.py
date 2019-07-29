@@ -332,3 +332,18 @@ class TaskTestCase(unittest.TestCase):
 
             comment = gazu.task.get_last_comment_for_task(task)
             self.assertEquals(comment["id"], result[0]["id"])
+
+
+    def test_assign_task(self):
+        with requests_mock.mock() as mock:
+            mock.put(
+                gazu.client.get_full_url(
+                    "actions/persons/person-1/assign"
+                ),
+                text=json.dumps(
+                    [{"id": "task-1", "assignees": ['person-1']}]
+                )
+            )
+            task = gazu.task.assign_task({"id": "task-1"},
+                                         {"id": "person-1"})[0]
+            self.assertIn("person-1", task["assignees"])
