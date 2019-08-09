@@ -6,6 +6,21 @@ from .helpers import normalize_model_parameter
 
 
 @cache
+def all_previews_for_shot(shot):
+    """
+    Args:
+        shot (str / dict): The shot dict or the shot ID.
+
+    Returns:
+        list: Previews from database for given shot.
+    """
+    shot = normalize_model_parameter(shot)
+    previews = client.fetch_all("shots/%s/preview-files" % shot["id"])
+
+    return previews
+
+
+@cache
 def all_shots_for_project(project):
     """
     Args:
