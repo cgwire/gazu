@@ -12,6 +12,7 @@ from . import person
 from . import shot
 from . import task
 from . import user
+from . import playlist
 
 from .exception import AuthFailedException
 
