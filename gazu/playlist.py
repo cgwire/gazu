@@ -40,5 +40,5 @@ def all_playlists_for_project(project):
 
     project = normalize_model_parameter(project)
     return sort_by_name(
-        client.fetch_all("projects/%s/playlist" % project["id"])
+        client.fetch_all("projects/%s/playlists" % project["id"])
     )
