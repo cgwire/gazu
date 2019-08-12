@@ -59,3 +59,60 @@ def get_playlist(playlist):
 
     playlist = normalize_model_parameter(playlist)
     return client.fetch_one("playlists", playlist["id"])
+
+
+@cache
+def get_playlist_by_name(project, name):
+    """
+    Args:
+        project (str / dict): The project dict or the project ID.
+        name (str): The playlist name
+
+    Returns:
+        dict: Playlist matching given name for given project.
+    """
+    project = normalize_model_parameter(project)
+    playlists = all_playlists_for_project(project)
+    for playlist in playlists:
+        if playlist["name"] == name:
+            return playlist
+    return None
+
+
+def new_playlist(project, name):
+    """
+    Create a new playlist in the database for given project.
+
+    Args:
+        project (str / dict): The project dict or the project ID.
+        name (str): Playlist name.
+
+    Returns:
+        dict: Created playlist.
+    """
+    project = normalize_model_parameter(project)
+    print(project)
+    print(name)
+    data = {
+        "name": name,
+        "project_id": project["id"]
+    }
+
+    playlist = get_playlist_by_name(project, name)
+    if playlist is None:
+        playlist = client.post("data/playlists/", data)
+    return playlist
+
+
+def update_playlist(playlist):
+    """
+    Save given playlist data into the API. Metadata are fully replaced by
+    the ones set on given playlist.
+
+    Args:
+        playlist (dict): The playlist dict to update.
+
+    Returns:
+        dict: Updated playlist.
+    """
+    return client.put("data/playlists/%s" % playlist["id"], playlist)
