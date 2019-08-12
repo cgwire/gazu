@@ -11,7 +11,7 @@ def all_playlists():
         list: All playlists for all projects.
     """
 
-    return sort_by_name(client.fetch_all("playlist"))
+    return sort_by_name(client.fetch_all("playlists"))
 
 
 def all_shots_for_playlist(playlist):
