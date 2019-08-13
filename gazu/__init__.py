@@ -35,3 +35,11 @@ def log_in(email, password):
     else:
         client.set_tokens(tokens)
     return tokens
+
+
+def get_event_host():
+    return client.get_event_host()
+
+
+def set_event_host(url):
+    client.set_event_host(url)
