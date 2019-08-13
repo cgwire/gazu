@@ -37,7 +37,7 @@ def get_entity_type(entity_type_id):
 def get_entity_types():
     """
     Returns:
-        list: All entities types of the project
+        list: All entities types available in the API.
     """
 
     return client.fetch_all('entity-types')
