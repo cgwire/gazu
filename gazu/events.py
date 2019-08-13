@@ -6,8 +6,8 @@ def init():
         Event client that will be able to set listeners.
     """
     from socketIO_client import SocketIO, BaseNamespace
-    from . import get_host
-    path = get_host()
+    from . import get_event_host
+    path = get_event_host()
     socketIO = SocketIO(path, None)
     main_namespace = socketIO.define(BaseNamespace, "/events")
     socketIO.main_namespace = main_namespace

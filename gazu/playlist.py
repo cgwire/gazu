@@ -91,13 +91,10 @@ def new_playlist(project, name):
         dict: Created playlist.
     """
     project = normalize_model_parameter(project)
-    print(project)
-    print(name)
     data = {
         "name": name,
         "project_id": project["id"]
     }
-
     playlist = get_playlist_by_name(project, name)
     if playlist is None:
         playlist = client.post("data/playlists/", data)
