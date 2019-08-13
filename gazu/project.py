@@ -6,6 +6,15 @@ from .helpers import normalize_model_parameter
 
 
 @cache
+def all_project_status():
+    """
+    Returns:
+        list: Project status listed in database.
+    """
+    return sort_by_name(client.fetch_all("project-status"))
+
+
+@cache
 def all_projects():
     """
     Returns:
