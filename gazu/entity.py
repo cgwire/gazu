@@ -31,3 +31,13 @@ def get_entity_type(entity_type_id):
         kind).
     """
     return client.fetch_one('entity-types', entity_type_id)
+
+
+@cache
+def get_entity_types():
+    """
+    Returns:
+        list: All entities types of the project
+    """
+
+    return client.fetch_all('entity-types')
