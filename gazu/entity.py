@@ -1,6 +1,16 @@
 from . import client
 
 from .cache import cache
+from .sorting import sort_by_name
+
+
+@cache
+def all_entity_types():
+    """
+    Returns:
+        list: Entity types listed in database.
+    """
+    return sort_by_name(client.fetch_all("entity-types"))
 
 
 @cache
