@@ -56,16 +56,6 @@ def get_project_by_name(project_name):
     return client.fetch_first("projects?name=%s" % project_name)
 
 
-@cache
-def get_entity_types():
-    """
-    Returns:
-        list: All entities types of the project
-    """
-
-    return client.fetch_one('entity-types', '')
-
-
 def new_project(name, production_type="short"):
     """
     Creates a new project.
