@@ -314,7 +314,8 @@ def get_task(task_id):
     Returns:
         dict: Task matching given ID.
     """
-    return client.get('data/tasks/%s/full' % task_id)
+    task_id = normalize_model_parameter(task_id)
+    return client.get('data/tasks/%s/full' % task_id["id"])
 
 
 def new_task(
