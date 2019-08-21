@@ -26,6 +26,7 @@ except:
 
 
 HOST = "http://gazu.change.serverhost/api"
+EVENT_HOST = None
 
 tokens = {
     "access_token": "",
@@ -57,6 +58,26 @@ def set_host(new_host):
     """
     global HOST
     HOST = new_host
+
+
+def get_event_host():
+    """
+    Returns:
+        Host on which listening for events.
+    """
+    if EVENT_HOST is None:
+        return HOST
+    else:
+        return EVENT_HOST
+
+
+def set_event_host(new_host):
+    """
+    Returns:
+        Set currently configured host on which listening for events.
+    """
+    global EVENT_HOST
+    EVENT_HOST = new_host
 
 
 def set_tokens(new_tokens):

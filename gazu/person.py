@@ -6,12 +6,33 @@ from .cache import cache
 
 
 @cache
+def all_organisations():
+    """
+    Returns:
+        list: Organisations listed in database.
+    """
+    return sort_by_name(client.fetch_all("organisations"))
+
+
+@cache
 def all_persons():
     """
     Returns:
         list: Persons listed in database.
     """
     return sort_by_name(client.fetch_all("persons"))
+
+
+@cache
+def get_person(id):
+    """
+    Args:
+        desktop_login (str): Login used to sign in on the desktop computer.
+
+    Returns:
+        dict: Person corresponding to given id.
+    """
+    return client.fetch("persons/%s" % id)
 
 
 @cache

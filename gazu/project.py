@@ -6,6 +6,15 @@ from .helpers import normalize_model_parameter
 
 
 @cache
+def all_project_status():
+    """
+    Returns:
+        list: Project status listed in database.
+    """
+    return sort_by_name(client.fetch_all("project-status"))
+
+
+@cache
 def all_projects():
     """
     Returns:
@@ -45,16 +54,6 @@ def get_project_by_name(project_name):
         dict: Project corresponding to given name.
     """
     return client.fetch_first("projects?name=%s" % project_name)
-
-
-@cache
-def get_entity_types():
-    """
-    Returns:
-        list: All entities types of the project
-    """
-
-    return client.fetch_one('entity-types', '')
 
 
 def new_project(name, production_type="short"):
