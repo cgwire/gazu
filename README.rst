@@ -71,12 +71,17 @@ Sponsors
 Contributors
 ------------
 
+* @aboellinger (Unit Image)
 * @BigRoy (Colorbleed)
 * @col-one (Allegorithmic)
 * @flablog (Les Fées Spéciales)
 * @frankrousseau (CGWire) - *maintainer*
+* @kguyaux
 * @g-Lul (TNZPV)
 * @jdrese (HEAJ)
+* @pcharmoille (Unit Image)
+* @tokejepsen (Bumpybox)
+* @tpodeva
 
 About authors
 -------------
@@ -88,7 +93,8 @@ efficiently.
 We apply software craftmanship principles as much as possible. We love
 coding and consider that strong quality and good developer experience
 matter a lot. Our extensive experience allows studios to get better at
-doing software and focus more on the artistic work.
+managing production and doing software. They can focus more on the artistic
+work.
 
 Visit `cg-wire.com <https://cg-wire.com>`__ for more information.
 
