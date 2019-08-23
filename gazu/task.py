@@ -185,6 +185,15 @@ def all_task_types_for_episode(episode):
 
 
 @cache
+def all_task_types_for_episode(episode):
+    """
+    Return task types of tasks linked directly to given episode.
+    """
+    task_types = client.fetch_all("episodes/%s/task-types" % episode['id'])
+    return sort_by_name(task_types)
+
+
+@cache
 def all_tasks_for_entity_and_task_type(entity, task_type):
     """
     Args:
