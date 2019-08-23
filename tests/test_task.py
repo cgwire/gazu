@@ -54,6 +54,20 @@ class TaskTestCase(unittest.TestCase):
             task = tasks[0]
             self.assertEqual(task["name"], "Master Modeling")
 
+    def test_all_for_episode(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url("data/episodes/episode-01/tasks"),
+                text=json.dumps([
+                    {"id": 1, "name": "Toto Task"}
+                ])
+            )
+
+            episode = {"id": "episode-01"}
+            tasks = gazu.task.all_tasks_for_episode(episode)
+            task = tasks[0]
+            self.assertEqual(task["name"], "Toto Task")
+
     def test_all_task_types(self):
         with requests_mock.mock() as mock:
             mock.get(
@@ -89,6 +103,20 @@ class TaskTestCase(unittest.TestCase):
             task_types = gazu.task.all_task_types_for_sequence(sequence)
             task_type = task_types[0]
             self.assertEqual(task_type["name"], "Modeling")
+
+    def test_all_task_types_for_episode(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url(
+                    "data/episodes/episode-1/task-types"
+                ),
+                text=json.dumps([{"id": 1, "name": "TotoType"}])
+            )
+
+            episode = {"id": "episode-1"}
+            task_types = gazu.task.all_task_types_for_episode(episode)
+            task_type = task_types[0]
+            self.assertEqual(task_type["name"], "TotoType")
 
     def test_get_task_by_name(self):
         with requests_mock.mock() as mock:
