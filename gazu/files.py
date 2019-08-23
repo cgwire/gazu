@@ -650,42 +650,69 @@ def get_last_entity_output_revision(entity, output_type, task_type):
 
 
 @cache
-def get_last_output_files_for_entity(entity):
+def get_last_output_files_for_entity(
+        entity,
+        output_type=None,
+        task_type=None,
+        name=None,
+        representation=None):
     """
     Args:
         entity (str / dict): The entity dict or ID.
 
     Returns:
-        dict: Dict listing last output files for given entity. Files are
-        returned in a form of a tree. First level are output types, second level
-        are file names. Leaves are last ouput files for a given output type and
-        a given file name.
+        list: list of last output files for given entity
     """
     entity = normalize_model_parameter(entity)
-    path = "data/entities/%s/output-files/last-revisions" % entity["id"]
+    path = "data/entities/{entity_id}/output-files/last-revisions?".format(
+        entity_id=entity["id"])
+
+    if output_type:
+        path += 'output_type_id={}&'.format(output_type['id'])
+    if task_type:
+        path += 'task_type_id={}&'.format(task_type['id'])
+    if representation:
+        path += 'representation={}&'.format(representation)
+    if name:
+        path += 'name={}&'.format(name)
+
     return client.get(path)
 
 
 @cache
-def get_last_output_files_for_asset_instance(asset_instance, temporal_entity):
+def get_last_output_files_for_asset_instance(
+        asset_instance,
+        temporal_entity,
+        task_type=None,
+        output_type=None,
+        name=None,
+        representation=None):
     """
     Args:
         asset_instance (str / dict): The asset instance dict or ID.
         temporal_entity (str / dict): The temporal entity dict or ID.
 
     Returns:
-        dict: Dict listing last output files for given asset instance and
-        temporal entity where it appears. Files are returned in a form of a
-        tree. First level are output types, second level are file names.  Leaves
-        are last ouput files for a given output type and a given file name.
+        list: last output files for given asset instance and
+        temporal entity where it appears.
     """
     asset_instance = normalize_model_parameter(asset_instance)
     temporal_entity = normalize_model_parameter(temporal_entity)
-    path = "data/asset-instances/%s/entities/%s" \
-           "/output-files/last-revisions" % (
-               asset_instance["id"],
-               temporal_entity["id"]
-           )
+    path = (
+        "data/asset-instances/{asset_instance_id}/entities/{temporal_entity_id}"
+        "/output-files/last-revisions?").format(
+            asset_instance_id=asset_instance["id"],
+            temporal_entity_id=temporal_entity["id"])
+
+    if output_type:
+        path += 'output_type_id={}&'.format(output_type['id'])
+    if task_type:
+        path += 'task_type_id={}&'.format(task_type['id'])
+    if representation:
+        path += 'representation={}&'.format(representation)
+    if name:
+        path += 'name={}&'.format(name)
+
     return client.get(path)
 
 
