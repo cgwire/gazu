@@ -82,6 +82,15 @@ def all_tasks_for_asset(asset):
 
 
 @cache
+def all_tasks_for_episode(episode):
+    """
+    Retrieve all tasks directly linked to given episode.
+    """
+    tasks = client.fetch_all("episodes/%s/tasks" % episode["id"])
+    return sort_by_name(tasks)
+
+
+@cache
 def all_tasks_for_task_status(project, task_type, task_status):
     """
     Args:
@@ -157,6 +166,15 @@ def all_task_types_for_sequence(sequence):
     """
     sequence = normalize_model_parameter(sequence)
     task_types = client.fetch_all("sequences/%s/task-types" % sequence['id'])
+    return sort_by_name(task_types)
+
+
+@cache
+def all_task_types_for_episode(episode):
+    """
+    Return task types of tasks linked directly to given episode.
+    """
+    task_types = client.fetch_all("episodes/%s/task-types" % episode['id'])
     return sort_by_name(task_types)
 
 
