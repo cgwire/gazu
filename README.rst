@@ -77,6 +77,7 @@ Contributors
 * @frankrousseau (CGWire) - *maintainer*
 * @g-Lul (TNZPV)
 * @jdrese (HEAJ)
+* @aboellinger (Unit Image)
 
 About authors
 -------------
