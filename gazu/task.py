@@ -86,6 +86,7 @@ def all_tasks_for_episode(episode):
     """
     Retrieve all tasks directly linked to given episode.
     """
+    episode = normalize_model_parameter(episode)
     tasks = client.fetch_all("episodes/%s/tasks" % episode["id"])
     return sort_by_name(tasks)
 
@@ -174,6 +175,7 @@ def all_task_types_for_episode(episode):
     """
     Return task types of tasks linked directly to given episode.
     """
+    episode = normalize_model_parameter(episode)
     task_types = client.fetch_all("episodes/%s/task-types" % episode['id'])
     return sort_by_name(task_types)
 
