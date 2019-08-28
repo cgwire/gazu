@@ -115,10 +115,11 @@ def get_output_file_by_path(path):
 
 @cache
 def all_output_files_for_entity(
-    entity,
-    output_type,
-    representation=None
-):
+        entity,
+        output_type=None,
+        task_type=None,
+        name=None,
+        representation=None):
     """
     Args:
         entity (str / dict): The entity dict or ID.
@@ -129,23 +130,29 @@ def all_output_files_for_entity(
     """
     entity = normalize_model_parameter(entity)
     output_type = normalize_model_parameter(output_type)
-    path = "entities/%s/output-types/%s/output-files" % (
-        entity["id"],
-        output_type["id"]
-    )
-    params = {}
-    if representation is not None:
-        params = {"representation": representation}
-    return client.fetch_all(path, params)
+    path = "data/entities/{entity_id}/output-files?".format(
+        entity_id=entity['id'])
+
+    if output_type:
+        path += 'output_type_id={}&'.format(output_type['id'])
+    if task_type:
+        path += 'task_type_id={}&'.format(task_type['id'])
+    if representation:
+        path += 'representation={}&'.format(representation)
+    if name:
+        path += 'name={}&'.format(name)
+
+    return client.get(path)
 
 
 @cache
 def all_output_files_for_asset_instance(
-    asset_instance,
-    temporal_entity,
-    output_type,
-    representation=None
-):
+        asset_instance,
+        temporal_entity=None,
+        task_type=None,
+        output_type=None,
+        name=None,
+        representation=None):
     """
     Args:
         entity (str / dict): The entity dict or ID.
@@ -158,17 +165,21 @@ def all_output_files_for_asset_instance(
     """
     asset_instance = normalize_model_parameter(asset_instance)
     temporal_entity = normalize_model_parameter(temporal_entity)
-    output_type = normalize_model_parameter(output_type)
-    path = "asset-instances/%s/entities/%s" \
-           "/output-types/%s/output-files" % (
-               asset_instance["id"],
-               temporal_entity["id"],
-               output_type["id"]
-           )
-    params = {}
-    if representation is not None:
-        params = {"representation": representation}
-    return client.fetch_all(path, params)
+    path = "data/asset-instances/{asset_instance_id}/output-files?".format(
+        asset_instance_id=asset_instance['id'])
+
+    if temporal_entity:
+        path += 'temporal_entity_id={}&'.format(temporal_entity['id'])
+    if output_type:
+        path += 'output_type_id={}&'.format(output_type['id'])
+    if task_type:
+        path += 'task_type_id={}&'.format(task_type['id'])
+    if representation:
+        path += 'representation={}&'.format(representation)
+    if name:
+        path += 'name={}&'.format(name)
+
+    return client.get(path)
 
 
 @cache
