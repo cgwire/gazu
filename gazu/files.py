@@ -108,6 +108,24 @@ def get_output_file_by_path(path):
 
 
 @cache
+def get_all_working_files_for_entity(
+        entity,
+        task=None,
+        name=None):
+    """
+    Retrieves all the working files of a given entity and specied parameters
+    """
+    path = "data/entities/{entity_id}/working-files?".format(
+        entity_id=entity["id"],
+    )
+    if task is not None:
+        path += "task_id={}&".format(task['id'])
+    if name is not None:
+        path += "name={}&".format(name)
+
+    return client.get(path)
+
+
 def all_output_files_for_entity(
     entity, output_type=None, task_type=None, name=None, representation=None
 ):
