@@ -9,7 +9,7 @@ from .cache import cache
 def all_task_statuses():
     """
     Returns:
-        Task statuses stored in database.
+        list: Task statuses stored in database.
     """
     task_statuses = client.fetch_all("task-status")
     return sort_by_name(task_statuses)
@@ -163,7 +163,7 @@ def all_task_types_for_sequence(sequence):
         sequence (str / dict): The sequence dict or the sequence ID.
 
     Returns:
-        Task types of tasks linked directly to given sequence.
+        list: Task types of tasks linked directly to given sequence.
     """
     sequence = normalize_model_parameter(sequence)
     task_types = client.fetch_all("sequences/%s/task-types" % sequence['id'])
@@ -173,7 +173,8 @@ def all_task_types_for_sequence(sequence):
 @cache
 def all_task_types_for_episode(episode):
     """
-    Return task types of tasks linked directly to given episode.
+    Returns:
+        list: Task types of tasks linked directly to given episode.
     """
     episode = normalize_model_parameter(episode)
     task_types = client.fetch_all("episodes/%s/task-types" % episode['id'])
@@ -200,6 +201,26 @@ def all_tasks_for_entity_and_task_type(entity, task_type):
             task_type_id
         )
     )
+
+
+@cache
+def all_tasks_for_person(person):
+    """
+    Returns:
+        list: Tasks that are not done for given person (only for open projects).
+    """
+    person = normalize_model_parameter(person)
+    return client.fetch_all("persons/%s/tasks" % person["id"])
+
+
+@cache
+def all_done_tasks_for_person(person):
+    """
+    Returns:
+        list: Tasks that are done for given person (only for open projects).
+    """
+    person = normalize_model_parameter(person)
+    return client.fetch_all("persons/%s/tasks" % person["id"])
 
 
 @cache
@@ -628,6 +649,3 @@ def assign_task(task, person):
     task = normalize_model_parameter(task)
     route = "/actions/persons/%s/assign" % person['id']
     return client.put(route, {'task_ids': task['id']})
-
-    
-

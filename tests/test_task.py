@@ -285,7 +285,7 @@ class TaskTestCase(unittest.TestCase):
 
     def test_all_tasks_for_task_status(self):
         with requests_mock.mock() as mock:
-            result = [{"id": "task-status-1"}, {"id": "task-status-2"}]
+            result = [{"id": "task-1"}, {"id": "task-1"}]
             mock.get(
                 gazu.client.get_full_url(
                     "data/tasks?project_id=project-1&"
@@ -297,10 +297,20 @@ class TaskTestCase(unittest.TestCase):
             project = {"id": "project-1"}
             task_type = {"id": "task-type-1"}
             task_status = {"id": "task-status-1"}
-            task_status = gazu.task.all_tasks_for_task_status(
+            tasks = gazu.task.all_tasks_for_task_status(
                 project, task_type, task_status
             )
-            self.assertEqual(task_status, result)
+            self.assertEqual(tasks, result)
+
+    def test_all_tasks_for_person(self):
+        with requests_mock.mock() as mock:
+            result = [{"id": "task-status-1"}, {"id": "task-status-2"}]
+            mock.get(
+                gazu.client.get_full_url("data/persons/person-1/tasks"),
+                text=json.dumps(result)
+            )
+            tasks = gazu.task.all_tasks_for_person("person-1")
+            self.assertEqual(tasks, result)
 
     def test_get_task_status_by_name(self):
         with requests_mock.mock() as mock:
