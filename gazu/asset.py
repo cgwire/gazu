@@ -51,7 +51,7 @@ def all_assets_for_episode(episode):
     episode = normalize_model_parameter(episode)
 
     return sort_by_name(
-        client.fetch_all("assets?source_id=%s" % episode["id"])
+        client.fetch_all("assets", {"source_id": episode["id"]})
     )
 
 
@@ -103,14 +103,17 @@ def get_asset_by_name(project, name, asset_type=None):
     """
     project = normalize_model_parameter(project)
 
+    path = "assets/all"
     if asset_type is None:
-        path = "assets/all?project_id=%s&name=%s" % (project["id"], name)
+        params = {"project_id": project["id"], "name": name}
     else:
         asset_type = normalize_model_parameter(asset_type)
-        path = "assets/all?project_id=%s&name=%s&entity_type_id=%s" % (
-            project["id"], name, asset_type["id"]
-        )
-    return client.fetch_first(path)
+        params = {
+            "project_id": project["id"],
+            "name": name,
+            "entity_type_id": asset_type["id"]
+        }
+    return client.fetch_first(path, params)
 
 
 @cache
@@ -184,9 +187,10 @@ def remove_asset(asset, force=False):
     """
     asset = normalize_model_parameter(asset)
     path = "data/assets/%s" % asset["id"]
+    params = {}
     if force:
-        path += "?force=true"
-    return client.delete(path)
+        params = {"force": "true"}
+    return client.delete(path, params)
 
 
 @cache
@@ -247,7 +251,7 @@ def get_asset_type_by_name(name):
     Returns:
         dict: Asset Type matching given name.
     """
-    return client.fetch_first("entity-types?name=%s" % name)
+    return client.fetch_first("entity-types", {"name": name})
 
 
 def new_asset_type(name):
@@ -263,7 +267,7 @@ def new_asset_type(name):
     data = {
         "name": name
     }
-    asset_type = client.fetch_first("entity-types?name=%s" % name)
+    asset_type = client.fetch_first("entity-types", {"name": name})
     if asset_type is None:
         asset_type = client.create("entity-types", data)
     return asset_type

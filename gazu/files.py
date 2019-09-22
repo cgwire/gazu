@@ -61,7 +61,9 @@ def get_output_type_by_name(output_type_name):
     Returns:
         dict: Output type matching given name.
     """
-    return client.fetch_first("output-types?name=%s" % output_type_name)
+    return client.fetch_first("output-types", {
+        "name": output_type_name
+    })
 
 
 def new_output_type(name, short_name):
@@ -106,7 +108,9 @@ def get_output_file_by_path(path):
     Returns:
         dict: Output file matching given path.
     """
-    return client.fetch_first("output-files?path=%s" % path)
+    return client.fetch_first("output-files",{
+        "path": path
+    })
 
 
 @cache
@@ -125,13 +129,14 @@ def all_output_files_for_entity(
     """
     entity = normalize_model_parameter(entity)
     output_type = normalize_model_parameter(output_type)
-    path = "data/entities/%s/output-types/%s/output-files" % (
+    path = "entities/%s/output-types/%s/output-files" % (
         entity["id"],
         output_type["id"]
     )
+    params = {}
     if representation is not None:
-        path += "?representation=%s" % representation
-    return client.get(path)
+        params = {"representation": representation}
+    return client.fetch_all(path, params)
 
 
 @cache
@@ -154,15 +159,16 @@ def all_output_files_for_asset_instance(
     asset_instance = normalize_model_parameter(asset_instance)
     temporal_entity = normalize_model_parameter(temporal_entity)
     output_type = normalize_model_parameter(output_type)
-    path = "data/asset-instances/%s/entities/%s" \
+    path = "asset-instances/%s/entities/%s" \
            "/output-types/%s/output-files" % (
                asset_instance["id"],
                temporal_entity["id"],
                output_type["id"]
            )
+    params = {}
     if representation is not None:
-        path += "?representation=%s" % representation
-    return client.get(path)
+        params = {"representation": representation}
+    return client.fetch_all(path, params)
 
 
 @cache
@@ -195,7 +201,7 @@ def get_software_by_name(software_name):
     Returns:
         dict: Software object corresponding to given name.
     """
-    return client.fetch_first("softwares?name=%s" % software_name)
+    return client.fetch_first("softwares", {"name": software_name})
 
 
 def new_software(name, short_name, file_extension):

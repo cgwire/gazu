@@ -113,10 +113,10 @@ def get_episode_by_name(project, episode_name):
         dict: Episode corresponding to given name and project.
     """
     project = normalize_model_parameter(project)
-    return client.fetch_first("episodes?project_id=%s&name=%s" % (
-        project["id"],
-        episode_name
-    ))
+    return client.fetch_first("episodes", {
+        "project_id": project["id"],
+        "name": episode_name
+    })
 
 
 @cache
@@ -158,14 +158,17 @@ def get_sequence_by_name(project, sequence_name, episode=None):
     """
     project = normalize_model_parameter(project)
     if episode is None:
-        path = "sequences?project_id=%s&name=%s" % (
-            project["id"],
-            sequence_name
-        )
+        params = {
+            "project_id": project["id"],
+            "name": sequence_name
+        }
     else:
         episode = normalize_model_parameter(episode)
-        path = "sequences?episode_id=%s&name=%s" % (episode["id"], sequence_name)
-    return client.fetch_first(path)
+        params = {
+            "episode_id": episode["id"],
+            "name": sequence_name
+        }
+    return client.fetch_first("sequences", params)
 
 
 @cache
@@ -204,10 +207,10 @@ def get_shot_by_name(sequence, shot_name):
         dict: Shot corresponding to given name and sequence.
     """
     sequence = normalize_model_parameter(sequence)
-    return client.fetch_first("shots/all?sequence_id=%s&name=%s" % (
-        sequence["id"],
-        shot_name
-    ))
+    return client.fetch_first("shots/all", {
+        "sequence_id": sequence["id"],
+        "name": shot_name
+    })
 
 
 def new_sequence(
@@ -326,9 +329,10 @@ def remove_shot(shot, force=False):
     """
     shot = normalize_model_parameter(shot)
     path = "data/shots/%s" % shot["id"]
+    params = {}
     if force:
-        path += "?force=true"
-    return client.delete(path)
+        params = {"force": "true"}
+    return client.delete(path, params)
 
 
 def new_episode(project, name):

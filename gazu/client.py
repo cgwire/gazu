@@ -1,6 +1,7 @@
 import functools
-import shutil
 import json
+import shutil
+import urllib
 
 from .encoder import CustomJSONEncoder
 
@@ -126,13 +127,16 @@ def get_full_url(path):
     return url_path_join(get_host(), path)
 
 
-def get(path, json_response=True):
+def get(path, json_response=True, params={}):
     """
     Run a get request toward given path for configured host.
 
     Returns:
         The request result.
     """
+    if len(params) > 0:
+        path = "%s?%s" % (path, urllib.urlencode(params))
+
     response = requests_session.get(
         get_full_url(path),
         headers=make_auth_header()
@@ -177,13 +181,16 @@ def put(path, data):
     return response.json()
 
 
-def delete(path):
+def delete(path, params={}):
     """
     Run a get request toward given path for configured host.
 
     Returns:
         The request result.
     """
+    if len(params) > 0:
+        path = "%s?%s" % (path, urllib.urlencode(params))
+
     response = requests_session.delete(
         get_full_url(path),
         headers=make_auth_header()
@@ -248,7 +255,7 @@ def check_status(request, path):
     return status_code
 
 
-def fetch_all(path):
+def fetch_all(path, params={}):
     """
     Args:
         path (str): The path for which we want to retrieve all entries.
@@ -257,10 +264,10 @@ def fetch_all(path):
         list: All entries stored in database for a given model. You can add a
         filter to the model name like this: "tasks?project_id=project-id"
     """
-    return get(url_path_join('data', path))
+    return get(url_path_join('data', path), params=params)
 
 
-def fetch_first(path):
+def fetch_first(path, params={}):
     """
     Args:
         path (str): The path for which we want to retrieve the first entry.
@@ -268,7 +275,7 @@ def fetch_first(path):
     Returns:
         dict: The first entry for which a model is required.
     """
-    entries = get(url_path_join('data', path))
+    entries = get(url_path_join('data', path), params=params)
     if len(entries) > 0:
         return entries[0]
     else:

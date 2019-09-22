@@ -105,13 +105,11 @@ def all_tasks_for_task_status(project, task_type, task_status):
     project = normalize_model_parameter(project)
     task_type = normalize_model_parameter(task_type)
     task_status = normalize_model_parameter(task_status)
-    return client.fetch_all(
-        "tasks?project_id=%s&task_type_id=%s&task_status_id=%s" % (
-            project["id"],
-            task_type["id"],
-            task_status["id"]
-        )
-    )
+    return client.fetch_all("tasks", {
+        "project_id": project["id"],
+        "task_type_id": task_type["id"],
+        "task_status_id": task_status["id"]
+    })
 
 
 @cache
@@ -238,14 +236,11 @@ def get_task_by_name(entity, task_type, name="main"):
     """
     entity = normalize_model_parameter(entity)
     task_type = normalize_model_parameter(task_type)
-    return client.fetch_first(
-        "tasks?name={name}&entity_id={entity_id}&task_type_id={task_type_id}"
-        .format(
-            name=name,
-            task_type_id=task_type["id"],
-            entity_id=entity["id"]
-        )
-    )
+    return client.fetch_first("tasks", {
+        "name": name,
+        "task_type_id": task_type["id"],
+        "entity_id": entity["id"]
+    })
 
 
 @cache
@@ -269,7 +264,7 @@ def get_task_type_by_name(task_type_name):
     Returns:
         dict: Task type object for given name.
     """
-    return client.fetch_first("task-types?name=%s" % task_type_name)
+    return client.fetch_first("task-types", {"name": task_type_name})
 
 
 @cache
@@ -303,9 +298,7 @@ def get_task_status(task):
         A task status object corresponding to status set on given task.
     """
     return client.fetch_first(
-        "task-status?id={task_status_id}".format(
-            task_status_id=task['task_status_id']
-        )
+        "task-status", {"id": task['task_status_id']}
     )
 
 
@@ -318,7 +311,7 @@ def get_task_status_by_name(name):
     Returns:
         dict: Task status matching given name.
     """
-    return client.fetch_first("task-status?name=%s" % name)
+    return client.fetch_first("task-status", {"name": name})
 
 
 @cache
@@ -331,7 +324,7 @@ def get_task_status_by_short_name(task_status_short_name):
         dict: Task status matching given short name.
     """
     return client.fetch_first(
-        "task-status?short_name=%s" % task_status_short_name
+        "task-status", {"short_name": task_status_short_name}
     )
 
 
@@ -343,7 +336,9 @@ def remove_task_status(task_status):
         task_status (str / dict): The task status dict or ID.
     """
     task_status = normalize_model_parameter(task_status)
-    return client.delete("data/task-status/%s?force=true" % task_status["id"])
+    return client.delete("data/task-status/%s" % task_status["id"], {
+        "force": "true"
+    })
 
 
 @cache
@@ -416,7 +411,7 @@ def remove_task(task):
         task (str / dict): The task dict or the task ID.
     """
     task = normalize_model_parameter(task)
-    client.delete("data/tasks/%s?force=true" % task["id"])
+    client.delete("data/tasks/%s" % task["id"], {"force": "true"})
 
 
 def start_task(task):

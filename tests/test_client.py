@@ -145,6 +145,26 @@ class BaseFuncTestCase(ClientTestCase):
             )
             self.assertIsNone(client.fetch_first("persons"))
 
+    def test_query_string(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                client.get_full_url("data/projects?name=Test"),
+                text=json.dumps([
+                    {"name": "Project"},
+                ])
+            )
+            self.assertEqual(
+                client.fetch_first("projects", {"name": "Test"}),
+                {"name": "Project"}
+            )
+
+            mock.get(
+                client.get_full_url("data/persons"),
+                text=json.dumps([])
+            )
+            self.assertIsNone(client.fetch_first("persons"))
+
+
     def test_fetch_one(self):
         with requests_mock.mock() as mock:
             mock.get(
