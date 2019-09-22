@@ -125,7 +125,9 @@ def get_asset(asset_id):
     return client.fetch_one('assets', asset_id)
 
 
-def new_asset(project, asset_type, name, description="", extra_data={}):
+def new_asset(
+    project, asset_type, name, description="", extra_data={}, episode_id=None
+):
     """
     Create a new asset in the database for given project and asset type.
 
@@ -148,6 +150,9 @@ def new_asset(project, asset_type, name, description="", extra_data={}):
         "data": extra_data
     }
 
+    if episode_id is not None:
+        data["source_id"] = episode_id
+
     asset = get_asset_by_name(project, name, asset_type)
     if asset is None:
         asset = client.post("data/projects/%s/asset-types/%s/assets/new" % (
@@ -165,6 +170,8 @@ def update_asset(asset):
     Args:
         asset (dict): Asset to save.
     """
+    if "episode_id" in asset:
+        asset["source_id"] = asset["episode_id"]
     return client.put('data/entities/%s' % asset["id"], asset)
 
 
