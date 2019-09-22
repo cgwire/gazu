@@ -12,7 +12,8 @@ from .exception import (
     MethodNotAllowedException,
     ParameterException,
     RouteNotFoundException,
-    ServerErrorException
+    ServerErrorException,
+    UploadFailedException
 )
 try:
     import requests
@@ -319,12 +320,14 @@ def upload(path, file_path):
     """
     url = get_full_url(path)
     files = {"file": open(file_path, "rb")}
-    return requests_session.post(
+    result = requests_session.post(
         url,
         headers=make_auth_header(),
         files=files
     ).json()
-    return requests_session.post(url, files=files).json()
+    if "message" in result:
+        raise UploadFailedException(result["message"])
+    return result
 
 
 def download(path, file_path):
