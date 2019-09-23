@@ -53,7 +53,7 @@ def get_project_by_name(project_name):
     Returns:
         dict: Project corresponding to given name.
     """
-    return client.fetch_first("projects?name=%s" % project_name)
+    return client.fetch_first("projects", {"name": project_name})
 
 
 def new_project(name, production_type="short"):

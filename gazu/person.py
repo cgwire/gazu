@@ -44,7 +44,7 @@ def get_person_by_desktop_login(desktop_login):
     Returns:
         dict: Person corresponding to given desktop computer login.
     """
-    return client.fetch_first("persons?desktop_login=%s" % desktop_login)
+    return client.fetch_first("persons", {"desktop_login": desktop_login})
 
 
 @cache
@@ -56,7 +56,7 @@ def get_person_by_email(email):
     Returns:
         dict:  Person corresponding to given email.
     """
-    return client.fetch_first("persons?email=%s" % email)
+    return client.fetch_first("persons", {"email": email})
 
 
 @cache

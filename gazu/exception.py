@@ -47,6 +47,14 @@ class ParameterException(Exception):
     pass
 
 
+class UploadFailedException(Exception):
+    """
+    Error raised when an error while uploading a file, mainly to handle cases
+    where processing that occurs on the remote server fails.
+    """
+    pass
+
+
 class TooBigFileException(Exception):
     """
     Error raised when a 413 error (payload too big error) is sent by the API.

@@ -1,6 +1,8 @@
 import functools
-import shutil
 import json
+import shutil
+import urllib
+import sys
 
 from .encoder import CustomJSONEncoder
 
@@ -11,7 +13,8 @@ from .exception import (
     MethodNotAllowedException,
     ParameterException,
     RouteNotFoundException,
-    ServerErrorException
+    ServerErrorException,
+    UploadFailedException
 )
 try:
     import requests
@@ -126,13 +129,19 @@ def get_full_url(path):
     return url_path_join(get_host(), path)
 
 
-def get(path, json_response=True):
+def get(path, json_response=True, params={}):
     """
     Run a get request toward given path for configured host.
 
     Returns:
         The request result.
     """
+    if len(params) > 0:
+        if hasattr(urllib, 'urlencode'):
+            path = "%s?%s" % (path, urllib.urlencode(params))
+        else:
+            path = "%s?%s" % (path, urllib.parse.urlencode(params))
+
     response = requests_session.get(
         get_full_url(path),
         headers=make_auth_header()
@@ -177,13 +186,18 @@ def put(path, data):
     return response.json()
 
 
-def delete(path):
+def delete(path, params={}):
     """
     Run a get request toward given path for configured host.
 
     Returns:
         The request result.
     """
+    if hasattr(urllib, 'urlencode'):
+        path = "%s?%s" % (path, urllib.urlencode(params))
+    else:
+        path = "%s?%s" % (path, urllib.parse.urlencode(params))
+
     response = requests_session.delete(
         get_full_url(path),
         headers=make_auth_header()
@@ -248,7 +262,7 @@ def check_status(request, path):
     return status_code
 
 
-def fetch_all(path):
+def fetch_all(path, params={}):
     """
     Args:
         path (str): The path for which we want to retrieve all entries.
@@ -257,10 +271,10 @@ def fetch_all(path):
         list: All entries stored in database for a given model. You can add a
         filter to the model name like this: "tasks?project_id=project-id"
     """
-    return get(url_path_join('data', path))
+    return get(url_path_join('data', path), params=params)
 
 
-def fetch_first(path):
+def fetch_first(path, params={}):
     """
     Args:
         path (str): The path for which we want to retrieve the first entry.
@@ -268,7 +282,7 @@ def fetch_first(path):
     Returns:
         dict: The first entry for which a model is required.
     """
-    entries = get(url_path_join('data', path))
+    entries = get(url_path_join('data', path), params=params)
     if len(entries) > 0:
         return entries[0]
     else:
@@ -312,12 +326,14 @@ def upload(path, file_path):
     """
     url = get_full_url(path)
     files = {"file": open(file_path, "rb")}
-    return requests_session.post(
+    result = requests_session.post(
         url,
         headers=make_auth_header(),
         files=files
     ).json()
-    return requests_session.post(url, files=files).json()
+    if "message" in result:
+        raise UploadFailedException(result["message"])
+    return result
 
 
 def download(path, file_path):

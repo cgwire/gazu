@@ -70,10 +70,10 @@ def get_scene_by_name(sequence, scene_name):
     Returns scene corresponding to given sequence and name.
     """
     sequence = normalize_model_parameter(sequence)
-    result = client.fetch_all("scenes/all?parent_id=%s&name=%s" % (
-        sequence["id"],
-        scene_name
-    ))
+    result = client.fetch_all("scenes/all", {
+        "parent_id": sequence["id"],
+        "name": scene_name
+    })
     return next(iter(result or []), None)
 
 
@@ -137,11 +137,10 @@ def get_asset_instance_by_name(scene, name):
     """
     Returns the asset instance of the scene that has the given name.
     """
-    instances = client.get(
-        "data/asset-instances?name=%s&scene_id=%s" % (name, scene["id"]))
-    if len(instances) > 0:
-        return instances[0]
-    return None
+    return client.fetch_first("asset-instances", {
+        "name": name,
+        "scene_id": scene["id"]
+    })
 
 
 @cache
