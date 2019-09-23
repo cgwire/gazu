@@ -2,6 +2,7 @@ import functools
 import json
 import shutil
 import urllib
+import sys
 
 from .encoder import CustomJSONEncoder
 
@@ -136,7 +137,10 @@ def get(path, json_response=True, params={}):
         The request result.
     """
     if len(params) > 0:
-        path = "%s?%s" % (path, urllib.urlencode(params))
+        if hasattr(urllib, 'urlencode'):
+            path = "%s?%s" % (path, urllib.urlencode(params))
+        else:
+            path = "%s?%s" % (path, urllib.parse.urlencode(params))
 
     response = requests_session.get(
         get_full_url(path),
@@ -189,8 +193,10 @@ def delete(path, params={}):
     Returns:
         The request result.
     """
-    if len(params) > 0:
+    if hasattr(urllib, 'urlencode'):
         path = "%s?%s" % (path, urllib.urlencode(params))
+    else:
+        path = "%s?%s" % (path, urllib.parse.urlencode(params))
 
     response = requests_session.delete(
         get_full_url(path),
