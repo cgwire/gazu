@@ -124,12 +124,16 @@ def all_output_files_for_entity(
     Args:
         entity (str / dict): The entity dict or ID.
         output_type (str / dict): The output type dict or ID.
+        task_type (str / dict): The task type dict or ID.
+        name (str): The file name
+        representation (str): The file representation
 
     Returns:
         list: Output files for a given entity (asset or shot) and output type.
     """
     entity = normalize_model_parameter(entity)
     output_type = normalize_model_parameter(output_type)
+    task_type = normalize_model_parameter(task_type)
     path = "data/entities/{entity_id}/output-files?".format(
         entity_id=entity['id'])
 
@@ -157,7 +161,10 @@ def all_output_files_for_asset_instance(
     Args:
         entity (str / dict): The entity dict or ID.
         temporal_entity (str / dict): Shot dict or ID (or scene or sequence).
+        task_type (str / dict): The task type dict or ID.
         output_type (str / dict): The output_type dict or ID.
+        name (str): The file name
+        representation (str): The file representation
 
     Returns:
         list: Output files for a given asset instance and temporal entity and
@@ -165,6 +172,8 @@ def all_output_files_for_asset_instance(
     """
     asset_instance = normalize_model_parameter(asset_instance)
     temporal_entity = normalize_model_parameter(temporal_entity)
+    task_type = normalize_model_parameter(task_type)
+    output_type = normalize_model_parameter(output_type)
     path = "data/asset-instances/{asset_instance_id}/output-files?".format(
         asset_instance_id=asset_instance['id'])
 
