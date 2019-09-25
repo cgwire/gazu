@@ -129,18 +129,14 @@ def get_full_url(path):
     return url_path_join(get_host(), path)
 
 
-def get(path, json_response=True, params={}):
+def get(path, json_response=True, params=None):
     """
     Run a get request toward given path for configured host.
 
     Returns:
         The request result.
     """
-    if len(params) > 0:
-        if hasattr(urllib, 'urlencode'):
-            path = "%s?%s" % (path, urllib.urlencode(params))
-        else:
-            path = "%s?%s" % (path, urllib.parse.urlencode(params))
+    path = build_path_with_params(path, params)
 
     response = requests_session.get(
         get_full_url(path),
@@ -186,17 +182,14 @@ def put(path, data):
     return response.json()
 
 
-def delete(path, params={}):
+def delete(path, params=None):
     """
     Run a get request toward given path for configured host.
 
     Returns:
         The request result.
     """
-    if hasattr(urllib, 'urlencode'):
-        path = "%s?%s" % (path, urllib.urlencode(params))
-    else:
-        path = "%s?%s" % (path, urllib.parse.urlencode(params))
+    path = build_path_with_params(path, params)
 
     response = requests_session.delete(
         get_full_url(path),
@@ -262,7 +255,7 @@ def check_status(request, path):
     return status_code
 
 
-def fetch_all(path, params={}):
+def fetch_all(path, params=None):
     """
     Args:
         path (str): The path for which we want to retrieve all entries.
@@ -274,7 +267,7 @@ def fetch_all(path, params={}):
     return get(url_path_join('data', path), params=params)
 
 
-def fetch_first(path, params={}):
+def fetch_first(path, params=None):
     """
     Args:
         path (str): The path for which we want to retrieve the first entry.
@@ -372,3 +365,24 @@ def get_current_user():
         dict: User database information for user linked to auth tokens.
     """
     return get("auth/authenticated")["user"]
+
+
+def build_path_with_params(path, params):
+    """
+    Add params to a path using urllib encoding
+
+    Args:
+        path (str): The url base path
+        params (dict): The parameters to add as a dict
+
+    Returns:
+        str: the builded path
+    """
+    if not params:
+        return path
+
+    if hasattr(urllib, 'urlencode'):
+        path = "%s?%s" % (path, urllib.urlencode(params))
+    else:
+        path = "%s?%s" % (path, urllib.parse.urlencode(params))
+    return path

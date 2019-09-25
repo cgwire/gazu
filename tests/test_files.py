@@ -404,55 +404,74 @@ class FilesTestCase(unittest.TestCase):
 
     def test_get_output_files_for_entity(self):
         with requests_mock.mock() as mock:
-            path = "/data/entities/asset-1/output-types/output-type-1/" \
-                   "output-files"
+            base_path = ("entities/asset-1/output-files")
+            path = gazu.client.url_path_join('data', base_path)
+            params = {
+                "output_type_id": u"output-type-1"
+            }
+
             mock.get(
-                gazu.client.get_full_url(path),
+                gazu.client.get_full_url(
+                    gazu.client.build_path_with_params(path, params)),
                 text=json.dumps([{
                     "id": "output-file-01",
                     "name": "main"
                 }])
             )
-            output_type = gazu.files.all_output_files_for_entity(
+            output_files = gazu.files.all_output_files_for_entity(
                 {"id": "asset-1"},
-                {"id": "output-type-1"},
+                output_type={"id": "output-type-1"},
             )
-            self.assertEqual(output_type[0]["name"], "main")
+            self.assertEqual(output_files[0]["name"], "main")
 
-            path = "/data/entities/asset-1/output-types/output-type-1/" \
-                   "output-files?representation=obj"
+            # test with representation
+            params = {
+                "output_type_id": u"output-type-1",
+                "representation": u"obj"
+            }
             mock.get(
-                gazu.client.get_full_url(path),
+                gazu.client.get_full_url(
+                    gazu.client.build_path_with_params(path, params)),
                 text=json.dumps([{
                     "id": "output-file-01",
                     "name": "main",
                     "representation": "obj"
                 }])
             )
-            output_type = gazu.files.all_output_files_for_entity(
+            output_files = gazu.files.all_output_files_for_entity(
                 {"id": "asset-1"},
                 {"id": "output-type-1"},
                 representation="obj"
             )
-            self.assertEqual(output_type[0]["name"], "main")
+            self.assertEqual(output_files[0]["name"], "main")
 
     def test_get_output_files_for_asset_instance(self):
         with requests_mock.mock() as mock:
-            path = "/data/asset-instances/asset-instance-1/" \
-                   "entities/scene-1/output-types/output-type-1/output-files"
+            base_path = "asset-instances/asset-instance-1/output-files"
+            path = gazu.client.url_path_join('data', base_path)
+            params = {
+                "temporal_entity_id": u"scene-1",
+                "output_type_id": u"output-type-1"
+            }
+
             mock.get(
-                gazu.client.get_full_url(path),
+                gazu.client.get_full_url(
+                    gazu.client.build_path_with_params(path, params)),
                 text=json.dumps([{
                     "id": "output-file-01",
                     "name": "main"
                 }])
             )
-            output_type = gazu.files.all_output_files_for_asset_instance(
+
+            output_files = gazu.files.all_output_files_for_asset_instance(
                 {"id": "asset-instance-1"},
-                {"id": "scene-1"},
-                {"id": "output-type-1"},
+                temporal_entity={"id": "scene-1"},
+                output_type={"id": "output-type-1"},
             )
-            self.assertEqual(output_type[0]["name"], "main")
+
+            self.assertEqual(len(output_files), 1)
+            self.assertEqual(output_files[0]["id"], "output-file-01")
+            self.assertEqual(output_files[0]["name"], "main")
 
     def test_update_modification_date(self):
         with requests_mock.mock() as mock:
@@ -536,7 +555,7 @@ class FilesTestCase(unittest.TestCase):
     def test_new_output_type(self):
         with requests_mock.mock() as mock:
             mock.get(
-                "/data/output-types?name=Geometry",
+                gazu.client.get_full_url("/data/output-types?name=Geometry"),
                 text=json.dumps([])
             )
             path = "/data/output-types"
