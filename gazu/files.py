@@ -129,24 +129,27 @@ def all_output_files_for_entity(
         representation (str): The file representation
 
     Returns:
-        list: Output files for a given entity (asset or shot) and output type.
+        list:
+            Output files for a given entity (asset or shot), output type,
+            task_type, name and representation
     """
     entity = normalize_model_parameter(entity)
     output_type = normalize_model_parameter(output_type)
     task_type = normalize_model_parameter(task_type)
-    path = "data/entities/{entity_id}/output-files?".format(
+    path = "entities/{entity_id}/output-files?".format(
         entity_id=entity['id'])
 
+    params = {}
     if output_type:
-        path += 'output_type_id={}&'.format(output_type['id'])
+        params['output_type_id'] = output_type['id']
     if task_type:
-        path += 'task_type_id={}&'.format(task_type['id'])
+        params['task_type_id'] = task_type['id']
     if representation:
-        path += 'representation={}&'.format(representation)
+        params['representation'] = representation
     if name:
-        path += 'name={}&'.format(name)
+        params['name'] = name
 
-    return client.get(path)
+    return client.fetch_all(path, name)
 
 
 @cache
@@ -159,7 +162,7 @@ def all_output_files_for_asset_instance(
         representation=None):
     """
     Args:
-        entity (str / dict): The entity dict or ID.
+        asset_instance (str / dict): The instance dict or ID.
         temporal_entity (str / dict): Shot dict or ID (or scene or sequence).
         task_type (str / dict): The task type dict or ID.
         output_type (str / dict): The output_type dict or ID.
@@ -167,28 +170,29 @@ def all_output_files_for_asset_instance(
         representation (str): The file representation
 
     Returns:
-        list: Output files for a given asset instance and temporal entity and
-        output type.
+        list: Output files for a given asset instance, temporal entity,
+        output type, task_type, name and representation
     """
     asset_instance = normalize_model_parameter(asset_instance)
     temporal_entity = normalize_model_parameter(temporal_entity)
     task_type = normalize_model_parameter(task_type)
     output_type = normalize_model_parameter(output_type)
-    path = "data/asset-instances/{asset_instance_id}/output-files?".format(
+    path = "asset-instances/{asset_instance_id}/output-files?".format(
         asset_instance_id=asset_instance['id'])
 
+    params = {}
     if temporal_entity:
-        path += 'temporal_entity_id={}&'.format(temporal_entity['id'])
+        params['temporal_entity_id'] = temporal_entity
     if output_type:
-        path += 'output_type_id={}&'.format(output_type['id'])
+        params['output_type_id'] = output_type['id']
     if task_type:
-        path += 'task_type_id={}&'.format(task_type['id'])
+        params['task_type_id'] = task_type['id']
     if representation:
-        path += 'representation={}&'.format(representation)
+        params['representation'] = representation
     if name:
-        path += 'name={}&'.format(name)
+        params['name'] = name
 
-    return client.get(path)
+    return client.fetch_all(path, name)
 
 
 @cache
@@ -679,24 +683,45 @@ def get_last_output_files_for_entity(
     """
     Args:
         entity (str / dict): The entity dict or ID.
+        output_type (str / dict): The output type dict or ID.
+        task_type (str / dict): The task type dict or ID.
+        name (str): The file name
+        representation (str): The file representation
 
     Returns:
-        list: list of last output files for given entity
+        list:
+            Last output files for a given entity (asset or shot), output type,
+            task_type, name and representation
     """
     entity = normalize_model_parameter(entity)
-    path = "data/entities/{entity_id}/output-files/last-revisions?".format(
+    path = "entities/{entity_id}/output-files/last-revisions".format(
         entity_id=entity["id"])
 
+    params = {}
     if output_type:
-        path += 'output_type_id={}&'.format(output_type['id'])
+        params['output_type_id'] = output_type['id']
     if task_type:
-        path += 'task_type_id={}&'.format(task_type['id'])
+        params['task_type_id'] = task_type['id']
     if representation:
-        path += 'representation={}&'.format(representation)
+        params['representation'] = representation
     if name:
-        path += 'name={}&'.format(name)
+        params['name'] = name
 
-    return client.get(path)
+    return client.fetch_all(path, name)
+
+
+def get_last_output_files_for_entity_and_output_type(
+        entity, output_type):
+    """
+    Args:
+        entity (str / dict): The entity dict or ID.
+        temporal_entity (str / dict): Shot dict or ID (or scene or sequence).
+
+    Returns:
+        list: Output files for a given asset instance and temporal entity
+    """
+    return all_output_files_for_asset_instance(
+        asset_instance, temporal_entity=temporal_entity)
 
 
 @cache
@@ -719,21 +744,22 @@ def get_last_output_files_for_asset_instance(
     asset_instance = normalize_model_parameter(asset_instance)
     temporal_entity = normalize_model_parameter(temporal_entity)
     path = (
-        "data/asset-instances/{asset_instance_id}/entities/{temporal_entity_id}"
-        "/output-files/last-revisions?").format(
+        "asset-instances/{asset_instance_id}/entities/{temporal_entity_id}"
+        "/output-files/last-revisions").format(
             asset_instance_id=asset_instance["id"],
             temporal_entity_id=temporal_entity["id"])
 
+    params = {}
     if output_type:
-        path += 'output_type_id={}&'.format(output_type['id'])
+        params['output_type_id'] = output_type['id']
     if task_type:
-        path += 'task_type_id={}&'.format(task_type['id'])
+        params['task_type_id'] = task_type['id']
     if representation:
-        path += 'representation={}&'.format(representation)
+        params['representation'] = representation
     if name:
-        path += 'name={}&'.format(name)
+        params['name'] = name
 
-    return client.get(path)
+    return client.fetch_all(path, name)
 
 
 @cache

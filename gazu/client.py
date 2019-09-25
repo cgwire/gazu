@@ -129,13 +129,14 @@ def get_full_url(path):
     return url_path_join(get_host(), path)
 
 
-def get(path, json_response=True, params={}):
+def get(path, json_response=True, params=None):
     """
     Run a get request toward given path for configured host.
 
     Returns:
         The request result.
     """
+    params = params or {}
     if len(params) > 0:
         if hasattr(urllib, 'urlencode'):
             path = "%s?%s" % (path, urllib.urlencode(params))
