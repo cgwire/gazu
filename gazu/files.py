@@ -710,20 +710,6 @@ def get_last_output_files_for_entity(
     return client.fetch_all(path, name)
 
 
-def get_last_output_files_for_entity_and_output_type(
-        entity, output_type):
-    """
-    Args:
-        entity (str / dict): The entity dict or ID.
-        temporal_entity (str / dict): Shot dict or ID (or scene or sequence).
-
-    Returns:
-        list: Output files for a given asset instance and temporal entity
-    """
-    return all_output_files_for_asset_instance(
-        asset_instance, temporal_entity=temporal_entity)
-
-
 @cache
 def get_last_output_files_for_asset_instance(
         asset_instance,
