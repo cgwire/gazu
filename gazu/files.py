@@ -136,7 +136,7 @@ def all_output_files_for_entity(
     entity = normalize_model_parameter(entity)
     output_type = normalize_model_parameter(output_type)
     task_type = normalize_model_parameter(task_type)
-    path = "entities/{entity_id}/output-files?".format(
+    path = "entities/{entity_id}/output-files".format(
         entity_id=entity['id'])
 
     params = {}
@@ -149,7 +149,7 @@ def all_output_files_for_entity(
     if name:
         params['name'] = name
 
-    return client.fetch_all(path, name)
+    return client.fetch_all(path, params)
 
 
 @cache
@@ -177,12 +177,12 @@ def all_output_files_for_asset_instance(
     temporal_entity = normalize_model_parameter(temporal_entity)
     task_type = normalize_model_parameter(task_type)
     output_type = normalize_model_parameter(output_type)
-    path = "asset-instances/{asset_instance_id}/output-files?".format(
+    path = "asset-instances/{asset_instance_id}/output-files".format(
         asset_instance_id=asset_instance['id'])
 
     params = {}
     if temporal_entity:
-        params['temporal_entity_id'] = temporal_entity
+        params['temporal_entity_id'] = temporal_entity['id']
     if output_type:
         params['output_type_id'] = output_type['id']
     if task_type:
@@ -192,7 +192,7 @@ def all_output_files_for_asset_instance(
     if name:
         params['name'] = name
 
-    return client.fetch_all(path, name)
+    return client.fetch_all(path, params)
 
 
 @cache
@@ -707,7 +707,7 @@ def get_last_output_files_for_entity(
     if name:
         params['name'] = name
 
-    return client.fetch_all(path, name)
+    return client.fetch_all(path, params)
 
 
 @cache
@@ -745,7 +745,7 @@ def get_last_output_files_for_asset_instance(
     if name:
         params['name'] = name
 
-    return client.fetch_all(path, name)
+    return client.fetch_all(path, params)
 
 
 @cache
