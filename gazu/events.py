@@ -7,6 +7,7 @@ def init():
     """
     from socketIO_client import SocketIO, BaseNamespace
     from . import get_event_host
+
     path = get_event_host()
     socketIO = SocketIO(path, None)
     main_namespace = socketIO.define(BaseNamespace, "/events")

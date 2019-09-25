@@ -111,7 +111,7 @@ def get_asset_by_name(project, name, asset_type=None):
         params = {
             "project_id": project["id"],
             "name": name,
-            "entity_type_id": asset_type["id"]
+            "entity_type_id": asset_type["id"],
         }
     return client.fetch_first(path, params)
 
@@ -125,7 +125,7 @@ def get_asset(asset_id):
     Returns:
         dict: Asset matching given ID.
     """
-    return client.fetch_one('assets', asset_id)
+    return client.fetch_one("assets", asset_id)
 
 
 def new_asset(
@@ -147,21 +147,18 @@ def new_asset(
     project = normalize_model_parameter(project)
     asset_type = normalize_model_parameter(asset_type)
 
-    data = {
-        "name": name,
-        "description": description,
-        "data": extra_data
-    }
+    data = {"name": name, "description": description, "data": extra_data}
 
     if episode_id is not None:
         data["source_id"] = episode_id
 
     asset = get_asset_by_name(project, name, asset_type)
     if asset is None:
-        asset = client.post("data/projects/%s/asset-types/%s/assets/new" % (
-            project["id"],
-            asset_type["id"]
-        ), data)
+        asset = client.post(
+            "data/projects/%s/asset-types/%s/assets/new"
+            % (project["id"], asset_type["id"]),
+            data,
+        )
     return asset
 
 
@@ -175,7 +172,7 @@ def update_asset(asset):
     """
     if "episode_id" in asset:
         asset["source_id"] = asset["episode_id"]
-    return client.put('data/entities/%s' % asset["id"], asset)
+    return client.put("data/entities/%s" % asset["id"], asset)
 
 
 def remove_asset(asset, force=False):
@@ -211,9 +208,9 @@ def all_asset_types_for_project(project):
     Returns:
         list: Asset types from assets listed in given project.
     """
-    return sort_by_name(client.fetch_all(
-        "projects/%s/asset-types" % project["id"]
-    ))
+    return sort_by_name(
+        client.fetch_all("projects/%s/asset-types" % project["id"])
+    )
 
 
 @cache
@@ -225,9 +222,7 @@ def all_asset_types_for_shot(shot):
     Returns:
         list: Asset types from assets casted in given shot.
     """
-    return sort_by_name(client.fetch_all(
-        "shots/%s/asset-types" % shot["id"]
-    ))
+    return sort_by_name(client.fetch_all("shots/%s/asset-types" % shot["id"]))
 
 
 @cache
@@ -239,7 +234,7 @@ def get_asset_type(asset_id):
     Returns:
         dict: Asset Type matching given ID.
     """
-    return client.fetch_one('asset-types', asset_id)
+    return client.fetch_one("asset-types", asset_id)
 
 
 @cache
@@ -264,9 +259,7 @@ def new_asset_type(name):
     Returns:
         (dict): Created asset type.
     """
-    data = {
-        "name": name
-    }
+    data = {"name": name}
     asset_type = client.fetch_first("entity-types", {"name": name})
     if asset_type is None:
         asset_type = client.create("entity-types", data)
@@ -281,9 +274,7 @@ def update_asset_type(asset_type):
     Args:
         asset_type (dict): Asset Type to save.
     """
-    data = {
-        "name": asset_type["name"]
-    }
+    data = {"name": asset_type["name"]}
     return client.put("data/asset-types/%s" % asset_type["id"], data)
 
 
@@ -320,7 +311,7 @@ def all_shot_asset_instances_for_asset(asset):
         list: Asset instances existing for a given asset.
     """
     asset = normalize_model_parameter(asset)
-    return client.fetch_all("assets/%s/shot-asset-instances" % asset['id'])
+    return client.fetch_all("assets/%s/shot-asset-instances" % asset["id"])
 
 
 def enable_asset_instance(asset_instance):
@@ -357,7 +348,7 @@ def all_scene_asset_instances_for_asset(asset):
         list: Scene asset instances existing for a given asset.
     """
     asset = normalize_model_parameter(asset)
-    return client.fetch_all("assets/%s/scene-asset-instances" % asset['id'])
+    return client.fetch_all("assets/%s/scene-asset-instances" % asset["id"])
 
 
 @cache
@@ -369,7 +360,7 @@ def all_asset_instances_for_shot(shot):
     Returns:
         list: Asset instances existing for a given shot.
     """
-    return client.fetch_all("shots/%s/asset-instances" % shot['id'])
+    return client.fetch_all("shots/%s/asset-instances" % shot["id"])
 
 
 @cache
@@ -382,7 +373,7 @@ def all_asset_instances_for_asset(asset):
         list: Asset instances existing for a given asset.
     """
     asset = normalize_model_parameter(asset)
-    return client.fetch_all("assets/%s/asset-asset-instances" % asset['id'])
+    return client.fetch_all("assets/%s/asset-asset-instances" % asset["id"])
 
 
 def new_asset_asset_instance(asset, asset_to_instantiate, description=""):
@@ -402,9 +393,8 @@ def new_asset_asset_instance(asset, asset_to_instantiate, description=""):
     asset_to_instantiate = normalize_model_parameter(asset_to_instantiate)
     data = {
         "asset_to_instantiate_id": asset_to_instantiate["id"],
-        "description": description
+        "description": description,
     }
     return client.post(
-        "data/assets/%s/asset-asset-instances" % asset["id"],
-        data
+        "data/assets/%s/asset-asset-instances" % asset["id"], data
     )

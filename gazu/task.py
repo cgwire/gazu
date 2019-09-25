@@ -35,7 +35,7 @@ def all_tasks_for_shot(shot):
         list: Tasks linked to given shot.
     """
     shot = normalize_model_parameter(shot)
-    tasks = client.fetch_all("shots/%s/tasks" % shot['id'])
+    tasks = client.fetch_all("shots/%s/tasks" % shot["id"])
     return sort_by_name(tasks)
 
 
@@ -49,7 +49,7 @@ def all_tasks_for_sequence(sequence):
         list: Tasks linked to given sequence.
     """
     sequence = normalize_model_parameter(sequence)
-    tasks = client.fetch_all("sequences/%s/tasks" % sequence['id'])
+    tasks = client.fetch_all("sequences/%s/tasks" % sequence["id"])
     return sort_by_name(tasks)
 
 
@@ -63,7 +63,7 @@ def all_tasks_for_scene(scene):
         list: Tasks linked to given scene.
     """
     scene = normalize_model_parameter(scene)
-    tasks = client.fetch_all("scenes/%s/tasks" % scene['id'])
+    tasks = client.fetch_all("scenes/%s/tasks" % scene["id"])
     return sort_by_name(tasks)
 
 
@@ -105,11 +105,14 @@ def all_tasks_for_task_status(project, task_type, task_status):
     project = normalize_model_parameter(project)
     task_type = normalize_model_parameter(task_type)
     task_status = normalize_model_parameter(task_status)
-    return client.fetch_all("tasks", {
-        "project_id": project["id"],
-        "task_type_id": task_type["id"],
-        "task_status_id": task_status["id"]
-    })
+    return client.fetch_all(
+        "tasks",
+        {
+            "project_id": project["id"],
+            "task_type_id": task_type["id"],
+            "task_status_id": task_status["id"],
+        },
+    )
 
 
 @cache
@@ -122,7 +125,7 @@ def all_task_types_for_shot(shot):
         list: Task types of task linked to given shot.
     """
     shot = normalize_model_parameter(shot)
-    task_types = client.fetch_all("shots/%s/task-types" % shot['id'])
+    task_types = client.fetch_all("shots/%s/task-types" % shot["id"])
     return sort_by_name(task_types)
 
 
@@ -136,7 +139,7 @@ def all_task_types_for_asset(asset):
         list: Task types of tasks related to given asset.
     """
     asset = normalize_model_parameter(asset)
-    task_types = client.fetch_all("assets/%s/task-types" % asset['id'])
+    task_types = client.fetch_all("assets/%s/task-types" % asset["id"])
     return sort_by_name(task_types)
 
 
@@ -150,7 +153,7 @@ def all_task_types_for_scene(scene):
         list: Task types of tasks linked to given scene.
     """
     scene = normalize_model_parameter(scene)
-    task_types = client.fetch_all("scenes/%s/task-types" % scene['id'])
+    task_types = client.fetch_all("scenes/%s/task-types" % scene["id"])
     return sort_by_name(task_types)
 
 
@@ -164,7 +167,7 @@ def all_task_types_for_sequence(sequence):
         list: Task types of tasks linked directly to given sequence.
     """
     sequence = normalize_model_parameter(sequence)
-    task_types = client.fetch_all("sequences/%s/task-types" % sequence['id'])
+    task_types = client.fetch_all("sequences/%s/task-types" % sequence["id"])
     return sort_by_name(task_types)
 
 
@@ -175,7 +178,7 @@ def all_task_types_for_episode(episode):
         list: Task types of tasks linked directly to given episode.
     """
     episode = normalize_model_parameter(episode)
-    task_types = client.fetch_all("episodes/%s/task-types" % episode['id'])
+    task_types = client.fetch_all("episodes/%s/task-types" % episode["id"])
     return sort_by_name(task_types)
 
 
@@ -194,10 +197,7 @@ def all_tasks_for_entity_and_task_type(entity, task_type):
     task_type_id = task_type["id"]
     entity_id = entity["id"]
     return client.fetch_all(
-        "entities/%s/task-types/%s/tasks" % (
-            entity_id,
-            task_type_id
-        )
+        "entities/%s/task-types/%s/tasks" % (entity_id, task_type_id)
     )
 
 
@@ -236,11 +236,14 @@ def get_task_by_name(entity, task_type, name="main"):
     """
     entity = normalize_model_parameter(entity)
     task_type = normalize_model_parameter(task_type)
-    return client.fetch_first("tasks", {
-        "name": name,
-        "task_type_id": task_type["id"],
-        "entity_id": entity["id"]
-    })
+    return client.fetch_first(
+        "tasks",
+        {
+            "name": name,
+            "task_type_id": task_type["id"],
+            "entity_id": entity["id"],
+        },
+    )
 
 
 @cache
@@ -283,7 +286,7 @@ def get_task_by_path(project, file_path, entity_type="shot"):
     data = {
         "file_path": file_path,
         "project_id": project["id"],
-        "type": entity_type
+        "type": entity_type,
     }
     return client.post("data/tasks/from-path/", data)
 
@@ -297,9 +300,7 @@ def get_task_status(task):
     Returns:
         A task status object corresponding to status set on given task.
     """
-    return client.fetch_first(
-        "task-status", {"id": task['task_status_id']}
-    )
+    return client.fetch_first("task-status", {"id": task["task_status_id"]})
 
 
 @cache
@@ -336,9 +337,9 @@ def remove_task_status(task_status):
         task_status (str / dict): The task status dict or ID.
     """
     task_status = normalize_model_parameter(task_status)
-    return client.delete("data/task-status/%s" % task_status["id"], {
-        "force": "true"
-    })
+    return client.delete(
+        "data/task-status/%s" % task_status["id"], {"force": "true"}
+    )
 
 
 @cache
@@ -351,7 +352,7 @@ def get_task(task_id):
         dict: Task matching given ID.
     """
     task_id = normalize_model_parameter(task_id)
-    return client.get('data/tasks/%s/full' % task_id["id"])
+    return client.get("data/tasks/%s/full" % task_id["id"])
 
 
 def new_task(
@@ -360,7 +361,7 @@ def new_task(
     name="main",
     task_status=None,
     assigner=None,
-    assignees=None
+    assignees=None,
 ):
     """
     Create a new task for given entity and task type.
@@ -386,7 +387,7 @@ def new_task(
         "entity_id": entity["id"],
         "task_type_id": task_type["id"],
         "task_status_id": task_status["id"],
-        "name": name
+        "name": name,
     }
 
     if assigner is not None:
@@ -429,13 +430,7 @@ def start_task(task):
     return client.put(path, {})
 
 
-def task_to_review(
-    task,
-    person,
-    comment,
-    revision=1,
-    change_status=True
-):
+def task_to_review(task, person, comment, revision=1, change_status=True):
     """
     Deprecated.
     Mark given task as pending, waiting for approval. Author is given through
@@ -458,7 +453,7 @@ def task_to_review(
         "person_id": person["id"],
         "comment": comment,
         "revision": revision,
-        "change_status": change_status
+        "change_status": change_status,
     }
 
     return client.put(path, data)
@@ -479,10 +474,7 @@ def get_time_spent(task, date):
         dict: A dict with person ID as key and time spent object as value.
     """
     task = normalize_model_parameter(task)
-    path = "actions/tasks/%s/time-spents/%s" % (
-        task["id"],
-        date
-    )
+    path = "actions/tasks/%s/time-spents/%s" % (task["id"], date)
     return client.get(path)
 
 
@@ -505,7 +497,7 @@ def set_time_spent(task, person, date, duration):
     path = "actions/tasks/%s/time-spents/%s/persons/%s" % (
         task["id"],
         date,
-        person["id"]
+        person["id"],
     )
     return client.post(path, {"duration": duration})
 
@@ -530,7 +522,7 @@ def add_time_spent(task, person, date, duration):
     path = "actions/tasks/%s/time-spents/%s/persons/%s/add" % (
         task["id"],
         date,
-        person["id"]
+        person["id"],
     )
     return client.post(path, {"duration": duration})
 
@@ -551,10 +543,7 @@ def add_comment(task, task_status, comment=""):
     """
     task = normalize_model_parameter(task)
     task_status = normalize_model_parameter(task_status)
-    data = {
-        "task_status_id": task_status["id"],
-        "comment": comment
-    }
+    data = {"task_status_id": task_status["id"], "comment": comment}
     return client.post("actions/tasks/%s/comment" % task["id"], data)
 
 
@@ -575,7 +564,7 @@ def add_preview(task, comment, preview_file_path):
     comment = normalize_model_parameter(comment)
     path = "actions/tasks/%s/comments/%s/add-preview" % (
         task["id"],
-        comment["id"]
+        comment["id"],
     )
     preview_file = client.post(path, {})
     path = "pictures/preview-files/%s" % preview_file["id"]
@@ -598,7 +587,7 @@ def set_main_preview(entity, preview_file):
     preview_file = normalize_model_parameter(preview_file)
     path = "actions/entities/%s/set-main-preview/%s" % (
         entity["id"],
-        preview_file["id"]
+        preview_file["id"],
     )
     return client.put(path, {})
 
@@ -642,5 +631,5 @@ def assign_task(task, person):
     """
     person = normalize_model_parameter(person)
     task = normalize_model_parameter(task)
-    route = "/actions/persons/%s/assign" % person['id']
-    return client.put(route, {'task_ids': task['id']})
+    route = "/actions/persons/%s/assign" % person["id"]
+    return client.put(route, {"task_ids": task["id"]})

@@ -7,19 +7,20 @@ import gazu.project
 
 
 class CacheTestCase(unittest.TestCase):
-
     def test_enable_disable(self):
         with requests_mock.mock() as mock:
             mock_open = mock.get(
-                gazu.client.get_full_url('data/projects/open'),
-                text=json.dumps([{"name": "Agent 327", "id": "project_1"}])
+                gazu.client.get_full_url("data/projects/open"),
+                text=json.dumps([{"name": "Agent 327", "id": "project_1"}]),
             )
             mock_all = mock.get(
-                gazu.client.get_full_url('data/projects'),
-                text=json.dumps([
-                    {"name": "Agent 327", "id": "project_1"},
-                    {"name": "Big Buck Bunny", "id": "project_2"}
-                ])
+                gazu.client.get_full_url("data/projects"),
+                text=json.dumps(
+                    [
+                        {"name": "Agent 327", "id": "project_1"},
+                        {"name": "Big Buck Bunny", "id": "project_2"},
+                    ]
+                ),
             )
 
             gazu.project.all_open_projects()
@@ -50,16 +51,16 @@ class CacheTestCase(unittest.TestCase):
     def test_max_size(self):
         with requests_mock.mock() as mock:
             mock_1 = mock.get(
-                gazu.client.get_full_url('data/projects/project-1'),
-                text=json.dumps({"name": "Agent 327", "id": "project_1"})
+                gazu.client.get_full_url("data/projects/project-1"),
+                text=json.dumps({"name": "Agent 327", "id": "project_1"}),
             )
             mock_2 = mock.get(
-                gazu.client.get_full_url('data/projects/project-2'),
-                text=json.dumps({"name": "Agent 327 02", "id": "project_2"})
+                gazu.client.get_full_url("data/projects/project-2"),
+                text=json.dumps({"name": "Agent 327 02", "id": "project_2"}),
             )
             mock_3 = mock.get(
-                gazu.client.get_full_url('data/projects/project-3'),
-                text=json.dumps({"name": "Agent 327 03", "id": "project_3"})
+                gazu.client.get_full_url("data/projects/project-3"),
+                text=json.dumps({"name": "Agent 327 03", "id": "project_3"}),
             )
 
             gazu.cache.enable()

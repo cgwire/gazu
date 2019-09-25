@@ -49,7 +49,7 @@ def all_assets_for_asset_type_and_project(project, asset_type):
     asset_type = normalize_model_parameter(asset_type)
     path = "user/projects/%s/asset-types/%s/assets" % (
         project["id"],
-        asset_type["id"]
+        asset_type["id"],
     )
     assets = client.fetch_all(path)
     return sort_by_name(assets)

@@ -5,21 +5,14 @@ from .cache import cache
 from .helpers import normalize_model_parameter
 
 
-def new_scene(
-    project,
-    sequence,
-    name
-):
+def new_scene(project, sequence, name):
     """
     Create a scene for given sequence.
     """
     project = normalize_model_parameter(project)
     sequence = normalize_model_parameter(sequence)
-    shot = {
-        "name": name,
-        "sequence_id": sequence["id"]
-    }
-    return client.post('data/projects/%s/scenes' % project["id"], shot)
+    shot = {"name": name, "sequence_id": sequence["id"]}
+    return client.post("data/projects/%s/scenes" % project["id"], shot)
 
 
 @cache
@@ -61,7 +54,7 @@ def get_scene(scene_id):
     """
     Return scene corresponding to given scene ID.
     """
-    return client.fetch_one('scenes', scene_id)
+    return client.fetch_one("scenes", scene_id)
 
 
 @cache
@@ -70,10 +63,9 @@ def get_scene_by_name(sequence, scene_name):
     Returns scene corresponding to given sequence and name.
     """
     sequence = normalize_model_parameter(sequence)
-    result = client.fetch_all("scenes/all", {
-        "parent_id": sequence["id"],
-        "name": scene_name
-    })
+    result = client.fetch_all(
+        "scenes/all", {"parent_id": sequence["id"], "name": scene_name}
+    )
     return next(iter(result or []), None)
 
 
@@ -81,7 +73,7 @@ def update_scene(scene):
     """
     Save given scene data into the API.
     """
-    return client.put('data/entities/%s' % scene["id"], scene)
+    return client.put("data/entities/%s" % scene["id"], scene)
 
 
 @cache
@@ -92,10 +84,7 @@ def new_scene_asset_instance(scene, asset, description=""):
     """
     scene = normalize_model_parameter(scene)
     asset = normalize_model_parameter(asset)
-    data = {
-        "asset_id": asset["id"],
-        "description": description
-    }
+    data = {"asset_id": asset["id"], "description": description}
     return client.post("data/scenes/%s/asset-instances" % scene["id"], data)
 
 
@@ -137,10 +126,9 @@ def get_asset_instance_by_name(scene, name):
     """
     Returns the asset instance of the scene that has the given name.
     """
-    return client.fetch_first("asset-instances", {
-        "name": name,
-        "scene_id": scene["id"]
-    })
+    return client.fetch_first(
+        "asset-instances", {"name": name, "scene_id": scene["id"]}
+    )
 
 
 @cache
@@ -185,10 +173,8 @@ def update_asset_instance_name(asset_instance, name):
     """
     Update the name of given asset instance.
     """
-    path = "/data/asset-instances/%s" % asset_instance['id']
-    return client.put(path, {
-        "name": name
-    })
+    path = "/data/asset-instances/%s" % asset_instance["id"]
+    return client.put(path, {"name": name})
 
 
 def update_asset_instance_data(asset_instance, data):
@@ -196,7 +182,5 @@ def update_asset_instance_data(asset_instance, data):
     Update the extra data of given asset instance.
     """
     asset_instance = normalize_model_parameter(asset_instance)
-    path = "/data/asset-instances/%s" % asset_instance['id']
-    return client.put(path, {
-        "data": data
-    })
+    path = "/data/asset-instances/%s" % asset_instance["id"]
+    return client.put(path, {"data": data})

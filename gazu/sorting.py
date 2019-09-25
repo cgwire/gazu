@@ -8,4 +8,4 @@ def sort_by_name(dicts):
     Returns:
         Sorted list.
     """
-    return sorted(dicts, key=lambda k: k.get('name', '').lower())
+    return sorted(dicts, key=lambda k: k.get("name", "").lower())

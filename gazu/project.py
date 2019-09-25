@@ -67,10 +67,7 @@ def new_project(name, production_type="short"):
     Returns:
         dict: Created project.
     """
-    data = {
-        "name": name,
-        "production_type": production_type
-    }
+    data = {"name": name, "production_type": production_type}
     project = get_project_by_name(name)
     if project is None:
         project = client.create("projects", data)

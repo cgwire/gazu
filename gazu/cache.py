@@ -89,7 +89,7 @@ def insert_value(function, cache_store, args, kwargs):
     key = get_cache_key(args, kwargs)
     cache_store[key] = {
         "date_accessed": datetime.datetime.now(),
-        "value": returned_value
+        "value": returned_value,
     }
     return get_value(cache_store, key)
 
@@ -133,7 +133,7 @@ def is_cache_expired(memo, state, key):
     """
     date = memo[key]["date_accessed"]
     expire = state["expire"]
-    date_to_check = (date + datetime.timedelta(seconds=expire))
+    date_to_check = date + datetime.timedelta(seconds=expire)
     return expire > 0 and date_to_check < datetime.datetime.now()
 
 
@@ -149,11 +149,7 @@ def cache(function, maxsize=300, expire=0):
         expire: Time to live in seconds of stored value (disabled by default)
     """
     cache_store = {}
-    state = {
-        "enabled": True,
-        "expire": expire,
-        "maxsize": maxsize
-    }
+    state = {"enabled": True, "expire": expire, "maxsize": maxsize}
 
     def clear_cache():
         cache_store.clear()
@@ -184,10 +180,7 @@ def cache(function, maxsize=300, expire=0):
 
             else:
                 returned_value = insert_value(
-                    function,
-                    cache_store,
-                    args,
-                    kwargs
+                    function, cache_store, args, kwargs
                 )
                 remove_oldest_entry(cache_store, state["maxsize"])
                 return returned_value

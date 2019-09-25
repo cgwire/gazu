@@ -113,10 +113,9 @@ def get_episode_by_name(project, episode_name):
         dict: Episode corresponding to given name and project.
     """
     project = normalize_model_parameter(project)
-    return client.fetch_first("episodes", {
-        "project_id": project["id"],
-        "name": episode_name
-    })
+    return client.fetch_first(
+        "episodes", {"project_id": project["id"], "name": episode_name}
+    )
 
 
 @cache
@@ -158,16 +157,10 @@ def get_sequence_by_name(project, sequence_name, episode=None):
     """
     project = normalize_model_parameter(project)
     if episode is None:
-        params = {
-            "project_id": project["id"],
-            "name": sequence_name
-        }
+        params = {"project_id": project["id"], "name": sequence_name}
     else:
         episode = normalize_model_parameter(episode)
-        params = {
-            "episode_id": episode["id"],
-            "name": sequence_name
-        }
+        params = {"episode_id": episode["id"], "name": sequence_name}
     return client.fetch_first("sequences", params)
 
 
@@ -207,17 +200,12 @@ def get_shot_by_name(sequence, shot_name):
         dict: Shot corresponding to given name and sequence.
     """
     sequence = normalize_model_parameter(sequence)
-    return client.fetch_first("shots/all", {
-        "sequence_id": sequence["id"],
-        "name": shot_name
-    })
+    return client.fetch_first(
+        "shots/all", {"sequence_id": sequence["id"], "name": shot_name}
+    )
 
 
-def new_sequence(
-    project,
-    episode,
-    name
-):
+def new_sequence(project, episode, name):
     """
     Create a sequence for given project and episode.
 
@@ -231,10 +219,7 @@ def new_sequence(
     """
     project = normalize_model_parameter(project)
     episode = normalize_model_parameter(episode)
-    data = {
-        "name": name,
-        "episode_id": episode["id"]
-    }
+    data = {"name": name, "episode_id": episode["id"]}
 
     sequence = get_sequence_by_name(project, name, episode=episode)
     if sequence is None:
@@ -243,14 +228,7 @@ def new_sequence(
         return sequence
 
 
-def new_shot(
-    project,
-    sequence,
-    name,
-    frame_in=None,
-    frame_out=None,
-    data={}
-):
+def new_shot(project, sequence, name, frame_in=None, frame_out=None, data={}):
     """
     Create a shot for given sequence and project. Add frame in and frame out
     parameters to shot extra data. Allow to set metadata too.
@@ -274,11 +252,7 @@ def new_shot(
     if frame_out is not None:
         data["frame_out"] = frame_out
 
-    data = {
-        "name": name,
-        "data": data,
-        "sequence_id": sequence["id"]
-    }
+    data = {"name": name, "data": data, "sequence_id": sequence["id"]}
 
     shot = get_shot_by_name(sequence, name)
     if shot is None:
@@ -347,9 +321,7 @@ def new_episode(project, name):
         dict: Created episode.
     """
     project = normalize_model_parameter(project)
-    data = {
-        "name": name
-    }
+    data = {"name": name}
     episode = get_episode_by_name(project, name)
     if episode is None:
         return client.post("data/projects/%s/episodes" % project["id"], data)
@@ -407,9 +379,7 @@ def add_asset_instance_to_shot(shot, asset_instance):
     """
     shot = normalize_model_parameter(shot)
     asset_instance = normalize_model_parameter(asset_instance)
-    data = {
-        "asset_instance_id": asset_instance["id"]
-    }
+    data = {"asset_instance_id": asset_instance["id"]}
     return client.post("data/shots/%s/asset-instances" % shot["id"], data)
 
 
@@ -425,7 +395,7 @@ def remove_asset_instance_from_shot(shot, asset_instance):
     asset_instance = normalize_model_parameter(asset_instance)
     path = "data/shots/%s/asset-instances/%s" % (
         shot["id"],
-        asset_instance["id"]
+        asset_instance["id"],
     )
     return client.delete(path)
 

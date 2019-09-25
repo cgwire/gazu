@@ -77,12 +77,7 @@ def get_person_by_full_name(full_name):
 
 
 def new_person(
-    first_name,
-    last_name,
-    email,
-    phone="",
-    role="user",
-    desktop_login=""
+    first_name, last_name, email, phone="", role="user", desktop_login=""
 ):
     """
     Create a new person based on given parameters. His/her password will is
@@ -102,14 +97,17 @@ def new_person(
     """
     person = get_person_by_email(email)
     if person is None:
-        person = client.post("data/persons/new", {
-            "first_name": first_name,
-            "last_name": last_name,
-            "email": email,
-            "phone": phone,
-            "role": role,
-            "desktop_login": desktop_login
-        })
+        person = client.post(
+            "data/persons/new",
+            {
+                "first_name": first_name,
+                "last_name": last_name,
+                "email": email,
+                "phone": phone,
+                "role": role,
+                "desktop_login": desktop_login,
+            },
+        )
     return person
 
 
@@ -124,8 +122,7 @@ def set_avatar(person, file_path):
     """
     person = normalize_model_parameter(person)
     return client.upload(
-        "/pictures/thumbnails/persons/%s" % person["id"],
-        file_path
+        "/pictures/thumbnails/persons/%s" % person["id"], file_path
     )
 
 

@@ -14,14 +14,15 @@ from .exception import (
     ParameterException,
     RouteNotFoundException,
     ServerErrorException,
-    UploadFailedException
+    UploadFailedException,
 )
+
 try:
     import requests
+
     # Little hack to allow json encoder to manage dates.
     requests.models.complexjson.dumps = functools.partial(
-        json.dumps,
-        cls=CustomJSONEncoder
+        json.dumps, cls=CustomJSONEncoder
     )
     requests_session = requests.Session()
 except:
@@ -31,10 +32,7 @@ except:
 HOST = "http://gazu.change.serverhost/api"
 EVENT_HOST = None
 
-tokens = {
-    "access_token": "",
-    "refresh_token": ""
-}
+tokens = {"access_token": "", "refresh_token": ""}
 
 
 def host_is_up():
@@ -115,7 +113,7 @@ def url_path_join(*items):
     Args:
         items (list): Path elements
     """
-    return "/".join([item.lstrip('/').rstrip('/') for item in items])
+    return "/".join([item.lstrip("/").rstrip("/") for item in items])
 
 
 def get_full_url(path):
@@ -139,8 +137,7 @@ def get(path, json_response=True, params=None):
     path = build_path_with_params(path, params)
 
     response = requests_session.get(
-        get_full_url(path),
-        headers=make_auth_header()
+        get_full_url(path), headers=make_auth_header()
     )
     check_status(response, path)
 
@@ -158,9 +155,7 @@ def post(path, data):
         The request result.
     """
     response = requests_session.post(
-        get_full_url(path),
-        json=data,
-        headers=make_auth_header()
+        get_full_url(path), json=data, headers=make_auth_header()
     )
     check_status(response, path)
     return response.json()
@@ -174,9 +169,7 @@ def put(path, data):
         The request result.
     """
     response = requests_session.put(
-        get_full_url(path),
-        json=data,
-        headers=make_auth_header()
+        get_full_url(path), json=data, headers=make_auth_header()
     )
     check_status(response, path)
     return response.json()
@@ -192,8 +185,7 @@ def delete(path, params=None):
     path = build_path_with_params(path, params)
 
     response = requests_session.delete(
-        get_full_url(path),
-        headers=make_auth_header()
+        get_full_url(path), headers=make_auth_header()
     )
     check_status(response, path)
     return response.text
@@ -220,31 +212,29 @@ def check_status(request, path):
         ServerErrorException: when 500 response occurs
     """
     status_code = request.status_code
-    if (status_code == 404):
+    if status_code == 404:
         raise RouteNotFoundException(path)
-    elif (status_code == 403):
+    elif status_code == 403:
         raise NotAllowedException(path)
-    elif (status_code == 400):
+    elif status_code == 400:
         text = request.json().get("message", "No additional information")
         raise ParameterException(path, text)
-    elif (status_code == 405):
+    elif status_code == 405:
         raise MethodNotAllowedException(path)
-    elif (status_code == 413):
+    elif status_code == 413:
         raise TooBigFileException(
             "%s: You send a too big file. "
             "Change your proxy configuration to allow bigger files." % path
         )
-    elif (status_code in [401, 422]):
+    elif status_code in [401, 422]:
         raise NotAuthenticatedException(path)
-    elif (status_code in [500, 502]):
+    elif status_code in [500, 502]:
         try:
             stacktrace = request.json().get(
-                "stacktrace",
-                "No stacktrace sent by the server"
+                "stacktrace", "No stacktrace sent by the server"
             )
             message = request.json().get(
-                "message",
-                "No message sent by the server"
+                "message", "No message sent by the server"
             )
             print("A server error occured!\n")
             print("Server stacktrace:\n%s" % stacktrace)
@@ -264,7 +254,7 @@ def fetch_all(path, params=None):
         list: All entries stored in database for a given model. You can add a
         filter to the model name like this: "tasks?project_id=project-id"
     """
-    return get(url_path_join('data', path), params=params)
+    return get(url_path_join("data", path), params=params)
 
 
 def fetch_first(path, params=None):
@@ -275,7 +265,7 @@ def fetch_first(path, params=None):
     Returns:
         dict: The first entry for which a model is required.
     """
-    entries = get(url_path_join('data', path), params=params)
+    entries = get(url_path_join("data", path), params=params)
     if len(entries) > 0:
         return entries[0]
     else:
@@ -293,7 +283,7 @@ def fetch_one(model_name, id):
     Returns:
         dict: The model instance matching id and model name.
     """
-    return get(url_path_join('data', model_name, id))
+    return get(url_path_join("data", model_name, id))
 
 
 def create(model_name, data):
@@ -303,7 +293,7 @@ def create(model_name, data):
     Returns:
         dict: Created entry
     """
-    return post(url_path_join('data', model_name), data)
+    return post(url_path_join("data", model_name), data)
 
 
 def upload(path, file_path):
@@ -320,9 +310,7 @@ def upload(path, file_path):
     url = get_full_url(path)
     files = {"file": open(file_path, "rb")}
     result = requests_session.post(
-        url,
-        headers=make_auth_header(),
-        files=files
+        url, headers=make_auth_header(), files=files
     ).json()
     if "message" in result:
         raise UploadFailedException(result["message"])
@@ -343,11 +331,9 @@ def download(path, file_path):
     """
     url = get_full_url(path)
     with requests_session.get(
-        url,
-        headers=make_auth_header(),
-        stream=True
+        url, headers=make_auth_header(), stream=True
     ) as response:
-        with open(file_path, 'wb') as target_file:
+        with open(file_path, "wb") as target_file:
             shutil.copyfileobj(response.raw, target_file)
 
 
@@ -356,7 +342,7 @@ def get_api_version():
     Returns:
         str: Current version of the API.
     """
-    return get('')['version']
+    return get("")["version"]
 
 
 def get_current_user():
@@ -381,7 +367,7 @@ def build_path_with_params(path, params):
     if not params:
         return path
 
-    if hasattr(urllib, 'urlencode'):
+    if hasattr(urllib, "urlencode"):
         path = "%s?%s" % (path, urllib.urlencode(params))
     else:
         path = "%s?%s" % (path, urllib.parse.urlencode(params))

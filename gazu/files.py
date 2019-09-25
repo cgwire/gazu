@@ -33,10 +33,8 @@ def all_output_types_for_asset_instance(asset_instance, temporal_entity):
         list: Output types for given asset instance and entity (shot or scene).
     """
     return client.fetch_all(
-        "asset-instances/%s/entities/%s/output-types" % (
-            asset_instance["id"],
-            temporal_entity["id"]
-        )
+        "asset-instances/%s/entities/%s/output-types"
+        % (asset_instance["id"], temporal_entity["id"])
     )
 
 
@@ -61,9 +59,7 @@ def get_output_type_by_name(output_type_name):
     Returns:
         dict: Output type matching given name.
     """
-    return client.fetch_first("output-types", {
-        "name": output_type_name
-    })
+    return client.fetch_first("output-types", {"name": output_type_name})
 
 
 def new_output_type(name, short_name):
@@ -108,18 +104,13 @@ def get_output_file_by_path(path):
     Returns:
         dict: Output file matching given path.
     """
-    return client.fetch_first("output-files",{
-        "path": path
-    })
+    return client.fetch_first("output-files", {"path": path})
 
 
 @cache
 def all_output_files_for_entity(
-        entity,
-        output_type=None,
-        task_type=None,
-        name=None,
-        representation=None):
+    entity, output_type=None, task_type=None, name=None, representation=None
+):
     """
     Args:
         entity (str / dict): The entity dict or ID.
@@ -136,30 +127,30 @@ def all_output_files_for_entity(
     entity = normalize_model_parameter(entity)
     output_type = normalize_model_parameter(output_type)
     task_type = normalize_model_parameter(task_type)
-    path = "entities/{entity_id}/output-files".format(
-        entity_id=entity['id'])
+    path = "entities/{entity_id}/output-files".format(entity_id=entity["id"])
 
     params = {}
     if output_type:
-        params['output_type_id'] = output_type['id']
+        params["output_type_id"] = output_type["id"]
     if task_type:
-        params['task_type_id'] = task_type['id']
+        params["task_type_id"] = task_type["id"]
     if representation:
-        params['representation'] = representation
+        params["representation"] = representation
     if name:
-        params['name'] = name
+        params["name"] = name
 
     return client.fetch_all(path, params)
 
 
 @cache
 def all_output_files_for_asset_instance(
-        asset_instance,
-        temporal_entity=None,
-        task_type=None,
-        output_type=None,
-        name=None,
-        representation=None):
+    asset_instance,
+    temporal_entity=None,
+    task_type=None,
+    output_type=None,
+    name=None,
+    representation=None,
+):
     """
     Args:
         asset_instance (str / dict): The instance dict or ID.
@@ -178,19 +169,20 @@ def all_output_files_for_asset_instance(
     task_type = normalize_model_parameter(task_type)
     output_type = normalize_model_parameter(output_type)
     path = "asset-instances/{asset_instance_id}/output-files".format(
-        asset_instance_id=asset_instance['id'])
+        asset_instance_id=asset_instance["id"]
+    )
 
     params = {}
     if temporal_entity:
-        params['temporal_entity_id'] = temporal_entity['id']
+        params["temporal_entity_id"] = temporal_entity["id"]
     if output_type:
-        params['output_type_id'] = output_type['id']
+        params["output_type_id"] = output_type["id"]
     if task_type:
-        params['task_type_id'] = task_type['id']
+        params["task_type_id"] = task_type["id"]
     if representation:
-        params['representation'] = representation
+        params["representation"] = representation
     if name:
-        params['name'] = name
+        params["name"] = name
 
     return client.fetch_all(path, params)
 
@@ -243,7 +235,7 @@ def new_software(name, short_name, file_extension):
     data = {
         "name": name,
         "short_name": short_name,
-        "file_extension": file_extension
+        "file_extension": file_extension,
     }
     software = get_software_by_name(name)
     if software is None:
@@ -254,12 +246,7 @@ def new_software(name, short_name, file_extension):
 
 @cache
 def build_working_file_path(
-    task,
-    name="main",
-    mode="working",
-    software=None,
-    revision=1,
-    sep="/"
+    task, name="main", mode="working", software=None, revision=1, sep="/"
 ):
     """
     From the fie path template configured at the project level and arguments, it
@@ -276,11 +263,7 @@ def build_working_file_path(
     Returns:
         Generated working file path for given task (without extension).
     """
-    data = {
-        "mode": mode,
-        "name": name,
-        "revision": revision
-    }
+    data = {"mode": mode, "name": name, "revision": revision}
     task = normalize_model_parameter(task)
     software = normalize_model_parameter(software)
     if software is not None:
@@ -289,7 +272,7 @@ def build_working_file_path(
     return "%s%s%s" % (
         result["path"].replace(" ", "_"),
         sep,
-        result["name"].replace(" ", "_")
+        result["name"].replace(" ", "_"),
     )
 
 
@@ -303,7 +286,7 @@ def build_entity_output_file_path(
     representation="",
     revision=0,
     nb_elements=1,
-    sep="/"
+    sep="/",
 ):
     """
     From the fie path template configured at the project level and arguments, it
@@ -337,14 +320,14 @@ def build_entity_output_file_path(
         "representation": representation,
         "revision": revision,
         "nb_elements": nb_elements,
-        "separator": sep
+        "separator": sep,
     }
     path = "data/entities/%s/output-file-path" % entity["id"]
     result = client.post(path, data)
     return "%s%s%s" % (
         result["folder_path"].replace(" ", "_"),
         sep,
-        result["file_name"].replace(" ", "_")
+        result["file_name"].replace(" ", "_"),
     )
 
 
@@ -359,7 +342,7 @@ def build_asset_instance_output_file_path(
     mode="output",
     revision=0,
     nb_elements=1,
-    sep="/"
+    sep="/",
 ):
     """
     From the fie path template configured at the project level and arguments, it
@@ -396,17 +379,17 @@ def build_asset_instance_output_file_path(
         "representation": representation,
         "revision": revision,
         "nb_elements": nb_elements,
-        "sep": sep
+        "sep": sep,
     }
     path = "data/asset-instances/%s/entities/%s/output-file-path" % (
         asset_instance["id"],
-        temporal_entity["id"]
+        temporal_entity["id"],
     )
     result = client.post(path, data)
     return "%s%s%s" % (
         result["folder_path"].replace(" ", "_"),
         sep,
-        result["file_name"].replace(" ", "_")
+        result["file_name"].replace(" ", "_"),
     )
 
 
@@ -418,7 +401,7 @@ def new_working_file(
     comment="",
     person=None,
     revision=0,
-    sep="/"
+    sep="/",
 ):
     """
     Create a new working_file for given task. It generates and store the
@@ -446,7 +429,7 @@ def new_working_file(
         "comment": comment,
         "task_id": task["id"],
         "revision": revision,
-        "mode": mode
+        "mode": mode,
     }
     if person is not None:
         data["person_id"] = person["id"]
@@ -468,7 +451,7 @@ def new_entity_output_file(
     revision=0,
     nb_elements=1,
     representation="",
-    sep="/"
+    sep="/",
 ):
     """
     Create a new output file for given entity, task type and output type.
@@ -509,7 +492,7 @@ def new_entity_output_file(
         "representation": representation,
         "name": name,
         "nb_elements": nb_elements,
-        "sep": sep
+        "sep": sep,
     }
 
     if working_file is not None:
@@ -534,7 +517,7 @@ def new_asset_instance_output_file(
     revision=0,
     nb_elements=1,
     representation="",
-    sep="/"
+    sep="/",
 ):
     """
     Create a new output file for given asset instance, temporal entity, task
@@ -569,7 +552,7 @@ def new_asset_instance_output_file(
     person = normalize_model_parameter(person)
     path = "data/asset-instances/%s/entities/%s/output-files/new" % (
         asset_instance["id"],
-        temporal_entity["id"]
+        temporal_entity["id"],
     )
     data = {
         "output_type_id": output_type["id"],
@@ -579,11 +562,11 @@ def new_asset_instance_output_file(
         "revision": revision,
         "representation": representation,
         "nb_elements": nb_elements,
-        "sep": sep
+        "sep": sep,
     }
 
     if "working_file_id" in data:
-        data["working_file_id"] = working_file["id"],
+        data["working_file_id"] = (working_file["id"],)
 
     if person is not None:
         data["person_id"] = person["id"]
@@ -592,10 +575,7 @@ def new_asset_instance_output_file(
 
 
 def get_next_entity_output_revision(
-    entity,
-    output_type,
-    task_type,
-    name="main"
+    entity, output_type, task_type, name="main"
 ):
     """
     Args:
@@ -613,17 +593,13 @@ def get_next_entity_output_revision(
         "name": name,
         "output_type_id": output_type["id"],
         "task_type_id": task_type["id"],
-        "name": name
+        "name": name,
     }
     return client.post(path, data)["next_revision"]
 
 
 def get_next_asset_instance_output_revision(
-    asset_instance,
-    temporal_entity,
-    output_type,
-    task_type,
-    name="master"
+    asset_instance, temporal_entity, output_type, task_type, name="master"
 ):
     """
     Args:
@@ -640,15 +616,15 @@ def get_next_asset_instance_output_revision(
     temporal_entity = normalize_model_parameter(temporal_entity)
     output_type = normalize_model_parameter(output_type)
     task_type = normalize_model_parameter(task_type)
-    path = "data/asset-instances/" + \
-           "%s/entities/%s/output-files/next-revision" % (
-               asset_instance["id"],
-               temporal_entity["id"]
-           )
+    path = (
+        "data/asset-instances/"
+        + "%s/entities/%s/output-files/next-revision"
+        % (asset_instance["id"], temporal_entity["id"])
+    )
     data = {
         "name": name,
         "output_type_id": output_type["id"],
-        "task_type_id": task_type["id"]
+        "task_type_id": task_type["id"],
     }
     return client.post(path, data)["next_revision"]
 
@@ -675,11 +651,8 @@ def get_last_entity_output_revision(entity, output_type, task_type):
 
 @cache
 def get_last_output_files_for_entity(
-        entity,
-        output_type=None,
-        task_type=None,
-        name=None,
-        representation=None):
+    entity, output_type=None, task_type=None, name=None, representation=None
+):
     """
     Args:
         entity (str / dict): The entity dict or ID.
@@ -695,29 +668,31 @@ def get_last_output_files_for_entity(
     """
     entity = normalize_model_parameter(entity)
     path = "entities/{entity_id}/output-files/last-revisions".format(
-        entity_id=entity["id"])
+        entity_id=entity["id"]
+    )
 
     params = {}
     if output_type:
-        params['output_type_id'] = output_type['id']
+        params["output_type_id"] = output_type["id"]
     if task_type:
-        params['task_type_id'] = task_type['id']
+        params["task_type_id"] = task_type["id"]
     if representation:
-        params['representation'] = representation
+        params["representation"] = representation
     if name:
-        params['name'] = name
+        params["name"] = name
 
     return client.fetch_all(path, params)
 
 
 @cache
 def get_last_output_files_for_asset_instance(
-        asset_instance,
-        temporal_entity,
-        task_type=None,
-        output_type=None,
-        name=None,
-        representation=None):
+    asset_instance,
+    temporal_entity,
+    task_type=None,
+    output_type=None,
+    name=None,
+    representation=None,
+):
     """
     Args:
         asset_instance (str / dict): The asset instance dict or ID.
@@ -731,19 +706,21 @@ def get_last_output_files_for_asset_instance(
     temporal_entity = normalize_model_parameter(temporal_entity)
     path = (
         "asset-instances/{asset_instance_id}/entities/{temporal_entity_id}"
-        "/output-files/last-revisions").format(
-            asset_instance_id=asset_instance["id"],
-            temporal_entity_id=temporal_entity["id"])
+        "/output-files/last-revisions"
+    ).format(
+        asset_instance_id=asset_instance["id"],
+        temporal_entity_id=temporal_entity["id"],
+    )
 
     params = {}
     if output_type:
-        params['output_type_id'] = output_type['id']
+        params["output_type_id"] = output_type["id"]
     if task_type:
-        params['task_type_id'] = task_type['id']
+        params["task_type_id"] = task_type["id"]
     if representation:
-        params['representation'] = representation
+        params["representation"] = representation
     if name:
-        params['name'] = name
+        params["name"] = name
 
     return client.fetch_all(path, params)
 
@@ -818,8 +795,8 @@ def update_comment(working_file, comment):
     """
     working_file = normalize_model_parameter(working_file)
     return client.put(
-        "/actions/working-files/%s/comment" % working_file['id'],
-        {"comment": comment}
+        "/actions/working-files/%s/comment" % working_file["id"],
+        {"comment": comment},
     )
 
 
@@ -834,8 +811,7 @@ def update_modification_date(working_file):
         dict: Modified working file
     """
     return client.put(
-        "/actions/working-files/%s/modified" % working_file['id'],
-        {}
+        "/actions/working-files/%s/modified" % working_file["id"], {}
     )
 
 
@@ -850,11 +826,8 @@ def update_output_file(output_file, data):
         dict: Modified output file
     """
     output_file = normalize_model_parameter(output_file)
-    path = "/data/output-files/%s" % output_file['id']
-    return client.put(
-        path,
-        data
-    )
+    path = "/data/output-files/%s" % output_file["id"]
+    return client.put(path, data)
 
 
 def set_project_file_tree(project, file_tree_name):
@@ -904,10 +877,11 @@ def download_preview_file(preview_file, file_path):
     """
     preview_file = normalize_model_parameter(preview_file)
     preview_file = client.fetch_one("preview-files", preview_file["id"])
-    return client.download("pictures/originals/preview-files/%s.%s" % (
-        preview_file["id"],
-        preview_file["extension"]
-    ), file_path)
+    return client.download(
+        "pictures/originals/preview-files/%s.%s"
+        % (preview_file["id"], preview_file["extension"]),
+        file_path,
+    )
 
 
 def download_preview_file_thumbnail(preview_file, file_path):
@@ -920,6 +894,7 @@ def download_preview_file_thumbnail(preview_file, file_path):
 
     """
     preview_file = normalize_model_parameter(preview_file)
-    return client.download("pictures/thumbnails/preview-files/%s.png" % (
-        preview_file["id"]
-    ), file_path)
+    return client.download(
+        "pictures/thumbnails/preview-files/%s.png" % (preview_file["id"]),
+        file_path,
+    )

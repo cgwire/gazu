@@ -7,14 +7,13 @@ import gazu.scene
 
 
 class SceneTestCase(unittest.TestCase):
-
     def test_get_scene(self):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/scenes/scene-1"),
-                text='{"name": "Scene 01", "project_id": "project-1"}'
+                text='{"name": "Scene 01", "project_id": "project-1"}',
             )
-            scene = gazu.scene.get_scene('scene-1')
+            scene = gazu.scene.get_scene("scene-1")
             self.assertEqual(scene["name"], "Scene 01")
 
     def test_get_scene_by_name(self):
@@ -23,9 +22,9 @@ class SceneTestCase(unittest.TestCase):
                 gazu.client.get_full_url(
                     "data/scenes/all?parent_id=sequence-1&name=Scene01"
                 ),
-                text=json.dumps([
-                    {"name": "Scene01", "project_id": "project-1"}
-                ])
+                text=json.dumps(
+                    [{"name": "Scene01", "project_id": "project-1"}]
+                ),
             )
             sequence = {"id": "sequence-1"}
             scene = gazu.scene.get_scene_by_name(sequence, "Scene01")
@@ -35,9 +34,9 @@ class SceneTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/projects/project-1/scenes"),
-                text=json.dumps([
-                    {"name": "Scene 01", "project_id": "project-1"}
-                ])
+                text=json.dumps(
+                    [{"name": "Scene 01", "project_id": "project-1"}]
+                ),
             )
             project = {"id": "project-1"}
             scenes = gazu.scene.all_scenes_for_project(project)
@@ -49,15 +48,16 @@ class SceneTestCase(unittest.TestCase):
     def test_all_scenes_for_sequence(self):
         with requests_mock.mock() as mock:
             mock.get(
-                gazu.client.get_full_url(
-                    "data/sequences/sequence-1/scenes"),
-                text=json.dumps([
-                    {
-                        "name": "Scene 01",
-                        "project_id": "project-1",
-                        "parent_id": "sequence-1"
-                    }
-                ])
+                gazu.client.get_full_url("data/sequences/sequence-1/scenes"),
+                text=json.dumps(
+                    [
+                        {
+                            "name": "Scene 01",
+                            "project_id": "project-1",
+                            "parent_id": "sequence-1",
+                        }
+                    ]
+                ),
             )
             sequence = {"id": "sequence-1"}
             scenes = gazu.scene.all_scenes_for_sequence(sequence)
@@ -71,27 +71,22 @@ class SceneTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.post(
                 gazu.client.get_full_url("data/projects/project-1/scenes"),
-                text=json.dumps({"id": "scene-01", "project_id": "project-1"})
+                text=json.dumps({"id": "scene-01", "project_id": "project-1"}),
             )
             project = {"id": "project-1"}
             sequence = {"id": "sequence-1"}
-            scene = gazu.scene.new_scene(project, sequence, 'Scene 01')
+            scene = gazu.scene.new_scene(project, sequence, "Scene 01")
             self.assertEqual(scene["id"], "scene-01")
 
     def test_update_scene(self):
         with requests_mock.mock() as mock:
             mock = mock.put(
                 gazu.client.get_full_url("data/entities/scene-id"),
-                text=json.dumps({
-                    "id": "scene-id",
-                    "name": "S02",
-                    "project_id": "project-1"
-                })
+                text=json.dumps(
+                    {"id": "scene-id", "name": "S02", "project_id": "project-1"}
+                ),
             )
-            scene = {
-                "id": "scene-id",
-                "name": "S02"
-            }
+            scene = {"id": "scene-id", "name": "S02"}
             scene = gazu.scene.update_scene(scene)
             self.assertEqual(scene["id"], "scene-id")
             self.assertEqual(scene["name"], "S02")
@@ -100,14 +95,17 @@ class SceneTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/scenes/scene-1/camera-instances"),
-                text=json.dumps([
-                    {
-                        "id": "scene-1-camera-instance-1",
-                        "number": "1",
-                        "entity_id": "scene-1"
-                    }
-                ])
+                    "data/scenes/scene-1/camera-instances"
+                ),
+                text=json.dumps(
+                    [
+                        {
+                            "id": "scene-1-camera-instance-1",
+                            "number": "1",
+                            "entity_id": "scene-1",
+                        }
+                    ]
+                ),
             )
             scene = {"id": "scene-1"}
             instances = gazu.scene.all_camera_instances_for_scene(scene)
@@ -118,14 +116,7 @@ class SceneTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/scenes/scene-1/shots"),
-                text=json.dumps([
-                    {
-                        "id": "shot-1"
-                    },
-                    {
-                        "id": "shot-2"
-                    }
-                ])
+                text=json.dumps([{"id": "shot-1"}, {"id": "shot-2"}]),
             )
             scene = {"id": "scene-1"}
             shots = gazu.scene.all_shots_for_scene(scene)
@@ -136,9 +127,7 @@ class SceneTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.post(
                 gazu.client.get_full_url("data/scenes/scene-1/shots"),
-                text=json.dumps({
-                    "id": "shot-1"
-                })
+                text=json.dumps({"id": "shot-1"}),
             )
             scene = {"id": "scene-1"}
             shot = {"id": "shot-1"}
@@ -149,7 +138,7 @@ class SceneTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.delete(
                 gazu.client.get_full_url("data/scenes/scene-1/shots/shot-1"),
-                text=""
+                text="",
             )
             scene = {"id": "scene-1"}
             shot = {"id": "shot-1"}
@@ -159,31 +148,27 @@ class SceneTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             result = {"id": "asset-instance-01"}
             mock = mock.post(
-                gazu.client.get_full_url(
-                    "data/scenes/scene-1/asset-instances"
-                ),
-                text=json.dumps(result)
+                gazu.client.get_full_url("data/scenes/scene-1/asset-instances"),
+                text=json.dumps(result),
             )
             scene = {"id": "scene-1"}
             asset = {"id": "asset-1"}
-            asset_instance = gazu.scene.new_scene_asset_instance(
-                scene,
-                asset
-            )
+            asset_instance = gazu.scene.new_scene_asset_instance(scene, asset)
             self.assertEqual(asset_instance, result)
 
     def test_all_asset_instances_for_scene(self):
         with requests_mock.mock() as mock:
             mock.get(
-                gazu.client.get_full_url(
-                    "data/scenes/scene-1/asset-instances"),
-                text=json.dumps([
-                    {
-                        "id": "scene-1-instance-1",
-                        "number": "1",
-                        "entity_id": "scene-1"
-                    }
-                ])
+                gazu.client.get_full_url("data/scenes/scene-1/asset-instances"),
+                text=json.dumps(
+                    [
+                        {
+                            "id": "scene-1-instance-1",
+                            "number": "1",
+                            "entity_id": "scene-1",
+                        }
+                    ]
+                ),
             )
             scene = {"id": "scene-1"}
             instances = gazu.scene.all_asset_instances_for_scene(scene)
@@ -194,38 +179,43 @@ class SceneTestCase(unittest.TestCase):
         instance = {
             "id": "scene-1-instance-1",
             "number": "1",
-            "entity_id": "scene-1"
+            "entity_id": "scene-1",
         }
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
                     "data/asset-instances?"
-                    "name=instance_name&scene_id=scene-1"),
-                text=json.dumps([instance, ])
+                    "name=instance_name&scene_id=scene-1"
+                ),
+                text=json.dumps([instance]),
             )
             scene = {"id": "scene-1"}
             result = gazu.scene.get_asset_instance_by_name(
-                scene, "instance_name")
+                scene, "instance_name"
+            )
             self.assertEqual(instance, result)
 
     def test_update_asset_instance_name(self):
-        updated_name = 'updated_name'
+        updated_name = "updated_name"
         instance = {
             "id": "instance-id",
             "name": "original",
             "number": "1",
-            "entity_id": "scene-1"
+            "entity_id": "scene-1",
         }
         with requests_mock.mock() as mock:
             mock = mock.put(
                 gazu.client.get_full_url("data/asset-instances/instance-id"),
-                text=json.dumps({
-                    "id": "instance-id",
-                    "name": updated_name,
-                    "number": "1",
-                    "entity_id": "scene-1"
-                })
+                text=json.dumps(
+                    {
+                        "id": "instance-id",
+                        "name": updated_name,
+                        "number": "1",
+                        "entity_id": "scene-1",
+                    }
+                ),
             )
             instance = gazu.scene.update_asset_instance_name(
-                instance, updated_name)
+                instance, updated_name
+            )
             self.assertEqual(instance["name"], updated_name)
