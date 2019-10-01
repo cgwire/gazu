@@ -5,6 +5,15 @@ from .sorting import sort_by_name
 
 
 @cache
+def all_entities():
+    """
+    Returns:
+        list: Retrieve all entities
+    """
+    return client.fetch_all('entities')
+
+
+@cache
 def all_entity_types():
     """
     Returns:
@@ -41,3 +50,19 @@ def get_entity_types():
     """
 
     return client.fetch_all("entity-types")
+
+
+def new_entity_type(name):
+    """
+    Creates an entity type with the given name.
+
+    Args:
+        name (str): The name of the entity type
+
+    Returns:
+        dict: The created entity type
+    """
+    data = {
+        "name": name
+    }
+    return client.post('/data/entity-types', data)
