@@ -1,3 +1,5 @@
+import string
+
 from . import client
 from .sorting import sort_by_name
 from .helpers import normalize_model_parameter
@@ -633,3 +635,43 @@ def assign_task(task, person):
     task = normalize_model_parameter(task)
     route = "/actions/persons/%s/assign" % person["id"]
     return client.put(route, {"task_ids": task["id"]})
+
+
+def new_task_type(name):
+    """
+    Create a new task type with the given name.
+
+    Args:
+        name (str): The name of the task type
+
+    Returns:
+        dict: The created task type
+    """
+    data = {
+        'name': name
+    }
+    return client.post('data/task-types', data)
+
+
+def new_task_status(name, short_name, color):
+    """
+    Create a new task status with the given name, short name and color.
+
+    Args:
+        name (str): The name of the task status
+        short_name (str): The short name of the task status
+        color (str): The color of the task status has an hexadecimal string
+        with # as first character. ex : #00FF00
+
+    Returns:
+        dict: The created task status
+    """
+    assert(color[0] == '#')
+    assert(all(c in string.hexdigits for c in color[1:]))
+
+    data = {
+        'name': name,
+        'short_name': short_name,
+        'color': color
+    }
+    return client.post('data/task-status', data)
