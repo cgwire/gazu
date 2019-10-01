@@ -647,12 +647,13 @@ def get_next_asset_instance_output_revision(
     return client.post(path, data)["next_revision"]
 
 
-def get_last_entity_output_revision(entity, output_type, task_type):
+def get_last_entity_output_revision(entity, output_type, task_type, name="master"):
     """
     Args:
         entity (str / dict): The entity dict or ID.
         output_type (str / dict): The entity dict or ID.
         task_type (str / dict): The entity dict or ID.
+        name (str): The output name
 
     Returns:
         int: Last revision of ouput files for given entity, output type and task
@@ -661,7 +662,23 @@ def get_last_entity_output_revision(entity, output_type, task_type):
     entity = normalize_model_parameter(entity)
     output_type = normalize_model_parameter(output_type)
     task_type = normalize_model_parameter(task_type)
-    revision = get_next_entity_output_revision(entity, output_type, task_type)
+    revision = get_next_entity_output_revision(
+        entity, output_type, task_type, name)
+    if revision != 1:
+        revision -= 1
+    return revision
+
+
+def get_last_asset_instance_output_revision(asset_instance, temporal_entity, output_type, task_type, name="master"):
+    """
+    Generate last output revision for given asset instance.
+    """
+    asset_instance = normalize_model_parameter(asset_instance)
+    temporal_entity = normalize_model_parameter(temporal_entity)
+    output_type = normalize_model_parameter(output_type)
+    task_type = normalize_model_parameter(task_type)
+    revision = get_next_asset_instance_output_revision(
+        asset_instance, temporal_entity, output_type, task_type, name=name)
     if revision != 1:
         revision -= 1
     return revision
