@@ -3,6 +3,7 @@ from . import client
 from .sorting import sort_by_name
 from .cache import cache
 from .helpers import normalize_model_parameter
+from .shot import get_sequence
 
 
 def new_scene(project, sequence, name):
@@ -160,3 +161,12 @@ def update_asset_instance_data(asset_instance, data):
     asset_instance = normalize_model_parameter(asset_instance)
     path = "/data/asset-instances/%s" % asset_instance["id"]
     return client.put(path, {"data": data})
+
+
+@cache
+def get_sequence_from_scene(scene):
+    """
+    Return sequence which is parent of given shot.
+    """
+    scene = normalize_model_parameter(scene)
+    return get_sequence(scene["parent_id"])
