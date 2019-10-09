@@ -113,7 +113,16 @@ def get_all_working_files_for_entity(
         task=None,
         name=None):
     """
-    Retrieves all the working files of a given entity and specied parameters
+    Retrieves all the working files of a given entity and specified parameters
+
+    Args:
+        entity (str / dict): The entity dict or ID.
+        task (str / dict): The task dict or ID.
+        name (str): The file name
+
+    Returns:
+        list:
+            Working files for a given entity (asset or shot), task or name
     """
     path = "data/entities/{entity_id}/working-files?".format(
         entity_id=entity["id"],
