@@ -137,7 +137,7 @@ def is_cache_expired(memo, state, key):
     return expire > 0 and date_to_check < datetime.datetime.now()
 
 
-def cache(function, maxsize=300, expire=0):
+def cache(function, maxsize=300, expire=120):
     """
     Decorator that generate cache wrapper and that adds cache feature to
     target function. A max cache size and and expiration time (in seconds) can

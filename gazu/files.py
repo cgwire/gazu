@@ -108,6 +108,28 @@ def get_output_file_by_path(path):
 
 
 @cache
+def get_all_working_files_for_entity(
+        entity,
+        task=None,
+        name=None):
+    """
+    Retrieves all the working files of a given entity and specied parameters
+    """
+    entity = normalize_model_parameter(entity)
+    task = normalize_model_parameter(task)
+    path = "data/entities/{entity_id}/working-files?".format(
+        entity_id=entity["id"],
+    )
+
+    params = {}
+    if task is not None:
+        params["task_id"] = task["id"]
+    if name is not None:
+        params["name"] = name
+
+    return client.fetch_all(path, params)
+
+
 def all_output_files_for_entity(
     entity, output_type=None, task_type=None, name=None, representation=None
 ):
@@ -629,12 +651,13 @@ def get_next_asset_instance_output_revision(
     return client.post(path, data)["next_revision"]
 
 
-def get_last_entity_output_revision(entity, output_type, task_type):
+def get_last_entity_output_revision(entity, output_type, task_type, name="master"):
     """
     Args:
         entity (str / dict): The entity dict or ID.
         output_type (str / dict): The entity dict or ID.
         task_type (str / dict): The entity dict or ID.
+        name (str): The output name
 
     Returns:
         int: Last revision of ouput files for given entity, output type and task
@@ -643,7 +666,23 @@ def get_last_entity_output_revision(entity, output_type, task_type):
     entity = normalize_model_parameter(entity)
     output_type = normalize_model_parameter(output_type)
     task_type = normalize_model_parameter(task_type)
-    revision = get_next_entity_output_revision(entity, output_type, task_type)
+    revision = get_next_entity_output_revision(
+        entity, output_type, task_type, name)
+    if revision != 1:
+        revision -= 1
+    return revision
+
+
+def get_last_asset_instance_output_revision(asset_instance, temporal_entity, output_type, task_type, name="master"):
+    """
+    Generate last output revision for given asset instance.
+    """
+    asset_instance = normalize_model_parameter(asset_instance)
+    temporal_entity = normalize_model_parameter(temporal_entity)
+    output_type = normalize_model_parameter(output_type)
+    task_type = normalize_model_parameter(task_type)
+    revision = get_next_asset_instance_output_revision(
+        asset_instance, temporal_entity, output_type, task_type, name=name)
     if revision != 1:
         revision -= 1
     return revision
@@ -768,7 +807,7 @@ def get_last_working_file_revision(task, name="main"):
     task = normalize_model_parameter(task)
     path = "data/tasks/%s/working-files/last-revisions" % task["id"]
     working_files_dict = client.get(path)
-    return working_files_dict.get(name, 0)
+    return working_files_dict.get(name)
 
 
 @cache

@@ -3,6 +3,7 @@ from . import client
 from .sorting import sort_by_name
 from .cache import cache
 from .helpers import normalize_model_parameter
+from .shot import get_sequence
 
 
 def new_scene(project, sequence, name):
@@ -89,30 +90,6 @@ def new_scene_asset_instance(scene, asset, description=""):
 
 
 @cache
-def all_shots_for_scene(scene):
-    """
-    Return the list of shots issued from given scene.
-    """
-    return client.get("data/scenes/%s/shots" % scene["id"])
-
-
-def add_shot_to_scene(scene, shot):
-    """
-    Link a shot to a scene to mark the fact it was generated out from that
-    scene.
-    """
-    data = {"shot_id": shot["id"]}
-    return client.post("data/scenes/%s/shots" % scene["id"], data)
-
-
-def remove_shot_from_scene(scene, shot):
-    """
-    Remove link between a shot and a scene.
-    """
-    return client.delete("data/scenes/%s/shots/%s" % (scene["id"], shot["id"]))
-
-
-@cache
 def all_asset_instances_for_scene(scene):
     """
     Return the list of asset instances listed in a scene.
@@ -184,3 +161,12 @@ def update_asset_instance_data(asset_instance, data):
     asset_instance = normalize_model_parameter(asset_instance)
     path = "/data/asset-instances/%s" % asset_instance["id"]
     return client.put(path, {"data": data})
+
+
+@cache
+def get_sequence_from_scene(scene):
+    """
+    Return sequence which is parent of given shot.
+    """
+    scene = normalize_model_parameter(scene)
+    return get_sequence(scene["parent_id"])

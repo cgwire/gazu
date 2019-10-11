@@ -275,6 +275,14 @@ def update_shot(shot):
     return client.put("data/entities/%s" % shot["id"], shot)
 
 
+@cache
+def get_asset_instances_for_shot(shot):
+    """
+    Return the list of asset instances linked to given shot.
+    """
+    return client.get("data/shots/%s/asset-instances" % shot["id"])
+
+
 def update_shot_data(shot, data={}):
     """
     Update the metadata for the provided shot. Keys that are not provided are

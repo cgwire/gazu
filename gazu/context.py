@@ -88,7 +88,7 @@ def all_sequences_for_project(project, user_context=False):
     if user_context:
         return gazu_user.all_sequences_for_project(project)
     else:
-        return gazu_shot.all_sequences(project)
+        return gazu_shot.all_sequences_for_project(project)
 
 
 def all_scenes_for_project(project, user_context=False):
