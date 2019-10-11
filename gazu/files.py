@@ -115,15 +115,19 @@ def get_all_working_files_for_entity(
     """
     Retrieves all the working files of a given entity and specied parameters
     """
+    entity = normalize_model_parameter(entity)
+    task = normalize_model_parameter(task)
     path = "data/entities/{entity_id}/working-files?".format(
         entity_id=entity["id"],
     )
-    if task is not None:
-        path += "task_id={}&".format(task['id'])
-    if name is not None:
-        path += "name={}&".format(name)
 
-    return client.get(path)
+    params = {}
+    if task is not None:
+        params["task_id"] = task["id"]
+    if name is not None:
+        params["name"] = name
+
+    return client.fetch_all(path, params)
 
 
 def all_output_files_for_entity(
@@ -803,7 +807,7 @@ def get_last_working_file_revision(task, name="main"):
     task = normalize_model_parameter(task)
     path = "data/tasks/%s/working-files/last-revisions" % task["id"]
     working_files_dict = client.get(path)
-    return working_files_dict.get(name, 0)  # TODO: Inconsistent return type !
+    return working_files_dict.get(name)
 
 
 @cache
