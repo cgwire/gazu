@@ -10,7 +10,7 @@ def normalize_model_parameter(model_parameter):
     """
     if model_parameter is None:
         return None
-    elif isinstance(model_parameter, basestring):
+    elif isinstance(model_parameter, str):
         return {"id": model_parameter}
     elif isinstance(model_parameter, dict):
         return model_parameter
