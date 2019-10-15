@@ -117,7 +117,7 @@ def get_all_working_files_for_entity(
     """
     entity = normalize_model_parameter(entity)
     task = normalize_model_parameter(task)
-    path = "data/entities/{entity_id}/working-files?".format(
+    path = "entities/{entity_id}/working-files?".format(
         entity_id=entity["id"],
     )
 
