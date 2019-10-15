@@ -28,15 +28,6 @@ def all_task_types():
 
 
 @cache
-def all_task_statuses():
-    """
-    Return task statuses
-    """
-    task_statuses = client.fetch_all("task-status")
-    return sort_by_name(task_statuses)
-
-
-@cache
 def all_tasks_for_shot(shot):
     """
     Args:
@@ -190,15 +181,6 @@ def all_task_types_for_episode(episode):
     """
     episode = normalize_model_parameter(episode)
     task_types = client.fetch_all("episodes/%s/task-types" % episode["id"])
-    return sort_by_name(task_types)
-
-
-@cache
-def all_task_types_for_episode(episode):
-    """
-    Return task types of tasks linked directly to given episode.
-    """
-    task_types = client.fetch_all("episodes/%s/task-types" % episode['id'])
     return sort_by_name(task_types)
 
 
