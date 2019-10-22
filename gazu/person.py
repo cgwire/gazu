@@ -27,7 +27,7 @@ def all_persons():
 def get_person(id):
     """
     Args:
-        desktop_login (str): Login used to sign in on the desktop computer.
+        id (str): An uuid identifying a person.
 
     Returns:
         dict: Person corresponding to given id.
