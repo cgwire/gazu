@@ -5,6 +5,8 @@ import requests_mock
 import gazu.asset
 import gazu.client
 
+from utils import fakeid
+
 
 class AssetTestCase(unittest.TestCase):
     def test_all_assets_for_shot(self):
@@ -256,24 +258,25 @@ class AssetTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/assets/asset-01/asset-asset-instances"
+                    "data/assets/{}/asset-asset-instances"
+                    .format(fakeid("asset-01"))
                 ),
                 text=json.dumps(
                     [
                         {
-                            "asset_id": "asset-02",
-                            "target_asset_id": "asset-01",
+                            "asset_id": fakeid("asset-02"),
+                            "target_asset_id": fakeid("asset-01"),
                             "number": 1,
                         }
                     ]
                 ),
             )
             asset_instances = gazu.asset.all_asset_instances_for_asset(
-                "asset-01"
+                fakeid("asset-01")
             )
             asset_instance = asset_instances[0]
-            self.assertEqual(asset_instance["asset_id"], "asset-02")
-            self.assertEqual(asset_instance["target_asset_id"], "asset-01")
+            self.assertEqual(asset_instance["asset_id"], fakeid("asset-02"))
+            self.assertEqual(asset_instance["target_asset_id"], fakeid("asset-01"))
             self.assertEqual(asset_instance["number"], 1)
 
     def test_new_asset_asset_instance(self):

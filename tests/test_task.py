@@ -4,6 +4,8 @@ import requests_mock
 import gazu.client
 import gazu.task
 
+from utils import fakeid
+
 
 class TaskTestCase(unittest.TestCase):
     def test_all_for_shot(self):
@@ -179,13 +181,13 @@ class TaskTestCase(unittest.TestCase):
 
     def test_get_task(self):
         with requests_mock.mock() as mock:
-            path = "data/tasks/task-01/full"
+            path = "data/tasks/{}/full".format(fakeid("task-01"))
             mock.get(
                 gazu.client.get_full_url(path),
-                text=json.dumps({"id": "task-01"}),
+                text=json.dumps({"id": fakeid("task-01")}),
             )
-            task = gazu.task.get_task("task-01")
-            self.assertEqual(task["id"], "task-01")
+            task = gazu.task.get_task(fakeid("task-01"))
+            self.assertEqual(task["id"], fakeid("task-01"))
 
     def test_start_task(self):
         with requests_mock.mock() as mock:
@@ -284,12 +286,14 @@ class TaskTestCase(unittest.TestCase):
 
     def test_all_tasks_for_person(self):
         with requests_mock.mock() as mock:
-            result = [{"id": "task-status-01"}, {"id": "task-status-2"}]
+            result = [{"id": fakeid("task-status-01")},
+                      {"id": fakeid("task-status-02")}]
             mock.get(
-                gazu.client.get_full_url("data/persons/person-01/tasks"),
+                gazu.client.get_full_url(
+                    "data/persons/{}/tasks".format(fakeid("person-01"))),
                 text=json.dumps(result),
             )
-            tasks = gazu.task.all_tasks_for_person("person-01")
+            tasks = gazu.task.all_tasks_for_person(fakeid("person-01"))
             self.assertEqual(tasks, result)
 
     def test_get_task_status_by_name(self):
@@ -304,23 +308,27 @@ class TaskTestCase(unittest.TestCase):
 
     def test_new_task(self):
         with requests_mock.mock() as mock:
-            result = {"id": "task-01"}
+            result = {"id": fakeid("task-01")}
             mock.get(
                 gazu.client.get_full_url(
-                    "data/tasks?name=main&entity_id=asset-01"
-                    + "&task_type_id=task-type-01"
+                    "data/tasks?name=main&entity_id={asset}"
+                    "&task_type_id={task_type}".format(
+                        asset=fakeid("asset-01"),
+                        task_type=fakeid("task-type-01"))
                 ),
                 text=json.dumps([]),
             )
             mock.get(
                 gazu.client.get_full_url("data/task-status?name=Todo"),
-                text=json.dumps([{"id": "task-status-01"}]),
+                text=json.dumps([{"id": fakeid("task-status-01")}]),
             )
             mock.post(
-                gazu.client.get_full_url("data/tasks"), text=json.dumps(result)
+                gazu.client.get_full_url("data/tasks"),
+                text=json.dumps(result)
             )
-            asset = {"id": "asset-01", "project_id": "project-01"}
-            task_type = {"id": "task-type-01"}
+            asset = {"id": fakeid("asset-01"),
+                     "project_id": fakeid("project-01")}
+            task_type = {"id": fakeid("task-type-01")}
             task = gazu.task.new_task(asset, task_type)
             self.assertEqual(task, result)
 
