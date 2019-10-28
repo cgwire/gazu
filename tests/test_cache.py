@@ -11,13 +11,13 @@ class CacheTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock_open = mock.get(
                 gazu.client.get_full_url("data/projects/open"),
-                text=json.dumps([{"name": "Agent 327", "id": "project_1"}]),
+                text=json.dumps([{"name": "Agent 327", "id": "project-01"}]),
             )
             mock_all = mock.get(
                 gazu.client.get_full_url("data/projects"),
                 text=json.dumps(
                     [
-                        {"name": "Agent 327", "id": "project_1"},
+                        {"name": "Agent 327", "id": "project-01"},
                         {"name": "Big Buck Bunny", "id": "project_2"},
                     ]
                 ),
@@ -51,11 +51,11 @@ class CacheTestCase(unittest.TestCase):
     def test_max_size(self):
         with requests_mock.mock() as mock:
             mock_1 = mock.get(
-                gazu.client.get_full_url("data/projects/project-1"),
-                text=json.dumps({"name": "Agent 327", "id": "project_1"}),
+                gazu.client.get_full_url("data/projects/project-01"),
+                text=json.dumps({"name": "Agent 327", "id": "project-01"}),
             )
             mock_2 = mock.get(
-                gazu.client.get_full_url("data/projects/project-2"),
+                gazu.client.get_full_url("data/projects/project-02"),
                 text=json.dumps({"name": "Agent 327 02", "id": "project_2"}),
             )
             mock_3 = mock.get(
@@ -65,19 +65,19 @@ class CacheTestCase(unittest.TestCase):
 
             gazu.cache.enable()
             gazu.project.get_project.set_cache_max_size(2)
-            gazu.project.get_project("project-1")
-            gazu.project.get_project("project-1")
-            gazu.project.get_project("project-1")
+            gazu.project.get_project("project-01")
+            gazu.project.get_project("project-01")
+            gazu.project.get_project("project-01")
             self.assertEqual(mock_1.call_count, 1)
-            gazu.project.get_project("project-2")
-            gazu.project.get_project("project-2")
-            gazu.project.get_project("project-1")
+            gazu.project.get_project("project-02")
+            gazu.project.get_project("project-02")
+            gazu.project.get_project("project-01")
             self.assertEqual(mock_2.call_count, 1)
             self.assertEqual(mock_1.call_count, 1)
 
             gazu.project.get_project("project-3")
             gazu.project.get_project("project-3")
-            gazu.project.get_project("project-1")
+            gazu.project.get_project("project-01")
             self.assertEqual(mock_3.call_count, 1)
             self.assertEqual(mock_1.call_count, 2)
             gazu.cache.disable()

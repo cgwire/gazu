@@ -11,14 +11,14 @@ class AssetTestCase(unittest.TestCase):
     def test_all_entities(self):
         entities = [
             {
-                "id": "asset-1",
+                "id": "asset-01",
                 "name": "Asset 01",
-                "project_id": "project-1",
+                "project_id": "project-01",
             },
             {
-                "id": "shot-1",
+                "id": "shot-01",
                 "name": "Shot 01",
-                "project_id": "project-1",
+                "project_id": "project-01",
             }
         ]
         with requests_mock.mock() as mock:
@@ -32,18 +32,18 @@ class AssetTestCase(unittest.TestCase):
     def test_get_entity(self):
         with requests_mock.mock() as mock:
             mock.get(
-                gazu.client.get_full_url("data/entities/asset-1"),
+                gazu.client.get_full_url("data/entities/asset-01"),
                 text=json.dumps(
                     {
-                        "id": "asset-1",
+                        "id": "asset-01",
                         "name": "Asset 01",
-                        "project_id": "project-1",
+                        "project_id": "project-01",
                     }
                 ),
             )
-            entity = gazu.entity.get_entity("asset-1")
+            entity = gazu.entity.get_entity("asset-01")
             self.assertEqual(entity["name"], "Asset 01")
-            self.assertEqual(entity["project_id"], "project-1")
+            self.assertEqual(entity["project_id"], "project-01")
 
     def test_get_entity_type(self):
         with requests_mock.mock() as mock:

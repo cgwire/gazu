@@ -29,8 +29,8 @@ class TaskTestCase(unittest.TestCase):
                 gazu.client.get_full_url("data/sequences/sequence-01/tasks"),
                 text=json.dumps(
                     [
-                        {"id": 1, "name": "Master Compositing"},
-                        {"id": 2, "name": "Master Animation"},
+                        {"id": "task-01", "name": "Master Compositing"},
+                        {"id": "task-02", "name": "Master Animation"},
                     ]
                 ),
             )
@@ -46,8 +46,8 @@ class TaskTestCase(unittest.TestCase):
                 gazu.client.get_full_url("data/assets/asset-01/tasks"),
                 text=json.dumps(
                     [
-                        {"id": 1, "name": "Master Modeling"},
-                        {"id": 2, "name": "Master Texture"},
+                        {"id": "task-01", "name": "Master Modeling"},
+                        {"id": "task-02", "name": "Master Texture"},
                     ]
                 ),
             )
@@ -61,7 +61,7 @@ class TaskTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/episodes/episode-01/tasks"),
-                text=json.dumps([{"id": 1, "name": "Toto Task"}]),
+                text=json.dumps([{"id": "task-01", "name": "Toto Task"}]),
             )
 
             episode = {"id": "episode-01"}
@@ -73,7 +73,7 @@ class TaskTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/task-types"),
-                text=json.dumps([{"id": 1, "name": "Modeling"}]),
+                text=json.dumps([{"id": "task-type-01", "name": "Modeling"}]),
             )
             task_types = gazu.task.all_task_types()
             task_type = task_types[0]
@@ -82,11 +82,11 @@ class TaskTestCase(unittest.TestCase):
     def test_all_task_types_for_shot(self):
         with requests_mock.mock() as mock:
             mock.get(
-                gazu.client.get_full_url("data/shots/shot-1/task-types"),
-                text=json.dumps([{"id": 1, "name": "Modeling"}]),
+                gazu.client.get_full_url("data/shots/shot-01/task-types"),
+                text=json.dumps([{"id": "task-type-01", "name": "Modeling"}]),
             )
 
-            shot = {"id": "shot-1"}
+            shot = {"id": "shot-01"}
             task_types = gazu.task.all_task_types_for_shot(shot)
             task_type = task_types[0]
             self.assertEqual(task_type["name"], "Modeling")
@@ -95,12 +95,12 @@ class TaskTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/sequences/sequence-1/task-types"
+                    "data/sequences/sequence-01/task-types"
                 ),
-                text=json.dumps([{"id": 1, "name": "Modeling"}]),
+                text=json.dumps([{"id": "task-type-01", "name": "Modeling"}]),
             )
 
-            sequence = {"id": "sequence-1"}
+            sequence = {"id": "sequence-01"}
             task_types = gazu.task.all_task_types_for_sequence(sequence)
             task_type = task_types[0]
             self.assertEqual(task_type["name"], "Modeling")
@@ -109,7 +109,7 @@ class TaskTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/episodes/episode-1/task-types"),
-                text=json.dumps([{"id": 1, "name": "TotoType"}]),
+                text=json.dumps([{"id": "task-type-01", "name": "TotoType"}]),
             )
 
             episode = {"id": "episode-1"}
@@ -121,15 +121,15 @@ class TaskTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/tasks?name=Task%2001&entity_id=entity-1&"
-                    + "task_type_id=modeling-1"
+                    "data/tasks?name=Task%2001&entity_id=entity-01&"
+                    "task_type_id=modeling-1"
                 ),
                 text=json.dumps(
-                    [{"name": "Task 01", "project_id": "project-1"}]
+                    [{"name": "Task 01", "project_id": "project-01"}]
                 ),
             )
             test_task = gazu.task.get_task_by_name(
-                {"id": "entity-1"}, {"id": "modeling-1"}, "Task 01"
+                {"id": "entity-01"}, {"id": "modeling-1"}, "Task 01"
             )
             self.assertEqual(test_task["name"], "Task 01")
 
@@ -190,24 +190,24 @@ class TaskTestCase(unittest.TestCase):
     def test_start_task(self):
         with requests_mock.mock() as mock:
             mock.put(
-                gazu.client.get_full_url("actions/tasks/task-1/start"),
+                gazu.client.get_full_url("actions/tasks/task-01/start"),
                 text='{"name": "Task 01", "task_status_id": "wip-1"}',
             )
-            test_task = gazu.task.start_task({"id": "task-1"})
+            test_task = gazu.task.start_task({"id": "task-01"})
             self.assertEqual(test_task["task_status_id"], "wip-1")
 
     def test_to_review(self):
         with requests_mock.mock() as mock:
             mock.put(
-                gazu.client.get_full_url("actions/tasks/task-1/to-review"),
+                gazu.client.get_full_url("actions/tasks/task-01/to-review"),
                 text=json.dumps({"name": "Task 01", "task_status_id": "wfa-1"}),
             )
             test_task = gazu.task.task_to_review(
-                {"id": "task-1"}, {"id": "person-1"}, "my comment"
+                {"id": "task-01"}, {"id": "person-01"}, "my comment"
             )
             self.assertEqual(test_task["task_status_id"], "wfa-1")
             test_task = gazu.task.task_to_review(
-                {"id": "task-1"}, {"id": "person-1"}, "my comment"
+                {"id": "task-01"}, {"id": "person-01"}, "my comment"
             )
             self.assertEqual(test_task["task_status_id"], "wfa-1")
 
@@ -215,12 +215,12 @@ class TaskTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "actions/tasks/task-1/time-spents/2017-09-23"
+                    "actions/tasks/task-01/time-spents/2017-09-23"
                 ),
                 text=json.dumps({"person1": {"duration": 3600}, "total": 3600}),
             )
             time_spents = gazu.task.get_time_spent(
-                {"id": "task-1"}, "2017-09-23"
+                {"id": "task-01"}, "2017-09-23"
             )
             self.assertEqual(time_spents["total"], 3600)
 
@@ -228,13 +228,13 @@ class TaskTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.post(
                 gazu.client.get_full_url(
-                    "actions/tasks/task-1/time-spents/2017-09-23/"
-                    "persons/person-1"
+                    "actions/tasks/task-01/time-spents/2017-09-23/"
+                    "persons/person-01"
                 ),
-                text=json.dumps({"id": "time-spent-1", "duration": 3600}),
+                text=json.dumps({"id": "time-spent-01", "duration": 3600}),
             )
             time_spents = gazu.task.set_time_spent(
-                {"id": "task-1"}, {"id": "person-1"}, "2017-09-23", 3600
+                {"id": "task-01"}, {"id": "person-01"}, "2017-09-23", 3600
             )
             self.assertEqual(time_spents["duration"], 3600)
 
@@ -242,13 +242,13 @@ class TaskTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.post(
                 gazu.client.get_full_url(
-                    "actions/tasks/task-1/time-spents/2017-09-23/"
-                    "persons/person-1/add"
+                    "actions/tasks/task-01/time-spents/2017-09-23/"
+                    "persons/person-01/add"
                 ),
-                text=json.dumps({"id": "time-spent-1", "duration": 7200}),
+                text=json.dumps({"id": "time-spent-01", "duration": 7200}),
             )
             time_spent = gazu.task.add_time_spent(
-                {"id": "task-1"}, {"id": "person-1"}, "2017-09-23", 7200
+                {"id": "task-01"}, {"id": "person-01"}, "2017-09-23", 7200
             )
             self.assertEqual(time_spent["duration"], 7200)
 
@@ -265,18 +265,18 @@ class TaskTestCase(unittest.TestCase):
 
     def test_all_tasks_for_task_status(self):
         with requests_mock.mock() as mock:
-            result = [{"id": "task-1"}, {"id": "task-1"}]
+            result = [{"id": "task-01"}, {"id": "task-01"}]
             mock.get(
                 gazu.client.get_full_url(
-                    "data/tasks?project_id=project-1&"
-                    "task_type_id=task-type-1&"
-                    "task_status_id=task-status-1"
+                    "data/tasks?project_id=project-01&"
+                    "task_type_id=task-type-01&"
+                    "task_status_id=task-status-01"
                 ),
                 text=json.dumps(result),
             )
-            project = {"id": "project-1"}
-            task_type = {"id": "task-type-1"}
-            task_status = {"id": "task-status-1"}
+            project = {"id": "project-01"}
+            task_type = {"id": "task-type-01"}
+            task_status = {"id": "task-status-01"}
             tasks = gazu.task.all_tasks_for_task_status(
                 project, task_type, task_status
             )
@@ -284,17 +284,17 @@ class TaskTestCase(unittest.TestCase):
 
     def test_all_tasks_for_person(self):
         with requests_mock.mock() as mock:
-            result = [{"id": "task-status-1"}, {"id": "task-status-2"}]
+            result = [{"id": "task-status-01"}, {"id": "task-status-2"}]
             mock.get(
-                gazu.client.get_full_url("data/persons/person-1/tasks"),
+                gazu.client.get_full_url("data/persons/person-01/tasks"),
                 text=json.dumps(result),
             )
-            tasks = gazu.task.all_tasks_for_person("person-1")
+            tasks = gazu.task.all_tasks_for_person("person-01")
             self.assertEqual(tasks, result)
 
     def test_get_task_status_by_name(self):
         with requests_mock.mock() as mock:
-            result = [{"id": "task-status-1"}]
+            result = [{"id": "task-status-01"}]
             mock.get(
                 gazu.client.get_full_url("data/task-status?name=wip"),
                 text=json.dumps(result),
@@ -304,23 +304,23 @@ class TaskTestCase(unittest.TestCase):
 
     def test_new_task(self):
         with requests_mock.mock() as mock:
-            result = {"id": "task-1"}
+            result = {"id": "task-01"}
             mock.get(
                 gazu.client.get_full_url(
-                    "data/tasks?name=main&entity_id=asset-1"
-                    + "&task_type_id=task-type-1"
+                    "data/tasks?name=main&entity_id=asset-01"
+                    + "&task_type_id=task-type-01"
                 ),
                 text=json.dumps([]),
             )
             mock.get(
                 gazu.client.get_full_url("data/task-status?name=Todo"),
-                text=json.dumps([{"id": "task-status-1"}]),
+                text=json.dumps([{"id": "task-status-01"}]),
             )
             mock.post(
                 gazu.client.get_full_url("data/tasks"), text=json.dumps(result)
             )
-            asset = {"id": "asset-1", "project_id": "project-1"}
-            task_type = {"id": "task-type-1"}
+            asset = {"id": "asset-01", "project_id": "project-01"}
+            task_type = {"id": "task-type-01"}
             task = gazu.task.new_task(asset, task_type)
             self.assertEqual(task, result)
 
@@ -328,11 +328,11 @@ class TaskTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             result = {"id": "comment-1"}
             mock.post(
-                gazu.client.get_full_url("actions/tasks/task-1/comment"),
+                gazu.client.get_full_url("actions/tasks/task-01/comment"),
                 text=json.dumps(result),
             )
-            task = {"id": "task-1"}
-            task_status = {"id": "task-status-1"}
+            task = {"id": "task-01"}
+            task_status = {"id": "task-status-01"}
             comment = "New comment"
             task = gazu.task.add_comment(task, task_status, comment)
 
@@ -340,10 +340,10 @@ class TaskTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             result = [{"id": "comment-1"}]
             mock.get(
-                gazu.client.get_full_url("data/tasks/task-1/comments"),
+                gazu.client.get_full_url("data/tasks/task-01/comments"),
                 text=json.dumps(result),
             )
-            task = {"id": "task-1"}
+            task = {"id": "task-01"}
             comments = gazu.task.all_comments_for_task(task)
             self.assertEquals(comments[0]["id"], result[0]["id"])
 
@@ -353,19 +353,19 @@ class TaskTestCase(unittest.TestCase):
     def test_assign_task(self):
         with requests_mock.mock() as mock:
             mock.put(
-                gazu.client.get_full_url("actions/persons/person-1/assign"),
-                text=json.dumps([{"id": "task-1", "assignees": ["person-1"]}]),
+                gazu.client.get_full_url("actions/persons/person-01/assign"),
+                text=json.dumps([{"id": "task-01", "assignees": ["person-01"]}]),
             )
-            task = gazu.task.assign_task({"id": "task-1"}, {"id": "person-1"})[
+            task = gazu.task.assign_task({"id": "task-01"}, {"id": "person-01"})[
                 0
             ]
-            self.assertIn("person-1", task["assignees"])
+            self.assertIn("person-01", task["assignees"])
 
     def test_new_task_type(self):
         task_type_name = "task-type-name"
         with requests_mock.mock() as mock:
             task_type = {
-                "id": "task-type-1",
+                "id": "task-type-01",
                 "name": task_type_name
             }
             mock.post(
