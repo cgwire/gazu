@@ -32,7 +32,7 @@ def get_person(id):
     Returns:
         dict: Person corresponding to given id.
     """
-    return client.fetch("persons/%s" % id)
+    return client.fetch_one("persons", id)
 
 
 @cache
