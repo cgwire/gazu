@@ -1,3 +1,8 @@
+import re
+
+_UUID_RE = re.compile("([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}){1}")
+
+
 def normalize_model_parameter(model_parameter):
     """
     Args:
@@ -10,9 +15,15 @@ def normalize_model_parameter(model_parameter):
     """
     if model_parameter is None:
         return None
-    elif isinstance(model_parameter, str):
-        return {"id": model_parameter}
     elif isinstance(model_parameter, dict):
         return model_parameter
     else:
-        raise ValueError("Wrong format: expected ID string or Data dict")
+        try:
+            id_str = str(model_parameter)
+        except Exception:
+            raise ValueError("Failed to cast argument to str")
+
+        if _UUID_RE.match(id_str):
+            return {"id": id_str}
+        else:
+            raise ValueError("Wrong format: expected ID string or Data dict")

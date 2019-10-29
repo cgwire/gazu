@@ -11,7 +11,7 @@ class PersonTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/persons"),
-                text=json.dumps([{"first_name": "John", "id": "person-1"}]),
+                text=json.dumps([{"first_name": "John", "id": "person-01"}]),
             )
             persons = gazu.person.all_persons()
             person_instance = persons[0]
@@ -26,7 +26,7 @@ class PersonTestCase(unittest.TestCase):
                         {
                             "first_name": "John",
                             "last_name": "Doe",
-                            "id": "person-1",
+                            "id": "person-01",
                         },
                         {
                             "first_name": "John",
@@ -54,13 +54,13 @@ class PersonTestCase(unittest.TestCase):
                             "first_name": "John",
                             "last_name": "Doe",
                             "desktop_login": "john.doe",
-                            "id": "person-1",
+                            "id": "person-01",
                         }
                     ]
                 ),
             )
             person = gazu.person.get_person_by_desktop_login("john.doe")
-            self.assertEqual(person["id"], "person-1")
+            self.assertEqual(person["id"], "person-01")
 
     def test_get_person_by_email(self):
         with requests_mock.mock() as mock:
@@ -72,13 +72,13 @@ class PersonTestCase(unittest.TestCase):
                             "first_name": "John",
                             "last_name": "Doe",
                             "desktop_login": "john.doe",
-                            "id": "person-1",
+                            "id": "person-01",
                         }
                     ]
                 ),
             )
             person = gazu.person.get_person_by_email("john@gmail.com")
-            self.assertEqual(person["id"], "person-1")
+            self.assertEqual(person["id"], "person-01")
 
     def test_new_person(self):
         with requests_mock.mock() as mock:
@@ -97,7 +97,7 @@ class PersonTestCase(unittest.TestCase):
                             "desktop_login": "john.doe",
                             "phone": "06 07 07 07 07",
                             "role": "user",
-                            "id": "person-1",
+                            "id": "person-01",
                         }
                     ]
                 ),

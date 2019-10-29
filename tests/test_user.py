@@ -9,7 +9,7 @@ class ProjectTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/user/projects/open"),
-                text='[{"name": "Big Buck Bunny", "id": "project_1"}]',
+                text='[{"name": "Big Buck Bunny", "id": "project-01"}]',
             )
             projects = gazu.user.all_open_projects()
             project_instance = projects[0]
@@ -19,12 +19,12 @@ class ProjectTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/user/projects/project-1/asset-types"
+                    "data/user/projects/project-01/asset-types"
                 ),
                 text='[{"name": "Props", "id": "asset-type-01"}]',
             )
 
-            project = {"id": "project-1"}
+            project = {"id": "project-01"}
             asset_types = gazu.user.all_asset_types_for_project(project)
             asset_type = asset_types[0]
             self.assertEqual(asset_type["name"], "Props")
@@ -33,14 +33,14 @@ class ProjectTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/user/projects/project-1/asset-types/asset-type-1"
+                    "data/user/projects/project-01/asset-types/asset-type-01"
                     "/assets"
                 ),
                 text='[{"name": "Chair", "id": "asset-01"}]',
             )
 
-            project = {"id": "project-1"}
-            asset_type = {"id": "asset-type-1"}
+            project = {"id": "project-01"}
+            asset_type = {"id": "asset-type-01"}
             assets = gazu.user.all_assets_for_asset_type_and_project(
                 project, asset_type
             )
@@ -50,10 +50,10 @@ class ProjectTestCase(unittest.TestCase):
     def test_tasks_for_asset(self):
         with requests_mock.mock() as mock:
             mock.get(
-                gazu.client.get_full_url("data/user/assets/asset-1/tasks"),
+                gazu.client.get_full_url("data/user/assets/asset-01/tasks"),
                 text='[{"name": "main", "id": "task-01"}]',
             )
-            asset = {"id": "asset-1"}
+            asset = {"id": "asset-01"}
             tasks = gazu.user.all_tasks_for_asset(asset)
             task = tasks[0]
             self.assertEqual(task["name"], "main")
@@ -61,10 +61,10 @@ class ProjectTestCase(unittest.TestCase):
     def test_tasks_for_shot(self):
         with requests_mock.mock() as mock:
             mock.get(
-                gazu.client.get_full_url("data/user/shots/shot-1/tasks"),
+                gazu.client.get_full_url("data/user/shots/shot-01/tasks"),
                 text='[{"name": "main", "id": "task-01"}]',
             )
-            shot = {"id": "shot-1"}
+            shot = {"id": "shot-01"}
             tasks = gazu.user.all_tasks_for_shot(shot)
             task = tasks[0]
             self.assertEqual(task["name"], "main")
@@ -72,10 +72,10 @@ class ProjectTestCase(unittest.TestCase):
     def test_task_types_for_asset(self):
         with requests_mock.mock() as mock:
             mock.get(
-                gazu.client.get_full_url("data/user/assets/asset-1/task-types"),
+                gazu.client.get_full_url("data/user/assets/asset-01/task-types"),
                 text='[{"name": "modeling", "id": "task-type-01"}]',
             )
-            asset = {"id": "asset-1"}
+            asset = {"id": "asset-01"}
             task_types = gazu.user.all_task_types_for_asset(asset)
             task_type = task_types[0]
             self.assertEqual(task_type["name"], "modeling")
@@ -83,11 +83,11 @@ class ProjectTestCase(unittest.TestCase):
     def test_task_types_for_shot(self):
         with requests_mock.mock() as mock:
             mock.get(
-                gazu.client.get_full_url("data/user/shots/shot-1/task-types"),
+                gazu.client.get_full_url("data/user/shots/shot-01/task-types"),
                 text='[{"name": "animation", "id": "task-type-01"}]',
             )
 
-            shot = {"id": "shot-1"}
+            shot = {"id": "shot-01"}
             tasks = gazu.user.all_task_types_for_shot(shot)
             task = tasks[0]
             self.assertEqual(task["name"], "animation")
@@ -96,11 +96,11 @@ class ProjectTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/user/projects/project-1/sequences"
+                    "data/user/projects/project-01/sequences"
                 ),
                 text='[{"name": "SEQ01", "id": "sequence-01"}]',
             )
-            project = {"id": "project-1"}
+            project = {"id": "project-01"}
             sequences = gazu.user.all_sequences_for_project(project)
             sequence = sequences[0]
             self.assertEqual(sequence["name"], "SEQ01")
@@ -109,11 +109,11 @@ class ProjectTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/user/sequences/sequence-1/shots"
+                    "data/user/sequences/sequence-01/shots"
                 ),
                 text='[{"name": "SEQ01", "id": "shot-01"}]',
             )
-            sequence = {"id": "sequence-1"}
+            sequence = {"id": "sequence-01"}
             shots = gazu.user.all_shots_for_sequence(sequence)
             shot = shots[0]
             self.assertEqual(shot["name"], "SEQ01")

@@ -67,11 +67,11 @@ class BaseFuncTestCase(ClientTestCase):
         with requests_mock.mock() as mock:
             mock.post(
                 client.get_full_url("data/persons"),
-                text='{"id": "person-1", "first_name": "John"}',
+                text='{"id": "person-01", "first_name": "John"}',
             )
             self.assertEqual(
-                client.post("data/persons", "person-1"),
-                {"id": "person-1", "first_name": "John"},
+                client.post("data/persons", "person-01"),
+                {"id": "person-01", "first_name": "John"},
             )
 
     def test_post_with_a_date_field(self):
@@ -79,28 +79,28 @@ class BaseFuncTestCase(ClientTestCase):
         with requests_mock.mock() as mock:
             mock.post(
                 client.get_full_url("data/persons"),
-                text='{"id": "person-1", "first_name": "John"}',
+                text='{"id": "person-01", "first_name": "John"}',
             )
             self.assertEqual(
                 client.post("data/persons", {"birth_date": now}),
-                {"id": "person-1", "first_name": "John"},
+                {"id": "person-01", "first_name": "John"},
             )
 
     def test_put(self):
         with requests_mock.mock() as mock:
             mock.put(
                 client.get_full_url("data/persons"),
-                text='{"id": "person-1", "first_name": "John"}',
+                text='{"id": "person-01", "first_name": "John"}',
             )
             self.assertEqual(
-                client.put("data/persons", "person-1"),
-                {"id": "person-1", "first_name": "John"},
+                client.put("data/persons", "person-01"),
+                {"id": "person-01", "first_name": "John"},
             )
 
     def test_delete(self):
         with requests_mock.mock() as mock:
-            mock.delete(client.get_full_url("data/persons/person-1"), text="")
-            self.assertEqual(client.delete("data/persons/person-1"), "")
+            mock.delete(client.get_full_url("data/persons/person-01"), text="")
+            self.assertEqual(client.delete("data/persons/person-01"), "")
 
     def test_fetch_all(self):
         with requests_mock.mock() as mock:
@@ -144,23 +144,23 @@ class BaseFuncTestCase(ClientTestCase):
     def test_fetch_one(self):
         with requests_mock.mock() as mock:
             mock.get(
-                client.get_full_url("data/persons/person-1"),
-                text='{"id": "person-1", "first_name": "John"}',
+                client.get_full_url("data/persons/person-01"),
+                text='{"id": "person-01", "first_name": "John"}',
             )
             self.assertEqual(
-                client.fetch_one("persons", "person-1"),
-                {"id": "person-1", "first_name": "John"},
+                client.fetch_one("persons", "person-01"),
+                {"id": "person-01", "first_name": "John"},
             )
 
     def test_create(self):
         with requests_mock.mock() as mock:
             mock.post(
                 client.get_full_url("data/persons"),
-                text='{"id": "person-1", "first_name": "John"}',
+                text='{"id": "person-01", "first_name": "John"}',
             )
             self.assertEqual(
                 client.create("persons", {"first_name": "John"}),
-                {"id": "person-1", "first_name": "John"},
+                {"id": "person-01", "first_name": "John"},
             )
 
     def test_version(self):
