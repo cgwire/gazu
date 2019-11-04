@@ -63,7 +63,7 @@ def all_task_types_for_asset(asset, user_context=False):
 
 def all_task_types_for_shot(shot, user_context=False):
     """
-    Return the list of tasks for given asset and current user.
+    Return the list of tasks for given shot and current user.
     """
     if user_context:
         return gazu_user.all_task_types_for_shot(shot)
@@ -73,12 +73,22 @@ def all_task_types_for_shot(shot, user_context=False):
 
 def all_task_types_for_scene(scene, user_context=False):
     """
-    Return the list of tasks for given asset and current user.
+    Return the list of tasks for given scene and current user.
     """
     if user_context:
         return gazu_user.all_task_types_for_scene(scene)
     else:
         return gazu_task.all_task_types_for_scene(scene)
+
+
+def all_task_types_for_sequence(sequence, user_context=False):
+    """
+    Return the list of tasks for given sequence and current user.
+    """
+    if user_context:
+        return gazu_user.all_task_types_for_sequence(sequence)
+    else:
+        return gazu_task.all_task_types_for_sequence(sequence)
 
 
 def all_sequences_for_project(project, user_context=False):

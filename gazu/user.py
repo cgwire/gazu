@@ -101,6 +101,17 @@ def all_tasks_for_scene(scene):
 
 
 @cache
+def all_tasks_for_sequence(sequence):
+    """
+    Return the list of tasks for given asset and current user.
+    """
+    sequence = normalize_model_parameter(sequence)
+    path = "user/sequences/%s/tasks" % sequence["id"]
+    tasks = client.fetch_all(path)
+    return sort_by_name(tasks)
+
+
+@cache
 def all_task_types_for_asset(asset):
     """
     Args:
@@ -141,6 +152,17 @@ def all_task_types_for_scene(scene):
     """
     scene = normalize_model_parameter(scene)
     path = "user/scenes/%s/task-types" % scene["id"]
+    task_types = client.fetch_all(path)
+    return sort_by_name(task_types)
+
+
+@cache
+def all_task_types_for_sequence(sequence):
+    """
+    return the list of task_tyes for given asset and current user.
+    """
+    sequence = normalize_model_parameter(sequence)
+    path = "user/sequences/%s/task-types" % sequence["id"]
     task_types = client.fetch_all(path)
     return sort_by_name(task_types)
 
