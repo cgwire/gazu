@@ -69,6 +69,19 @@ class ProjectTestCase(unittest.TestCase):
             task = tasks[0]
             self.assertEqual(task["name"], "main")
 
+    def test_tasks_for_sequence(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url(
+                    'data/user/sequences/sequence-1/tasks'
+                ),
+                text='[{"name": "main", "id": "task-01"}]'
+            )
+            sequence = {"id": "sequence-1"}
+            tasks = gazu.user.all_tasks_for_sequence(sequence)
+            task = tasks[0]
+            self.assertEqual(task["name"], "main")
+
     def test_task_types_for_asset(self):
         with requests_mock.mock() as mock:
             mock.get(
@@ -91,6 +104,20 @@ class ProjectTestCase(unittest.TestCase):
             tasks = gazu.user.all_task_types_for_shot(shot)
             task = tasks[0]
             self.assertEqual(task["name"], "animation")
+
+    def test_task_types_for_sequence(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url(
+                    'data/user/sequences/sequence-1/task-types'
+                ),
+                text='[{"name": "previz", "id": "task-type-01"}]'
+            )
+
+            sequence = {"id": "sequence-1"}
+            tasks = gazu.user.all_task_types_for_sequence(sequence)
+            task = tasks[0]
+            self.assertEqual(task["name"], "previz")
 
     def test_sequences_for_project(self):
         with requests_mock.mock() as mock:
