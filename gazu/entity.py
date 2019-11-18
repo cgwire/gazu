@@ -10,7 +10,7 @@ def all_entities():
     Returns:
         list: Retrieve all entities
     """
-    return client.fetch_all('entities')
+    return client.fetch_all("entities")
 
 
 @cache
@@ -27,7 +27,7 @@ def all_entities():
     """
     Retrieve all entity types
     """
-    return client.fetch_all('entities')
+    return client.fetch_all("entities")
 
 
 @cache
@@ -35,7 +35,7 @@ def all_entity_types():
     """
     Retrieve all entity types
     """
-    return client.fetch_all('entity-types')
+    return client.fetch_all("entity-types")
 
 
 @cache
@@ -78,7 +78,5 @@ def new_entity_type(name):
     Returns:
         dict: The created entity type
     """
-    data = {
-        "name": name
-    }
-    return client.post('/data/entity-types', data)
+    data = {"name": name}
+    return client.post("/data/entity-types", data)

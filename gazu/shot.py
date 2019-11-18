@@ -406,20 +406,3 @@ def remove_asset_instance_from_shot(shot, asset_instance):
         asset_instance["id"],
     )
     return client.delete(path)
-
-
-def update_casting(shot, casting):
-    """
-    Change casting of given shot with given casting (list of asset ids displayed
-    into the shot).
-
-    Args:
-        shot (str / dict): The shot dict or the shot ID.
-        casting (dict): The casting description.
-        Ex: `casting = [{"asset_id": "asset-1", "nb_occurences": 3}]`
-
-    Returns:
-        dict: Related shot.
-    """
-    shot = normalize_model_parameter(shot)
-    return client.put("data/shots/%s/casting" % shot["id"], casting)

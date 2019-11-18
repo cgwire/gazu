@@ -57,7 +57,7 @@ def get_asset_type_casting(project, asset_type):
     asset_type = normalize_model_parameter(asset_type)
     path = "/data/projects/%s/asset-types/%s/casting" % (
         project["id"],
-        asset_type["id"]
+        asset_type["id"],
     )
     return client.get(path)
 
@@ -78,7 +78,7 @@ def get_sequence_casting(sequence):
     """
     path = "/data/projects/%s/sequences/%s/casting" % (
         sequence["project_id"],
-        sequence["id"]
+        sequence["id"],
     )
     return client.get(path)
 
@@ -95,7 +95,7 @@ def get_shot_casting(shot):
     """
     path = "/data/projects/%s/entities/%s/casting" % (
         shot["project_id"],
-        shot["id"]
+        shot["id"],
     )
     return client.get(path)
 
@@ -112,7 +112,7 @@ def get_asset_casting(asset):
     """
     path = "/data/projects/%s/entities/%s/casting" % (
         asset["project_id"],
-        asset["id"]
+        asset["id"],
     )
     return client.get(path)
 

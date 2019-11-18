@@ -392,7 +392,9 @@ class FilesTestCase(unittest.TestCase):
                 ),
             )
             output_files = gazu.files.all_output_files_for_entity(
-                {"id": "asset-01"}, {"id": "output-type-1"}, representation="obj"
+                {"id": "asset-01"},
+                {"id": "output-type-1"},
+                representation="obj",
             )
             self.assertEqual(output_files[0]["name"], "main")
 
@@ -537,8 +539,9 @@ class FilesTestCase(unittest.TestCase):
             path = "data/projects/{}".format(fakeid("project-01"))
             mock.put(
                 gazu.client.get_full_url(path),
-                text=json.dumps({"id": fakeid("project-01"),
-                                 "file_tree": file_tree}),
+                text=json.dumps(
+                    {"id": fakeid("project-01"), "file_tree": file_tree}
+                ),
             )
             file_tree = gazu.files.update_project_file_tree(
                 fakeid("project-01"), file_tree
@@ -551,13 +554,17 @@ class FilesTestCase(unittest.TestCase):
                 path = "data/preview-files/{}".format(fakeid("preview-1"))
                 mock.get(
                     gazu.client.get_full_url(path),
-                    text=json.dumps({"id": fakeid("preview-1"),
-                                     "extension": "png"}),
+                    text=json.dumps(
+                        {"id": fakeid("preview-1"), "extension": "png"}
+                    ),
                 )
-                path = ("pictures/originals/preview-files/{}.png"
-                        .format(fakeid("preview-1")))
+                path = "pictures/originals/preview-files/{}.png".format(
+                    fakeid("preview-1")
+                )
                 mock.get(gazu.client.get_full_url(path), body=thumbnail_file)
-                gazu.files.download_preview_file(fakeid("preview-1"), "./test.png")
+                gazu.files.download_preview_file(
+                    fakeid("preview-1"), "./test.png"
+                )
                 self.assertTrue(os.path.exists("./test.png"))
                 self.assertEqual(
                     os.path.getsize("./test.png"),
@@ -567,8 +574,9 @@ class FilesTestCase(unittest.TestCase):
     def test_download_preview_file_thumbnail(self):
         with open("./tests/fixtures/v1.png", "rb") as thumbnail_file:
             with requests_mock.mock() as mock:
-                path = ("pictures/thumbnails/preview-files/{}.png"
-                        .format(fakeid("preview-1")))
+                path = "pictures/thumbnails/preview-files/{}.png".format(
+                    fakeid("preview-1")
+                )
                 mock.get(gazu.client.get_full_url(path), body=thumbnail_file)
                 gazu.files.download_preview_file_thumbnail(
                     fakeid("preview-1"), "./test.png"

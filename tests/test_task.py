@@ -286,11 +286,14 @@ class TaskTestCase(unittest.TestCase):
 
     def test_all_tasks_for_person(self):
         with requests_mock.mock() as mock:
-            result = [{"id": fakeid("task-status-01")},
-                      {"id": fakeid("task-status-02")}]
+            result = [
+                {"id": fakeid("task-status-01")},
+                {"id": fakeid("task-status-02")},
+            ]
             mock.get(
                 gazu.client.get_full_url(
-                    "data/persons/{}/tasks".format(fakeid("person-01"))),
+                    "data/persons/{}/tasks".format(fakeid("person-01"))
+                ),
                 text=json.dumps(result),
             )
             tasks = gazu.task.all_tasks_for_person(fakeid("person-01"))
@@ -314,7 +317,8 @@ class TaskTestCase(unittest.TestCase):
                     "data/tasks?name=main&entity_id={asset}"
                     "&task_type_id={task_type}".format(
                         asset=fakeid("asset-01"),
-                        task_type=fakeid("task-type-01"))
+                        task_type=fakeid("task-type-01"),
+                    )
                 ),
                 text=json.dumps([]),
             )
@@ -323,11 +327,12 @@ class TaskTestCase(unittest.TestCase):
                 text=json.dumps([{"id": fakeid("task-status-01")}]),
             )
             mock.post(
-                gazu.client.get_full_url("data/tasks"),
-                text=json.dumps(result)
+                gazu.client.get_full_url("data/tasks"), text=json.dumps(result)
             )
-            asset = {"id": fakeid("asset-01"),
-                     "project_id": fakeid("project-01")}
+            asset = {
+                "id": fakeid("asset-01"),
+                "project_id": fakeid("project-01"),
+            }
             task_type = {"id": fakeid("task-type-01")}
             task = gazu.task.new_task(asset, task_type)
             self.assertEqual(task, result)
@@ -353,41 +358,38 @@ class TaskTestCase(unittest.TestCase):
             )
             task = {"id": "task-01"}
             comments = gazu.task.all_comments_for_task(task)
-            self.assertEquals(comments[0]["id"], result[0]["id"])
+            self.assertEqual(comments[0]["id"], result[0]["id"])
 
             comment = gazu.task.get_last_comment_for_task(task)
-            self.assertEquals(comment["id"], result[0]["id"])
+            self.assertEqual(comment["id"], result[0]["id"])
 
     def test_assign_task(self):
         with requests_mock.mock() as mock:
             mock.put(
                 gazu.client.get_full_url("actions/persons/person-01/assign"),
-                text=json.dumps([{"id": "task-01", "assignees": ["person-01"]}]),
+                text=json.dumps(
+                    [{"id": "task-01", "assignees": ["person-01"]}]
+                ),
             )
-            task = gazu.task.assign_task({"id": "task-01"}, {"id": "person-01"})[
-                0
-            ]
+            task = gazu.task.assign_task(
+                {"id": "task-01"}, {"id": "person-01"}
+            )[0]
             self.assertIn("person-01", task["assignees"])
 
     def test_new_task_type(self):
         task_type_name = "task-type-name"
         with requests_mock.mock() as mock:
-            task_type = {
-                "id": "task-type-01",
-                "name": task_type_name
-            }
+            task_type = {"id": "task-type-01", "name": task_type_name}
             mock.post(
                 gazu.client.get_full_url("data/task-types"),
                 text=json.dumps(task_type),
             )
-            self.assertEqual(
-                gazu.task.new_task_type(task_type),
-                task_type)
+            self.assertEqual(gazu.task.new_task_type(task_type), task_type)
 
     def test_new_task_status(self):
         name = "name"
         short_name = "short"
-        color = '#000000'
+        color = "#000000"
         with requests_mock.mock() as mock:
             status = {
                 "id": "status-1",
@@ -400,5 +402,5 @@ class TaskTestCase(unittest.TestCase):
                 text=json.dumps(status),
             )
             self.assertEqual(
-                gazu.task.new_task_status(name, short_name, color),
-                status)
+                gazu.task.new_task_status(name, short_name, color), status
+            )

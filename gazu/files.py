@@ -108,18 +108,13 @@ def get_output_file_by_path(path):
 
 
 @cache
-def get_all_working_files_for_entity(
-        entity,
-        task=None,
-        name=None):
+def get_all_working_files_for_entity(entity, task=None, name=None):
     """
     Retrieves all the working files of a given entity and specied parameters
     """
     entity = normalize_model_parameter(entity)
     task = normalize_model_parameter(task)
-    path = "entities/{entity_id}/working-files?".format(
-        entity_id=entity["id"],
-    )
+    path = "entities/{entity_id}/working-files?".format(entity_id=entity["id"])
 
     params = {}
     if task is not None:
@@ -651,7 +646,9 @@ def get_next_asset_instance_output_revision(
     return client.post(path, data)["next_revision"]
 
 
-def get_last_entity_output_revision(entity, output_type, task_type, name="master"):
+def get_last_entity_output_revision(
+    entity, output_type, task_type, name="master"
+):
     """
     Args:
         entity (str / dict): The entity dict or ID.
@@ -667,13 +664,16 @@ def get_last_entity_output_revision(entity, output_type, task_type, name="master
     output_type = normalize_model_parameter(output_type)
     task_type = normalize_model_parameter(task_type)
     revision = get_next_entity_output_revision(
-        entity, output_type, task_type, name)
+        entity, output_type, task_type, name
+    )
     if revision != 1:
         revision -= 1
     return revision
 
 
-def get_last_asset_instance_output_revision(asset_instance, temporal_entity, output_type, task_type, name="master"):
+def get_last_asset_instance_output_revision(
+    asset_instance, temporal_entity, output_type, task_type, name="master"
+):
     """
     Generate last output revision for given asset instance.
     """
@@ -682,7 +682,8 @@ def get_last_asset_instance_output_revision(asset_instance, temporal_entity, out
     output_type = normalize_model_parameter(output_type)
     task_type = normalize_model_parameter(task_type)
     revision = get_next_asset_instance_output_revision(
-        asset_instance, temporal_entity, output_type, task_type, name=name)
+        asset_instance, temporal_entity, output_type, task_type, name=name
+    )
     if revision != 1:
         revision -= 1
     return revision

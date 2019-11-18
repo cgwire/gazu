@@ -8,7 +8,7 @@ import gazu.client
 from utils import fakeid
 
 
-class AssetTestCase(unittest.TestCase):
+class CastingTestCase(unittest.TestCase):
     def test_all_assets_for_shot(self):
         with requests_mock.mock() as mock:
             mock.get(
@@ -181,7 +181,8 @@ class AssetTestCase(unittest.TestCase):
     def test_remove_asset(self):
         with requests_mock.mock() as mock:
             mock.delete(
-                gazu.client.get_full_url("data/assets/asset-01"), status_code=204
+                gazu.client.get_full_url("data/assets/asset-01"),
+                status_code=204,
             )
             asset = {"id": "asset-01", "name": "Table"}
             gazu.asset.remove_asset(asset)
@@ -212,7 +213,13 @@ class AssetTestCase(unittest.TestCase):
                     "data/assets/asset-01/shot-asset-instances"
                 ),
                 text=json.dumps(
-                    [{"asset_id": "asset-01", "shot_id": "shot-01", "number": 1}]
+                    [
+                        {
+                            "asset_id": "asset-01",
+                            "shot_id": "shot-01",
+                            "number": 1,
+                        }
+                    ]
                 ),
             )
             asset_instance = gazu.asset.all_shot_asset_instances_for_asset(
@@ -229,7 +236,13 @@ class AssetTestCase(unittest.TestCase):
                     "data/assets/asset-01/scene-asset-instances"
                 ),
                 text=json.dumps(
-                    [{"asset_id": "asset-01", "shot_id": "shot-01", "number": 1}]
+                    [
+                        {
+                            "asset_id": "asset-01",
+                            "shot_id": "shot-01",
+                            "number": 1,
+                        }
+                    ]
                 ),
             )
             asset_instance = gazu.asset.all_scene_asset_instances_for_asset(
@@ -244,7 +257,13 @@ class AssetTestCase(unittest.TestCase):
             mock.get(
                 gazu.client.get_full_url("data/shots/shot-01/asset-instances"),
                 text=json.dumps(
-                    [{"asset_id": "asset-01", "shot_id": "shot-01", "number": 1}]
+                    [
+                        {
+                            "asset_id": "asset-01",
+                            "shot_id": "shot-01",
+                            "number": 1,
+                        }
+                    ]
                 ),
             )
             shot_instance = gazu.asset.all_asset_instances_for_shot(
@@ -258,8 +277,9 @@ class AssetTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/assets/{}/asset-asset-instances"
-                    .format(fakeid("asset-01"))
+                    "data/assets/{}/asset-asset-instances".format(
+                        fakeid("asset-01")
+                    )
                 ),
                 text=json.dumps(
                     [
@@ -276,7 +296,9 @@ class AssetTestCase(unittest.TestCase):
             )
             asset_instance = asset_instances[0]
             self.assertEqual(asset_instance["asset_id"], fakeid("asset-02"))
-            self.assertEqual(asset_instance["target_asset_id"], fakeid("asset-01"))
+            self.assertEqual(
+                asset_instance["target_asset_id"], fakeid("asset-01")
+            )
             self.assertEqual(asset_instance["number"], 1)
 
     def test_new_asset_asset_instance(self):

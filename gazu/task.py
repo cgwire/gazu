@@ -647,10 +647,8 @@ def new_task_type(name):
     Returns:
         dict: The created task type
     """
-    data = {
-        'name': name
-    }
-    return client.post('data/task-types', data)
+    data = {"name": name}
+    return client.post("data/task-types", data)
 
 
 def new_task_status(name, short_name, color):
@@ -666,12 +664,8 @@ def new_task_status(name, short_name, color):
     Returns:
         dict: The created task status
     """
-    assert(color[0] == '#')
-    assert(all(c in string.hexdigits for c in color[1:]))
+    assert color[0] == "#"
+    assert all(c in string.hexdigits for c in color[1:])
 
-    data = {
-        'name': name,
-        'short_name': short_name,
-        'color': color
-    }
-    return client.post('data/task-status', data)
+    data = {"name": name, "short_name": short_name, "color": color}
+    return client.post("data/task-status", data)

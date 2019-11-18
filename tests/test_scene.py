@@ -83,7 +83,11 @@ class SceneTestCase(unittest.TestCase):
             mock = mock.put(
                 gazu.client.get_full_url("data/entities/scene-id"),
                 text=json.dumps(
-                    {"id": "scene-id", "name": "S02", "project_id": "project-01"}
+                    {
+                        "id": "scene-id",
+                        "name": "S02",
+                        "project_id": "project-01",
+                    }
                 ),
             )
             scene = {"id": "scene-id", "name": "S02"}
