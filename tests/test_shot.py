@@ -310,16 +310,3 @@ class ShotTestCase(unittest.TestCase):
             asset_instance = gazu.shot.remove_asset_instance_from_shot(
                 shot, asset_instance
             )
-
-    def test_get_shot_casting(self):
-        with requests_mock.mock() as mock:
-            mock = mock.put(
-                gazu.client.get_full_url("data/shots/shot-01/casting"),
-                text=json.dumps({"success": True}),
-            )
-            shot = {"id": "shot-01"}
-            casting = [
-                {"asset_id": "asset-01", "nb_occurences": 2},
-                {"asset_id": "asset-02", "nb_occurences": 1},
-            ]
-            gazu.shot.update_casting(shot, casting)

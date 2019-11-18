@@ -1,6 +1,8 @@
 import re
 
-_UUID_RE = re.compile("([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}){1}")
+_UUID_RE = re.compile(
+    "([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}){1}"
+)
 
 
 def normalize_model_parameter(model_parameter):

@@ -7,19 +7,10 @@ import gazu.client
 
 
 class AssetTestCase(unittest.TestCase):
-
     def test_all_entities(self):
         entities = [
-            {
-                "id": "asset-01",
-                "name": "Asset 01",
-                "project_id": "project-01",
-            },
-            {
-                "id": "shot-01",
-                "name": "Shot 01",
-                "project_id": "project-01",
-            }
+            {"id": "asset-01", "name": "Asset 01", "project_id": "project-01"},
+            {"id": "shot-01", "name": "Shot 01", "project_id": "project-01"},
         ]
         with requests_mock.mock() as mock:
             mock.get(
@@ -57,14 +48,11 @@ class AssetTestCase(unittest.TestCase):
     def test_new_entity_type(self):
         entity_type_name = "Characters"
         with requests_mock.mock() as mock:
-            entity_type = {
-                "id": "entity-type-1",
-                "name": entity_type_name
-            }
+            entity_type = {"id": "entity-type-1", "name": entity_type_name}
             mock.post(
                 gazu.client.get_full_url("data/entity-types"),
                 text=json.dumps(entity_type),
             )
             self.assertEqual(
-                gazu.entity.new_entity_type(entity_type_name),
-                entity_type)
+                gazu.entity.new_entity_type(entity_type_name), entity_type
+            )

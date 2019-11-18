@@ -85,7 +85,9 @@ class ProjectTestCase(unittest.TestCase):
     def test_task_types_for_asset(self):
         with requests_mock.mock() as mock:
             mock.get(
-                gazu.client.get_full_url("data/user/assets/asset-01/task-types"),
+                gazu.client.get_full_url(
+                    "data/user/assets/asset-01/task-types"
+                ),
                 text='[{"name": "modeling", "id": "task-type-01"}]',
             )
             asset = {"id": "asset-01"}
