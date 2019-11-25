@@ -74,7 +74,7 @@ def new_project(name, production_type="short"):
     return project
 
 
-def remove_project(project):
+def remove_project(project, force=False):
     """
     Remove given project from database. (Prior to do that, make sure, there
     is no asset or shot left).
@@ -84,6 +84,8 @@ def remove_project(project):
     """
     project = normalize_model_parameter(project)
     path = "data/projects/%s" % project["id"]
+    if force:
+        path += "?force=true"
     return client.delete(path)
 
 
