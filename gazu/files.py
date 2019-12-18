@@ -266,7 +266,7 @@ def build_working_file_path(
     task, name="main", mode="working", software=None, revision=1, sep="/"
 ):
     """
-    From the fie path template configured at the project level and arguments, it
+    From the file path template configured at the project level and arguments, it
     builds a file path location where to store related DCC file.
 
     Args:
@@ -306,7 +306,7 @@ def build_entity_output_file_path(
     sep="/",
 ):
     """
-    From the fie path template configured at the project level and arguments, it
+    From the file path template configured at the project level and arguments, it
     builds a file path location where to store related DCC output file.
 
     Args:
@@ -362,7 +362,7 @@ def build_asset_instance_output_file_path(
     sep="/",
 ):
     """
-    From the fie path template configured at the project level and arguments, it
+    From the file path template configured at the project level and arguments, it
     builds a file path location where to store related DCC output file.
 
     Args:
