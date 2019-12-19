@@ -77,7 +77,6 @@ def update_scene(scene):
     return client.put("data/entities/%s" % scene["id"], scene)
 
 
-@cache
 def new_scene_asset_instance(scene, asset, description=""):
     """
     Creates a new asset instance on given scene. The instance number is
