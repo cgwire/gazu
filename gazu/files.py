@@ -917,9 +917,13 @@ def download_preview_file(preview_file, file_path):
     """
     preview_file = normalize_model_parameter(preview_file)
     preview_file = client.fetch_one("preview-files", preview_file["id"])
+    if preview_file["extension"] == "mp4":
+        file_type = "movies"
+    else:
+        file_type = "pictures"
     return client.download(
-        "pictures/originals/preview-files/%s.%s"
-        % (preview_file["id"], preview_file["extension"]),
+        "%s/originals/preview-files/%s.%s"
+        % (file_type, preview_file["id"], preview_file["extension"]),
         file_path,
     )
 
