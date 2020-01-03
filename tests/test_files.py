@@ -571,6 +571,29 @@ class FilesTestCase(unittest.TestCase):
                     os.path.getsize("./tests/fixtures/v1.png"),
                 )
 
+        with open("./tests/fixtures/v1.png", "rb") as thumbnail_file:
+            with requests_mock.mock() as mock:
+                path = "data/preview-files/{}".format(fakeid("preview-1"))
+                mock.get(
+                    gazu.client.get_full_url(path),
+                    text=json.dumps(
+                        {"id": fakeid("preview-1"), "extension": "mp4"}
+                    ),
+                )
+                path = "movies/originals/preview-files/{}.mp4".format(
+                    fakeid("preview-1")
+                )
+                mock.get(gazu.client.get_full_url(path), body=thumbnail_file)
+                gazu.files.download_preview_file(
+                    fakeid("preview-1"), "./test.mp4"
+                )
+                self.assertTrue(os.path.exists("./test.mp4"))
+                self.assertEqual(
+                    os.path.getsize("./test.mp4"),
+                    os.path.getsize("./tests/fixtures/v1.png"),
+                )
+
+
     def test_download_preview_file_thumbnail(self):
         with open("./tests/fixtures/v1.png", "rb") as thumbnail_file:
             with requests_mock.mock() as mock:

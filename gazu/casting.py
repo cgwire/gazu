@@ -3,7 +3,7 @@ from . import client
 from .helpers import normalize_model_parameter
 
 
-def update_shot_casting(shot, casting):
+def update_shot_casting(project, shot, casting):
     """
     Change casting of given shot with given casting (list of asset ids displayed
     into the shot).
@@ -17,10 +17,12 @@ def update_shot_casting(shot, casting):
         dict: Related shot.
     """
     shot = normalize_model_parameter(shot)
-    return client.put("data/entities/%s/casting" % shot["id"], casting)
+    project = normalize_model_parameter(project)
+    path = "data/projects/%s/entities/%s/casting" % (project["id"], shot["id"])
+    return client.put(path, casting)
 
 
-def update_asset_casting(asset, casting):
+def update_asset_casting(project, asset, casting):
     """
     Change casting of given asset with given casting (list of asset ids
     displayed into the asset).
@@ -34,7 +36,9 @@ def update_asset_casting(asset, casting):
         dict: Related asset.
     """
     asset = normalize_model_parameter(asset)
-    return client.put("data/entities/%s/casting" % asset["id"], casting)
+    project = normalize_model_parameter(project)
+    path = "data/projects/%s/entities/%s/casting" % (project["id"], asset["id"])
+    return client.put(path, casting)
 
 
 def get_asset_type_casting(project, asset_type):
