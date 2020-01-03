@@ -16,6 +16,7 @@ from . import user
 from . import playlist
 
 from .exception import AuthFailedException
+from .__version__ import __version__
 
 
 def get_host():
