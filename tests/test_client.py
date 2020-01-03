@@ -61,7 +61,9 @@ class BaseFuncTestCase(ClientTestCase):
                 client.get_full_url("data/persons"),
                 text='{"first_name": "John"}',
             )
-            self.assertEqual(client.get("data/persons"), {"first_name": "John"})
+            self.assertEqual(
+                client.get("data/persons"), {"first_name": "John"}
+            )
 
     def test_post(self):
         with requests_mock.mock() as mock:
@@ -219,7 +221,9 @@ class BaseFuncTestCase(ClientTestCase):
                 client.get_full_url("auth/login"),
                 text=json.dumps({"login": False}),
             )
-            self.assertRaises(AuthFailedException, gazu.log_in, "frank", "test")
+            self.assertRaises(
+                AuthFailedException, gazu.log_in, "frank", "test"
+            )
 
     def test_get_current_user(self):
         with requests_mock.mock() as mock:

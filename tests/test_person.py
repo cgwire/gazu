@@ -47,7 +47,9 @@ class PersonTestCase(unittest.TestCase):
     def test_get_person_by_desktop_login(self):
         with requests_mock.mock() as mock:
             mock.get(
-                gazu.client.get_full_url("data/persons?desktop_login=john.doe"),
+                gazu.client.get_full_url(
+                    "data/persons?desktop_login=john.doe"
+                ),
                 text=json.dumps(
                     [
                         {

@@ -202,7 +202,9 @@ class TaskTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.put(
                 gazu.client.get_full_url("actions/tasks/task-01/to-review"),
-                text=json.dumps({"name": "Task 01", "task_status_id": "wfa-1"}),
+                text=json.dumps(
+                    {"name": "Task 01", "task_status_id": "wfa-1"}
+                ),
             )
             test_task = gazu.task.task_to_review(
                 {"id": "task-01"}, {"id": "person-01"}, "my comment"
@@ -219,7 +221,9 @@ class TaskTestCase(unittest.TestCase):
                 gazu.client.get_full_url(
                     "actions/tasks/task-01/time-spents/2017-09-23"
                 ),
-                text=json.dumps({"person1": {"duration": 3600}, "total": 3600}),
+                text=json.dumps(
+                    {"person1": {"duration": 3600}, "total": 3600}
+                ),
             )
             time_spents = gazu.task.get_time_spent(
                 {"id": "task-01"}, "2017-09-23"

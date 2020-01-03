@@ -45,7 +45,9 @@ def all_shots_for_sequence(sequence):
         list: Shots which are children of given sequence.
     """
     sequence = normalize_model_parameter(sequence)
-    return sort_by_name(client.fetch_all("sequences/%s/shots" % sequence["id"]))
+    return sort_by_name(
+        client.fetch_all("sequences/%s/shots" % sequence["id"])
+    )
 
 
 @cache

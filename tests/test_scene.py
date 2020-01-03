@@ -71,7 +71,9 @@ class SceneTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.post(
                 gazu.client.get_full_url("data/projects/project-01/scenes"),
-                text=json.dumps({"id": "scene-01", "project_id": "project-01"}),
+                text=json.dumps(
+                    {"id": "scene-01", "project_id": "project-01"}
+                ),
             )
             project = {"id": "project-01"}
             sequence = {"id": "sequence-01"}
@@ -152,7 +154,9 @@ class SceneTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             result = {"id": "asset-instance-01"}
             mock = mock.post(
-                gazu.client.get_full_url("data/scenes/scene-1/asset-instances"),
+                gazu.client.get_full_url(
+                    "data/scenes/scene-1/asset-instances"
+                ),
                 text=json.dumps(result),
             )
             scene = {"id": "scene-1"}
@@ -163,7 +167,9 @@ class SceneTestCase(unittest.TestCase):
     def test_all_asset_instances_for_scene(self):
         with requests_mock.mock() as mock:
             mock.get(
-                gazu.client.get_full_url("data/scenes/scene-1/asset-instances"),
+                gazu.client.get_full_url(
+                    "data/scenes/scene-1/asset-instances"
+                ),
                 text=json.dumps(
                     [
                         {
