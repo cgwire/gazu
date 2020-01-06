@@ -129,7 +129,7 @@ def get_asset(asset_id):
 
 
 def new_asset(
-    project, asset_type, name, description="", extra_data={}, episode_id=None
+    project, asset_type, name, description="", extra_data={}, episode=None
 ):
     """
     Create a new asset in the database for given project and asset type.
@@ -146,11 +146,12 @@ def new_asset(
     """
     project = normalize_model_parameter(project)
     asset_type = normalize_model_parameter(asset_type)
+    episode = normalize_model_parameter(episode)
 
     data = {"name": name, "description": description, "data": extra_data}
 
-    if episode_id is not None:
-        data["episode_id"] = episode_id
+    if episode is not None:
+        data["episode_id"] = episode["episode_id"]
 
     asset = get_asset_by_name(project, name, asset_type)
     if asset is None:
