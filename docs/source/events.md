@@ -49,6 +49,9 @@ events emitted that way:
 
 * asset-instance:add-to-shot
 * asset-instance:remove-from-shot
+* organisation:set-thumbnail
+* person:set-thumbnail
+* project:set-thumbnail
 * preview-file:add-file
 * preview-file:set-main
 * shot:casting-update
@@ -62,4 +65,6 @@ You can access to most recent events by doing a classic request:
 ```
 events = gazu.client.get("data/events/last?page_size=100")
 events = gazu.client.get("data/events/last?page_size=100&before=2019-02-01")
+events = gazu.client.get("data/events/last?page_size=100&before=2019-02-01&after=2019-01-01")
+events = gazu.client.get("data/events/last?page_size=100&only_files=true")
 ```
