@@ -353,6 +353,17 @@ class TaskTestCase(unittest.TestCase):
             comment = "New comment"
             task = gazu.task.add_comment(task, task_status, comment)
 
+    def test_remove_comment(self):
+        with requests_mock.mock() as mock:
+            mock.delete(
+                gazu.client.get_full_url("data/comments/comment-01"),
+                status_code=204,
+                text=""
+            )
+            comment = {"id": "comment-01"}
+            gazu.task.remove_comment(comment)
+
+
     def test_comments_for_task(self):
         with requests_mock.mock() as mock:
             result = [{"id": "comment-1"}]
