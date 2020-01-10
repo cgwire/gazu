@@ -202,7 +202,9 @@ class TaskTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.put(
                 gazu.client.get_full_url("actions/tasks/task-01/to-review"),
-                text=json.dumps({"name": "Task 01", "task_status_id": "wfa-1"}),
+                text=json.dumps(
+                    {"name": "Task 01", "task_status_id": "wfa-1"}
+                ),
             )
             test_task = gazu.task.task_to_review(
                 {"id": "task-01"}, {"id": "person-01"}, "my comment"
@@ -219,7 +221,9 @@ class TaskTestCase(unittest.TestCase):
                 gazu.client.get_full_url(
                     "actions/tasks/task-01/time-spents/2017-09-23"
                 ),
-                text=json.dumps({"person1": {"duration": 3600}, "total": 3600}),
+                text=json.dumps(
+                    {"person1": {"duration": 3600}, "total": 3600}
+                ),
             )
             time_spents = gazu.task.get_time_spent(
                 {"id": "task-01"}, "2017-09-23"
@@ -348,6 +352,17 @@ class TaskTestCase(unittest.TestCase):
             task_status = {"id": "task-status-01"}
             comment = "New comment"
             task = gazu.task.add_comment(task, task_status, comment)
+
+    def test_remove_comment(self):
+        with requests_mock.mock() as mock:
+            mock.delete(
+                gazu.client.get_full_url("data/comments/comment-01"),
+                status_code=204,
+                text=""
+            )
+            comment = {"id": "comment-01"}
+            gazu.task.remove_comment(comment)
+
 
     def test_comments_for_task(self):
         with requests_mock.mock() as mock:

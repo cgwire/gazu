@@ -37,7 +37,10 @@ def update_asset_casting(project, asset, casting):
     """
     asset = normalize_model_parameter(asset)
     project = normalize_model_parameter(project)
-    path = "data/projects/%s/entities/%s/casting" % (project["id"], asset["id"])
+    path = "data/projects/%s/entities/%s/casting" % (
+        project["id"],
+        asset["id"],
+    )
     return client.put(path, casting)
 
 

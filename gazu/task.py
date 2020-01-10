@@ -549,6 +549,18 @@ def add_comment(task, task_status, comment=""):
     return client.post("actions/tasks/%s/comment" % task["id"], data)
 
 
+def remove_comment(comment):
+    """
+    Remove given comment and related (previews, news, notifications) from
+    database.
+
+    Args:
+        comment (str / dict): The comment dict or the comment ID.
+    """
+    comment = normalize_model_parameter(comment)
+    return client.delete("data/comments/%s" % comment["id"])
+
+
 def add_preview(task, comment, preview_file_path):
     """
     Add a preview to given comment. It it's a movie, it must be mentioned

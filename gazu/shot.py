@@ -45,7 +45,9 @@ def all_shots_for_sequence(sequence):
         list: Shots which are children of given sequence.
     """
     sequence = normalize_model_parameter(sequence)
-    return sort_by_name(client.fetch_all("sequences/%s/shots" % sequence["id"]))
+    return sort_by_name(
+        client.fetch_all("sequences/%s/shots" % sequence["id"])
+    )
 
 
 @cache
@@ -205,7 +207,7 @@ def get_shot_by_name(sequence, shot_name):
     )
 
 
-def new_sequence(project, episode, name):
+def new_sequence(project, name, episode=None):
     """
     Create a sequence for given project and episode.
 
@@ -218,8 +220,11 @@ def new_sequence(project, episode, name):
         Created sequence.
     """
     project = normalize_model_parameter(project)
-    episode = normalize_model_parameter(episode)
-    data = {"name": name, "episode_id": episode["id"]}
+    data = {"name": name}
+
+    if episode is not None:
+        episode = normalize_model_parameter(episode)
+        data["episode_id"] = episode["id"]
 
     sequence = get_sequence_by_name(project, name, episode=episode)
     if sequence is None:

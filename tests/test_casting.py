@@ -13,7 +13,7 @@ class CastingTestCase(unittest.TestCase):
         casting = [{"asset_id": fakeid("asset-1"), "nb_occurences": 3}]
         path = "data/projects/%s/entities/%s/casting" % (
             fakeid("project-01"),
-            fakeid("shot-01")
+            fakeid("shot-01"),
         )
         with requests_mock.mock() as mock:
             mock.put(gazu.client.get_full_url(path), text=json.dumps(casting))
@@ -26,13 +26,15 @@ class CastingTestCase(unittest.TestCase):
         casting = [{"asset_id": fakeid("asset-1"), "nb_occurences": 3}]
         path = "data/projects/%s/entities/%s/casting" % (
             fakeid("project-01"),
-            fakeid("asset-01")
+            fakeid("asset-01"),
         )
         with requests_mock.mock() as mock:
             mock.put(gazu.client.get_full_url(path), text=json.dumps(casting))
             asset = {"id": fakeid("asset-01")}
             project = {"id": fakeid("project-01")}
-            casting = gazu.casting.update_asset_casting(project, asset, casting)
+            casting = gazu.casting.update_asset_casting(
+                project, asset, casting
+            )
             self.assertEqual(casting[0]["asset_id"], fakeid("asset-1"))
 
     def test_get_asset_type_casting(self):
@@ -83,7 +85,10 @@ class CastingTestCase(unittest.TestCase):
         )
         with requests_mock.mock() as mock:
             mock.get(gazu.client.get_full_url(path), text=json.dumps(casting))
-            shot = {"id": fakeid("shot-01"), "project_id": fakeid("project-01")}
+            shot = {
+                "id": fakeid("shot-01"),
+                "project_id": fakeid("project-01"),
+            }
             casting = gazu.casting.get_shot_casting(shot)
             self.assertEqual(casting[0]["asset_id"], fakeid("asset-1"))
 

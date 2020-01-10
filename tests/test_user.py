@@ -73,9 +73,9 @@ class ProjectTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    'data/user/sequences/sequence-1/tasks'
+                    "data/user/sequences/sequence-1/tasks"
                 ),
-                text='[{"name": "main", "id": "task-01"}]'
+                text='[{"name": "main", "id": "task-01"}]',
             )
             sequence = {"id": "sequence-1"}
             tasks = gazu.user.all_tasks_for_sequence(sequence)
@@ -111,9 +111,9 @@ class ProjectTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    'data/user/sequences/sequence-1/task-types'
+                    "data/user/sequences/sequence-1/task-types"
                 ),
-                text='[{"name": "previz", "id": "task-type-01"}]'
+                text='[{"name": "previz", "id": "task-type-01"}]',
             )
 
             sequence = {"id": "sequence-1"}
