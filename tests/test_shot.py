@@ -207,7 +207,23 @@ class ShotTestCase(unittest.TestCase):
             )
             project = {"id": "project-01"}
             episode = {"id": "episode-1"}
-            shot = gazu.shot.new_sequence(project, episode, "Sequence 01")
+            shot = gazu.shot.new_sequence(project, "Sequence 01", episode)
+            self.assertEqual(shot["id"], "sequence-01")
+
+            mock.get(
+                gazu.client.get_full_url(
+                    "data/sequences?name=Sequence 01"
+                ),
+                text=json.dumps([]),
+            )
+            mock.post(
+                gazu.client.get_full_url("data/projects/project-01/sequences"),
+                text=json.dumps(
+                    {"id": "sequence-01", "project_id": "project-01"}
+                ),
+            )
+            project = {"id": "project-01"}
+            shot = gazu.shot.new_sequence(project, "Sequence 01")
             self.assertEqual(shot["id"], "sequence-01")
 
     def test_new_shot(self):
