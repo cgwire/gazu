@@ -233,7 +233,15 @@ def new_sequence(project, name, episode=None):
         return sequence
 
 
-def new_shot(project, sequence, name, frame_in=None, frame_out=None, data={}):
+def new_shot(
+    project,
+    sequence,
+    name,
+    nb_frames=None,
+    frame_in=None,
+    frame_out=None,
+    data={}
+):
     """
     Create a shot for given sequence and project. Add frame in and frame out
     parameters to shot extra data. Allow to set metadata too.
@@ -258,6 +266,8 @@ def new_shot(project, sequence, name, frame_in=None, frame_out=None, data={}):
         data["frame_out"] = frame_out
 
     data = {"name": name, "data": data, "sequence_id": sequence["id"]}
+    if nb_frames is not None:
+        data["nb_frames"] = nb_frames
 
     shot = get_shot_by_name(sequence, name)
     if shot is None:
