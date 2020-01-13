@@ -681,3 +681,39 @@ def new_task_status(name, short_name, color):
 
     data = {"name": name, "short_name": short_name, "color": color}
     return client.post("data/task-status", data)
+
+
+def update_task(task):
+    """
+    Save given task data into the API. Metadata are fully replaced by the ones
+    set on given task.
+
+    Args:
+        task (dict): The task dict to update.
+
+    Returns:
+        dict: Updated task.
+    """
+    return client.put("data/tasks/%s" % task["id"], task)
+
+
+def update_task_data(task, data={}):
+    """
+    Update the metadata for the provided task. Keys that are not provided are
+    not changed.
+
+    Args:
+        task (dict / ID): The task dict or ID to save in database.
+        data (dict): Free field to set metadata of any kind.
+
+    Returns:
+        dict: Updated task.
+    """
+    task = normalize_model_parameter(task)
+    current_task = get_task(task["id"])
+
+    updated_task = {"id": current_task["id"], "data": current_task["data"]}
+    if updated_task["data"] == None:
+        updated_task["data"] = {}
+    updated_task["data"].update(data)
+    update_task(updated_task)
