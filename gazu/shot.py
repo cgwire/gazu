@@ -233,7 +233,15 @@ def new_sequence(project, name, episode=None):
         return sequence
 
 
-def new_shot(project, sequence, name, frame_in=None, frame_out=None, data={}):
+def new_shot(
+    project,
+    sequence,
+    name,
+    nb_frames=None,
+    frame_in=None,
+    frame_out=None,
+    data={}
+):
     """
     Create a shot for given sequence and project. Add frame in and frame out
     parameters to shot extra data. Allow to set metadata too.
@@ -258,6 +266,8 @@ def new_shot(project, sequence, name, frame_in=None, frame_out=None, data={}):
         data["frame_out"] = frame_out
 
     data = {"name": name, "data": data, "sequence_id": sequence["id"]}
+    if nb_frames is not None:
+        data["nb_frames"] = nb_frames
 
     shot = get_shot_by_name(sequence, name)
     if shot is None:
@@ -278,6 +288,20 @@ def update_shot(shot):
         dict: Updated shot.
     """
     return client.put("data/entities/%s" % shot["id"], shot)
+
+
+def update_sequence(sequence):
+    """
+    Save given sequence data into the API. Metadata are fully replaced by the
+    ones set on given sequence.
+
+    Args:
+        sequence (dict): The sequence dict to update.
+
+    Returns:
+        dict: Updated sequence.
+    """
+    return client.put("data/entities/%s" % sequence["id"], sequence)
 
 
 @cache
@@ -305,6 +329,28 @@ def update_shot_data(shot, data={}):
     updated_shot = {"id": current_shot["id"], "data": current_shot["data"]}
     updated_shot["data"].update(data)
     update_shot(updated_shot)
+
+
+def update_sequence_data(sequence, data={}):
+    """
+    Update the metadata for the provided sequence. Keys that are not provided are
+    not changed.
+
+    Args:
+        sequence (dict / ID): The sequence dicto or ID to save in database.
+        data (dict): Free field to set metadata of any kind.
+
+    Returns:
+        dict: Updated sequence.
+    """
+    sequence = normalize_model_parameter(sequence)
+    current_sequence = get_sequence(sequence["id"])
+    updated_sequence = {
+        "id": current_sequence["id"],
+        "data": current_sequence["data"]
+    }
+    updated_sequence["data"].update(data)
+    update_sequence(updated_sequence)
 
 
 def remove_shot(shot, force=False):
