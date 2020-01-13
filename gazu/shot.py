@@ -280,6 +280,20 @@ def update_shot(shot):
     return client.put("data/entities/%s" % shot["id"], shot)
 
 
+def update_sequence(sequence):
+    """
+    Save given sequence data into the API. Metadata are fully replaced by the
+    ones set on given sequence.
+
+    Args:
+        sequence (dict): The sequence dict to update.
+
+    Returns:
+        dict: Updated sequence.
+    """
+    return client.put("data/entities/%s" % sequence["id"], sequence)
+
+
 @cache
 def get_asset_instances_for_shot(shot):
     """
@@ -305,6 +319,28 @@ def update_shot_data(shot, data={}):
     updated_shot = {"id": current_shot["id"], "data": current_shot["data"]}
     updated_shot["data"].update(data)
     update_shot(updated_shot)
+
+
+def update_sequence_data(sequence, data={}):
+    """
+    Update the metadata for the provided sequence. Keys that are not provided are
+    not changed.
+
+    Args:
+        sequence (dict / ID): The sequence dicto or ID to save in database.
+        data (dict): Free field to set metadata of any kind.
+
+    Returns:
+        dict: Updated sequence.
+    """
+    sequence = normalize_model_parameter(sequence)
+    current_sequence = get_sequence(sequence["id"])
+    updated_sequence = {
+        "id": current_sequence["id"],
+        "data": current_sequence["data"]
+    }
+    updated_sequence["data"].update(data)
+    update_sequence(updated_sequence)
 
 
 def remove_shot(shot, force=False):
