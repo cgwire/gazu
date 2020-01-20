@@ -29,6 +29,12 @@ gazu.asset
 .. automodule:: gazu.asset
     :members:
 
+gazu.casting
+-------------
+
+.. automodule:: gazu.casting
+    :members:
+
 gazu.client
 ------------
 
@@ -53,6 +59,13 @@ gazu.person
 .. automodule:: gazu.person
     :members:
 
+gazu.playlist
+-------------
+
+.. automodule:: gazu.playlist
+    :members:
+
+
 gazu.project
 ------------
 
@@ -75,13 +88,6 @@ gazu.user
 -----------
 
 .. automodule:: gazu.user
-    :members:
-
-
-gazu.playlist
--------------
-
-.. automodule:: gazu.playlist
     :members:
 
 
