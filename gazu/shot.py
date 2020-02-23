@@ -388,6 +388,42 @@ def new_episode(project, name):
         return episode
 
 
+def update_episode(episode):
+    """
+    Save given episode data into the API. Metadata are fully replaced by the
+    ones set on given episode.
+
+    Args:
+        episode (dict): The episode dict to update.
+
+    Returns:
+        dict: Updated episode.
+    """
+    return client.put("data/entities/%s" % episode["id"], episode)
+
+
+def update_episode_data(episode, data={}):
+    """
+    Update the metadata for the provided episode. Keys that are not provided
+    are not changed.
+
+    Args:
+        episode (dict / ID): The episode dict or ID to save in database.
+        data (dict): Free field to set metadata of any kind.
+
+    Returns:
+        dict: Updated episode.
+    """
+    episode = normalize_model_parameter(episode)
+    current_episode = get_sequence(episode["id"])
+    updated_episode = {
+        "id": current_episode["id"],
+        "data": current_episode["data"]
+    }
+    updated_episode["data"].update(data)
+    update_episode(updated_episode)
+
+
 def remove_episode(episode):
     """
     Remove given episode and related from database.
