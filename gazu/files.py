@@ -942,3 +942,18 @@ def download_preview_file_thumbnail(preview_file, file_path):
         "pictures/thumbnails/preview-files/%s.png" % (preview_file["id"]),
         file_path,
     )
+
+
+def update_preview(preview_file, data):
+    """
+    Update the data of given preview file.
+
+    Args:
+        preview_file (str / dict): The preview file dict or ID.
+
+    Returns:
+        dict: Modified preview file
+    """
+    preview_file = normalize_model_parameter(preview_file)
+    path = "/data/preview-files/%s" % preview_file["id"]
+    return client.put(path, data)
