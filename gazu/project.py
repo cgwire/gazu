@@ -121,3 +121,24 @@ def update_project_data(project, data={}):
         project["data"] = {}
     project["data"].update(data)
     update_project(project)
+
+
+def close_project(project):
+    """
+    Closes the provided project.
+
+    Args:
+        project (dict / ID): The project dict or id to save in database.
+
+    Returns:
+        dict: Updated project.
+    """
+    closed_status_id = None
+    for status in all_project_status():
+        if status["name"].lower() == "closed":
+            closed_status_id = status["id"]
+
+    project["project_status_id"] = closed_status_id
+    update_project(project)
+
+    return project
