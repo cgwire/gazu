@@ -419,3 +419,21 @@ class TaskTestCase(unittest.TestCase):
             self.assertEqual(
                 gazu.task.new_task_status(name, short_name, color), status
             )
+
+
+    def test_set_main_preview(self):
+        with requests_mock.mock() as mock:
+            result = {
+                "id": "preview-1"
+            }
+            path = "actions/preview-files/preview-1/set-main-preview"
+            mock.put(
+                gazu.client.get_full_url(path),
+                text=json.dumps(result),
+            )
+            preview_file = {
+                "id": "preview-1"
+            }
+            self.assertEqual(
+                gazu.task.set_main_preview(preview_file), result
+            )

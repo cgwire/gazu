@@ -586,23 +586,18 @@ def add_preview(task, comment, preview_file_path):
     return preview_file
 
 
-def set_main_preview(entity, preview_file):
+def set_main_preview(preview_file):
     """
     Set given preview as thumbnail of given entity.
 
     Args:
-        task (str / dict): The task dict or the task ID.
         preview_file (str / dict): The preview file dict or ID.
 
     Returns:
         dict: Created preview file model.
     """
-    entity = normalize_model_parameter(entity)
     preview_file = normalize_model_parameter(preview_file)
-    path = "actions/entities/%s/set-main-preview/%s" % (
-        entity["id"],
-        preview_file["id"],
-    )
+    path = "actions/preview-files/%s/set-main-preview" % preview_file["id"]
     return client.put(path, {})
 
 
