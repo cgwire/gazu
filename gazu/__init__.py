@@ -15,7 +15,7 @@ from . import task
 from . import user
 from . import playlist
 
-from .exception import AuthFailedException
+from .exception import AuthFailedException, ParameterException
 from .__version__ import __version__
 
 
@@ -28,8 +28,15 @@ def set_host(url):
 
 
 def log_in(email, password):
-    tokens = client.post("auth/login", {"email": email, "password": password})
-    if "login" in tokens and tokens["login"] == False:
+    tokens = {}
+    try:
+        tokens = client.post(
+            "auth/login", {"email": email, "password": password}
+        )
+    except ParameterException:
+        pass
+
+    if "login" in tokens and tokens.get("login", False) == False:
         raise AuthFailedException
     else:
         client.set_tokens(tokens)
