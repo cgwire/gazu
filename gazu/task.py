@@ -737,7 +737,7 @@ def update_task_data(task, data={}):
     current_task = get_task(task["id"])
 
     updated_task = {"id": current_task["id"], "data": current_task["data"]}
-    if updated_task["data"] == None:
+    if updated_task["data"] is None:
         updated_task["data"] = {}
     updated_task["data"].update(data)
     update_task(updated_task)
