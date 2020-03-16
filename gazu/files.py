@@ -907,6 +907,38 @@ def update_project_file_tree(project, file_tree):
     return client.put(path, data)
 
 
+def upload_working_file(working_file, file_path):
+    """
+    Save given file in working file storage.
+
+    Args:
+        working_file (str / dict): The working file dict or ID.
+        file_path (str): Location on hard drive where to save the file.
+    """
+    working_file = normalize_model_parameter(working_file)
+    url_path = "/data/working-files/%s/file" % working_file["id"]
+    client.upload(url_path, file_path)
+    return working_file
+
+
+def download_working_file(working_file, file_path=None):
+    """
+    Download given working file and save it at given location.
+
+    Args:
+        working_file (str / dict): The working file dict or ID.
+        file_path (str): Location on hard drive where to save the file.
+    """
+    working_file = normalize_model_parameter(working_file)
+    if file_path is None:
+        working_file = client.fetch_one("working-files", working_file["id"])
+        file_path = working_file["path"]
+    return client.download(
+        "data/working-files/%s/file" % (working_file["id"]),
+        file_path,
+    )
+
+
 def download_preview_file(preview_file, file_path):
     """
     Download given preview file and save it at given location.
