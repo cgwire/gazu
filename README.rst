@@ -92,7 +92,7 @@ efficiently.
 
 We apply software craftmanship principles as much as possible. We love
 coding and consider that strong quality and good developer experience
-matter a lot. Our extensive experience allows studios to get better at
+matter a lot. Our extensive knowledge allows studios to get better at
 managing production and doing software. They can focus more on the artistic
 work.
 
