@@ -345,6 +345,10 @@ def update_sequence_data(sequence, data={}):
     """
     sequence = normalize_model_parameter(sequence)
     current_sequence = get_sequence(sequence["id"])
+
+    if not current_sequence.get('data'):
+        current_sequence["data"] = {}
+
     updated_sequence = {
         "id": current_sequence["id"],
         "data": current_sequence["data"]

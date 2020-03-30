@@ -152,7 +152,7 @@ def new_asset(
     data = {"name": name, "description": description, "data": extra_data}
 
     if episode is not None:
-        data["source_id"] = episode["id"]
+        data["episode_id"] = episode["id"]
 
     asset = get_asset_by_name(project, name, asset_type)
     if asset is None:
