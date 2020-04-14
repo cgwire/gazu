@@ -378,12 +378,8 @@ def get_file_data_from_url(url, full=False):
     """
     Return data found at given url.
     """
-    try:
-        if not full:
-            url = get_full_url(url)
-        return requests.get(url, stream=True, headers=make_auth_header())
-    except urllib.error.HTTPError as e:
-        print('The server couldn\'t fulfill the request.')
-        print('Error message : ', e.reason)
-        print('Error code: ', e.code)
-        raise
+    if not full:
+        url = get_full_url(url)
+    response = requests.get(url, stream=True, headers=make_auth_header())
+    check_status(response, url)
+    return response
