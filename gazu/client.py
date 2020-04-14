@@ -372,3 +372,14 @@ def build_path_with_params(path, params):
     else:
         path = "%s?%s" % (path, urllib.parse.urlencode(params))
     return path
+
+
+def get_file_data_from_url(url, full=False):
+    """
+    Return data found at given url.
+    """
+    if not full:
+        url = get_full_url(url)
+    response = requests.get(url, stream=True, headers=make_auth_header())
+    check_status(response, url)
+    return response

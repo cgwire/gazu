@@ -125,6 +125,15 @@ def get_all_working_files_for_entity(entity, task=None, name=None):
     return client.fetch_all(path, params)
 
 
+@cache
+def get_all_preview_files_for_task(task):
+    """
+    Retrieves all the preview files for a given task.
+    """
+    task = normalize_model_parameter(task)
+    return client.fetch_all("preview-files", {"task_id":task["id"]})
+
+
 def all_output_files_for_entity(
     entity, output_type=None, task_type=None, name=None, representation=None
 ):
