@@ -131,8 +131,7 @@ def get_all_preview_files_for_task(task):
     Retrieves all the preview files for a given task.
     """
     task = normalize_model_parameter(task)
-    path = "preview-files?task_id={}".format(task["id"])
-    return client.fetch_all(path)
+    return client.fetch_all("preview-files", {"task_id":task["id"]})
 
 
 def all_output_files_for_entity(
