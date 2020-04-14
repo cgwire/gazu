@@ -374,12 +374,13 @@ def build_path_with_params(path, params):
     return path
 
 
-def get_file_data_from_url(url):
+def get_file_data_from_url(url, full=False):
     """
     Return data found at given url.
     """
     try:
-        url = get_full_url(url)
+        if not full:
+            url = get_full_url(url)
         return requests.get(url, stream=True, headers=make_auth_header())
     except urllib.error.HTTPError as e:
         print('The server couldn\'t fulfill the request.')
