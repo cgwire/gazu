@@ -372,3 +372,19 @@ def build_path_with_params(path, params):
     else:
         path = "%s?%s" % (path, urllib.parse.urlencode(params))
     return path
+
+
+
+def get_file_data_from_url(url):
+    """
+    Return data found at given url
+    """
+    try:
+        req = urllib.request.Request(url, None, make_auth_header())
+        data = urllib.request.urlopen(req)
+        return data
+    except urllib.error.HTTPError as e:
+        print('The server couldn\'t fulfill the request.')
+        print('Error message : ', e.reason)
+        print('Error code: ', e.code)
+        raise
