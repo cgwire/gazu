@@ -54,6 +54,23 @@ Documentation is available on a dedicated website:
 
 `https://gazu.cg-wire.com/ <https://gazu.cg-wire.com>`__
 
+
+Projects based on Gazu
+----------------------
+
+Our community built open-source tools to connect your CG tools to your
+Kitsu instance. They are listed below:
+
+* `Qtazu <https://github.com/Colorbleed/qtazu>`__: Qt Widgets such as a login
+  modal.
+* `Nagato <https://github.com/eaxum/nagato>`__: Publishing and file versioning
+  for Blender.
+* `Bamboo <https://github.com/nervYu/Bamboo>`__: Pyside2 widgets to publish
+  previews to Kitsu. 
+* `Gazu Publisher <https://github.com/cgwire/gazu-publisher>`__: Our work in
+  progress publisher tool. 
+
+
 Contributions
 -------------
 
