@@ -38,9 +38,12 @@ tokens = {"access_token": "", "refresh_token": ""}
 def host_is_up():
     """
     Returns:
-        True if the host is up
+        True if the host is up.
     """
-    response = requests_session.head(HOST)
+    try:
+        response = requests_session.head(HOST)
+    except:
+        return False
     return response.status_code == 200
 
 
