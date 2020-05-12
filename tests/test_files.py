@@ -622,3 +622,65 @@ class FilesTestCase(unittest.TestCase):
                     os.path.getsize("./test.png"),
                     os.path.getsize("./tests/fixtures/v1.png"),
                 )
+
+    def test_new_file_status(self):
+        name = "ToBeReviewed"
+        color = "#FFFFFF"
+
+        with requests_mock.mock() as mock:
+
+            path = gazu.client.get_full_url(
+                "/data/file-status?name={name}".format(**locals()))
+            mock.get(
+                path,
+                text=json.dumps([]))
+
+            path = gazu.client.get_full_url("/data/file-status")
+            status_id = "file-status-01"
+            mock.post(
+                path,
+                text=json.dumps({
+                    "id": status_id,
+                    "name": name,
+                    "color": color,
+                })
+            )
+            file_status = gazu.files.new_file_status(name, color)
+
+            self.assertEqual(file_status["id"], status_id)
+            self.assertEqual(file_status["name"], name)
+            self.assertEqual(file_status["color"], color)
+
+    def test_get_file_status(self):
+        with requests_mock.mock() as mock:
+            file_status = {
+                "id": "file-status-01",
+                "name": "ToBeReviewed",
+                "color": "#FFFFFF"}
+
+            path = "/data/file-status/{}".format(file_status['id'])
+            mock.get(
+                gazu.client.get_full_url(path),
+                text=json.dumps(file_status)
+            )
+
+            self.assertEqual(
+                file_status,
+                gazu.files.get_file_status(file_status['id']))
+
+    def test_get_file_status_by_name(self):
+        with requests_mock.mock() as mock:
+            file_status = {
+                "id": "file-status-01",
+                "name": "ToBeReviewed",
+                "color": "#FFFFFF"}
+
+            path = "/data/file-status?name={}".format(file_status['name'])
+            mock.get(
+                gazu.client.get_full_url(path),
+                text=json.dumps([file_status, ])
+            )
+
+            self.assertEqual(
+                file_status,
+                gazu.files.get_file_status_by_name(file_status['name']))

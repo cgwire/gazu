@@ -79,7 +79,6 @@ def new_output_type(name, short_name):
         return client.create("output-types", data)
     else:
         return output_type
-    return client.create("output-types", data)
 
 
 @cache
@@ -995,3 +994,31 @@ def update_preview(preview_file, data):
     preview_file = normalize_model_parameter(preview_file)
     path = "/data/preview-files/%s" % preview_file["id"]
     return client.put(path, data)
+
+
+def new_file_status(name, color):
+    """
+    Create a new file status if not existing yet.
+    """
+    data = {"name": name, "color": color}
+    status = get_file_status_by_name(name)
+    if status is None:
+        return client.create("file-status", data)
+    else:
+        return status
+
+
+@cache
+def get_file_status(status_id):
+    """
+    Return file status object corresponding to given ID.
+    """
+    return client.fetch_one("file-status", status_id)
+
+
+@cache
+def get_file_status_by_name(name):
+    """
+    Return file status object corresponding to given name
+    """
+    return client.fetch_first("file-status?name=%s" % name)
