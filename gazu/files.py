@@ -135,7 +135,12 @@ def get_all_preview_files_for_task(task):
 
 
 def all_output_files_for_entity(
-    entity, output_type=None, task_type=None, name=None, representation=None
+    entity,
+    output_type=None,
+    task_type=None,
+    name=None,
+    representation=None,
+    file_status=None,
 ):
     """
     Args:
@@ -144,6 +149,7 @@ def all_output_files_for_entity(
         task_type (str / dict): The task type dict or ID.
         name (str): The file name
         representation (str): The file representation
+        file_status (str / dict): The file status
 
     Returns:
         list:
@@ -153,6 +159,7 @@ def all_output_files_for_entity(
     entity = normalize_model_parameter(entity)
     output_type = normalize_model_parameter(output_type)
     task_type = normalize_model_parameter(task_type)
+    file_status = normalize_model_parameter(file_status)
     path = "entities/{entity_id}/output-files".format(entity_id=entity["id"])
 
     params = {}
@@ -164,6 +171,8 @@ def all_output_files_for_entity(
         params["representation"] = representation
     if name:
         params["name"] = name
+    if file_status:
+        params["file_status_id"] = file_status["id"]
 
     return client.fetch_all(path, params)
 
@@ -176,6 +185,7 @@ def all_output_files_for_asset_instance(
     output_type=None,
     name=None,
     representation=None,
+    file_status=None,
 ):
     """
     Args:
@@ -185,6 +195,7 @@ def all_output_files_for_asset_instance(
         output_type (str / dict): The output_type dict or ID.
         name (str): The file name
         representation (str): The file representation
+        file_status (str / dict): The file status
 
     Returns:
         list: Output files for a given asset instance, temporal entity,
@@ -194,6 +205,7 @@ def all_output_files_for_asset_instance(
     temporal_entity = normalize_model_parameter(temporal_entity)
     task_type = normalize_model_parameter(task_type)
     output_type = normalize_model_parameter(output_type)
+    file_status = normalize_model_parameter(file_status)
     path = "asset-instances/{asset_instance_id}/output-files".format(
         asset_instance_id=asset_instance["id"]
     )
@@ -209,6 +221,8 @@ def all_output_files_for_asset_instance(
         params["representation"] = representation
     if name:
         params["name"] = name
+    if file_status:
+        params["file_status_id"] = file_status["id"]
 
     return client.fetch_all(path, params)
 
@@ -700,7 +714,12 @@ def get_last_asset_instance_output_revision(
 
 @cache
 def get_last_output_files_for_entity(
-    entity, output_type=None, task_type=None, name=None, representation=None
+    entity,
+    output_type=None,
+    task_type=None,
+    name=None,
+    representation=None,
+    file_status=None,
 ):
     """
     Args:
@@ -709,6 +728,7 @@ def get_last_output_files_for_entity(
         task_type (str / dict): The task type dict or ID.
         name (str): The file name
         representation (str): The file representation
+        file_status (str / dict): The file status
 
     Returns:
         list:
@@ -716,6 +736,9 @@ def get_last_output_files_for_entity(
             task_type, name and representation
     """
     entity = normalize_model_parameter(entity)
+    output_type = normalize_model_parameter(output_type)
+    task_type = normalize_model_parameter(task_type)
+    file_status = normalize_model_parameter(file_status)
     path = "entities/{entity_id}/output-files/last-revisions".format(
         entity_id=entity["id"]
     )
@@ -729,6 +752,8 @@ def get_last_output_files_for_entity(
         params["representation"] = representation
     if name:
         params["name"] = name
+    if file_status:
+        params["file_status_id"] = file_status["id"]
 
     return client.fetch_all(path, params)
 
@@ -741,11 +766,17 @@ def get_last_output_files_for_asset_instance(
     output_type=None,
     name=None,
     representation=None,
+    file_status=None,
 ):
     """
     Args:
         asset_instance (str / dict): The asset instance dict or ID.
         temporal_entity (str / dict): The temporal entity dict or ID.
+        output_type (str / dict): The output type dict or ID.
+        task_type (str / dict): The task type dict or ID.
+        name (str): The file name
+        representation (str): The file representation
+        file_status (str / dict): The file status
 
     Returns:
         list: last output files for given asset instance and
@@ -753,6 +784,9 @@ def get_last_output_files_for_asset_instance(
     """
     asset_instance = normalize_model_parameter(asset_instance)
     temporal_entity = normalize_model_parameter(temporal_entity)
+    output_type = normalize_model_parameter(output_type)
+    task_type = normalize_model_parameter(task_type)
+    file_status = normalize_model_parameter(file_status)
     path = (
         "asset-instances/{asset_instance_id}/entities/{temporal_entity_id}"
         "/output-files/last-revisions"
@@ -770,6 +804,8 @@ def get_last_output_files_for_asset_instance(
         params["representation"] = representation
     if name:
         params["name"] = name
+    if file_status:
+        params["file_status_id"] = file_status["id"]
 
     return client.fetch_all(path, params)
 
