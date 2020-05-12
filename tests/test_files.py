@@ -624,9 +624,6 @@ class FilesTestCase(unittest.TestCase):
                 )
 
     def test_new_file_status(self):
-        name = "ToBeReviewed"
-        color = "#FFFFFF"
-
         with requests_mock.mock() as mock:
 
             path = gazu.client.get_full_url(
@@ -637,6 +634,9 @@ class FilesTestCase(unittest.TestCase):
 
             path = gazu.client.get_full_url("/data/file-status")
             status_id = "file-status-01"
+            name = "ToBeReviewed"
+            color = "#FFFFFF"
+
             mock.post(
                 path,
                 text=json.dumps({
