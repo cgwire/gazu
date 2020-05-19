@@ -302,6 +302,7 @@ def get_task_status(task):
     Returns:
         A task status object corresponding to status set on given task.
     """
+    task = normalize_model_parameter(task)
     return client.fetch_first("task-status", {"id": task["task_status_id"]})
 
 
