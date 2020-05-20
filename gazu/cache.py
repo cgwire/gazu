@@ -43,7 +43,6 @@ def remove_oldest_entry(memo, maxsize):
     Returns:
         Oldest entry for given cache.
     """
-    oldest_entry = None
     if maxsize > 0 and len(memo) > maxsize:
         oldest_entry_key = list(memo.keys())[0]
         for entry_key in memo.keys():
@@ -51,7 +50,7 @@ def remove_oldest_entry(memo, maxsize):
             if memo[entry_key]["date_accessed"] < oldest_date:
                 oldest_entry_key = entry_key
         memo.pop(oldest_entry_key)
-    return oldest_entry
+    return None
 
 
 def get_cache_key(args, kwargs):
@@ -183,27 +182,25 @@ def cache(function, maxsize=300, expire=120):
     @wraps(function)
     def wrapper(*args, **kwargs):
 
-        if is_cache_enabled(state):
-            key = get_cache_key(args, kwargs)
+        if not is_cache_enabled(state):
+            return function(*args, **kwargs)
+        key = get_cache_key(args, kwargs)
 
-            if key in cache_store:
-                if is_cache_expired(cache_store, state, key):
-                    statistics["expired_hits"] += 1
-                    return insert_value(function, cache_store, args, kwargs)
-                else:
-                    statistics["hits"] += 1
-                    return get_value(cache_store, key)
-
+        if key in cache_store:
+            if is_cache_expired(cache_store, state, key):
+                statistics["expired_hits"] += 1
+                return insert_value(function, cache_store, args, kwargs)
             else:
-                statistics["misses"] += 1
-                returned_value = insert_value(
-                    function, cache_store, args, kwargs
-                )
-                remove_oldest_entry(cache_store, state["maxsize"])
-                return returned_value
+                statistics["hits"] += 1
+                return get_value(cache_store, key)
 
         else:
-            return function(*args, **kwargs)
+            statistics["misses"] += 1
+            returned_value = insert_value(
+                function, cache_store, args, kwargs
+            )
+            remove_oldest_entry(cache_store, state["maxsize"])
+            return returned_value
 
     wrapper.set_cache_expire = set_expire
     wrapper.set_cache_max_size = set_max_size
