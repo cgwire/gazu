@@ -169,7 +169,7 @@ def cache(function, maxsize=300, expire=120):
         return infos
 
     def set_expire(new_expire):
-        state["expire"] = expire
+        state["expire"] = new_expire
 
     def set_max_size(maxsize):
         state["maxsize"] = maxsize
