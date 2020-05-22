@@ -151,11 +151,25 @@ def cache(function, maxsize=300, expire=120):
     cache_store = {}
     state = {"enabled": True, "expire": expire, "maxsize": maxsize}
 
+    statistics = {
+        "hits": 0,
+        "misses": 0,
+        "expired_hits": 0
+    }
+
     def clear_cache():
         cache_store.clear()
 
+    def get_cache_infos():
+        size = {'current_size': len(cache_store)}
+        infos = {}
+        for d in [state, statistics, size]:
+            infos.update(d)
+
+        return infos
+
     def set_expire(new_expire):
-        state["expire"] = expire
+        state["expire"] = new_expire
 
     def set_max_size(maxsize):
         state["maxsize"] = maxsize
@@ -174,11 +188,14 @@ def cache(function, maxsize=300, expire=120):
 
             if key in cache_store:
                 if is_cache_expired(cache_store, state, key):
+                    statistics["expired_hits"] += 1
                     return insert_value(function, cache_store, args, kwargs)
                 else:
+                    statistics["hits"] += 1
                     return get_value(cache_store, key)
 
             else:
+                statistics["misses"] += 1
                 returned_value = insert_value(
                     function, cache_store, args, kwargs
                 )
@@ -193,6 +210,7 @@ def cache(function, maxsize=300, expire=120):
     wrapper.clear_cache = clear_cache
     wrapper.enable_cache = enable_cache
     wrapper.disable_cache = disable_cache
+    wrapper.get_cache_infos = get_cache_infos
 
     cached_functions.append(wrapper)
     return wrapper
