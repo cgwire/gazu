@@ -39,3 +39,9 @@ Set time to live for a single function:
 ```python
 gazu.asset.all_assets.set_expire(120) # in seconds
 ```
+
+Retrieve statistics about caching:
+
+```python
+gazu.person.all_persons.get_cache_infos()
+```
