@@ -7,9 +7,10 @@ def init():
     """
     from socketIO_client import SocketIO, BaseNamespace
     from . import get_event_host
+    from gazu.client import make_auth_header
 
     path = get_event_host()
-    socketIO = SocketIO(path, None)
+    socketIO = SocketIO(path, None, headers=make_auth_header())
     main_namespace = socketIO.define(BaseNamespace, "/events")
     socketIO.main_namespace = main_namespace
     return socketIO
