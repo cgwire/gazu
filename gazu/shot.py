@@ -203,7 +203,7 @@ def get_shot_by_name(sequence, shot_name):
     """
     sequence = normalize_model_parameter(sequence)
     return client.fetch_first(
-        "shots/all", {"sequence_id": sequence["id"], "name": shot_name}
+        "shots", {"sequence_id": sequence["id"], "name": shot_name}
     )
 
 
