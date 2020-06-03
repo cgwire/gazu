@@ -491,6 +491,7 @@ def new_entity_output_file(
     nb_elements=1,
     representation="",
     sep="/",
+    file_status_id=None,
 ):
     """
     Create a new output file for given entity, task type and output type.
@@ -513,6 +514,7 @@ def new_entity_output_file(
         representation (str): Differientate file extensions. It can be useful
         to build folders based on extensions like abc, jpg, etc.
         sep (str): OS separator.
+        file_status_id (id): The id of the file status to set at creation
 
     Returns:
         Created output file.
@@ -540,6 +542,9 @@ def new_entity_output_file(
     if person is not None:
         data["person_id"] = person["id"]
 
+    if file_status_id is not None:
+        data["file_status_id"] = file_status_id
+
     return client.post(path, data)
 
 
@@ -557,6 +562,7 @@ def new_asset_instance_output_file(
     nb_elements=1,
     representation="",
     sep="/",
+    file_status_id=None,
 ):
     """
     Create a new output file for given asset instance, temporal entity, task
@@ -579,6 +585,7 @@ def new_asset_instance_output_file(
         representation (str): Differientate file extensions. It can be useful
     to build folders based on extensions like abc, jpg, cetc.
         sep (str): OS separator.
+        file_status_id (id): The id of the file status to set at creation
 
     Returns:
         Created output file.
@@ -604,11 +611,14 @@ def new_asset_instance_output_file(
         "sep": sep,
     }
 
-    if "working_file_id" in data:
-        data["working_file_id"] = (working_file["id"],)
+    if working_file is not None:
+        data["working_file_id"] = working_file["id"]
 
     if person is not None:
         data["person_id"] = person["id"]
+
+    if file_status_id is not None:
+        data["file_status_id"] = file_status_id
 
     return client.post(path, data)
 

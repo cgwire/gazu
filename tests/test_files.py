@@ -40,48 +40,115 @@ class FilesTestCase(unittest.TestCase):
             self.assertEqual(working_file["id"], 1)
 
     def test_new_entity_output_file(self):
+        entity = {"id": "asset-01"}
+        output_type = {"id": "output-type-01"}
+        task_type = {"id": "task-type-01"}
+        comment = 'comment'
+        name = 'name'
+        working_file = {"id": "working-file-01"}
+        person = {"id": "person-01"}
+        file_status = {"id": "file-status-id-01"}
+        path = gazu.client.get_full_url(
+            "data/entities/%s/output-files/new" % entity['id'])
+
         with requests_mock.mock() as mock:
             mock.post(
-                gazu.client.get_full_url(
-                    "data/entities/asset-01/" "output-files/new"
-                ),
-                text=json.dumps(
-                    {"output_file": {"file_name": "filename.max"}}
-                ),
+                path,
+                text=json.dumps({
+                    "output_file": {
+                        "file_name": "filename.max"
+                    }
+                })
             )
             result = gazu.files.new_entity_output_file(
-                {"id": "asset-01"},
-                {"id": "output-type-01"},
-                {"id": "task-type-01"},
-                "comment",
-                working_file={"id": "working-file-01"},
-                person={"id": "person-01"},
+                entity,
+                output_type,
+                task_type,
+                comment,
+                name='name',
+                working_file=working_file,
+                person=person,
+                file_status_id=file_status['id']
             )
-            name = result["output_file"]["file_name"]
-            self.assertEqual(name, "filename.max")
+            file_name = result["output_file"]["file_name"]
+
+            self.assertEqual(mock.called, True)
+            self.assertEqual(mock.call_count, 1)
+            self.assertEqual(file_name, "filename.max")
+            self.assertEqual(mock.last_request.url, path)
+            self.assertEqual(
+                mock.last_request.json(),
+                {
+                    u'comment': comment,
+                    u'name': name,
+                    u'nb_elements': 1,
+                    u'output_type_id': output_type['id'],
+                    u'person_id': person['id'],
+                    u'representation': u'',
+                    u'revision': 0,
+                    u'sep': u'/',
+                    u'task_type_id': task_type['id'],
+                    u'working_file_id': working_file['id'],
+                    u'file_status_id': file_status['id'],
+                }
+            )
 
     def test_new_instance_output_file(self):
+        asset_instance = {"id": "asset-instance-01"}
+        temporal_entity = {"id": "scene-01"}
+        name = "name"
+        output_type = {"id": "output-type-01"}
+        task_type = {"id": "task-type-01"}
+        comment = 'comment'
+        working_file = {"id": "working-file-01"}
+        person = {"id": "person-01"}
+        file_status = {"id": "file-status-id-01"}
+        path = gazu.client.get_full_url(
+            "data/asset-instances/%s/"
+            "entities/%s/output-files/new" % (
+                asset_instance['id'], temporal_entity['id']))
+
         with requests_mock.mock() as mock:
             mock.post(
-                gazu.client.get_full_url(
-                    "data/asset-instances/asset-instance-01/"
-                    "entities/scene-01/output-files/new"
-                ),
-                text=json.dumps(
-                    {"output_file": {"file_name": "filename.max"}}
-                ),
+                path,
+                text=json.dumps({
+                    "output_file": {
+                        "file_name": "filename.max"
+                    }
+                })
             )
             result = gazu.files.new_asset_instance_output_file(
-                {"id": "asset-instance-01"},
-                {"id": "scene-01"},
-                {"id": "output-type-01"},
-                {"id": "task-type-01"},
-                "comment",
-                working_file={"id": "working-file-01"},
-                person={"id": "person-01"},
+                asset_instance,
+                temporal_entity,
+                output_type,
+                task_type,
+                comment,
+                name=name,
+                working_file=working_file,
+                person=person,
+                file_status_id=file_status['id']
             )
-            name = result["output_file"]["file_name"]
-            self.assertEqual(name, "filename.max")
+            file_name = result["output_file"]["file_name"]
+            self.assertEqual(file_name, "filename.max")
+            self.assertEqual(mock.called, True)
+            self.assertEqual(mock.call_count, 1)
+            self.assertEqual(mock.last_request.url, path)
+            self.assertEqual(
+                mock.last_request.json(),
+                {
+                    'comment': comment,
+                    'name': name,
+                    'nb_elements': 1,
+                    'output_type_id': output_type['id'],
+                    'person_id': person['id'],
+                    'representation': '',
+                    'revision': 0,
+                    'sep': '/',
+                    'task_type_id': task_type['id'],
+                    'working_file_id': working_file['id'],
+                    'file_status_id': file_status['id'],
+                }
+            )
 
     def test_next_entity_output_revision(self):
         with requests_mock.mock() as mock:
@@ -625,16 +692,16 @@ class FilesTestCase(unittest.TestCase):
 
     def test_new_file_status(self):
         with requests_mock.mock() as mock:
+            name = "ToBeReviewed"
 
             path = gazu.client.get_full_url(
-                "/data/file-status?name={name}".format(**locals()))
+                "/data/file-status?name={name}".format(name=name))
             mock.get(
                 path,
                 text=json.dumps([]))
 
             path = gazu.client.get_full_url("/data/file-status")
             status_id = "file-status-01"
-            name = "ToBeReviewed"
             color = "#FFFFFF"
 
             mock.post(
