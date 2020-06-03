@@ -611,8 +611,8 @@ def new_asset_instance_output_file(
         "sep": sep,
     }
 
-    if "working_file_id" in data:
-        data["working_file_id"] = (working_file["id"],)
+    if working_file is not None:
+        data["working_file_id"] = working_file["id"]
 
     if person is not None:
         data["person_id"] = person["id"]
