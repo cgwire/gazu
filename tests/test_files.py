@@ -41,13 +41,6 @@ class FilesTestCase(unittest.TestCase):
 
     def test_new_entity_output_file(self):
         entity = {"id": "asset-01"}
-        output_type = {"id": "output-type-01"}
-        task_type = {"id": "task-type-01"}
-        comment = 'comment'
-        name = 'name'
-        working_file = {"id": "working-file-01"}
-        person = {"id": "person-01"}
-        file_status = {"id": "file-status-id-01"}
         path = gazu.client.get_full_url(
             "data/entities/%s/output-files/new" % entity['id'])
 
@@ -60,6 +53,12 @@ class FilesTestCase(unittest.TestCase):
                     }
                 })
             )
+            output_type = {"id": "output-type-01"}
+            task_type = {"id": "task-type-01"}
+            comment = 'comment'
+            working_file = {"id": "working-file-01"}
+            person = {"id": "person-01"}
+            file_status = {"id": "file-status-id-01"}
             result = gazu.files.new_entity_output_file(
                 entity,
                 output_type,
@@ -76,6 +75,7 @@ class FilesTestCase(unittest.TestCase):
             self.assertEqual(mock.call_count, 1)
             self.assertEqual(file_name, "filename.max")
             self.assertEqual(mock.last_request.url, path)
+            name = 'name'
             self.assertEqual(
                 mock.last_request.json(),
                 {
@@ -96,13 +96,6 @@ class FilesTestCase(unittest.TestCase):
     def test_new_instance_output_file(self):
         asset_instance = {"id": "asset-instance-01"}
         temporal_entity = {"id": "scene-01"}
-        name = "name"
-        output_type = {"id": "output-type-01"}
-        task_type = {"id": "task-type-01"}
-        comment = 'comment'
-        working_file = {"id": "working-file-01"}
-        person = {"id": "person-01"}
-        file_status = {"id": "file-status-id-01"}
         path = gazu.client.get_full_url(
             "data/asset-instances/%s/"
             "entities/%s/output-files/new" % (
@@ -117,6 +110,13 @@ class FilesTestCase(unittest.TestCase):
                     }
                 })
             )
+            name = "name"
+            output_type = {"id": "output-type-01"}
+            task_type = {"id": "task-type-01"}
+            comment = 'comment'
+            working_file = {"id": "working-file-01"}
+            person = {"id": "person-01"}
+            file_status = {"id": "file-status-id-01"}
             result = gazu.files.new_asset_instance_output_file(
                 asset_instance,
                 temporal_entity,
