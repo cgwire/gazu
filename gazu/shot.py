@@ -15,9 +15,7 @@ def all_previews_for_shot(shot):
         list: Previews from database for given shot.
     """
     shot = normalize_model_parameter(shot)
-    previews = client.fetch_all("shots/%s/preview-files" % shot["id"])
-
-    return previews
+    return client.fetch_all("shots/%s/preview-files" % shot["id"])
 
 
 @cache
