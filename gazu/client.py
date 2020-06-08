@@ -46,6 +46,19 @@ def host_is_up():
         return False
     return response.status_code == 200
 
+def host_is_valid():
+    """
+    Check if the host is valid by simulating a fake login.
+    Returns:
+        True if the host is valid.
+    """
+    if not host_is_up():
+        return False
+    try:
+        post("auth/login", {"email": "", "password": ""})
+    except Exception as exc:
+        return type(exc) == ParameterException
+
 
 def get_host():
     """
