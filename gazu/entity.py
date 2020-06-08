@@ -22,21 +22,6 @@ def all_entity_types():
     return sort_by_name(client.fetch_all("entity-types"))
 
 
-@cache
-def all_entities():
-    """
-    Retrieve all entity types
-    """
-    return client.fetch_all("entities")
-
-
-@cache
-def all_entity_types():
-    """
-    Retrieve all entity types
-    """
-    return client.fetch_all("entity-types")
-
 
 @cache
 def get_entity(entity_id):

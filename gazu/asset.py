@@ -32,7 +32,7 @@ def all_assets_for_project(project):
     project = normalize_model_parameter(project)
 
     if project is None:
-        return sort_by_name(client.fetch_all("assets/all"))
+        return sort_by_name(client.fetch_all("assets"))
     else:
         return sort_by_name(
             client.fetch_all("projects/%s/assets" % project["id"])
@@ -51,7 +51,7 @@ def all_assets_for_episode(episode):
     episode = normalize_model_parameter(episode)
 
     return sort_by_name(
-        client.fetch_all("assets", {"source_id": episode["id"]})
+        client.fetch_all("assets", {"episode_id": episode["id"]})
     )
 
 
@@ -103,7 +103,7 @@ def get_asset_by_name(project, name, asset_type=None):
     """
     project = normalize_model_parameter(project)
 
-    path = "assets/all"
+    path = "assets"
     if asset_type is None:
         params = {"project_id": project["id"], "name": name}
     else:
@@ -111,7 +111,7 @@ def get_asset_by_name(project, name, asset_type=None):
         params = {
             "project_id": project["id"],
             "name": name,
-            "entity_type_id": asset_type["id"],
+            "asset_type_id": asset_type["id"],
         }
     return client.fetch_first(path, params)
 
@@ -172,8 +172,6 @@ def update_asset(asset):
     Args:
         asset (dict): Asset to save.
     """
-    if "episode_id" in asset:
-        asset["source_id"] = asset["episode_id"]
     return client.put("data/entities/%s" % asset["id"], asset)
 
 

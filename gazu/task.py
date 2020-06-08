@@ -220,7 +220,7 @@ def all_done_tasks_for_person(person):
         list: Tasks that are done for given person (only for open projects).
     """
     person = normalize_model_parameter(person)
-    return client.fetch_all("persons/%s/tasks" % person["id"])
+    return client.fetch_all("persons/%s/done-tasks" % person["id"])
 
 
 @cache
