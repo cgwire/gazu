@@ -325,9 +325,11 @@ def upload(path, file_path):
     """
     url = get_full_url(path)
     files = {"file": open(file_path, "rb")}
-    result = requests_session.post(
+    response = requests_session.post(
         url, headers=make_auth_header(), files=files
-    ).json()
+    )
+    check_status(response, path)
+    result = response.json()
     if "message" in result:
         raise UploadFailedException(result["message"])
     return result
