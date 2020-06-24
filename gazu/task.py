@@ -28,7 +28,7 @@ def all_task_types():
 
 
 @cache
-def all_tasks_for_shot(shot):
+def all_tasks_for_shot(shot, relations=False):
     """
     Args:
         shot (str / dict): The shot dict or the shot ID.
@@ -37,12 +37,15 @@ def all_tasks_for_shot(shot):
         list: Tasks linked to given shot.
     """
     shot = normalize_model_parameter(shot)
-    tasks = client.fetch_all("shots/%s/tasks" % shot["id"])
+    params = {}
+    if relations:
+        params = {"relations": "true"}
+    tasks = client.fetch_all("shots/%s/tasks" % shot["id"], params)
     return sort_by_name(tasks)
 
 
 @cache
-def all_tasks_for_sequence(sequence):
+def all_tasks_for_sequence(sequence, relations=False):
     """
     Args:
         sequence (str / dict): The sequence dict or the sequence ID.
@@ -51,12 +54,14 @@ def all_tasks_for_sequence(sequence):
         list: Tasks linked to given sequence.
     """
     sequence = normalize_model_parameter(sequence)
-    tasks = client.fetch_all("sequences/%s/tasks" % sequence["id"])
+    if relations:
+        params = {"relations": "true"}
+    tasks = client.fetch_all("sequences/%s/tasks" % sequence["id"], params)
     return sort_by_name(tasks)
 
 
 @cache
-def all_tasks_for_scene(scene):
+def all_tasks_for_scene(scene, relations=False):
     """
     Args:
         sequence (str / dict): The scene dict or the scene ID.
@@ -65,12 +70,14 @@ def all_tasks_for_scene(scene):
         list: Tasks linked to given scene.
     """
     scene = normalize_model_parameter(scene)
-    tasks = client.fetch_all("scenes/%s/tasks" % scene["id"])
+    if relations:
+        params = {"relations": "true"}
+    tasks = client.fetch_all("scenes/%s/tasks" % scene["id"], params)
     return sort_by_name(tasks)
 
 
 @cache
-def all_tasks_for_asset(asset):
+def all_tasks_for_asset(asset, relations=False):
     """
     Args:
         asset (str / dict): The asset dict or the asset ID.
@@ -79,17 +86,21 @@ def all_tasks_for_asset(asset):
         list: Tasks directly linked to given asset.
     """
     asset = normalize_model_parameter(asset)
-    tasks = client.fetch_all("assets/%s/tasks" % asset["id"])
+    if relations:
+        params = {"relations": "true"}
+    tasks = client.fetch_all("assets/%s/tasks" % asset["id"], params)
     return sort_by_name(tasks)
 
 
 @cache
-def all_tasks_for_episode(episode):
+def all_tasks_for_episode(episode, relations=False):
     """
     Retrieve all tasks directly linked to given episode.
     """
     episode = normalize_model_parameter(episode)
-    tasks = client.fetch_all("episodes/%s/tasks" % episode["id"])
+    if relations:
+        params = {"relations": "true"}
+    tasks = client.fetch_all("episodes/%s/tasks" % episode["id"], params)
     return sort_by_name(tasks)
 
 
