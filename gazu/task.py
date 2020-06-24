@@ -54,6 +54,7 @@ def all_tasks_for_sequence(sequence, relations=False):
         list: Tasks linked to given sequence.
     """
     sequence = normalize_model_parameter(sequence)
+    params = {}
     if relations:
         params = {"relations": "true"}
     tasks = client.fetch_all("sequences/%s/tasks" % sequence["id"], params)
@@ -70,6 +71,7 @@ def all_tasks_for_scene(scene, relations=False):
         list: Tasks linked to given scene.
     """
     scene = normalize_model_parameter(scene)
+    params = {}
     if relations:
         params = {"relations": "true"}
     tasks = client.fetch_all("scenes/%s/tasks" % scene["id"], params)
@@ -86,6 +88,7 @@ def all_tasks_for_asset(asset, relations=False):
         list: Tasks directly linked to given asset.
     """
     asset = normalize_model_parameter(asset)
+    params = {}
     if relations:
         params = {"relations": "true"}
     tasks = client.fetch_all("assets/%s/tasks" % asset["id"], params)
@@ -98,6 +101,7 @@ def all_tasks_for_episode(episode, relations=False):
     Retrieve all tasks directly linked to given episode.
     """
     episode = normalize_model_parameter(episode)
+    params = {}
     if relations:
         params = {"relations": "true"}
     tasks = client.fetch_all("episodes/%s/tasks" % episode["id"], params)
