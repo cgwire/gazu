@@ -399,3 +399,12 @@ def get_file_data_from_url(url, full=False):
     response = requests.get(url, stream=True, headers=make_auth_header())
     check_status(response, url)
     return response
+
+
+def import_data(model_name, data):
+    """
+    Args:
+        model_name (str): The data model to import
+        data (dict): The data to import
+    """
+    return post("/import/kitsu/%s" % model_name, data)
