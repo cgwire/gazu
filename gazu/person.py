@@ -68,12 +68,17 @@ def get_person_by_full_name(full_name):
     Returns:
         dict: Person corresponding to given name.
     """
-    first_name, last_name = full_name.lower().split(" ")
+    if " " in full_name:
+        first_name, last_name = full_name.lower().split(" ")
+    else:
+        first_name, last_name = full_name.lower().strip(), ""
     for person in all_persons():
-        is_right_first_name = first_name == person["first_name"].lower()
-        is_right_last_name = last_name == person["last_name"].lower()
+        is_right_first_name = first_name == person["first_name"].lower().strip()
+        is_right_last_name = \
+            len(last_name) == 0 or last_name == person["last_name"].lower()
         if is_right_first_name and is_right_last_name:
             return person
+    return None
 
 
 def new_person(

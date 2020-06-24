@@ -1,4 +1,4 @@
-from gazu.exception import AuthFailedException
+from .exception import AuthFailedException
 
 
 def init():
