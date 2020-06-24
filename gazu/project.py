@@ -15,6 +15,18 @@ def all_project_status():
 
 
 @cache
+def get_project_status_by_name(project_status_name):
+    """
+    Args:
+        project_status_name (str): Name of claimed project status.
+
+    Returns:
+        dict: Project status corresponding to given name.
+    """
+    return client.fetch_first("project-status", {"name": project_name})
+
+
+@cache
 def all_projects():
     """
     Returns:
