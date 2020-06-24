@@ -129,6 +129,27 @@ def all_tasks_for_task_status(project, task_type, task_status):
 
 
 @cache
+def all_tasks_for_task_type(project, task_type):
+    """
+    Args:
+        project (str / dict): The project dict or the project ID.
+        task_type (str / dict): The task type dict or ID.
+
+    Returns:
+        list: Tasks for given project and task type.
+    """
+    project = normalize_model_parameter(project)
+    task_type = normalize_model_parameter(task_type)
+    return client.fetch_all(
+        "tasks",
+        {
+            "project_id": project["id"],
+            "task_type_id": task_type["id"],
+        },
+    )
+
+
+@cache
 def all_task_types_for_shot(shot):
     """
     Args:
