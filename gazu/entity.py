@@ -22,10 +22,12 @@ def all_entity_types():
     return sort_by_name(client.fetch_all("entity-types"))
 
 
-
 @cache
 def get_entity(entity_id):
     """
+    Args:
+        id (str): ID of claimed entity.
+
     Returns:
         dict: Retrieve entity matching given ID (It can be an entity of any
         kind: asset, shot, sequence or episode).
@@ -34,8 +36,23 @@ def get_entity(entity_id):
 
 
 @cache
+def get_entity_by_name(entity_name):
+    """
+    Args:
+        name (str): The name of the claimed entity.
+
+    Returns:
+        Retrieve entity matching given name.
+    """
+    return client.fetch_first("entities", {"name": entity_name})
+
+
+@cache
 def get_entity_type(entity_type_id):
     """
+    Args:
+        id (str): ID of claimed entity type.
+
     Returns:
         Retrieve entity type matching given ID (It can be an entity type of any
         kind).
@@ -44,13 +61,15 @@ def get_entity_type(entity_type_id):
 
 
 @cache
-def get_entity_types():
+def get_entity_type_by_name(entity_type_name):
     """
-    Returns:
-        list: All entities types available in the API.
-    """
+    Args:
+        name (str): The name of the claimed entity type
 
-    return client.fetch_all("entity-types")
+    Returns:
+        Retrieve entity type matching given name.
+    """
+    return client.fetch_first("entity-types", {"name": entity_type_name})
 
 
 def new_entity_type(name):
@@ -64,4 +83,4 @@ def new_entity_type(name):
         dict: The created entity type
     """
     data = {"name": name}
-    return client.post("/data/entity-types", data)
+    return client.create("entity-types", data)
