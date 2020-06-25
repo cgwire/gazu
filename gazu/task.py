@@ -566,7 +566,7 @@ def add_time_spent(task, person, date, duration):
     return client.post(path, {"duration": duration})
 
 
-def add_comment(task, task_status, comment=""):
+def add_comment(task, task_status, comment="", person=None, attachments=[]):
     """
     Add comment to given task. Each comment requires a task_status. Since the
     addition of comment triggers a task status change. Comment text can be
@@ -583,7 +583,22 @@ def add_comment(task, task_status, comment=""):
     task = normalize_model_parameter(task)
     task_status = normalize_model_parameter(task_status)
     data = {"task_status_id": task_status["id"], "comment": comment}
-    return client.post("actions/tasks/%s/comment" % task["id"], data)
+
+    if person is not None:
+        person = normalize_model_parameter(person)
+        data["person_id"] = person["id"]
+
+    if len(attachments) == 0:
+        return client.post("actions/tasks/%s/comment" % task["id"], data)
+
+    else:
+        attachment = attachments.pop()
+        return client.upload(
+            "actions/tasks/%s/comment" % task["id"],
+            attachment,
+            data=data,
+            extra_files=attachments
+        )
 
 
 def remove_comment(comment):
