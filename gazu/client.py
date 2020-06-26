@@ -336,7 +336,7 @@ def upload(path, file_path, data={}, extra_files=[]):
 
 
 def _build_file_dict(file_path, extra_files):
-    files = {"file-1": open(file_path, "rb")}
+    files = {"file": open(file_path, "rb")}
     i = 2
     for file_path in extra_files:
         files["file-%s" % i] = open(file_path, "rb")
