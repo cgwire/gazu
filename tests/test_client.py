@@ -1,7 +1,10 @@
-import unittest
-import requests_mock
+import cgi
 import datetime
 import json
+import io
+
+import unittest
+import requests_mock
 import gazu
 
 from gazu import client
@@ -178,7 +181,57 @@ class BaseFuncTestCase(ClientTestCase):
         )
 
     def test_upload(self):
-        pass
+        with open("./tests/fixtures/v1.png", "rb") as test_file:
+            with requests_mock.Mocker() as mock:
+                mock.post(
+                    client.get_full_url("data/new-file"),
+                    text='{"id": "person-01", "first_name": "John"}',
+                )
+
+                def verify_file_callback(request):
+                    body_file = io.BytesIO(request.body)
+                    _, pdict = cgi.parse_header(request.headers['Content-Type'])
+                    pdict["boundary"] = bytes(pdict["boundary"], "UTF-8")
+                    parsed = cgi.parse_multipart(fp=body_file, pdict=pdict)
+                    assert "file" in parsed
+                    assert "test" in parsed and parsed["test"]
+                    assert test_file.read() == parsed["file"][0]
+                    return None
+                mock.post("data/new-file", json={})
+                mock.add_matcher(verify_file_callback)
+                client.upload("data/new-file", "./tests/fixtures/v1.png", data={
+                    "test": True
+                })
+
+    def test_upload_multiple_files(self):
+        with open("./tests/fixtures/v1.png", "rb") as test_file:
+            with requests_mock.Mocker() as mock:
+                mock.post(
+                    client.get_full_url("data/new-file"),
+                    text='{"id": "person-01", "first_name": "John"}',
+                )
+
+                def verify_file_callback(request):
+                    body_file = io.BytesIO(request.body)
+                    _, pdict = cgi.parse_header(request.headers['Content-Type'])
+                    pdict["boundary"] = bytes(pdict["boundary"], "UTF-8")
+                    parsed = cgi.parse_multipart(fp=body_file, pdict=pdict)
+                    assert "file" in parsed
+                    assert "test" in parsed and parsed["test"]
+                    file_data = test_file.read()
+                    assert file_data == parsed["file"][0]
+                    assert file_data == parsed["file-2"][0]
+                    return None
+                mock.post("data/new-file", json={})
+                mock.add_matcher(verify_file_callback)
+                client.upload(
+                    "data/new-file",
+                    "./tests/fixtures/v1.png",
+                    data={
+                        "test": True,
+                    },
+                    extra_files=["./tests/fixtures/v1.png"]
+                )
 
     def test_check_status(self):
         class Request(object):
