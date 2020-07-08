@@ -128,6 +128,24 @@ def get_asset(asset_id):
     return client.fetch_one("assets", asset_id)
 
 
+@cache
+def get_asset_url(asset):
+    """
+    Args:
+        asset (str / dict): The asset dict or the asset ID.
+
+    Returns:
+        url (str): Web url associated to the given asset
+    """
+    asset = normalize_model_parameter(asset)
+    path = "{host}/productions/{project_id}/assets/{asset_id}/"
+    return path.format(
+        host=client.get_zou_url_from_host(),
+        project_id=asset["project_id"],
+        asset_id=asset["id"],
+    )
+
+
 def new_asset(
     project, asset_type, name, description="", extra_data={}, episode=None
 ):

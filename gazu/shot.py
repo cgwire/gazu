@@ -15,9 +15,7 @@ def all_previews_for_shot(shot):
         list: Previews from database for given shot.
     """
     shot = normalize_model_parameter(shot)
-    previews = client.fetch_all("shots/%s/preview-files" % shot["id"])
-
-    return previews
+    return client.fetch_all("shots/%s/preview-files" % shot["id"])
 
 
 @cache
@@ -206,6 +204,22 @@ def get_shot_by_name(sequence, shot_name):
         "shots/all", {"sequence_id": sequence["id"], "name": shot_name}
     )
 
+@cache
+def get_shot_url(shot):
+    """
+    Args:
+        shot (str / dict): The shot dict or the shot ID.
+
+    Returns:
+        url (str): Web url associated to the given shot
+    """
+    shot = normalize_model_parameter(shot)
+    path = "{host}/productions/{project_id}/shots/{shot_id}/"
+    return path.format(
+        host=client.get_zou_url_from_host(),
+        project_id=shot["project_id"],
+        shot_id=shot["id"],
+    )
 
 def new_sequence(project, name, episode=None):
     """

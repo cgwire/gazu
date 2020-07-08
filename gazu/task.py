@@ -788,3 +788,21 @@ def update_task_data(task, data={}):
         updated_task["data"] = {}
     updated_task["data"].update(data)
     update_task(updated_task)
+
+
+@cache
+def get_task_url(task):
+    """
+    Args:
+        task (str / dict): The task dict or the task ID.
+
+    Returns:
+        url (str): Web url associated to the given task
+    """
+    task = normalize_model_parameter(task)
+    path = "{host}/productions/{project_id}/shots/tasks/{task_id}/"
+    return path.format(
+        host=client.get_zou_url_from_host(),
+        project_id=task["project_id"],
+        task_id=task["id"],
+    )

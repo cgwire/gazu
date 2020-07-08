@@ -81,6 +81,23 @@ def get_person_by_full_name(full_name):
     return None
 
 
+@cache
+def get_person_url(person):
+    """
+    Args:
+        person (str / dict): The person dict or the person ID.
+
+    Returns:
+        url (str): Web url associated to the given person
+    """
+    person = normalize_model_parameter(person)
+    path = "{host}/people/{person_id}/"
+    return path.format(
+        host=client.get_zou_url_from_host(),
+        person_id=person["id"],
+    )
+
+
 def new_person(
     first_name, last_name, email, phone="", role="user", desktop_login=""
 ):

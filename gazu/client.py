@@ -68,6 +68,14 @@ def get_host():
     return HOST
 
 
+def get_zou_url_from_host():
+    """
+    Returns:
+        Zou url, retrieved from host.
+    """
+    return HOST[:-4]
+
+
 def set_host(new_host):
     """
     Returns:
