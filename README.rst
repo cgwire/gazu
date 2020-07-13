@@ -103,9 +103,8 @@ Contributors
 About authors
 -------------
 
-Gazu is written by CG Wire, a company based in France. We help small to
-midsize CG studios to manage their production and build pipeline
-efficiently.
+Gazu is written by CG Wire, a company based in France. We help indie creative
+studios to build their pipeline and workflow efficiently.
 
 We apply software craftmanship principles as much as possible. We love
 coding and consider that strong quality and good developer experience
