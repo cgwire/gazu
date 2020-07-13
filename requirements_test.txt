@@ -1,2 +1,3 @@
-pytest
-requests_mock
+pytest==4.6.11
+pytest-cov==2.10.0
+requests_mock==1.5.2
