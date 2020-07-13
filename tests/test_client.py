@@ -2,6 +2,7 @@ import cgi
 import datetime
 import json
 import io
+import sys
 
 import unittest
 import requests_mock
@@ -191,7 +192,10 @@ class BaseFuncTestCase(ClientTestCase):
                 def verify_file_callback(request):
                     body_file = io.BytesIO(request.body)
                     _, pdict = cgi.parse_header(request.headers['Content-Type'])
-                    pdict["boundary"] = bytes(pdict["boundary"], "UTF-8")
+                    if sys.version_info[0] == 3:
+                        pdict["boundary"] = bytes(pdict["boundary"], "UTF-8")
+                    else:
+                        pdict["boundary"] = bytes(pdict["boundary"])
                     parsed = cgi.parse_multipart(fp=body_file, pdict=pdict)
                     assert "file" in parsed
                     assert "test" in parsed and parsed["test"]
@@ -214,7 +218,10 @@ class BaseFuncTestCase(ClientTestCase):
                 def verify_file_callback(request):
                     body_file = io.BytesIO(request.body)
                     _, pdict = cgi.parse_header(request.headers['Content-Type'])
-                    pdict["boundary"] = bytes(pdict["boundary"], "UTF-8")
+                    if sys.version_info[0] == 3:
+                        pdict["boundary"] = bytes(pdict["boundary"], "UTF-8")
+                    else:
+                        pdict["boundary"] = bytes(pdict["boundary"])
                     parsed = cgi.parse_multipart(fp=body_file, pdict=pdict)
                     assert "file" in parsed
                     assert "test" in parsed and parsed["test"]
