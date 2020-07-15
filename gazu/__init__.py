@@ -34,7 +34,7 @@ def log_in(email, password):
             "auth/login", {"email": email, "password": password}
         )
     except ParameterException:
-        pass
+        raise
 
     if "login" in tokens and tokens.get("login", False) == False:
         raise AuthFailedException
