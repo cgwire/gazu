@@ -34,9 +34,11 @@ def log_in(email, password):
             "auth/login", {"email": email, "password": password}
         )
     except ParameterException:
-        raise
+        pass
 
-    if "login" in tokens and tokens.get("login", False) == False:
+    if not tokens or (
+        "login" in tokens and tokens.get("login", False) == False
+    ):
         raise AuthFailedException
     else:
         client.set_tokens(tokens)
