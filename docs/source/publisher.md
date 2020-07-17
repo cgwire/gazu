@@ -76,7 +76,7 @@ Then create a new virtual environment and activate it.
 To ensure version coherence, we must first find the Python used by Blender.
 To do that, open your Blender console, and type `bpy.app.binary_path_python`, like in the following gif :
 
-![Alt Text](_static/find_blender_exec.gif)
+![](_static/find_blender_exec.gif)
 
 Now with the executable you just found, create the virtual environment :
 
@@ -88,7 +88,7 @@ workon gazu_publisher_venv
 Once it's done, we can install the gazu publisher:
 
 ```sh
-pip install https://github.com/cgwire/gazu-publisher.git
+pip install git+https://github.com/cgwire/gazu-publisher.git
 ```
 
 Since Blender does not natively provide any Qt binding (PyQt or PySide), 
@@ -102,10 +102,16 @@ or
 pip install PySide2
 ```
 
-Great, the code has been installed ! Now we need to link the publisher and Blender.
+Great, the code has been installed ! You can verify that everything is fine by launching:
+
+```sh
+gazupublisher
+```
+
+Now we need to link the publisher and Blender.
 
 In the project, and more precisely in the folder `gazupublisher/software_link/blender`, 
-we've provided an add-on to link the publisher and Blender.
+we've provided an add-on `launch_kitsu.py` to link the publisher and Blender.
 This add-on does three things :
 
 - It adds the path of the gazu publisher to the sys.path variable.
@@ -113,7 +119,7 @@ This add-on does three things :
 - It adds the adequate component to the Blender UI (Window > Launch Kitsu)
 
 To complete the file, you must manually set the `gazupublisher_folder` variable 
-at the beginning of the file: open it and fill the variable with the path of the folder contaiing the project.
+at the beginning of the file: open it and fill the variable with the path of the folder containing the project.
 You can get this path with the command:
 ```sh
 pip show gazupublisher
@@ -129,7 +135,7 @@ For more info on this folder, please refer to the official Blender [documentatio
 Once it's done, the installation is complete ! 
 You can now launch the gazu publisher from Blender:
 
-![Alt Text](_static/blender_launch.gif)
+![](_static/blender_launch.gif)
 
 
 ## Troubleshooting
