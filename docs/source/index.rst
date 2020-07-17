@@ -32,7 +32,7 @@ Here is a non exhaustive list of use cases that allows Gazu:
 * Build a todo list for artists of the project.
 * Get working file paths and output file paths for a given task.
 * Get next available working revision for a given task.
-* Manage automatic validition changes.
+* Manage automatic validation changes.
 
 Sources
 =======
@@ -53,7 +53,7 @@ Contents
    cache
    events
    specs
-
+   publisher
 
 Function References
 ===================
