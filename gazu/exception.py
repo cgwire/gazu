@@ -1,3 +1,11 @@
+class HostException(Exception):
+    """
+    Error raised when host is not valid.
+    """
+
+    pass
+
+
 class AuthFailedException(Exception):
     """
     Error raised when user credentials are wrong.
