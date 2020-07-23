@@ -109,6 +109,32 @@ def all_tasks_for_episode(episode, relations=False):
 
 
 @cache
+def all_shot_tasks_for_sequence(sequence, relations=False):
+    """
+    Retrieve all tasks directly linked to all shots of given sequence.
+    """
+    sequence = normalize_model_parameter(sequence)
+    params = {}
+    if relations:
+        params = {"relations": "true"}
+    tasks = client.fetch_all("sequences/%s/shot-tasks" % sequence["id"], params)
+    return sort_by_name(tasks)
+
+
+@cache
+def all_shot_tasks_for_episode(episode, relations=False):
+    """
+    Retrieve all tasks directly linked to all shots of given episode.
+    """
+    episode = normalize_model_parameter(episode)
+    params = {}
+    if relations:
+        params = {"relations": "true"}
+    tasks = client.fetch_all("episodes/%s/shot-tasks" % episode["id"], params)
+    return sort_by_name(tasks)
+
+
+@cache
 def all_tasks_for_task_status(project, task_type, task_status):
     """
     Args:
