@@ -592,7 +592,14 @@ def add_time_spent(task, person, date, duration):
     return client.post(path, {"duration": duration})
 
 
-def add_comment(task, task_status, comment="", person=None, attachments=[]):
+def add_comment(
+    task,
+    task_status,
+    comment="",
+    person=None,
+    attachments=[],
+    created_at=None
+):
     """
     Add comment to given task. Each comment requires a task_status. Since the
     addition of comment triggers a task status change. Comment text can be
@@ -602,6 +609,8 @@ def add_comment(task, task_status, comment="", person=None, attachments=[]):
         task (str / dict): The task dict or the task ID.
         task_status (str / dict): The task status dict or ID.
         comment (str): Comment text
+        person (str / dict): Comment author
+        date (str): Comment date
 
     Returns:
         dict: Created comment.
@@ -613,6 +622,9 @@ def add_comment(task, task_status, comment="", person=None, attachments=[]):
     if person is not None:
         person = normalize_model_parameter(person)
         data["person_id"] = person["id"]
+
+    if created_at is not None:
+        data["created_at"] = created_at
 
     if len(attachments) == 0:
         return client.post("actions/tasks/%s/comment" % task["id"], data)
