@@ -128,12 +128,13 @@ This add-on does three things :
 
 To complete the file, you must manually set the `gazupublisher_folder` variable 
 at the beginning of the file: open it and fill the variable with the path of the folder containing the project.
-You can get this path with the command:
+The path should look like `path_to_virtual_env/lib/python3.X/site-packages`
+You can get it with the command:
 ```sh
 pip show gazupublisher
 ```
 You can also set in this file the variable `kitsu_host` with the URL of your 
-instance of Kitsu, so that the user won't have to fill it every time.
+instance of Kitsu, so that the users won't have to fill it every time.
 
 Once the file is set up, the final step is to move the add-on in the start-up folder of Blender.
 Usually this start-up folder can be found at `~/.config/blender/<version>/scripts/startup`
