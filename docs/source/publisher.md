@@ -1,6 +1,6 @@
-# Kitsu publisher
+# Kitsu Publisher
 
-The gazu publisher is a tool to send previews to Kitsu from your DCC.
+The Kitsu publisher is a tool to send previews to Kitsu from your DCC.
 
 For now, it is only available on Linux, and for the following softwares : Blender and Maya.
 
