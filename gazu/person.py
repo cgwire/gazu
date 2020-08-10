@@ -98,6 +98,15 @@ def get_person_url(person):
     )
 
 
+@cache
+def get_organisation():
+    """
+    Returns:
+        dict: Database information for organisation linked to auth tokens.
+    """
+    return client.get("auth/authenticated")["organisation"]
+
+
 def new_person(
     first_name, last_name, email, phone="", role="user", desktop_login=""
 ):
