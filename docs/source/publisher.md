@@ -2,7 +2,7 @@
 
 The gazu publisher is a tool to send previews to Kitsu from your DCC.
 
-For now, it is only available on Linux, and for the following softwares : Blender and Maya.
+For now, it is only available on Linux, and for the following softwares : Blender, Maya, and Houdini.
 
 ![](_static/gazu_publisher.png)
 
@@ -127,7 +127,7 @@ This add-on does three things :
 - It adds the adequate component to the Blender UI (Window > Launch Kitsu)
 
 To complete the file, you must manually set the `gazupublisher_folder` variable 
-at the beginning of the file: open it and fill the variable with the path of the folder containing the project.
+at the beginning: open it and fill the variable with the path of the folder containing the project.
 The path should look like `path_to_virtual_env/lib/python3.X/site-packages`
 You can get it with the command:
 ```sh
@@ -186,7 +186,7 @@ This file does two things :
 - It adds the adequate component to the Maya UI
 
 To complete the file, you must manually set the `gazupublisher_folder` variable 
-at the beginning of the file: open it and fill the variable with the path of the folder containing the project.
+at the beginning: open it and fill the variable with the path of the folder containing the project.
 You can get this path with the command:
 
 ```sh
@@ -209,6 +209,72 @@ You can now launch the gazu publisher from Maya:
 ![](_static/maya_launch.gif)
 
 
+
+### Houdini
+
+First, we recommend to install the code in a virtual environment.
+If you wish so, you can begin by installing a virtual environment manager (for example [virtualenv](https://virtualenv.pypa.io/en/latest/)):
+
+```sh
+pip install virtualenv
+```
+
+Then create a new virtual environment and activate it.
+To ensure version coherence, we must first find the Python used by Houdini.
+You can go in your Houdini Python shell and type `sys.executable` :
+
+![](_static/find_houdini_exec.gif)
+
+Now with the executable you just found, create the virtual environment :
+
+```sh
+mkvirtualenv --python <your_python_executable> gazu_publisher_venv
+workon gazu_publisher_venv
+```
+
+Once it's done, we can install the gazu publisher:
+
+```sh
+pip install git+https://github.com/cgwire/gazu-publisher.git
+```
+
+Great, the code has been installed !
+Now we need to link the publisher and Houdini.
+
+In the project, and more precisely in the folder `gazupublisher/software_link/houdini`, 
+we've provided a start-up file `123.py` to link the publisher and Houdini.
+This file does two things :
+
+- It adds the path of the gazu publisher to the sys.path variable.
+- It has a function `launch_kitsu()` that you can copy/paste in a new tool shelf, 
+to give users an easy way to launch the publisher
+
+To complete the file, you must manually set the `gazupublisher_folder` variable 
+at the beginning: open it and fill the variable with the path of the folder containing the project.
+You can get this path with the command:
+
+```sh
+pip show gazupublisher
+```
+
+Once the file is set up, the next step is to move the file in the start-up folder of Houdini.
+Usually this start-up folder looks like `~/houdiniXX/scripts/`.
+You can also find its path with the Python command `hou.findDirectory("scripts")`
+
+![](_static/find_houdini_startup_dir.gif)
+
+Note that if you already have a `123.py` file, you can merge the two files.
+
+Once it's done, the installation is almost complete ! 
+The ultimate step is to add a UI component to launch the code from the Houdini 
+interface. To do so, you can create a new tool shelf and add the `launch_kitsu` 
+function (from the `123.py` file) to it.
+And that's it ! You can now launch the gazu publisher from Houdini:
+
+![](_static/houdini_launch.gif)
+
+
+If you want it, the path of our little fox icon is `gazupublisher/resources/images/logo_kitsu.png`
 
 
 ## Troubleshooting
