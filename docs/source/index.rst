@@ -70,6 +70,7 @@ Contents
    events
    specs
    publisher
+   dccutils
 
 Function References
 ===================

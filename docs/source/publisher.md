@@ -1,4 +1,4 @@
-# Gazu publisher
+# Kitsu publisher
 
 The gazu publisher is a tool to send previews to Kitsu from your DCC.
 
