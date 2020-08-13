@@ -57,6 +57,7 @@ events emitted that way:
 * shot:casting-update
 * task:unassign
 * task:assign
+* task:status-change
 
 ## Event table
 
