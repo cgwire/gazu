@@ -20,8 +20,8 @@ To change task status, you have to post a new comment with the desired status.
 Comments without text are allowed too:
 
 ```python
-modeling = gazu.asset.get_task_type_by_name(asset, "modeling")
-wip = gazu.asset.get_task_status_by_short_name(asset, "wip")
+modeling = gazu.task.get_task_type_by_name("modeling")
+wip = gazu.task.get_task_status_by_short_name(asset, "wip")
 
 project = gazu.project.get_project_by_name("Caminandes")
 asset = gazu.asset.get_asset_by_name(asset, "Lama")
@@ -33,7 +33,7 @@ comment = gazu.task.add_comment(task, wip, "Change status to work in progress")
 ## Post a preview
 
 We assume here you already have retrieved related task and comment. To add a
-preview you need to specify you which to upload as a new preview:
+preview you need to specify what you which to upload as a new preview:
 
 ```python
 preview_file = gazu.task.add_preview(
@@ -41,7 +41,7 @@ preview_file = gazu.task.add_preview(
     comment,
     "/path/to/my/file.mp4"
 )
-gazu.task.set_main_preview(asset, preview_file) #  Set preview as asset thumbnail
+gazu.task.set_main_preview(preview_file) #  Set preview as asset thumbnail
 ```
 
 ## Deal with Persons 

@@ -14,9 +14,12 @@ retrieve either a list of dicts or a dict depending on the query.
 Each model instance provides at least the same three fields:
 
 * id: a unique id made of letters, hyphens and numbers
-* type: the model instance type
 * created\_at: the creation date
 * updated\_at: the update date
+
+They share another field that is dynamically generated:
+
+* type: the model instance type
 
 ### Models
 
