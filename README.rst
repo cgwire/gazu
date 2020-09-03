@@ -52,7 +52,7 @@ Documentation
 
 Documentation is available on a dedicated website:
 
-`https://gazu.cg-wire.com/ <https://gazu.cg-wire.com>`__
+`https://gazu.cg-wire.com <https://gazu.cg-wire.com>`__
 
 
 Projects based on Gazu
@@ -79,21 +79,16 @@ contract <https://rfc.zeromq.org/spec:42/C4>`__.
 
 Code must follow the pep8 convention.
 
-Sponsors
-~~~~~~~~
-
-|Unit Image Logo|
-|Les Fées Spéciales Logo|
-
 Contributors
 ------------
 
-* @aboellinger (Unit Image)
+* @aboellinger (Xilam)
 * @BigRoy (Colorbleed)
 * @col-one (Allegorithmic)
 * @flablog (Les Fées Spéciales)
 * @frankrousseau (CGWire) - *maintainer*
 * @kguyaux
+* @LedruRollin (Xilam)
 * @g-Lul (TNZPV)
 * @jdrese (HEAJ)
 * @pcharmoille (Unit Image)
@@ -122,6 +117,3 @@ Visit `cg-wire.com <https://cg-wire.com>`__ for more information.
    :target: https://slack.cg-wire.com
 .. |CGWire Logo| image:: https://zou.cg-wire.com/cgwire.png
    :target: https://cg-wire.com
-.. |Unit Image Logo| image:: https://www.cg-wire.com/images/logo-unit-image.png
-   :target: https://www.unit-image.fr
-.. |Les Fées Spéciales Logo| image:: https://www.cg-wire.com/images/logo-les-fees-speciales.png
