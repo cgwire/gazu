@@ -125,6 +125,19 @@ def get_all_working_files_for_entity(entity, task=None, name=None):
 
 
 @cache
+def get_preview_file(preview_file_id):
+    """
+    Args:
+        preview_file_id (str): ID of claimed preview file.
+
+    Returns:
+        dict: Preview file corresponding to given ID.
+    """
+    return client.fetch_one("preview-files", preview_file_id)
+
+
+
+@cache
 def get_all_preview_files_for_task(task):
     """
     Retrieves all the preview files for a given task.
