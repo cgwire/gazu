@@ -1,27 +1,29 @@
 from .helpers import normalize_model_parameter
 
-from . import client
+from . import client as raw
 from . import project as gazu_project
 
 from .sorting import sort_by_name
 
 from .cache import cache
 
+default = raw.default_client
+
 
 @cache
-def all_assets_for_open_projects():
+def all_assets_for_open_projects(client=default):
     """
     Returns:
         list: Assets stored in the database for open projects.
     """
     all_assets = []
-    for project in gazu_project.all_open_projects():
-        all_assets.extend(all_assets_for_project(project))
+    for project in gazu_project.all_open_projects(client=default):
+        all_assets.extend(all_assets_for_project(project, client))
     return sort_by_name(all_assets)
 
 
 @cache
-def all_assets_for_project(project):
+def all_assets_for_project(project, client=default):
     """
     Args:
         project (str / dict): The project dict or the project ID.
@@ -32,15 +34,14 @@ def all_assets_for_project(project):
     project = normalize_model_parameter(project)
 
     if project is None:
-        return sort_by_name(client.fetch_all("assets/all"))
+        return sort_by_name(raw.fetch_all("assets/all", client=client))
     else:
-        return sort_by_name(
-            client.fetch_all("projects/%s/assets" % project["id"])
-        )
+        path = "projects/%s/assets" % project["id"]
+        return sort_by_name(raw.fetch_all(path, client=client))
 
 
 @cache
-def all_assets_for_episode(episode):
+def all_assets_for_episode(episode, client=default):
     """
     Args:
         episode (str / dict): The episode dict or the episode ID.
@@ -51,12 +52,12 @@ def all_assets_for_episode(episode):
     episode = normalize_model_parameter(episode)
 
     return sort_by_name(
-        client.fetch_all("assets", {"source_id": episode["id"]})
+        raw.fetch_all("assets", {"source_id": episode["id"]}, client=client)
     )
 
 
 @cache
-def all_assets_for_shot(shot):
+def all_assets_for_shot(shot, client=default):
     """
     Args:
         shot (str / dict): The shot dict or the shot ID.
@@ -65,11 +66,12 @@ def all_assets_for_shot(shot):
         list: Assets stored in the database for given shot.
     """
     shot = normalize_model_parameter(shot)
-    return sort_by_name(client.fetch_all("shots/%s/assets" % shot["id"]))
+    path = "shots/%s/assets" % shot["id"]
+    return sort_by_name(raw.fetch_all(path, client=client))
 
 
 @cache
-def all_assets_for_project_and_type(project, asset_type):
+def all_assets_for_project_and_type(project, asset_type, client=default):
     """
     Args:
         project (str / dict): The project dict or the project ID.
@@ -86,12 +88,12 @@ def all_assets_for_project_and_type(project, asset_type):
     path = "projects/{project_id}/asset-types/{asset_type_id}/assets"
     path = path.format(project_id=project_id, asset_type_id=asset_type_id)
 
-    assets = client.fetch_all(path)
+    assets = raw.fetch_all(path, client=client)
     return sort_by_name(assets)
 
 
 @cache
-def get_asset_by_name(project, name, asset_type=None):
+def get_asset_by_name(project, name, asset_type=None, client=default):
     """
     Args:
         project (str / dict): The project dict or the project ID.
@@ -113,11 +115,11 @@ def get_asset_by_name(project, name, asset_type=None):
             "name": name,
             "entity_type_id": asset_type["id"],
         }
-    return client.fetch_first(path, params)
+    return raw.fetch_first(path, params, client=client)
 
 
 @cache
-def get_asset(asset_id):
+def get_asset(asset_id, client=default):
     """
     Args:
         asset_id (str): Id of claimed asset.
@@ -125,11 +127,11 @@ def get_asset(asset_id):
     Returns:
         dict: Asset matching given ID.
     """
-    return client.fetch_one("assets", asset_id)
+    return raw.fetch_one("assets", asset_id, client=client)
 
 
 @cache
-def get_asset_url(asset):
+def get_asset_url(asset, client=default):
     """
     Args:
         asset (str / dict): The asset dict or the asset ID.
@@ -140,14 +142,21 @@ def get_asset_url(asset):
     asset = normalize_model_parameter(asset)
     path = "{host}/productions/{project_id}/assets/{asset_id}/"
     return path.format(
-        host=client.get_zou_url_from_host(),
+        host=raw.get_api_url_from_host(),
         project_id=asset["project_id"],
         asset_id=asset["id"],
+        client=client
     )
 
 
 def new_asset(
-    project, asset_type, name, description="", extra_data={}, episode=None
+    project,
+    asset_type,
+    name,
+    description="",
+    extra_data={},
+    episode=None,
+    client=default
 ):
     """
     Create a new asset in the database for given project and asset type.
@@ -172,17 +181,18 @@ def new_asset(
     if episode is not None:
         data["episode_id"] = episode["id"]
 
-    asset = get_asset_by_name(project, name, asset_type)
+    asset = get_asset_by_name(project, name, asset_type, client=client)
     if asset is None:
-        asset = client.post(
+        asset = raw.post(
             "data/projects/%s/asset-types/%s/assets/new"
             % (project["id"], asset_type["id"]),
             data,
+            client=client
         )
     return asset
 
 
-def update_asset(asset):
+def update_asset(asset, client=default):
     """
     Save given asset data into the API. It assumes that the asset already
     exists.
@@ -192,10 +202,10 @@ def update_asset(asset):
     """
     if "episode_id" in asset:
         asset["source_id"] = asset["episode_id"]
-    return client.put("data/entities/%s" % asset["id"], asset)
+    return raw.put("data/entities/%s" % asset["id"], asset, client=client)
 
 
-def remove_asset(asset, force=False):
+def remove_asset(asset, force=False, client=default):
     """
     Remove given asset from database.
 
@@ -207,20 +217,20 @@ def remove_asset(asset, force=False):
     params = {}
     if force:
         params = {"force": "true"}
-    return client.delete(path, params)
+    return raw.delete(path, params, client=client)
 
 
 @cache
-def all_asset_types():
+def all_asset_types(client=default):
     """
     Returns:
         list: Asset types stored in the database.
     """
-    return sort_by_name(client.fetch_all("asset-types"))
+    return sort_by_name(raw.fetch_all("asset-types", client=client))
 
 
 @cache
-def all_asset_types_for_project(project):
+def all_asset_types_for_project(project, client=default):
     """
     Args:
         project (str / dict): The project dict or the project ID.
@@ -228,13 +238,12 @@ def all_asset_types_for_project(project):
     Returns:
         list: Asset types from assets listed in given project.
     """
-    return sort_by_name(
-        client.fetch_all("projects/%s/asset-types" % project["id"])
-    )
+    path = "projects/%s/asset-types" % project["id"]
+    return sort_by_name(raw.fetch_all(path, client=client))
 
 
 @cache
-def all_asset_types_for_shot(shot):
+def all_asset_types_for_shot(shot, client=default):
     """
     Args:
         shot (str / dict): The shot dict or the shot ID.
@@ -242,11 +251,12 @@ def all_asset_types_for_shot(shot):
     Returns:
         list: Asset types from assets casted in given shot.
     """
-    return sort_by_name(client.fetch_all("shots/%s/asset-types" % shot["id"]))
+    path = "shots/%s/asset-types" % shot["id"]
+    return sort_by_name(raw.fetch_all(path, client=client))
 
 
 @cache
-def get_asset_type(asset_id):
+def get_asset_type(asset_id, client=default):
     """
     Args:
         asset_type_id (str): Id of claimed asset type.
@@ -254,11 +264,11 @@ def get_asset_type(asset_id):
     Returns:
         dict: Asset Type matching given ID.
     """
-    return client.fetch_one("asset-types", asset_id)
+    return raw.fetch_one("asset-types", asset_id, client=client)
 
 
 @cache
-def get_asset_type_by_name(name):
+def get_asset_type_by_name(name, client=default):
     """
     Args:
         asset_type_id (str): Id of claimed asset type.
@@ -266,10 +276,10 @@ def get_asset_type_by_name(name):
     Returns:
         dict: Asset Type matching given name.
     """
-    return client.fetch_first("entity-types", {"name": name})
+    return raw.fetch_first("entity-types", {"name": name}, client=client)
 
 
-def new_asset_type(name):
+def new_asset_type(name, client=default):
     """
     Create a new asset type in the database.
 
@@ -280,13 +290,15 @@ def new_asset_type(name):
         (dict): Created asset type.
     """
     data = {"name": name}
-    asset_type = client.fetch_first("entity-types", {"name": name})
+    asset_type = raw.fetch_first(
+        "entity-types", {"name": name}, client=client
+    )
     if asset_type is None:
-        asset_type = client.create("entity-types", data)
+        asset_type = raw.create("entity-types", data, client=client)
     return asset_type
 
 
-def update_asset_type(asset_type):
+def update_asset_type(asset_type, client=default):
     """
     Save given asset type data into the API. It assumes that the asset type
     already exists.
@@ -295,10 +307,11 @@ def update_asset_type(asset_type):
         asset_type (dict): Asset Type to save.
     """
     data = {"name": asset_type["name"]}
-    return client.put("data/asset-types/%s" % asset_type["id"], data)
+    path = "data/asset-types/%s" % asset_type["id"]
+    return raw.put(path, data, client=client)
 
 
-def remove_asset_type(asset_type):
+def remove_asset_type(asset_type, client=default):
     """
     Remove given asset type from database.
 
@@ -306,11 +319,12 @@ def remove_asset_type(asset_type):
         asset_type (dict): Asset type to remove.
     """
     asset_type = normalize_model_parameter(asset_type)
-    return client.delete("data/asset-types/%s" % asset_type["id"])
+    path = "data/asset-types/%s" % asset_type["id"]
+    return raw.delete(path, client=client)
 
 
 @cache
-def get_asset_instance(asset_instance_id):
+def get_asset_instance(asset_instance_id, client=default):
     """
     Args:
         asset_instance_id (str): Id of claimed asset instance.
@@ -318,11 +332,11 @@ def get_asset_instance(asset_instance_id):
     Returns:
         dict: Asset Instance matching given ID.
     """
-    return client.fetch_one("asset-instances", asset_instance_id)
+    return raw.fetch_one("asset-instances", asset_instance_id, client=client)
 
 
 @cache
-def all_shot_asset_instances_for_asset(asset):
+def all_shot_asset_instances_for_asset(asset, client=default):
     """
     Args:
         asset (str / dict): The asset dict or the asset ID.
@@ -331,10 +345,11 @@ def all_shot_asset_instances_for_asset(asset):
         list: Asset instances existing for a given asset.
     """
     asset = normalize_model_parameter(asset)
-    return client.fetch_all("assets/%s/shot-asset-instances" % asset["id"])
+    path = "assets/%s/shot-asset-instances" % asset["id"]
+    return raw.fetch_all(path, client=client)
 
 
-def enable_asset_instance(asset_instance):
+def enable_asset_instance(asset_instance, client=default):
     """
     Set active flag of given asset instance to True.
 
@@ -343,10 +358,11 @@ def enable_asset_instance(asset_instance):
     """
     asset_instance = normalize_model_parameter(asset_instance)
     data = {"active": True}
-    return client.put("asset-instances/%s" % asset_instance["id"], data)
+    path = "asset-instances/%s" % asset_instance["id"]
+    return raw.put(path, data, client=client)
 
 
-def disable_asset_instance(asset_instance):
+def disable_asset_instance(asset_instance, client=default):
     """
     Set active flag of given asset instance to False.
 
@@ -355,11 +371,12 @@ def disable_asset_instance(asset_instance):
     """
     asset_instance = normalize_model_parameter(asset_instance)
     data = {"active": False}
-    return client.put("asset-instances/%s" % asset_instance["id"], data)
+    path = "asset-instances/%s" % asset_instance["id"]
+    return raw.put(path, data, client=client)
 
 
 @cache
-def all_scene_asset_instances_for_asset(asset):
+def all_scene_asset_instances_for_asset(asset, client=default):
     """
     Args:
         asset (str / dict): The asset dict or the asset ID.
@@ -368,11 +385,12 @@ def all_scene_asset_instances_for_asset(asset):
         list: Scene asset instances existing for a given asset.
     """
     asset = normalize_model_parameter(asset)
-    return client.fetch_all("assets/%s/scene-asset-instances" % asset["id"])
+    path = "assets/%s/scene-asset-instances" % asset["id"]
+    return raw.fetch_all(path, client=client)
 
 
 @cache
-def all_asset_instances_for_shot(shot):
+def all_asset_instances_for_shot(shot, client=default):
     """
     Args:
         shot (str / dict): The shot dict or the shot ID.
@@ -380,11 +398,12 @@ def all_asset_instances_for_shot(shot):
     Returns:
         list: Asset instances existing for a given shot.
     """
-    return client.fetch_all("shots/%s/asset-instances" % shot["id"])
+    path = "shots/%s/asset-instances" % shot["id"]
+    return raw.fetch_all(path, client=client)
 
 
 @cache
-def all_asset_instances_for_asset(asset):
+def all_asset_instances_for_asset(asset, client=default):
     """
     Args:
         asset (str / dict): The asset dict or the asset ID.
@@ -393,10 +412,16 @@ def all_asset_instances_for_asset(asset):
         list: Asset instances existing for a given asset.
     """
     asset = normalize_model_parameter(asset)
-    return client.fetch_all("assets/%s/asset-asset-instances" % asset["id"])
+    path = "assets/%s/asset-asset-instances" % asset["id"]
+    return raw.fetch_all(path, client=client)
 
 
-def new_asset_asset_instance(asset, asset_to_instantiate, description=""):
+def new_asset_asset_instance(
+    asset,
+    asset_to_instantiate,
+    description="",
+    client=default
+):
     """
     Creates a new asset instance for given asset. The instance number is
     automatically generated (increment highest number).
@@ -415,6 +440,8 @@ def new_asset_asset_instance(asset, asset_to_instantiate, description=""):
         "asset_to_instantiate_id": asset_to_instantiate["id"],
         "description": description,
     }
-    return client.post(
-        "data/assets/%s/asset-asset-instances" % asset["id"], data
+    return raw.post(
+        "data/assets/%s/asset-asset-instances" % asset["id"],
+        data,
+        client=client
     )

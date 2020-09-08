@@ -1,9 +1,11 @@
-from . import client
+from . import client as raw
 
 from .helpers import normalize_model_parameter
 
+default = raw.default_client
 
-def update_shot_casting(project, shot, casting):
+
+def update_shot_casting(project, shot, casting, client=default):
     """
     Change casting of given shot with given casting (list of asset ids displayed
     into the shot).
@@ -19,10 +21,10 @@ def update_shot_casting(project, shot, casting):
     shot = normalize_model_parameter(shot)
     project = normalize_model_parameter(project)
     path = "data/projects/%s/entities/%s/casting" % (project["id"], shot["id"])
-    return client.put(path, casting)
+    return raw.put(path, casting, client=client)
 
 
-def update_asset_casting(project, asset, casting):
+def update_asset_casting(project, asset, casting, client=default):
     """
     Change casting of given asset with given casting (list of asset ids
     displayed into the asset).
@@ -41,10 +43,10 @@ def update_asset_casting(project, asset, casting):
         project["id"],
         asset["id"],
     )
-    return client.put(path, casting)
+    return raw.put(path, casting, client=client)
 
 
-def get_asset_type_casting(project, asset_type):
+def get_asset_type_casting(project, asset_type, client=default):
     """
     Return casting for given asset_type.
     `casting = {
@@ -66,10 +68,10 @@ def get_asset_type_casting(project, asset_type):
         project["id"],
         asset_type["id"],
     )
-    return client.get(path)
+    return raw.get(path, client=client)
 
 
-def get_sequence_casting(sequence):
+def get_sequence_casting(sequence, client=default):
     """
     Return casting for given sequence.
     `casting = {
@@ -87,15 +89,15 @@ def get_sequence_casting(sequence):
         sequence["project_id"],
         sequence["id"],
     )
-    return client.get(path)
+    return raw.get(path, client=client)
 
 
-def get_shot_casting(shot):
+def get_shot_casting(shot, client=default):
     """
     Return casting for given shot.
     `[{"asset_id": "asset-1", "nb_occurences": 3}]}`
     Args:
-        shot (dict): The shot dict
+        shot (dict, client=default): The shot dict
 
     Returns:
         dict: Casting of the given shot.
@@ -104,15 +106,15 @@ def get_shot_casting(shot):
         shot["project_id"],
         shot["id"],
     )
-    return client.get(path)
+    return raw.get(path, client=client)
 
 
-def get_asset_casting(asset):
+def get_asset_casting(asset, client=default):
     """
     Return casting for given asset.
     `[{"asset_id": "asset-1", "nb_occurences": 3}]}`
     Args:
-        asset (dict): The asset dict
+        asset (dict, client=default): The asset dict
 
     Returns:
         dict: Casting for given asset.
@@ -121,17 +123,17 @@ def get_asset_casting(asset):
         asset["project_id"],
         asset["id"],
     )
-    return client.get(path)
+    return raw.get(path, client=client)
 
 
-def get_asset_cast_in(asset):
+def get_asset_cast_in(asset, client=default):
     """
     Return shot list where given asset is casted.
     Args:
-        asset (dict): The asset dict
+        asset (dict, client=default): The asset dict
 
     Returns:
         dict: Shot list where given asset is casted.
     """
     path = "/data/assets/%s/cast-in" % asset["id"]
-    return client.get(path)
+    return raw.get(path, client=client)

@@ -16,6 +16,19 @@ from .exception import (
     UploadFailedException,
 )
 
+
+class KitsuClient(object):
+    def __init__(self, host):
+        self.tokens = {"access_token": "", "refresh_token": ""}
+        self.session = requests.Session()
+        self.host = host
+        self.event_host = host
+
+
+def create_client(host):
+    return KitsuClient(host)
+
+
 try:
     import requests
 
@@ -23,36 +36,31 @@ try:
     requests.models.complexjson.dumps = functools.partial(
         json.dumps, cls=CustomJSONEncoder
     )
-    requests_session = requests.Session()
+    host = "http://gazu.change.serverhost/api"
+    default_client = create_client(host)
 except:
     print("Warning, running in setup mode!")
 
 
-HOST = "http://gazu.change.serverhost/api"
-EVENT_HOST = None
-
-tokens = {"access_token": "", "refresh_token": ""}
-
-
-def host_is_up():
+def host_is_up(client=default_client):
     """
     Returns:
         True if the host is up.
     """
     try:
-        response = requests_session.head(HOST)
+        response = client.session.head(client.host)
     except:
         return False
     return response.status_code == 200
 
 
-def host_is_valid():
+def host_is_valid(client=default_client):
     """
     Check if the host is valid by simulating a fake login.
     Returns:
         True if the host is valid.
     """
-    if not host_is_up():
+    if not host_is_up(client):
         return False
     try:
         post("auth/login", {"email": "", "password": ""})
@@ -60,71 +68,66 @@ def host_is_valid():
         return type(exc) == ParameterException
 
 
-def get_host():
+def get_host(client=default_client):
     """
     Returns:
         Host on which requests are sent.
     """
-    return HOST
+    return client.host
 
 
-def get_zou_url_from_host():
+def get_api_url_from_host(client=default_client):
     """
     Returns:
         Zou url, retrieved from host.
     """
-    return HOST[:-4]
+    return client.host[:-4]
 
 
-def set_host(new_host):
+def set_host(new_host, client=default_client):
     """
     Returns:
         Set currently configured host on which requests are sent.
     """
-    global HOST
-    HOST = new_host
+    client.host = new_host
+    return client.host
 
 
-def get_event_host():
+def get_event_host(client=default_client):
     """
     Returns:
         Host on which listening for events.
     """
-    if EVENT_HOST is None:
-        return HOST
-    else:
-        return EVENT_HOST
+    return client.event_host or client.host
 
 
-def set_event_host(new_host):
+def set_event_host(new_host, client=default_client):
     """
     Returns:
         Set currently configured host on which listening for events.
     """
-    global EVENT_HOST
-    EVENT_HOST = new_host
+    client.event_host = new_host
+    return client.event_host
 
 
-def set_tokens(new_tokens):
+def set_tokens(new_tokens, client=default_client):
     """
     Store authentication token to reuse them for all requests.
 
     Args:
         new_tokens (dict): Tokens to use for authentication.
     """
-    global tokens
-    tokens = new_tokens
-    return tokens
+    client.tokens = new_tokens
+    return client.tokens
 
 
-def make_auth_header():
+def make_auth_header(client=default_client):
     """
     Returns:
         Headers required to authenticate.
     """
-    global tokens
-    if "access_token" in tokens:
-        return {"Authorization": "Bearer %s" % tokens["access_token"]}
+    if "access_token" in client.tokens:
+        return {"Authorization": "Bearer %s" % client.tokens["access_token"]}
     else:
         return {}
 
@@ -140,7 +143,7 @@ def url_path_join(*items):
     return "/".join([item.lstrip("/").rstrip("/") for item in items])
 
 
-def get_full_url(path):
+def get_full_url(path, client=default_client):
     """
     Args:
         path (str): The path to integrate to host url.
@@ -148,10 +151,31 @@ def get_full_url(path):
     Returns:
         The result of joining configured host url with given path.
     """
-    return url_path_join(get_host(), path)
+    return url_path_join(get_host(client), path)
 
 
-def get(path, json_response=True, params=None):
+def build_path_with_params(path, params):
+    """
+    Add params to a path using urllib encoding
+
+    Args:
+        path (str): The url base path
+        params (dict): The parameters to add as a dict
+
+    Returns:
+        str: the builded path
+    """
+    if not params:
+        return path
+
+    if hasattr(urllib, "urlencode"):
+        path = "%s?%s" % (path, urllib.urlencode(params))
+    else:
+        path = "%s?%s" % (path, urllib.parse.urlencode(params))
+    return path
+
+
+def get(path, json_response=True, params=None, client=default_client):
     """
     Run a get request toward given path for configured host.
 
@@ -160,8 +184,9 @@ def get(path, json_response=True, params=None):
     """
     path = build_path_with_params(path, params)
 
-    response = requests_session.get(
-        get_full_url(path), headers=make_auth_header()
+    response = client.session.get(
+        get_full_url(path, client=client),
+        headers=make_auth_header(client=client)
     )
     check_status(response, path)
 
@@ -171,35 +196,38 @@ def get(path, json_response=True, params=None):
         return response.text
 
 
-def post(path, data):
+def post(path, data, client=default_client):
     """
     Run a post request toward given path for configured host.
 
     Returns:
         The request result.
     """
-    response = requests_session.post(
-        get_full_url(path), json=data, headers=make_auth_header()
+    response = client.session.post(
+        get_full_url(path, client), json=data,
+        headers=make_auth_header(client=client)
     )
     check_status(response, path)
     return response.json()
 
 
-def put(path, data):
+def put(path, data, client=default_client):
     """
     Run a put request toward given path for configured host.
 
     Returns:
         The request result.
     """
-    response = requests_session.put(
-        get_full_url(path), json=data, headers=make_auth_header()
+    response = client.session.put(
+        get_full_url(path, client),
+        json=data,
+        headers=make_auth_header(client=client)
     )
     check_status(response, path)
     return response.json()
 
 
-def delete(path, params=None):
+def delete(path, params=None, client=default_client):
     """
     Run a get request toward given path for configured host.
 
@@ -208,8 +236,9 @@ def delete(path, params=None):
     """
     path = build_path_with_params(path, params)
 
-    response = requests_session.delete(
-        get_full_url(path), headers=make_auth_header()
+    response = client.session.delete(
+        get_full_url(path, client),
+        headers=make_auth_header(client=client)
     )
     check_status(response, path)
     return response.text
@@ -269,7 +298,7 @@ def check_status(request, path):
     return status_code
 
 
-def fetch_all(path, params=None):
+def fetch_all(path, params=None, client=default_client):
     """
     Args:
         path (str): The path for which we want to retrieve all entries.
@@ -278,10 +307,10 @@ def fetch_all(path, params=None):
         list: All entries stored in database for a given model. You can add a
         filter to the model name like this: "tasks?project_id=project-id"
     """
-    return get(url_path_join("data", path), params=params)
+    return get(url_path_join("data", path), params=params, client=client)
 
 
-def fetch_first(path, params=None):
+def fetch_first(path, params=None, client=default_client):
     """
     Args:
         path (str): The path for which we want to retrieve the first entry.
@@ -289,14 +318,14 @@ def fetch_first(path, params=None):
     Returns:
         dict: The first entry for which a model is required.
     """
-    entries = get(url_path_join("data", path), params=params)
+    entries = get(url_path_join("data", path), params=params, client=client)
     if len(entries) > 0:
         return entries[0]
     else:
         return None
 
 
-def fetch_one(model_name, id):
+def fetch_one(model_name, id, client=default_client):
     """
     Function dedicated at targeting routes that returns a single model instance.
 
@@ -307,20 +336,20 @@ def fetch_one(model_name, id):
     Returns:
         dict: The model instance matching id and model name.
     """
-    return get(url_path_join("data", model_name, id))
+    return get(url_path_join("data", model_name, id), client=client)
 
 
-def create(model_name, data):
+def create(model_name, data, client=default_client):
     """
     Create an entry for given model and data.
 
     Returns:
         dict: Created entry
     """
-    return post(url_path_join("data", model_name), data)
+    return post(url_path_join("data", model_name), data, client=client)
 
 
-def upload(path, file_path, data={}, extra_files=[]):
+def upload(path, file_path, data={}, extra_files=[], client=default_client):
     """
     Upload file located at *file_path* to given url *path*.
 
@@ -331,10 +360,13 @@ def upload(path, file_path, data={}, extra_files=[]):
     Returns:
         Response: Request response object.
     """
-    url = get_full_url(path)
+    url = get_full_url(path, client)
     files = _build_file_dict(file_path, extra_files)
-    response = requests_session.post(
-        url, data=data, headers=make_auth_header(), files=files
+    response = client.session.post(
+        url,
+        data=data,
+        headers=make_auth_header(client=client),
+        files=files
     )
     check_status(response, path)
     result = response.json()
@@ -352,7 +384,7 @@ def _build_file_dict(file_path, extra_files):
     return files
 
 
-def download(path, file_path):
+def download(path, file_path, client=default_client):
     """
     Download file located at *file_path* to given url *path*.
 
@@ -364,66 +396,52 @@ def download(path, file_path):
         Response: Request response object.
 
     """
-    url = get_full_url(path)
-    with requests_session.get(
-        url, headers=make_auth_header(), stream=True
+    url = get_full_url(path, client)
+    with client.session.get(
+        url,
+        headers=make_auth_header(client=client),
+        stream=True
     ) as response:
         with open(file_path, "wb") as target_file:
             shutil.copyfileobj(response.raw, target_file)
 
 
-def get_api_version():
-    """
-    Returns:
-        str: Current version of the API.
-    """
-    return get("")["version"]
-
-
-def get_current_user():
-    """
-    Returns:
-        dict: User database information for user linked to auth tokens.
-    """
-    return get("auth/authenticated")["user"]
-
-
-def build_path_with_params(path, params):
-    """
-    Add params to a path using urllib encoding
-
-    Args:
-        path (str): The url base path
-        params (dict): The parameters to add as a dict
-
-    Returns:
-        str: the builded path
-    """
-    if not params:
-        return path
-
-    if hasattr(urllib, "urlencode"):
-        path = "%s?%s" % (path, urllib.urlencode(params))
-    else:
-        path = "%s?%s" % (path, urllib.parse.urlencode(params))
-    return path
-
-
-def get_file_data_from_url(url, full=False):
+def get_file_data_from_url(url, full=False, client=default_client):
     """
     Return data found at given url.
     """
     if not full:
         url = get_full_url(url)
-    response = requests.get(url, stream=True, headers=make_auth_header())
+    response = requests.get(
+        url,
+        stream=True,
+        headers=make_auth_header(client=client),
+        client=client
+    )
     check_status(response, url)
     return response
 
 
-def import_data(model_name, data):
+def import_data(model_name, data, client=default_client):
     """
     Args:
         model_name (str): The data model to import
         data (dict): The data to import
     """
-    return post("/import/kitsu/%s" % model_name, data)
+    return post("/import/kitsu/%s" % model_name, data, client=client)
+
+
+def get_api_version(client=default_client):
+    """
+    Returns:
+        str: Current version of the API.
+    """
+    return get("", client)["version"]
+
+
+def get_current_user(client=default_client):
+    """
+    Returns:
+        dict: User database information for user linked to auth tokens.
+    """
+    return get("auth/authenticated", client)["user"]
