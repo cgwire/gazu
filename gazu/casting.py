@@ -97,7 +97,7 @@ def get_shot_casting(shot, client=default):
     Return casting for given shot.
     `[{"asset_id": "asset-1", "nb_occurences": 3}]}`
     Args:
-        shot (dict, client=default): The shot dict
+        shot (dict): The shot dict
 
     Returns:
         dict: Casting of the given shot.
@@ -114,7 +114,7 @@ def get_asset_casting(asset, client=default):
     Return casting for given asset.
     `[{"asset_id": "asset-1", "nb_occurences": 3}]}`
     Args:
-        asset (dict, client=default): The asset dict
+        asset (dict): The asset dict
 
     Returns:
         dict: Casting for given asset.
@@ -130,10 +130,24 @@ def get_asset_cast_in(asset, client=default):
     """
     Return shot list where given asset is casted.
     Args:
-        asset (dict, client=default): The asset dict
+        asset (dict): The asset dict
 
     Returns:
         dict: Shot list where given asset is casted.
     """
+    asset = normalize_model_parameter(asset)
     path = "/data/assets/%s/cast-in" % asset["id"]
+    return raw.get(path, client=client)
+
+
+def all_entity_links_for_project(project, client=default):
+    """
+    Args:
+        project (dict): The project
+
+    Returns:
+        dict: Entity links for given project.
+    """
+    project = normalize_model_parameter(project)
+    path = "/data/projects/%s/entity-links" % project["id"]
     return raw.get(path, client=client)
