@@ -674,6 +674,22 @@ class FilesTestCase(unittest.TestCase):
                     os.path.getsize("./tests/fixtures/v1.png"),
                 )
 
+    def test_download_attachment_file(self):
+        with open("./tests/fixtures/v1.png", "rb") as attachment_file:
+            with requests_mock.mock() as mock:
+                path = "data/attachment-files/{}/file".format(
+                    fakeid("attachment-1")
+                )
+                mock.get(gazu.client.get_full_url(path), body=attachment_file)
+                gazu.files.download_attachment_file(
+                    fakeid("attachment-1"), "./test.png"
+                )
+                self.assertTrue(os.path.exists("./test.png"))
+                self.assertEqual(
+                    os.path.getsize("./test.png"),
+                    os.path.getsize("./tests/fixtures/v1.png"),
+                )
+
     def test_download_preview_file_thumbnail(self):
         with open("./tests/fixtures/v1.png", "rb") as thumbnail_file:
             with requests_mock.mock() as mock:
