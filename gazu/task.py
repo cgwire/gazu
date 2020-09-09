@@ -880,3 +880,16 @@ def get_task_url(task, client=default):
         project_id=task["project_id"],
         task_id=task["id"],
     )
+
+
+def all_tasks_for_project(project, client=default):
+    """
+    Args:
+        project (str / dict): The project
+
+    Returns:
+        dict: Tasks related to given project.
+    """
+    project = normalize_model_parameter(project)
+    path = "/data/projects/%s/tasks" % project["id"]
+    return raw.get(path, client=client)
