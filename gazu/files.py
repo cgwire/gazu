@@ -1011,6 +1011,21 @@ def download_preview_file(preview_file, file_path):
     )
 
 
+def download_attachment_file(attachment_file, file_path):
+    """
+    Download given attachment file and save it at given location.
+
+    Args:
+        attachment_file (str / dict): The attachment file dict or ID.
+        file_path (str): Location on hard drive where to save the file.
+    """
+    attachment_file = normalize_model_parameter(attachment_file)
+    return client.download(
+        "data/attachment-files/%s/file" % (attachment_file["id"]),
+        file_path,
+    )
+
+
 def download_preview_file_thumbnail(preview_file, file_path):
     """
     Download given preview file thumbnail and save it at given location.
