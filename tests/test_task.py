@@ -259,8 +259,8 @@ class TaskTestCase(unittest.TestCase):
             self.assertEqual(time_spent["duration"], 7200)
 
     def test_all_task_types_for_asset(self):
-        path = "data/assets/asset-01/task-types"
         with requests_mock.mock() as mock:
+            path = "data/assets/asset-01/task-types"
             mock.get(
                 gazu.client.get_full_url(path), text='[{"name": "Modeling"}]'
             )
@@ -391,8 +391,8 @@ class TaskTestCase(unittest.TestCase):
             self.assertIn("person-01", task["assignees"])
 
     def test_new_task_type(self):
-        task_type_name = "task-type-name"
         with requests_mock.mock() as mock:
+            task_type_name = "task-type-name"
             task_type = {"id": "task-type-01", "name": task_type_name}
             mock.post(
                 gazu.client.get_full_url("data/task-types"),
@@ -401,10 +401,10 @@ class TaskTestCase(unittest.TestCase):
             self.assertEqual(gazu.task.new_task_type(task_type), task_type)
 
     def test_new_task_status(self):
-        name = "name"
-        short_name = "short"
-        color = "#000000"
         with requests_mock.mock() as mock:
+            name = "name"
+            short_name = "short"
+            color = "#000000"
             status = {
                 "id": "status-1",
                 "name": name,

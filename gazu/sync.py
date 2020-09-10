@@ -53,15 +53,12 @@ def get_model_list_diff(source_list, target_list):
         and one containing the models that should not be in the target list.
     """
     missing = []
-    unexpected = []
     source_ids = {m["id"]: True for m in source_list}
     target_ids = {m["id"]: True for m in target_list}
     for model in source_list:
         if model["id"] not in target_ids:
             missing.append(model)
-    for model in target_list:
-        if model["id"] not in source_ids:
-            unexpected.append(model)
+    unexpected = [model for model in target_list if model["id"] not in source_ids]
     return (missing, unexpected)
 
 
