@@ -25,6 +25,7 @@ Set API server hostname:
 gazu.client.set_host("pipeline-api")
 ```
 
+
 ### Authentication
 
 Make the client log in:
@@ -50,7 +51,6 @@ Get API version:
 ```python
 gazu.client.get_api_version()
 ```
-
 
 ### Raw request functions
 
@@ -81,6 +81,17 @@ Performs a DELETE request on given path of the API:
 gazu.client.delete("data/projects/<project-id>")
 ```
 
+### Multi client
+
+Gazu acts a singleton. If you want several instances of the Kitsu client, 
+you can create them and pass them as parameter when you need it:
+
+```python
+source_client = gazu.create_client("https://mysource.kitsu")
+gazu.client.log_in("user-source@mail.com", "default", client=source_client)
+gazu.client.get("/version", client=source_client)
+gazu.project.all_open_projects(client=source_client)
+```
 
 ### Files functions
 

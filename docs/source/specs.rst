@@ -90,6 +90,11 @@ gazu.user
 .. automodule:: gazu.user
     :members:
 
+gazu.sync
+-----------
+
+.. automodule:: gazu.sync
+    :members:
 
 gazu.exceptions
 ---------------
