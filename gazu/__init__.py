@@ -1,4 +1,4 @@
-from . import client
+from . import client as raw
 from . import cache
 from . import helpers
 from . import events
@@ -20,19 +20,19 @@ from .exception import AuthFailedException, ParameterException
 from .__version__ import __version__
 
 
-def get_host():
-    return client.get_host()
+def get_host(client=raw.default_client):
+    return raw.get_host(client=client)
 
 
-def set_host(url):
-    client.set_host(url)
+def set_host(url, client=raw.default_client):
+    raw.set_host(url, client=client)
 
 
-def log_in(email, password):
+def log_in(email, password, client=raw.default_client):
     tokens = {}
     try:
-        tokens = client.post(
-            "auth/login", {"email": email, "password": password}
+        tokens = raw.post(
+            "auth/login", {"email": email, "password": password}, client=client
         )
     except ParameterException:
         pass
@@ -42,13 +42,13 @@ def log_in(email, password):
     ):
         raise AuthFailedException
     else:
-        client.set_tokens(tokens)
+        raw.set_tokens(tokens, client=client)
     return tokens
 
 
-def get_event_host():
-    return client.get_event_host()
+def get_event_host(client=raw.default_client):
+    return raw.get_event_host(client, client=client)
 
 
-def set_event_host(url):
-    client.set_event_host(url)
+def set_event_host(url, client=raw.default_client):
+    raw.set_event_host(url, client=client)

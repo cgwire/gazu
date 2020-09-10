@@ -115,3 +115,12 @@ class CastingTestCase(unittest.TestCase):
             asset = {"id": fakeid("asset-01")}
             casting = gazu.casting.get_asset_cast_in(asset)
             self.assertEqual(casting[0]["id"], fakeid("shot-1"))
+
+    def test_all_entity_links_for_project(self):
+        links = [{"id": fakeid("link-1")}]
+        path = "data/projects/%s/entity-links" % fakeid("project-01")
+        with requests_mock.mock() as mock:
+            mock.get(gazu.client.get_full_url(path), text=json.dumps(links))
+            project = {"id": fakeid("project-01")}
+            links = gazu.casting.all_entity_links_for_project(project)
+            self.assertEqual(links[0]["id"], fakeid("link-1"))

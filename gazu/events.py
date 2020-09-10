@@ -1,7 +1,8 @@
 from .exception import AuthFailedException
+from .client import default_client
 
 
-def init():
+def init(client=default_client):
     """
     Init configuration for SocketIO client.
 
@@ -12,12 +13,12 @@ def init():
     from . import get_event_host
     from gazu.client import make_auth_header
 
-    path = get_event_host()
-    socketIO = SocketIO(path, None, headers=make_auth_header())
-    main_namespace = socketIO.define(BaseNamespace, "/events")
-    socketIO.main_namespace = main_namespace
-    socketIO.on('error', connect_error)
-    return socketIO
+    path = get_event_host(client)
+    event_client = SocketIO(path, None, headers=make_auth_header())
+    main_namespace = event_client.define(BaseNamespace, "/events")
+    event_client.main_namespace = main_namespace
+    event_client.on('error', connect_error)
+    return event_client
 
 
 def connect_error(data):

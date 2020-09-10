@@ -1,30 +1,32 @@
-from . import client
+from . import client as raw
 
 from .sorting import sort_by_name
 from .helpers import normalize_model_parameter
 from .cache import cache
 
+default = raw.default_client
+
 
 @cache
-def all_organisations():
+def all_organisations(client=default):
     """
     Returns:
         list: Organisations listed in database.
     """
-    return sort_by_name(client.fetch_all("organisations"))
+    return sort_by_name(raw.fetch_all("organisations", client=client))
 
 
 @cache
-def all_persons():
+def all_persons(client=default):
     """
     Returns:
         list: Persons listed in database.
     """
-    return sort_by_name(client.fetch_all("persons"))
+    return sort_by_name(raw.fetch_all("persons", client=client))
 
 
 @cache
-def get_person(id):
+def get_person(id, client=default):
     """
     Args:
         id (str): An uuid identifying a person.
@@ -32,11 +34,11 @@ def get_person(id):
     Returns:
         dict: Person corresponding to given id.
     """
-    return client.fetch_one("persons", id)
+    return raw.fetch_one("persons", id, client=client)
 
 
 @cache
-def get_person_by_desktop_login(desktop_login):
+def get_person_by_desktop_login(desktop_login, client=default):
     """
     Args:
         desktop_login (str): Login used to sign in on the desktop computer.
@@ -44,11 +46,13 @@ def get_person_by_desktop_login(desktop_login):
     Returns:
         dict: Person corresponding to given desktop computer login.
     """
-    return client.fetch_first("persons", {"desktop_login": desktop_login})
+    return raw.fetch_first(
+        "persons", {"desktop_login": desktop_login}, client=client
+    )
 
 
 @cache
-def get_person_by_email(email):
+def get_person_by_email(email, client=default):
     """
     Args:
         email (str): User's email.
@@ -56,11 +60,11 @@ def get_person_by_email(email):
     Returns:
         dict:  Person corresponding to given email.
     """
-    return client.fetch_first("persons", {"email": email})
+    return raw.fetch_first("persons", {"email": email}, client=client)
 
 
 @cache
-def get_person_by_full_name(full_name):
+def get_person_by_full_name(full_name, client=default):
     """
     Args:
         full_name (str): User's full name
@@ -82,7 +86,7 @@ def get_person_by_full_name(full_name):
 
 
 @cache
-def get_person_url(person):
+def get_person_url(person, client=default):
     """
     Args:
         person (str / dict): The person dict or the person ID.
@@ -93,22 +97,23 @@ def get_person_url(person):
     person = normalize_model_parameter(person)
     path = "{host}/people/{person_id}/"
     return path.format(
-        host=client.get_zou_url_from_host(),
+        host=raw.get_api_url_from_host(client=client),
         person_id=person["id"],
     )
 
 
 @cache
-def get_organisation():
+def get_organisation(client=default):
     """
     Returns:
         dict: Database information for organisation linked to auth tokens.
     """
-    return client.get("auth/authenticated")["organisation"]
+    return raw.get("auth/authenticated", client=client)["organisation"]
 
 
 def new_person(
-    first_name, last_name, email, phone="", role="user", desktop_login=""
+    first_name, last_name, email, phone="", role="user", desktop_login="",
+    client=default
 ):
     """
     Create a new person based on given parameters. His/her password will is
@@ -128,7 +133,7 @@ def new_person(
     """
     person = get_person_by_email(email)
     if person is None:
-        person = client.post(
+        person = raw.post(
             "data/persons/new",
             {
                 "first_name": first_name,
@@ -138,11 +143,12 @@ def new_person(
                 "role": role,
                 "desktop_login": desktop_login,
             },
+            client=client
         )
     return person
 
 
-def set_avatar(person, file_path):
+def set_avatar(person, file_path, client=default):
     """
     Upload picture and set it as avatar for given person.
 
@@ -152,12 +158,14 @@ def set_avatar(person, file_path):
                          drive.
     """
     person = normalize_model_parameter(person)
-    return client.upload(
-        "/pictures/thumbnails/persons/%s" % person["id"], file_path
+    return raw.upload(
+        "/pictures/thumbnails/persons/%s" % person["id"],
+        file_path,
+        client=client
     )
 
 
-def get_presence_log(year, month):
+def get_presence_log(year, month, client=default):
     """
     Args:
         year (int):
@@ -167,4 +175,4 @@ def get_presence_log(year, month):
         The presence log table for given month and year.
     """
     path = "data/persons/presence-logs/%s-%s" % (year, str(month).zfill(2))
-    return client.get(path, json_response=False)
+    return raw.get(path, json_response=False, client=client)

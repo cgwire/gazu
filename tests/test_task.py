@@ -363,7 +363,6 @@ class TaskTestCase(unittest.TestCase):
             comment = {"id": "comment-01"}
             gazu.task.remove_comment(comment)
 
-
     def test_comments_for_task(self):
         with requests_mock.mock() as mock:
             result = [{"id": "comment-1"}]
@@ -420,7 +419,6 @@ class TaskTestCase(unittest.TestCase):
                 gazu.task.new_task_status(name, short_name, color), status
             )
 
-
     def test_set_main_preview(self):
         with requests_mock.mock() as mock:
             result = {
@@ -437,3 +435,12 @@ class TaskTestCase(unittest.TestCase):
             self.assertEqual(
                 gazu.task.set_main_preview(preview_file), result
             )
+
+    def test_all_tasks_for_project(self):
+        tasks = [{"id": fakeid("task-1")}]
+        path = "data/projects/%s/tasks" % fakeid("project-01")
+        with requests_mock.mock() as mock:
+            mock.get(gazu.client.get_full_url(path), text=json.dumps(tasks))
+            project = {"id": fakeid("project-01")}
+            tasks = gazu.task.all_tasks_for_project(project)
+            self.assertEqual(tasks[0]["id"], fakeid("task-1"))
