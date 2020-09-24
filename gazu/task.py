@@ -731,7 +731,7 @@ def add_preview(task, comment, preview_file_path, client=default):
     Returns:
         dict: Created preview file model.
     """
-    preview_file = create_preview(task, comment)
+    preview_file = create_preview(task, comment, client=client)
     upload_preview_file(preview_file, preview_file_path, client=client)
     return preview_file
 
