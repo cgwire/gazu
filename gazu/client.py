@@ -29,6 +29,7 @@ def create_client(host):
     return KitsuClient(host)
 
 
+default_client = None
 try:
     import requests
 
