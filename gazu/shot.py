@@ -375,7 +375,7 @@ def update_sequence_data(sequence, data={}, client=default):
     sequence = normalize_model_parameter(sequence)
     current_sequence = get_sequence(sequence["id"], client=client)
 
-    if not current_sequence.get('data', client=default):
+    if not current_sequence.get('data'):
         current_sequence["data"] = {}
 
     updated_sequence = {
