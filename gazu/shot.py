@@ -461,7 +461,7 @@ def update_episode_data(episode, data={}, client=default):
     return update_episode(updated_episode, client=client)
 
 
-def remove_episode(episode, client=default):
+def remove_episode(episode, force=False, client=default):
     """
     Remove given episode and related from database.
 
@@ -469,8 +469,8 @@ def remove_episode(episode, client=default):
         episode (dict / str): Episode to remove.
     """
     episode = normalize_model_parameter(episode)
-    path = "data/entities/%s" % episode["id"]
-    return raw.delete(path, client=client)
+    path = "data/episodes/%s" % episode["id"]
+    return raw.delete(path, params={"force": force}, client=client)
 
 
 def remove_sequence(sequence, client=default):
