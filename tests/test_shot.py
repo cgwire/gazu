@@ -283,7 +283,7 @@ class ShotTestCase(unittest.TestCase):
     def test_remove_episode(self):
         with requests_mock.mock() as mock:
             mock = mock.delete(
-                gazu.client.get_full_url("data/entities/episode-1"),
+                gazu.client.get_full_url("data/episodes/episode-1"),
                 status_code=204,
             )
             episode = {"id": "episode-1", "name": "S02"}
