@@ -1,6 +1,36 @@
 from . import client as raw
 
+from .helpers import normalize_model_parameter
+
 default = raw.default_client
+
+
+def get_last_events(
+    page_size=20000, project=None, after=None, before=None, client=default
+):
+    """
+    Get last events that occured on the machine.
+
+    Args:
+        page_size (int): Number of events to retrieve.
+        project (dict/id): Get only events related to this project.
+        after (dict/id): Get only events occuring after given date.
+        before (dict/id): Get only events occuring before given date.
+
+
+    Returns:
+        dict: Last events matching criterions.
+    """
+    path = "/data/events/last"
+    params = {"page_size": page_size}
+    if project is not None:
+        project = normalize_model_parameter(project)
+        params["project_id"] = project["id"]
+    if after is not None:
+        params["after"] = after
+    if before is not None:
+        params["before"] = before
+    return raw.get(path, params=params, client=client)
 
 
 def import_entities(entities, client=default):
