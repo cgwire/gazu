@@ -47,7 +47,7 @@ def log_in(email, password, client=raw.default_client):
 
 
 def get_event_host(client=raw.default_client):
-    return raw.get_event_host(client, client=client)
+    return raw.get_event_host(client=client)
 
 
 def set_event_host(url, client=raw.default_client):

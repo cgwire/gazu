@@ -35,6 +35,9 @@ class BaseFuncTestCase(ClientTestCase):
     def test_get_host(self):
         self.assertEqual(raw.get_host(), raw.default_client.host)
 
+    def test_get_event_host(self):
+        self.assertEqual(raw.get_event_host(), raw.default_client.host)
+
     def test_set_host(self):
         raw.set_host("newhost")
         self.assertEqual(raw.get_host(), "newhost")
