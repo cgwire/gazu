@@ -362,8 +362,8 @@ def update_shot_data(shot, data={}, client=default):
 
 def update_sequence_data(sequence, data={}, client=default):
     """
-    Update the metadata for the provided sequence. Keys that are not provided are
-    not changed.
+    Update the metadata for the provided sequence. Keys that are not provided
+    are not changed.
 
     Args:
         sequence (dict / ID): The sequence dicto or ID to save in database.
@@ -473,7 +473,7 @@ def remove_episode(episode, force=False, client=default):
     return raw.delete(path, params={"force": force}, client=client)
 
 
-def remove_sequence(sequence, client=default):
+def remove_sequence(sequence, force=False, client=default):
     """
     Remove given sequence and related from database.
 
@@ -482,7 +482,7 @@ def remove_sequence(sequence, client=default):
     """
     sequence = normalize_model_parameter(sequence)
     path = "data/entities/%s" % sequence["id"]
-    return raw.delete(path, client=client)
+    return raw.delete(path, params={"force": force}, client=client)
 
 
 @cache
