@@ -205,6 +205,25 @@ def update_asset(asset, client=default):
     return raw.put("data/entities/%s" % asset["id"], asset, client=client)
 
 
+def update_asset_data(asset, data={}, client=default):
+    """
+    Update the metadata for the provided asset. Keys that are not provided are
+    not changed.
+
+    Args:
+        asset (dict / ID): The asset dict or ID to save in database.
+        data (dict): Free field to set metadata of any kind.
+
+    Returns:
+        dict: Updated asset.
+    """
+    asset = normalize_model_parameter(asset)
+    current_asset = get_asset(asset["id"])
+    updated_asset = {"id": current_asset["id"], "data": current_asset["data"]}
+    updated_asset["data"].update(data)
+    update_asset(updated_asset, client=client)
+
+
 def remove_asset(asset, force=False, client=default):
     """
     Remove given asset from database.
