@@ -481,7 +481,7 @@ def remove_sequence(sequence, force=False, client=default):
         sequence (dict / str): Sequence to remove.
     """
     sequence = normalize_model_parameter(sequence)
-    path = "data/entities/%s" % sequence["id"]
+    path = "data/sequences/%s" % sequence["id"]
     return raw.delete(path, params={"force": force}, client=client)
 
 
