@@ -266,15 +266,15 @@ task = gazu.task.new_task(asset, task_type, assignees=[person_dict])
 Retrieve a given task type:
 
 ```python
-task_type = gazu.shot.get_task_type(task_status_id)
-task_type = gazu.shot.get_task_type_by_name(task_type_name)
+task_type = gazu.task.get_task_type(task_status_id)
+task_type = gazu.task.get_task_type_by_name(task_type_name)
 ```
 
 Retrieve a given task status:
 
 ```python
-task_status = gazu.shot.get_task_status(task_status_id)
-task_status = gazu.shot.get_task_status_by_name(task_status_name)
+task_status = gazu.task.get_task_status(task_status_id)
+task_status = gazu.task.get_task_status_by_name(task_status_name)
 ```
 
 Set a given task status as work in progress:
