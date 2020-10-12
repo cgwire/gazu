@@ -627,6 +627,7 @@ def add_comment(
     task_status,
     comment="",
     person=None,
+    checklist=[],
     attachments=[],
     created_at=None,
     client=default
@@ -648,7 +649,11 @@ def add_comment(
     """
     task = normalize_model_parameter(task)
     task_status = normalize_model_parameter(task_status)
-    data = {"task_status_id": task_status["id"], "comment": comment}
+    data = {
+        "task_status_id": task_status["id"],
+        "comment": comment,
+        "checklist": checklist
+    }
 
     if person is not None:
         person = normalize_model_parameter(person)
