@@ -1073,6 +1073,16 @@ def download_preview_file(preview_file, file_path, client=default):
     )
 
 
+def get_attachment_file(attachment_file_id, client=default):
+    """
+    Return attachment file object corresponding to given ID.
+
+    Args:
+        attachment_file_id (str): The attachment file ID.
+    """
+    return raw.fetch_one("attachment-files", attachment_file_id, client=client)
+
+
 def download_attachment_file(attachment_file, file_path, client=default):
     """
     Download given attachment file and save it at given location.
@@ -1137,6 +1147,9 @@ def new_file_status(name, color, client=default):
 def get_file_status(status_id, client=default):
     """
     Return file status object corresponding to given ID.
+
+    Args:
+        status_id (str): The files status ID.
     """
     return raw.fetch_one("file-status", status_id, client=client)
 
@@ -1145,5 +1158,8 @@ def get_file_status(status_id, client=default):
 def get_file_status_by_name(name, client=default):
     """
     Return file status object corresponding to given name
+
+    Args:
+        name (str): The files status name.
     """
     return raw.fetch_first("file-status?name=%s" % name, client=client)
