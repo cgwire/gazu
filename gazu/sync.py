@@ -137,3 +137,9 @@ def get_id_map_by_name(source_list, target_list):
         if model["name"].lower() in name_map:
             link_map[model["id"]] = name_map[model["name"].lower()]
     return link_map
+
+
+def is_changed(source_model, target_model):
+    source_date = source_model["updated_at"]
+    target_date = target_model["updated_at"]
+    return source_date > target_date
