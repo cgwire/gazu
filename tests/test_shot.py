@@ -274,7 +274,7 @@ class ShotTestCase(unittest.TestCase):
     def test_remove_sequence(self):
         with requests_mock.mock() as mock:
             mock = mock.delete(
-                gazu.client.get_full_url("data/entities/sequence-01"),
+                gazu.client.get_full_url("data/sequences/sequence-01"),
                 status_code=204,
             )
             sequence = {"id": "sequence-01", "name": "S02"}
