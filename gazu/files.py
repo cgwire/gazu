@@ -100,7 +100,7 @@ def get_output_file(output_file_id, client=default):
         dict: Output file matching given ID.
     """
     path = "data/output-files/%s" % (output_file_id)
-    return raw.get(path)
+    return raw.get(path, client=client)
 
 
 @cache
@@ -978,7 +978,7 @@ def update_output_file(output_file, data, client=default):
     """
     output_file = normalize_model_parameter(output_file)
     path = "/data/output-files/%s" % output_file["id"]
-    return raw.put(path, data, client)
+    return raw.put(path, data, client=client)
 
 
 def set_project_file_tree(project, file_tree_name, client=default):
