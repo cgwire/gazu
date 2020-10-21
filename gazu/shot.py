@@ -104,7 +104,7 @@ def get_episode(episode_id, client=default):
     Returns:
         dict: Episode corresponding to given episode ID.
     """
-    return raw.fetch_one("episodes", episode_id)
+    return raw.fetch_one("episodes", episode_id, client=client)
 
 
 @cache
