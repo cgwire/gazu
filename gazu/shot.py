@@ -188,7 +188,7 @@ def get_sequence_from_shot(shot, client=default):
 def get_shot(shot_id, client=default):
     """
     Args:
-        episode_id (str): Id of claimed episode.
+        shot_id (str): Id of claimed shot.
 
     Returns:
         dict: Shot corresponding to given shot ID.
