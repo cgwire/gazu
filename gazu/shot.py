@@ -255,16 +255,21 @@ def get_shot_url(shot, client=default):
         shot (str / dict): The shot dict or the shot ID.
 
     Returns:
-        url (str, client=default): Web url associated to the given shot
+        url (str): Web url associated to the given shot
     """
     shot = normalize_model_parameter(shot)
-    path = "{host}/productions/{project_id}/shots/{shot_id}/"
+    shot = get_shot(shot["id"])
+    path = "{host}/productions/{project_id}/"
+    if shot["episode_id"] is None:
+        path += "shots/{shot_id}/"
+    else:
+        path += "episodes/{episode_id}/shots/{shot_id}/"
     return path.format(
         host=raw.get_api_url_from_host(client=client),
         project_id=shot["project_id"],
         shot_id=shot["id"],
+        episode_id=shot["episode_id"],
     )
-
 
 def new_sequence(project, name, episode=None, client=default):
     """
