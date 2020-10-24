@@ -230,6 +230,25 @@ def get_shot_by_name(sequence, shot_name, client=default):
 
 
 @cache
+def get_episode_url(episode, client=default):
+    """
+    Args:
+        episode (str / dict): The episode dict or the episode ID.
+
+    Returns:
+        url (str): Web url associated to the given episode
+    """
+    episode = normalize_model_parameter(episode)
+    episode = get_episode(episode["id"])
+    path = "{host}/productions/{project_id}/episodes/{episode_id}/shots"
+    return path.format(
+        host=raw.get_api_url_from_host(client=client),
+        project_id=episode["project_id"],
+        episode_id=episode["id"],
+    )
+
+
+@cache
 def get_shot_url(shot, client=default):
     """
     Args:
