@@ -36,6 +36,21 @@ def all_shots_for_project(project, client=default):
 
 
 @cache
+def all_shots_for_episode(episode, client=default):
+    """
+    Args:
+        episode (str / dict): The episode dict or the episode ID.
+
+    Returns:
+        list: Shots which are children of given episode.
+    """
+    episode = normalize_model_parameter(episode)
+    return sort_by_name(
+        raw.fetch_all("episodes/%s/shots" % episode["id"], client=client)
+    )
+
+
+@cache
 def all_shots_for_sequence(sequence, client=default):
     """
     Args:
