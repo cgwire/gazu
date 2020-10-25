@@ -375,6 +375,6 @@ class ShotTestCase(unittest.TestCase):
             url = gazu.shot.get_shot_url(fakeid("shot-01"))
             self.assertEqual(
                 url,
-                "http://gazu.change.serverhost/productions/project-01/"
+                "http://gazu-server/productions/project-01/"
                 "episodes/episode-01/shots/shot-01/"
             )
