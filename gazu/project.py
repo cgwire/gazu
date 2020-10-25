@@ -177,5 +177,4 @@ def close_project(project, client=default):
 
     project["project_status_id"] = closed_status_id
     update_project(project, client=client)
-
     return project

@@ -41,7 +41,7 @@ class BaseFuncTestCase(ClientTestCase):
     def test_set_host(self):
         raw.set_host("newhost")
         self.assertEqual(raw.get_host(), "newhost")
-        raw.set_host("http://gazu-server/")
+        raw.set_host("http://gazu-server/api")
 
     def test_set_tokens(self):
         pass
@@ -52,7 +52,7 @@ class BaseFuncTestCase(ClientTestCase):
     def test_url_path_join(self):
         root = raw.get_host()
         items = ["data", "persons"]
-        expected_url = "{host}data/persons".format(host=raw.get_host())
+        expected_url = "{host}/data/persons".format(host=raw.get_host())
 
         self.assertEqual(raw.url_path_join(root, *items), expected_url)
 
@@ -200,7 +200,7 @@ class BaseFuncTestCase(ClientTestCase):
 
     def test_version(self):
         with requests_mock.mock() as mock:
-            mock.get(raw.get_host(), text='{"version": "0.2.0"}')
+            mock.get(raw.get_host() + "/", text='{"version": "0.2.0"}')
             self.assertEqual(raw.get_api_version(), "0.2.0")
 
     def test_make_auth_token(self):

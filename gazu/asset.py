@@ -140,11 +140,22 @@ def get_asset_url(asset, client=default):
         url (str): Web url associated to the given asset
     """
     asset = normalize_model_parameter(asset)
-    path = "{host}/productions/{project_id}/assets/{asset_id}/"
+    asset = get_asset(asset["id"])
+    project = gazu_project.get_project(asset["project_id"])
+    episode_id = "main"
+    path = "{host}/productions/{project_id}/"
+    if project["production_type"] != "tvshow":
+        path += "assets/{asset_id}/"
+    else:
+        path += "episodes/{episode_id}/assets/{asset_id}/"
+        if len(asset["episode_id"]) > 0:
+            episode_id = asset["episode_id"]
+
     return path.format(
         host=raw.get_api_url_from_host(),
         project_id=asset["project_id"],
         asset_id=asset["id"],
+        episode_id=episode_id,
         client=client
     )
 

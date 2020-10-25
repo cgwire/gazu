@@ -320,3 +320,31 @@ class CastingTestCase(unittest.TestCase):
                 asset, asset_to_instantiate
             )
             self.assertEqual(asset_instance, result)
+
+    def test_get_url(self):
+        with requests_mock.mock() as mock:
+            asset = {
+                "id": "asset-01",
+                "project_id": "project-01",
+                "episode_id": "episode-01"
+            }
+            project = {
+                "id": "project-01",
+                "production_type": "tvshow",
+            }
+            mock.get(
+                gazu.client.get_full_url(
+                    "data/projects/" + "project-01"
+                ),
+                text=json.dumps(project),
+            )
+            mock.get(
+                gazu.client.get_full_url("data/assets/" + fakeid("asset-01")),
+                text=json.dumps(asset),
+            )
+            url = gazu.asset.get_asset_url(fakeid("asset-01"))
+            self.assertEqual(
+                url,
+                "http://gazu.change.serverhost/productions/project-01/"
+                "episodes/episode-01/assets/asset-01/"
+            )

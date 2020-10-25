@@ -36,6 +36,21 @@ def all_shots_for_project(project, client=default):
 
 
 @cache
+def all_shots_for_episode(episode, client=default):
+    """
+    Args:
+        episode (str / dict): The episode dict or the episode ID.
+
+    Returns:
+        list: Shots which are children of given episode.
+    """
+    episode = normalize_model_parameter(episode)
+    return sort_by_name(
+        raw.fetch_all("episodes/%s/shots" % episode["id"], client=client)
+    )
+
+
+@cache
 def all_shots_for_sequence(sequence, client=default):
     """
     Args:
@@ -215,22 +230,46 @@ def get_shot_by_name(sequence, shot_name, client=default):
 
 
 @cache
+def get_episode_url(episode, client=default):
+    """
+    Args:
+        episode (str / dict): The episode dict or the episode ID.
+
+    Returns:
+        url (str): Web url associated to the given episode
+    """
+    episode = normalize_model_parameter(episode)
+    episode = get_episode(episode["id"])
+    path = "{host}/productions/{project_id}/episodes/{episode_id}/shots"
+    return path.format(
+        host=raw.get_api_url_from_host(client=client),
+        project_id=episode["project_id"],
+        episode_id=episode["id"],
+    )
+
+
+@cache
 def get_shot_url(shot, client=default):
     """
     Args:
         shot (str / dict): The shot dict or the shot ID.
 
     Returns:
-        url (str, client=default): Web url associated to the given shot
+        url (str): Web url associated to the given shot
     """
     shot = normalize_model_parameter(shot)
-    path = "{host}/productions/{project_id}/shots/{shot_id}/"
+    shot = get_shot(shot["id"])
+    path = "{host}/productions/{project_id}/"
+    if shot["episode_id"] is None:
+        path += "shots/{shot_id}/"
+    else:
+        path += "episodes/{episode_id}/shots/{shot_id}/"
     return path.format(
         host=raw.get_api_url_from_host(client=client),
         project_id=shot["project_id"],
         shot_id=shot["id"],
+        episode_id=shot["episode_id"],
     )
-
 
 def new_sequence(project, name, episode=None, client=default):
     """
