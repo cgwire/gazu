@@ -52,3 +52,10 @@ class ProjectTestCase(unittest.TestCase):
             )
             project = {"id": "project-01", "name": "S02"}
             gazu.project.remove_project(project)
+
+    def test_get_url(self):
+        url = gazu.project.get_project_url({"id": "project-01"})
+        self.assertEqual(
+            url,
+            "http://gazu-server/productions/project-01/assets/"
+        )
