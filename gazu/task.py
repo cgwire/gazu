@@ -377,20 +377,15 @@ def get_task_by_path(project, file_path, entity_type="shot", client=default):
 
 
 @cache
-def get_task_status(task, client=default):
+def get_task_status(task_status_id, client=default):
     """
     Args:
-        task (str / dict): The task dict or the task ID.
+        task_status_id (str): Id of claimed task status.
 
     Returns:
-        A task status object corresponding to status set on given task.
+        dict: Task status matching given ID.
     """
-    task = normalize_model_parameter(task)
-    return raw.fetch_first(
-        "task-status",
-        {"id": task["task_status_id"]},
-        client=client
-    )
+    return raw.fetch_one("task-status", task_status_id, client=client)
 
 
 @cache
