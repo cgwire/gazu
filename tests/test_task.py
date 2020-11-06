@@ -174,9 +174,7 @@ class TaskTestCase(unittest.TestCase):
                 gazu.client.get_full_url(path),
                 text=json.dumps([{"name": "WIP", "id": "status-01"}]),
             )
-            status = gazu.task.get_task_status(
-                {"id": "task-01", "task_status_id": "status-01"}
-            )
+            status = gazu.task.get_task_status("status-01")
             self.assertEqual(status["id"], "status-01")
 
     def test_get_task(self):
