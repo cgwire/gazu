@@ -287,7 +287,7 @@ def all_tasks_for_person(person, client=default):
         list: Tasks that are not done for given person (only for open projects).
     """
     person = normalize_model_parameter(person)
-    return raw.fetch_all("persons/%s/tasks" % person["id"])
+    return raw.fetch_all("persons/%s/tasks" % person["id"], client=client)
 
 
 @cache

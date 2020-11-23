@@ -516,7 +516,7 @@ def new_working_file(
     if software is not None:
         data["software_id"] = software["id"]
 
-    return raw.post("data/tasks/%s/working-files/new" % task["id"], data)
+    return raw.post("data/tasks/%s/working-files/new" % task["id"], data, client=client)
 
 
 def new_entity_output_file(
