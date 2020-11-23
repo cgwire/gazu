@@ -34,7 +34,7 @@ def all_scenes(project=None, client=default):
             client=client
         )
     else:
-        scenes = raw.fetch_all("scenes")
+        scenes = raw.fetch_all("scenes", client=client)
     return sort_by_name(scenes)
 
 
