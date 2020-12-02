@@ -386,14 +386,14 @@ def update_shot_data(shot, data={}, client=default):
     not changed.
 
     Args:
-        shot (dict / ID): The shot dicto or ID to save in database.
+        shot (dict / ID): The shot dict or ID to save in database.
         data (dict): Free field to set metadata of any kind.
 
     Returns:
         dict: Updated shot.
     """
     shot = normalize_model_parameter(shot)
-    current_shot = get_shot(shot["id"])
+    current_shot = get_shot(shot["id"], client=client)
     updated_shot = {"id": current_shot["id"], "data": current_shot["data"]}
     updated_shot["data"].update(data)
     update_shot(updated_shot, client=client)

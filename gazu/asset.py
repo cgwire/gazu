@@ -229,7 +229,7 @@ def update_asset_data(asset, data={}, client=default):
         dict: Updated asset.
     """
     asset = normalize_model_parameter(asset)
-    current_asset = get_asset(asset["id"])
+    current_asset = get_asset(asset["id"], client=client)
     updated_asset = {"id": current_asset["id"], "data": current_asset["data"]}
     updated_asset["data"].update(data)
     update_asset(updated_asset, client=client)
