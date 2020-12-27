@@ -49,7 +49,7 @@ def log_in(email, password, client=raw.default_client):
 def log_out(client=raw.default_client):
     tokens = {}
     try:
-        tokens = raw.get(
+        raw.get(
             "auth/logout", client=client
         )
     except ParameterException:
