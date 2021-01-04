@@ -169,10 +169,10 @@ class TaskTestCase(unittest.TestCase):
 
     def test_get_task_status(self):
         with requests_mock.mock() as mock:
-            path = "data/task-status?id=status-01"
+            path = "data/task-status/status-01"
             mock.get(
                 gazu.client.get_full_url(path),
-                text=json.dumps([{"name": "WIP", "id": "status-01"}]),
+                text=json.dumps({"name": "WIP", "id": "status-01"}),
             )
             status = gazu.task.get_task_status("status-01")
             self.assertEqual(status["id"], "status-01")
