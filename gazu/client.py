@@ -184,7 +184,6 @@ def get(path, json_response=True, params=None, client=default_client):
         The request result.
     """
     path = build_path_with_params(path, params)
-
     response = client.session.get(
         get_full_url(path, client=client),
         headers=make_auth_header(client=client)
@@ -437,7 +436,7 @@ def get_api_version(client=default_client):
     Returns:
         str: Current version of the API.
     """
-    return get("", client)["version"]
+    return get("", client=client)["version"]
 
 
 def get_current_user(client=default_client):
@@ -445,4 +444,4 @@ def get_current_user(client=default_client):
     Returns:
         dict: User database information for user linked to auth tokens.
     """
-    return get("auth/authenticated", client)["user"]
+    return get("auth/authenticated", client=client)["user"]
