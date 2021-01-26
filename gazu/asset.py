@@ -52,7 +52,7 @@ def all_assets_for_episode(episode, client=default):
     episode = normalize_model_parameter(episode)
 
     return sort_by_name(
-        raw.fetch_all("assets", {"source_id": episode["id"]}, client=client)
+        raw.fetch_all("assets", {"source_id": episode["id"], "project_id": episode["project_id"]}, client=client)
     )
 
 
