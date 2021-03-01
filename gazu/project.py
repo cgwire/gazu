@@ -26,7 +26,7 @@ def get_project_status_by_name(project_status_name, client=default):
         dict: Project status corresponding to given name.
     """
     return raw.fetch_first(
-        "project-status", {"name": project_name}, client=client
+        "project-status", {"name": project_status_name}, client=client
     )
 
 
