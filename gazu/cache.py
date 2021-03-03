@@ -62,14 +62,17 @@ def get_cache_key(args, kwargs):
     Returns:
         str: generated key
     """
-    if len(args) == 0 and len(kwargs) == 0:
+    kwargscopy = kwargs.copy()
+    if "client" in kwargscopy:
+        kwargscopy["client"] = kwargscopy["client"].host
+    if len(args) == 0 and len(kwargscopy) == 0:
         return ""
     elif len(args) == 0:
-        return json.dumps(kwargs)
-    elif len(kwargs.keys()) == 0:
+        return json.dumps(kwargscopy)
+    elif len(kwargscopy.keys()) == 0:
         return json.dumps(args)
     else:
-        return json.dumps([args, kwargs])
+        return json.dumps([args, kwargscopy])
 
 
 def insert_value(function, cache_store, args, kwargs):
