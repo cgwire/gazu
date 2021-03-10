@@ -509,6 +509,7 @@ def remove_episode(episode, force=False, client=default):
     """
     episode = normalize_model_parameter(episode)
     path = "data/episodes/%s" % episode["id"]
+    params = {}
     if force:
         params = {"force": "true"}
     return raw.delete(path, params=params, client=client)
@@ -523,6 +524,7 @@ def remove_sequence(sequence, force=False, client=default):
     """
     sequence = normalize_model_parameter(sequence)
     path = "data/sequences/%s" % sequence["id"]
+    params = {}
     if force:
         params = {"force": "true"}
     return raw.delete(path, params=params, client=client)
