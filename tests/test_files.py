@@ -677,12 +677,18 @@ class FilesTestCase(unittest.TestCase):
     def test_download_attachment_file(self):
         with open("./tests/fixtures/v1.png", "rb") as attachment_file:
             with requests_mock.mock() as mock:
-                path = "data/attachment-files/{}/file".format(
-                    fakeid("attachment-1")
+                attachment_id = fakeid("attachment-1")
+                path = "data/attachment-files/{}".format(attachment_id)
+                mock.get(gazu.client.get_full_url(path), text=json.dumps({
+                    "id": attachment_id,
+                    "name": "v1.png"
+                }))
+                path = "data/attachment-files/{}/file/v1.png".format(
+                    attachment_id
                 )
                 mock.get(gazu.client.get_full_url(path), body=attachment_file)
                 gazu.files.download_attachment_file(
-                    fakeid("attachment-1"), "./test.png"
+                    attachment_id, "./test.png"
                 )
                 self.assertTrue(os.path.exists("./test.png"))
                 self.assertEqual(

@@ -1092,8 +1092,12 @@ def download_attachment_file(attachment_file, file_path, client=default):
         file_path (str): Location on hard drive where to save the file.
     """
     attachment_file = normalize_model_parameter(attachment_file)
+    attachment_file = get_attachment_file(attachment_file["id"], client=client)
     return raw.download(
-        "data/attachment-files/%s/file" % (attachment_file["id"]),
+        "data/attachment-files/%s/file/%s" % (
+            attachment_file["id"],
+            attachment_file["name"]
+        ),
         file_path,
         client=client
     )
