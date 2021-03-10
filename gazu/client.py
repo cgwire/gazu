@@ -5,6 +5,8 @@ import urllib
 
 from .encoder import CustomJSONEncoder
 
+from .__version__ import __version__
+
 from .exception import (
     TooBigFileException,
     NotAuthenticatedException,
@@ -127,10 +129,10 @@ def make_auth_header(client=default_client):
     Returns:
         Headers required to authenticate.
     """
+    headers = { "User-Agent": "CGWire Gazu %s" % __version__ }
     if "access_token" in client.tokens:
-        return {"Authorization": "Bearer %s" % client.tokens["access_token"]}
-    else:
-        return {}
+        headers["Authorization"] = "Bearer %s" % client.tokens["access_token"]
+    return headers
 
 
 def url_path_join(*items):

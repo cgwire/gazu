@@ -7,6 +7,7 @@ import sys
 import unittest
 import requests_mock
 import gazu
+from gazu.__version__ import __version__
 
 from gazu import client as raw
 from gazu.exception import (
@@ -207,7 +208,10 @@ class BaseFuncTestCase(ClientTestCase):
         tokens = {"access_token": "token_test"}
         raw.set_tokens(tokens)
         self.assertEqual(
-            raw.make_auth_header(), {"Authorization": "Bearer token_test"}
+            raw.make_auth_header(), {
+                "Authorization": "Bearer token_test",
+                "User-Agent": "CGWire Gazu %s" % __version__
+            }
         )
 
     def test_upload(self):
