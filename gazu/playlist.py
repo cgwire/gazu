@@ -32,7 +32,7 @@ def all_shots_for_playlist(playlist, client=default):
 
 
 @cache
-def all_playlists_for_project(project, client=default):
+def all_playlists_for_project(project, client=default, page=1):
     """
     Args:
         project (str / dict): The project dict or the project ID.
@@ -42,7 +42,11 @@ def all_playlists_for_project(project, client=default):
     """
     project = normalize_model_parameter(project)
     return sort_by_name(
-        raw.fetch_all("projects/%s/playlists" % project["id"], client=client)
+        raw.fetch_all(
+            "projects/%s/playlists" % project["id"],
+            params={"page": page},
+            client=client
+        )
     )
 
 
