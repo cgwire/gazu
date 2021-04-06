@@ -14,7 +14,6 @@ def all_playlists(client=default):
     Returns:
         list: All playlists for all projects.
     """
-
     return sort_by_name(raw.fetch_all("playlists", client=client))
 
 
@@ -27,7 +26,6 @@ def all_shots_for_playlist(playlist, client=default):
     Returns:
         list: All shots linked to the given playlist
     """
-
     playlist = normalize_model_parameter(playlist)
     playlist = raw.fetch_one("playlists", playlist["id"], client=client)
     return sort_by_name(playlist["shots"])
@@ -36,17 +34,38 @@ def all_shots_for_playlist(playlist, client=default):
 @cache
 def all_playlists_for_project(project, client=default):
     """
-
     Args:
         project (str / dict): The project dict or the project ID.
 
     Returns:
         list: All playlists for the given project
     """
-
     project = normalize_model_parameter(project)
     return sort_by_name(
         raw.fetch_all("projects/%s/playlists" % project["id"], client=client)
+    )
+
+
+@cache
+def all_playlists_for_episode(episode, client=default):
+    """
+
+    Args:
+        episode (str / dict): The episode dict or the episode ID.
+
+    Returns:
+        list: All playlists for the given episode.
+    """
+
+    project = normalize_model_parameter(episode["project_id"])
+    return sort_by_name(
+        raw.fetch_all(
+            "projects/%s/episodes/%s/playlists" % (
+                project["id"],
+                episode["id"],
+            ),
+            client=client
+        )
     )
 
 
@@ -75,11 +94,11 @@ def get_playlist_by_name(project, name, client=default):
         dict: Playlist matching given name for given project.
     """
     project = normalize_model_parameter(project)
-    playlists = all_playlists_for_project(project, client=client)
-    for playlist in playlists:
-        if playlist["name"] == name:
-            return playlist
-    return None
+    params = {
+        "project_id": project["id"],
+        "name": name
+    }
+    return raw.fetch_first("playlists", params=params, client=client)
 
 
 def new_playlist(
