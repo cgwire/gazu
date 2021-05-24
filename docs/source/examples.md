@@ -349,7 +349,7 @@ softwares = gazu.files.all_softwares()
 Retrieve given software:
 
 ```python
-software = gazu.files.get_software(output_type_id)
+software = gazu.files.get_software(software_id)
 software = gazu.files.get_software_by_name("Maya")
 ```
 
