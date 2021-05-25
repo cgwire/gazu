@@ -396,9 +396,8 @@ output_file = gazu.files.new_entity_output_file(
     person=person_dict, # author
     revision=1,
     nb_elements=1, # change it only for image sequences
-    representation="ob"
+    representation="ob",
     sep="/"
-    
 )
 
 output_file = gazu.files.new_asset_instance_output_file(
@@ -410,9 +409,8 @@ output_file = gazu.files.new_asset_instance_output_file(
     person=person_dict, # author
     revision=1,
     nb_elements=1, # change it only for image sequences
-    representation="ob"
+    representation="ob",
     sep="/"
-    
 )
 ```
 
@@ -461,8 +459,7 @@ file_path = gazu.files.build_working_file_path(
     name="main",
     mode="output", 
     software=software_dict,
-    output_type=output_type_dict,
-    version=1,
+    revision=1,
     sep="/"
 )
 ```
@@ -471,12 +468,12 @@ Generate output file path from a given entity:
 
 ```python
 file_path = gazu.files.build_entity_output_file_path(
-    entity_dict, 
+    entity_dict,
+    output_type_dict,
+    task_type_dict,
     name="main",
-    mode="output", 
-    software=software_dict,
-    output_type=output_type_dict,
-    version=1
+    mode="output",
+    revision=1
 )
 ```
 
@@ -484,12 +481,13 @@ Generate output file path from a given asset instance:
 
 ```python
 file_path = gazu.files.build_asset_instance_output_file_path(
-    asset_instance_dict, 
+    asset_instance_dict,
+    temporal_entity_dict,
+    output_type_dict,
+    task_type_dict,
     name="main",
-    mode="output", 
-    software=software_dict,
-    output_type=output_type_dict,
-    version=1
+    mode="output",
+    revision=1
 )
 ```
 
