@@ -1,4 +1,5 @@
 import string
+import json
 
 from . import client as raw
 from .sorting import sort_by_name
@@ -680,6 +681,7 @@ def add_comment(
 
     else:
         attachment = attachments.pop()
+        data["checklist"] = json.dumps(checklist)
         return raw.upload(
             "actions/tasks/%s/comment" % task["id"],
             attachment,
