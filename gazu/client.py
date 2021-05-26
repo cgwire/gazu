@@ -406,6 +406,7 @@ def download(path, file_path, client=default_client):
     ) as response:
         with open(file_path, "wb") as target_file:
             shutil.copyfileobj(response.raw, target_file)
+        return response
 
 
 def get_file_data_from_url(url, full=False, client=default_client):
