@@ -30,6 +30,20 @@ def all_task_types(client=default):
 
 
 @cache
+def all_task_types_for_project(project, client=default):
+    """
+    Returns:
+        list: Task types stored in database.
+    """
+    project = normalize_model_parameter(project)
+    task_types = raw.fetch_all(
+        "projects/%/task-types" % project["id"],
+        client=client
+    )
+    return sort_by_name(task_types)
+
+
+@cache
 def all_tasks_for_shot(shot, relations=False, client=default):
     """
     Args:
