@@ -345,10 +345,34 @@ def create(model_name, data, client=default_client):
     """
     Create an entry for given model and data.
 
+    Args:
+        model (str): The model type involved
+        data (str): The data to use for creation
+
     Returns:
         dict: Created entry
     """
     return post(url_path_join("data", model_name), data, client=client)
+
+
+def update(model_name, model_id, data, client=default_client):
+    """
+    Update an entry for given model, id and data.
+
+    Args:
+        model (str): The model type involved
+        id (str): The target model id
+        data (str): The data to update
+
+    Returns:
+        dict: Updated entry
+    """
+    return put(
+        url_path_join("data", model_name, model_id),
+        data,
+        client=client
+    )
+
 
 
 def upload(path, file_path, data={}, extra_files=[], client=default_client):
