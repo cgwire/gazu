@@ -440,6 +440,19 @@ def remove_shot(shot, force=False, client=default):
     return raw.delete(path, params, client=client)
 
 
+def restore_shot(shot, client=default):
+    """
+    Restore given shot into database (uncancel it).
+
+    Args:
+        shot (dict / str): Shot to restore.
+    """
+    shot = normalize_model_parameter(shot)
+    path = "data/shots/%s" % shot["id"]
+    data = {"canceled": False}
+    return raw.put(path, data, client=client)
+
+
 def new_episode(project, name, client=default):
     """
     Create an episode for given project.
