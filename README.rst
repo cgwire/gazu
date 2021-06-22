@@ -2,10 +2,10 @@
    :alt: Gazu Logo
 
 
-Gazu, steroïds for your CG tools
-================================
+Gazu, Python client for the Kitsu API 
+=====================================
 
-Gazu is a Python client that allows to fetch data easily from your CG
+Gazu is a Python client that allows to fetch data easily from your animation
 production environment (tasks, shots, assets, casting and dependencies).
 More than giving access to data, it allows to perform operations like
 generating file paths, marking a task as started, setting a thumbnail on
@@ -58,8 +58,8 @@ Documentation is available on a dedicated website:
 Projects based on Gazu
 ----------------------
 
-Our community built open-source tools to connect your CG tools to your
-Kitsu instance. They are listed below:
+Our community built open-source tools to connect your content creation tools to
+your Kitsu instance. They are listed below:
 
 * `Qtazu <https://github.com/Colorbleed/qtazu>`__: Qt Widgets such as a login
   modal.
