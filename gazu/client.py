@@ -23,6 +23,7 @@ class KitsuClient(object):
     def __init__(self, host):
         self.tokens = {"access_token": "", "refresh_token": ""}
         self.session = requests.Session()
+        self.session.verify = False
         self.host = host
         self.event_host = host
 
