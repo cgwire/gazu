@@ -14,7 +14,12 @@ def init(client=default_client):
     from gazu.client import make_auth_header
 
     path = get_event_host(client)
-    event_client = SocketIO(path, None, headers=make_auth_header())
+    event_client = SocketIO(
+        path,
+        None,
+        headers=make_auth_header(),
+        verify=False
+    )
     main_namespace = event_client.define(BaseNamespace, "/events")
     event_client.main_namespace = main_namespace
     event_client.on('error', connect_error)
@@ -40,6 +45,7 @@ def run_client(event_client):
     configured.
     """
     try:
+        print("Listening to Kitsu events...")
         event_client.wait()
     except TypeError:
         raise AuthFailedException
