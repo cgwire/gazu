@@ -2,7 +2,7 @@ from .exception import AuthFailedException
 from .client import default_client
 
 
-def init(client=default_client):
+def init(client=default_client, ssl_verify=True):
     """
     Init configuration for SocketIO client.
 
@@ -18,7 +18,7 @@ def init(client=default_client):
         path,
         None,
         headers=make_auth_header(),
-        verify=False
+        verify=ssl_verify
     )
     main_namespace = event_client.define(BaseNamespace, "/events")
     event_client.main_namespace = main_namespace

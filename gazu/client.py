@@ -20,10 +20,10 @@ from .exception import (
 
 
 class KitsuClient(object):
-    def __init__(self, host):
+    def __init__(self, host, ssl_verify=True):
         self.tokens = {"access_token": "", "refresh_token": ""}
         self.session = requests.Session()
-        self.session.verify = False
+        self.session.verify = ssl_verify
         self.host = host
         self.event_host = host
 
@@ -42,7 +42,7 @@ try:
     )
     host = "http://gazu.change.serverhost/api"
     default_client = create_client(host)
-except:
+except Exception:
     print("Warning, running in setup mode!")
 
 
@@ -53,7 +53,7 @@ def host_is_up(client=default_client):
     """
     try:
         response = client.session.head(client.host)
-    except:
+    except Exception:
         return False
     return response.status_code == 200
 
@@ -130,7 +130,7 @@ def make_auth_header(client=default_client):
     Returns:
         Headers required to authenticate.
     """
-    headers = { "User-Agent": "CGWire Gazu %s" % __version__ }
+    headers = {"User-Agent": "CGWire Gazu %s" % __version__}
     if "access_token" in client.tokens:
         headers["Authorization"] = "Bearer %s" % client.tokens["access_token"]
     return headers
@@ -249,8 +249,8 @@ def delete(path, params=None, client=default_client):
 
 def check_status(request, path):
     """
-    Raise an exception related to status code, if the status code does not match
-    a success code. Print error message when it's relevant.
+    Raise an exception related to status code, if the status code does not
+    match a success code. Print error message when it's relevant.
 
     Args:
         request (Request): The request to validate.
@@ -295,7 +295,7 @@ def check_status(request, path):
             print("A server error occured!\n")
             print("Server stacktrace:\n%s" % stacktrace)
             print("Error message:\n%s\n" % message)
-        except:
+        except Exception:
             print(request.text)
         raise ServerErrorException(path)
     return status_code
@@ -330,7 +330,8 @@ def fetch_first(path, params=None, client=default_client):
 
 def fetch_one(model_name, id, client=default_client):
     """
-    Function dedicated at targeting routes that returns a single model instance.
+    Function dedicated at targeting routes that returns a single model
+    instance.
 
     Args:
         model_name (str): Model type name.
@@ -373,7 +374,6 @@ def update(model_name, model_id, data, client=default_client):
         data,
         client=client
     )
-
 
 
 def upload(path, file_path, data={}, extra_files=[], client=default_client):
