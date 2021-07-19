@@ -38,7 +38,7 @@ def all_task_types_for_project(project, client=default):
     """
     project = normalize_model_parameter(project)
     task_types = raw.fetch_all(
-        "projects/%/task-types" % project["id"],
+        "projects/%s/task-types" % project["id"],
         client=client
     )
     return sort_by_name(task_types)
