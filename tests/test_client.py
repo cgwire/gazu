@@ -9,13 +9,15 @@ import requests_mock
 import gazu
 from gazu.__version__ import __version__
 
-from gazu import client as raw
+from gazu import client as raw, set_event_host
 from gazu.exception import (
     RouteNotFoundException,
     AuthFailedException,
     MethodNotAllowedException,
     NotAuthenticatedException,
     NotAllowedException,
+    TooBigFileException,
+    ServerErrorException,
 )
 
 
@@ -32,12 +34,25 @@ class BaseFuncTestCase(ClientTestCase):
         with requests_mock.mock() as mock:
             mock.head(raw.get_host())
             self.assertTrue(raw.host_is_up())
+        self.assertFalse(raw.host_is_up())
+
+    def test_host_is_valid(self):
+        self.assertFalse(raw.host_is_valid())
+        with requests_mock.mock() as mock:
+            mock.head(raw.get_host())
+            mock.post(raw.get_full_url("auth/login"), text=json.dumps({}), status_code=400)
+            self.assertTrue(raw.host_is_valid())
+
+    def test_set_event_host(self):
+        gazu.set_event_host('newhost')
+        self.assertEqual(raw.default_client.event_host, 'newhost')
+        gazu.set_event_host("http://gazu.change.serverhost/api")
 
     def test_get_host(self):
         self.assertEqual(raw.get_host(), raw.default_client.host)
 
     def test_get_event_host(self):
-        self.assertEqual(raw.get_event_host(), raw.default_client.host)
+        self.assertEqual(gazu.get_event_host(), raw.default_client.host)
 
     def test_set_host(self):
         raw.set_host("newhost")
@@ -131,6 +146,18 @@ class BaseFuncTestCase(ClientTestCase):
             self.assertEqual(
                 raw.put("data/persons", "person-01"),
                 {"id": "person-01", "first_name": "John"},
+            )
+
+    def test_update(self):
+        with requests_mock.mock() as mock:
+            mock.put(
+                raw.get_full_url("data/persons/person-1"),
+                text='{"id": "person-1", "first_name": "John", "last_name": "Doe"}',
+            )
+            data = {"last_name": "Doe"}
+            self.assertEqual(
+                raw.update('persons', 'person-1', data),
+                {"id": "person-1", "first_name": "John", "last_name": "Doe"},
             )
 
     def test_delete(self):
@@ -239,6 +266,16 @@ class BaseFuncTestCase(ClientTestCase):
                 raw.upload("data/new-file", "./tests/fixtures/v1.png", data={
                     "test": True
                 })
+            with requests_mock.Mocker() as mock:
+                mock.post(
+                    raw.get_full_url("data/new-file"),
+                    text='{"message": "Error"}',
+                )
+                mock.post("data/new-file", json={})
+                with self.assertRaises(gazu.client.UploadFailedException):
+                    raw.upload("data/new-file", "./tests/fixtures/v1.png", data={
+                        "test": True
+                    })
 
     def test_upload_multiple_files(self):
         with open("./tests/fixtures/v1.png", "rb") as test_file:
@@ -278,6 +315,19 @@ class BaseFuncTestCase(ClientTestCase):
             def __init__(self, status_code):
                 self.status_code = status_code
 
+        class RequestText(object):
+            def __init__(self, status_code):
+                self.status_code = status_code
+                self.text = "Error on server"
+
+        class RequestJSON(object):
+            def __init__(self, status_code):
+                self.status_code = status_code
+                self.text = "Error on server"
+                
+            def json(self):
+                return {}
+
         self.assertRaises(
             NotAuthenticatedException, raw.check_status, Request(401), "/"
         )
@@ -289,6 +339,26 @@ class BaseFuncTestCase(ClientTestCase):
         )
         self.assertRaises(
             MethodNotAllowedException, raw.check_status, Request(405), "/"
+        )
+
+        self.assertRaises(
+            TooBigFileException, raw.check_status, Request(413), "/"
+        )
+
+        self.assertRaises(
+            ServerErrorException, raw.check_status, RequestText(500), "/"
+        )
+
+        self.assertRaises(
+            ServerErrorException, raw.check_status, RequestText(502), "/"
+        )
+
+        self.assertRaises(
+            ServerErrorException, raw.check_status, RequestJSON(500), "/"
+        )
+
+        self.assertRaises(
+            ServerErrorException, raw.check_status, RequestJSON(502), "/"
         )
 
     def test_init_host(self):
@@ -310,6 +380,13 @@ class BaseFuncTestCase(ClientTestCase):
             raw.default_client.tokens["tokens"]["access_token"], "tokentest"
         )
 
+    def test_init_log_out(self):
+        with requests_mock.mock() as mock:
+            mock.head(raw.get_host())
+            mock.get(raw.get_full_url("auth/logout"), text=json.dumps({}), status_code=400)
+            gazu.log_out()
+            self.assertEqual(raw.default_client.tokens, {})
+
     def test_init_log_in_fail(self):
         with requests_mock.mock() as mock:
             mock.post(
@@ -319,6 +396,14 @@ class BaseFuncTestCase(ClientTestCase):
             self.assertRaises(
                 AuthFailedException, gazu.log_in, "frank", "test"
             )
+            self.assertRaises(
+                AuthFailedException, gazu.log_in, "", ""
+            )
+        with requests_mock.mock() as mock:
+            mock.head(raw.get_host())
+            mock.post(raw.get_full_url("auth/login"), text=json.dumps({}), status_code=400)
+            with self.assertRaises(AuthFailedException):
+                gazu.log_in('', '')
 
     def test_get_current_user(self):
         with requests_mock.mock() as mock:
@@ -328,3 +413,11 @@ class BaseFuncTestCase(ClientTestCase):
             )
             current_user = raw.get_current_user()
             self.assertEqual(current_user["id"], "123")
+
+    def test_get_file_data_from_url(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                raw.get_full_url("test_url"),
+                text="test",
+            )
+            self.assertEqual(raw.get_file_data_from_url('test_url'), b"test")

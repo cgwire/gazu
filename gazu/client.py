@@ -364,7 +364,7 @@ def update(model_name, model_id, data, client=default_client):
     Args:
         model (str): The model type involved
         id (str): The target model id
-        data (str): The data to update
+        data (dict): The data to update
 
     Returns:
         dict: Updated entry
@@ -444,10 +444,9 @@ def get_file_data_from_url(url, full=False, client=default_client):
         url,
         stream=True,
         headers=make_auth_header(client=client),
-        client=client
     )
     check_status(response, url)
-    return response
+    return response.content
 
 
 def import_data(model_name, data, client=default_client):
