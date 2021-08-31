@@ -232,7 +232,7 @@ def update_asset_data(asset, data={}, client=default):
     current_asset = get_asset(asset["id"], client=client)
     updated_asset = {"id": current_asset["id"], "data": current_asset["data"]}
     updated_asset["data"].update(data)
-    update_asset(updated_asset, client=client)
+    return update_asset(updated_asset, client=client)
 
 
 def remove_asset(asset, force=False, client=default):
@@ -301,7 +301,7 @@ def get_asset_type(asset_id, client=default):
 def get_asset_type_by_name(name, client=default):
     """
     Args:
-        asset_type_id (str): Id of claimed asset type.
+        name (str): name of asset type.
 
     Returns:
         dict: Asset Type matching given name.
