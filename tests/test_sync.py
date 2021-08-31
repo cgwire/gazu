@@ -1,3 +1,4 @@
+from gazu.sync import validate_date_format
 import unittest
 import json
 import requests_mock
@@ -103,3 +104,34 @@ class SyncestCase(unittest.TestCase):
             "updated_at": "2020-08-31T22:31:55"
         }
         self.assertFalse(gazu.sync.is_changed(source_asset, target_asset))
+
+    def test_get_last_events(self):
+        result = [{
+            "id": fakeid("event-1"),
+            "created_at": "date-1",
+            "name": "name-1",
+            "user_id": fakeid("user-1"),
+            "data": {
+                "project_id": fakeid('project-1')
+                }
+            }
+            ]
+        path = "/data/events/last"
+        with requests_mock.mock() as mock:
+            mock.get(gazu.client.get_full_url(path), text=json.dumps(result))
+            self.assertEqual(gazu.sync.get_last_events(), result)
+            self.assertEqual(gazu.sync.get_last_events(project=fakeid('project-1'), after="2021-11-06", before="2021-11-06"), result)
+
+    def test_validate_date_format(self):
+        validate_date_format('2021-11-06')
+        validate_date_format('2021-11-06T11:25:59')
+        try:
+            validate_date_format('')
+        except Exception as e:
+            self.assertIsInstance(e, ValueError)
+
+    def test_get_id_map_by_name(self):
+        sources_list = [{'id':fakeid("1"),"name":"1"}, {'id':fakeid("2"),"name":"2"}]
+        target_list = [{'id':fakeid("1"),"name":"1"}]
+        result = {"1":fakeid("1")}
+        self.assertEqual(gazu.sync.get_id_map_by_name(sources_list, target_list), result)

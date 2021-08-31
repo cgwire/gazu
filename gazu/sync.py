@@ -2,6 +2,8 @@ from . import client as raw
 
 from .helpers import normalize_model_parameter
 
+import datetime
+
 default = raw.default_client
 
 
@@ -27,8 +29,10 @@ def get_last_events(
         project = normalize_model_parameter(project)
         params["project_id"] = project["id"]
     if after is not None:
+        validate_date_format(after)
         params["after"] = after
     if before is not None:
+        validate_date_format(before)
         params["before"] = before
     return raw.get(path, params=params, client=client)
 
@@ -135,8 +139,18 @@ def get_id_map_by_name(source_list, target_list):
         name_map[model["name"].lower()] = model["id"]
     for model in source_list:
         if model["name"].lower() in name_map:
-            link_map[model["id"]] = name_map[model["name"].lower()]
+            link_map[model["name"]] = name_map[model["name"].lower()]
     return link_map
+
+
+def validate_date_format(date_text):
+    try:
+        datetime.datetime.strptime(date_text, '%Y-%m-%dT%H:%M:%S')
+    except ValueError:
+        try:
+            datetime.datetime.strptime(date_text, '%Y-%m-%d')
+        except ValueError:
+            raise ValueError("Incorrect date format, should be YYYY-mm-dd or YYYY-mm-ddTHH:MM:SS")
 
 
 def is_changed(source_model, target_model):
