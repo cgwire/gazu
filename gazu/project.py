@@ -157,7 +157,7 @@ def update_project_data(project, data={}, client=default):
     if "data" not in project or project["data"] is None:
         project["data"] = {}
     project["data"].update(data)
-    update_project(project, client=client)
+    return update_project(project, client=client)
 
 
 def close_project(project, client=default):
@@ -170,6 +170,7 @@ def close_project(project, client=default):
     Returns:
         dict: Updated project.
     """
+    project = normalize_model_parameter(project)
     closed_status_id = None
     for status in all_project_status(client=client):
         if status["name"].lower() == "closed":
