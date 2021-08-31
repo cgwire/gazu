@@ -21,12 +21,8 @@ class TestCase(unittest.TestCase):
             def __str__(self):
                 raise TypeError('Can not by stringified')
 
-        try:
+        with self.assertRaises(ValueError):
             helpers.normalize_model_parameter(TestCantCastStr())
-        except Exception as e:
-            self.assertIsInstance(e, ValueError)
 
-        try:
+        with self.assertRaises(ValueError):
             helpers.normalize_model_parameter('NOT_AN_UUID')
-        except Exception as e:
-            self.assertIsInstance(e, ValueError)
