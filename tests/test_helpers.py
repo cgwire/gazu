@@ -1,4 +1,5 @@
 import unittest
+import datetime
 
 from gazu import helpers
 
@@ -26,3 +27,12 @@ class TestCase(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             helpers.normalize_model_parameter('NOT_AN_UUID')
+
+    def test_validate_date_format(self):
+        helpers.validate_date_format('2021-11-06')
+        helpers.validate_date_format('2021-11-06T11:25:59')
+        helpers.validate_date_format(datetime.datetime.now().isoformat())
+        try:
+            helpers.validate_date_format('')
+        except Exception as e:
+            self.assertIsInstance(e, ValueError)
