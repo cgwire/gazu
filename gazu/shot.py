@@ -377,6 +377,7 @@ def get_asset_instances_for_shot(shot, client=default):
     """
     Return the list of asset instances linked to given shot.
     """
+    shot = normalize_model_parameter(shot)
     return raw.get("data/shots/%s/asset-instances" % shot["id"], client=client)
 
 
@@ -396,7 +397,7 @@ def update_shot_data(shot, data={}, client=default):
     current_shot = get_shot(shot["id"], client=client)
     updated_shot = {"id": current_shot["id"], "data": current_shot["data"]}
     updated_shot["data"].update(data)
-    update_shot(updated_shot, client=client)
+    return update_shot(updated_shot, client=client)
 
 
 def update_sequence_data(sequence, data={}, client=default):
