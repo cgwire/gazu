@@ -1,4 +1,5 @@
 import re
+import datetime
 
 _UUID_RE = re.compile(
     "([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}){1}"
@@ -29,3 +30,16 @@ def normalize_model_parameter(model_parameter):
             return {"id": id_str}
         else:
             raise ValueError("Wrong format: expected ID string or Data dict")
+
+def validate_date_format(date_text):
+    try:
+        datetime.datetime.strptime(date_text, '%Y-%m-%dT%H:%M:%S')
+    except ValueError:
+        try:
+            datetime.datetime.strptime(date_text, '%Y-%m-%d')
+        except ValueError:
+            try:
+                datetime.datetime.fromisoformat(date_text)
+            except:
+                raise ValueError("Incorrect date format for %s, should be YYYY-mm-dd or YYYY-mm-ddTHH:MM:SS" % date_text)
+    return date_text

@@ -3,7 +3,7 @@ import json
 
 from . import client as raw
 from .sorting import sort_by_name
-from .helpers import normalize_model_parameter
+from .helpers import normalize_model_parameter, validate_date_format
 
 from .cache import cache
 
@@ -494,10 +494,10 @@ def new_task(
     }
 
     if assigner is not None:
-        data["assigner_id"] = assigner["id"]
+        data["assigner_id"] = normalize_model_parameter(assigner)["id"]
 
     if assignees is not None:
-        data["assignees"] = [person["id"] for person in assignees]
+        data["assignees"] = [normalize_model_parameter(person)["id"] for person in assignees]
     else:
         data["assignees"] = []
 
@@ -670,7 +670,7 @@ def add_comment(
         data["person_id"] = person["id"]
 
     if created_at is not None:
-        data["created_at"] = created_at
+        data["created_at"] = validate_date_format(created_at)
 
     if len(attachments) == 0:
         return raw.post(
@@ -877,7 +877,7 @@ def update_task_data(task, data={}, client=default):
     if updated_task["data"] is None:
         updated_task["data"] = {}
     updated_task["data"].update(data)
-    update_task(updated_task, client=client)
+    return update_task(updated_task, client=client)
 
 
 @cache
