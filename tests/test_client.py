@@ -319,10 +319,10 @@ class BaseFuncTestCase(ClientTestCase):
         class RequestJSON(object):
             def __init__(self, status_code):
                 self.status_code = status_code
-                self.text = "Error on server"
+                self.text = '{"stacktrace": "stacktrace", "message": "error"}'
 
             def json(self):
-                return {}
+                return json.dumps(self.text)
 
         self.assertRaises(
             NotAuthenticatedException, raw.check_status, Request(401), "/"
