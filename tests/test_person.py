@@ -28,11 +28,11 @@ class PersonTestCase(unittest.TestCase):
                         {
                             "first_name": "John",
                             "last_name": "Doe",
-                            "id": "person-01",
+                            "id": "person-1",
                         },
                         {
-                            "first_name": "John",
-                            "last_name": "Did",
+                            "first_name": "Alex",
+                            "last_name": "Doe",
                             "id": "person-2",
                         },
                         {
@@ -43,8 +43,8 @@ class PersonTestCase(unittest.TestCase):
                     ]
                 ),
             )
-            person = gazu.person.get_person_by_full_name("John Did")
-            self.assertEqual(person["id"], "person-2")
+            person = gazu.person.get_person_by_full_name("John Doe")
+            self.assertEqual(person["id"], "person-1")
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/persons"),
