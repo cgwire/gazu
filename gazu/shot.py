@@ -134,9 +134,7 @@ def get_episode_by_name(project, episode_name, client=default):
     """
     project = normalize_model_parameter(project)
     return raw.fetch_first(
-        "episodes",
-        {"project_id": project["id"], "name": episode_name},
-        client=client
+        "episodes", {"project_id": project["id"], "name": episode_name}, client=client
     )
 
 
@@ -223,9 +221,7 @@ def get_shot_by_name(sequence, shot_name, client=default):
     """
     sequence = normalize_model_parameter(sequence)
     return raw.fetch_first(
-        "shots/all",
-        {"sequence_id": sequence["id"], "name": shot_name},
-        client=client
+        "shots/all", {"sequence_id": sequence["id"], "name": shot_name}, client=client
     )
 
 
@@ -271,6 +267,7 @@ def get_shot_url(shot, client=default):
         episode_id=shot["episode_id"],
     )
 
+
 def new_sequence(project, name, episode=None, client=default):
     """
     Create a sequence for given project and episode.
@@ -290,8 +287,7 @@ def new_sequence(project, name, episode=None, client=default):
         episode = normalize_model_parameter(episode)
         data["episode_id"] = episode["id"]
 
-    sequence = \
-        get_sequence_by_name(project, name, episode=episode, client=client)
+    sequence = get_sequence_by_name(project, name, episode=episode, client=client)
     if sequence is None:
         path = "data/projects/%s/sequences" % project["id"]
         return raw.post(path, data, client=client)
@@ -307,7 +303,7 @@ def new_shot(
     frame_in=None,
     frame_out=None,
     data={},
-    client=default
+    client=default,
 ):
     """
     Create a shot for given sequence and project. Add frame in and frame out
@@ -415,13 +411,10 @@ def update_sequence_data(sequence, data={}, client=default):
     sequence = normalize_model_parameter(sequence)
     current_sequence = get_sequence(sequence["id"], client=client)
 
-    if not current_sequence.get('data'):
+    if not current_sequence.get("data"):
         current_sequence["data"] = {}
 
-    updated_sequence = {
-        "id": current_sequence["id"],
-        "data": current_sequence["data"]
-    }
+    updated_sequence = {"id": current_sequence["id"], "data": current_sequence["data"]}
     updated_sequence["data"].update(data)
     return update_sequence(updated_sequence, client)
 
@@ -470,9 +463,7 @@ def new_episode(project, name, client=default):
     episode = get_episode_by_name(project, name, client=client)
     if episode is None:
         return raw.post(
-            "data/projects/%s/episodes" % project["id"],
-            data,
-            client=client
+            "data/projects/%s/episodes" % project["id"], data, client=client
         )
     else:
         return episode
@@ -506,10 +497,7 @@ def update_episode_data(episode, data={}, client=default):
     """
     episode = normalize_model_parameter(episode)
     current_episode = get_sequence(episode["id"], client=client)
-    updated_episode = {
-        "id": current_episode["id"],
-        "data": current_episode["data"]
-    }
+    updated_episode = {"id": current_episode["id"], "data": current_episode["data"]}
     updated_episode["data"].update(data)
     return update_episode(updated_episode, client=client)
 

@@ -156,7 +156,7 @@ def get_asset_url(asset, client=default):
         project_id=asset["project_id"],
         asset_id=asset["id"],
         episode_id=episode_id,
-        client=client
+        client=client,
     )
 
 
@@ -167,7 +167,7 @@ def new_asset(
     description="",
     extra_data={},
     episode=None,
-    client=default
+    client=default,
 ):
     """
     Create a new asset in the database for given project and asset type.
@@ -198,7 +198,7 @@ def new_asset(
             "data/projects/%s/asset-types/%s/assets/new"
             % (project["id"], asset_type["id"]),
             data,
-            client=client
+            client=client,
         )
     return asset
 
@@ -320,9 +320,7 @@ def new_asset_type(name, client=default):
         (dict): Created asset type.
     """
     data = {"name": name}
-    asset_type = raw.fetch_first(
-        "entity-types", {"name": name}, client=client
-    )
+    asset_type = raw.fetch_first("entity-types", {"name": name}, client=client)
     if asset_type is None:
         asset_type = raw.create("entity-types", data, client=client)
     return asset_type
@@ -447,10 +445,7 @@ def all_asset_instances_for_asset(asset, client=default):
 
 
 def new_asset_asset_instance(
-    asset,
-    asset_to_instantiate,
-    description="",
-    client=default
+    asset, asset_to_instantiate, description="", client=default
 ):
     """
     Creates a new asset instance for given asset. The instance number is
@@ -471,7 +466,5 @@ def new_asset_asset_instance(
         "description": description,
     }
     return raw.post(
-        "data/assets/%s/asset-asset-instances" % asset["id"],
-        data,
-        client=client
+        "data/assets/%s/asset-asset-instances" % asset["id"], data, client=client
     )

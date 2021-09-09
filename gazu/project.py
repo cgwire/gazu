@@ -73,9 +73,7 @@ def get_project_url(project, section="assets", client=default):
     project = normalize_model_parameter(project)
     path = "{host}/productions/{project_id}/{section}/"
     return path.format(
-        host=raw.get_api_url_from_host(),
-        project_id=project["id"],
-        section=section
+        host=raw.get_api_url_from_host(), project_id=project["id"], section=section
     )
 
 
@@ -135,9 +133,7 @@ def update_project(project, client=default):
     Returns:
         dict: Updated project.
     """
-    return raw.put(
-        "data/projects/%s" % project["id"], project, client=client
-    )
+    return raw.put("data/projects/%s" % project["id"], project, client=client)
 
 
 def update_project_data(project, data={}, client=default):

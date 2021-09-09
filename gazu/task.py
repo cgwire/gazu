@@ -37,10 +37,7 @@ def all_task_types_for_project(project, client=default):
         list: Task types stored in database.
     """
     project = normalize_model_parameter(project)
-    task_types = raw.fetch_all(
-        "projects/%s/task-types" % project["id"],
-        client=client
-    )
+    task_types = raw.fetch_all("projects/%s/task-types" % project["id"], client=client)
     return sort_by_name(task_types)
 
 
@@ -178,7 +175,7 @@ def all_tasks_for_task_status(project, task_type, task_status, client=default):
             "task_type_id": task_type["id"],
             "task_status_id": task_status["id"],
         },
-        client=client
+        client=client,
     )
 
 
@@ -200,7 +197,7 @@ def all_tasks_for_task_type(project, task_type, client=default):
             "project_id": project["id"],
             "task_type_id": task_type["id"],
         },
-        client=client
+        client=client,
     )
 
 
@@ -229,9 +226,7 @@ def all_task_types_for_asset(asset, client=default):
         list: Task types of tasks related to given asset.
     """
     asset = normalize_model_parameter(asset)
-    task_types = raw.fetch_all(
-        "assets/%s/task-types" % asset["id"], client=client
-    )
+    task_types = raw.fetch_all("assets/%s/task-types" % asset["id"], client=client)
     return sort_by_name(task_types)
 
 
@@ -340,7 +335,7 @@ def get_task_by_name(entity, task_type, name="main", client=default):
             "task_type_id": task_type["id"],
             "entity_id": entity["id"],
         },
-        client=client
+        client=client,
     )
 
 
@@ -365,9 +360,7 @@ def get_task_type_by_name(task_type_name, client=default):
     Returns:
         dict: Task type object for given name.
     """
-    return raw.fetch_first(
-        "task-types", {"name": task_type_name}, client=client
-    )
+    return raw.fetch_first("task-types", {"name": task_type_name}, client=client)
 
 
 @cache
@@ -438,9 +431,7 @@ def remove_task_status(task_status, client=default):
     """
     task_status = normalize_model_parameter(task_status)
     return raw.delete(
-        "data/task-status/%s" % task_status["id"],
-        {"force": "true"},
-        client=client
+        "data/task-status/%s" % task_status["id"], {"force": "true"}, client=client
     )
 
 
@@ -464,7 +455,7 @@ def new_task(
     task_status=None,
     assigner=None,
     assignees=None,
-    client=default
+    client=default,
 ):
     """
     Create a new task for given entity and task type.
@@ -497,7 +488,9 @@ def new_task(
         data["assigner_id"] = normalize_model_parameter(assigner)["id"]
 
     if assignees is not None:
-        data["assignees"] = [normalize_model_parameter(person)["id"] for person in assignees]
+        data["assignees"] = [
+            normalize_model_parameter(person)["id"] for person in assignees
+        ]
     else:
         data["assignees"] = []
 
@@ -640,7 +633,7 @@ def add_comment(
     checklist=[],
     attachments=[],
     created_at=None,
-    client=default
+    client=default,
 ):
     """
     Add comment to given task. Each comment requires a task_status. Since the
@@ -662,7 +655,7 @@ def add_comment(
     data = {
         "task_status_id": task_status["id"],
         "comment": comment,
-        "checklist": checklist
+        "checklist": checklist,
     }
 
     if person is not None:
@@ -673,11 +666,7 @@ def add_comment(
         data["created_at"] = validate_date_format(created_at)
 
     if len(attachments) == 0:
-        return raw.post(
-            "actions/tasks/%s/comment" % task["id"],
-            data,
-            client=client
-        )
+        return raw.post("actions/tasks/%s/comment" % task["id"], data, client=client)
 
     else:
         attachment = attachments.pop()
@@ -687,7 +676,7 @@ def add_comment(
             attachment,
             data=data,
             extra_files=attachments,
-            client=client
+            client=client,
         )
 
 

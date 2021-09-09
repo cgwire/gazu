@@ -23,9 +23,7 @@ class ProjectTestCase(unittest.TestCase):
     def test_asset_types_for_project(self):
         with requests_mock.mock() as mock:
             mock.get(
-                gazu.client.get_full_url(
-                    "data/user/projects/project-01/asset-types"
-                ),
+                gazu.client.get_full_url("data/user/projects/project-01/asset-types"),
                 text='[{"name": "Props", "id": "asset-type-01"}]',
             )
 
@@ -38,8 +36,7 @@ class ProjectTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/user/projects/project-01/asset-types/asset-type-01"
-                    "/assets"
+                    "data/user/projects/project-01/asset-types/asset-type-01" "/assets"
                 ),
                 text='[{"name": "Chair", "id": "asset-01"}]',
             )
@@ -77,9 +74,7 @@ class ProjectTestCase(unittest.TestCase):
     def test_tasks_for_sequence(self):
         with requests_mock.mock() as mock:
             mock.get(
-                gazu.client.get_full_url(
-                    "data/user/sequences/sequence-1/tasks"
-                ),
+                gazu.client.get_full_url("data/user/sequences/sequence-1/tasks"),
                 text='[{"name": "main", "id": "task-01"}]',
             )
             sequence = {"id": "sequence-1"}
@@ -90,9 +85,7 @@ class ProjectTestCase(unittest.TestCase):
     def test_task_types_for_asset(self):
         with requests_mock.mock() as mock:
             mock.get(
-                gazu.client.get_full_url(
-                    "data/user/assets/asset-01/task-types"
-                ),
+                gazu.client.get_full_url("data/user/assets/asset-01/task-types"),
                 text='[{"name": "modeling", "id": "task-type-01"}]',
             )
             asset = {"id": "asset-01"}
@@ -115,9 +108,7 @@ class ProjectTestCase(unittest.TestCase):
     def test_task_types_for_sequence(self):
         with requests_mock.mock() as mock:
             mock.get(
-                gazu.client.get_full_url(
-                    "data/user/sequences/sequence-1/task-types"
-                ),
+                gazu.client.get_full_url("data/user/sequences/sequence-1/task-types"),
                 text='[{"name": "previz", "id": "task-type-01"}]',
             )
 
@@ -129,9 +120,7 @@ class ProjectTestCase(unittest.TestCase):
     def test_sequences_for_project(self):
         with requests_mock.mock() as mock:
             mock.get(
-                gazu.client.get_full_url(
-                    "data/user/projects/project-01/sequences"
-                ),
+                gazu.client.get_full_url("data/user/projects/project-01/sequences"),
                 text='[{"name": "SEQ01", "id": "sequence-01"}]',
             )
             project = {"id": "project-01"}
@@ -142,9 +131,7 @@ class ProjectTestCase(unittest.TestCase):
     def test_shot_for_sequences(self):
         with requests_mock.mock() as mock:
             mock.get(
-                gazu.client.get_full_url(
-                    "data/user/sequences/sequence-01/shots"
-                ),
+                gazu.client.get_full_url("data/user/sequences/sequence-01/shots"),
                 text='[{"name": "SEQ01", "id": "shot-01"}]',
             )
             sequence = {"id": "sequence-01"}
@@ -152,13 +139,10 @@ class ProjectTestCase(unittest.TestCase):
             shot = shots[0]
             self.assertEqual(shot["name"], "SEQ01")
 
-
     def test_all_task_types_for_scene(self):
         with requests_mock.mock() as mock:
             mock.get(
-                gazu.client.get_full_url(
-                    "data/user/scenes/scene-01/task-types"
-                ),
+                gazu.client.get_full_url("data/user/scenes/scene-01/task-types"),
                 text='[{"name": "scene1", "id": "scene-01"}]',
             )
             scene = {"id": "scene-01"}
@@ -187,7 +171,6 @@ class ProjectTestCase(unittest.TestCase):
             self.assertEqual(shot_instance["name"], "Shot 01")
             self.assertEqual(shot_instance["project_id"], "project-01")
             self.assertEqual(shot_instance["parent_id"], "sequence-01")
-
 
     def test_all_scenes_for_sequence(self):
         with requests_mock.mock() as mock:
@@ -227,11 +210,15 @@ class ProjectTestCase(unittest.TestCase):
     def test_all_tasks_for_scene(self):
         with requests_mock.mock() as mock:
             mock.get(
-                gazu.client.get_full_url("data/user/scene/%s/tasks" % fakeid("scene-1")),
-                text=json.dumps([
-                    {"id": fakeid("task-1"), "name": "task-1"},
-                    {"id": fakeid("task-2"), "name": "task-2"},
-                ])
+                gazu.client.get_full_url(
+                    "data/user/scene/%s/tasks" % fakeid("scene-1")
+                ),
+                text=json.dumps(
+                    [
+                        {"id": fakeid("task-1"), "name": "task-1"},
+                        {"id": fakeid("task-2"), "name": "task-2"},
+                    ]
+                ),
             )
             scene = {"id": fakeid("scene-1")}
             tasks = gazu.user.all_tasks_for_scene(scene)
@@ -243,10 +230,12 @@ class ProjectTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/user/tasks"),
-                text=json.dumps([
-                    {"id": fakeid("task-1"), "name": "task-1"},
-                    {"id": fakeid("task-2"), "name": "task-2"},
-                ])
+                text=json.dumps(
+                    [
+                        {"id": fakeid("task-1"), "name": "task-1"},
+                        {"id": fakeid("task-2"), "name": "task-2"},
+                    ]
+                ),
             )
             tasks = gazu.user.all_tasks_to_do()
             self.assertEqual(len(tasks), 2)
@@ -259,10 +248,10 @@ class ProjectTestCase(unittest.TestCase):
             mock.post(
                 gazu.client.get_full_url("data/user/desktop-login-logs"),
                 text=json.dumps(
-                    {"id": fakeid('user-1'), "date": date_str},
-                )
+                    {"id": fakeid("user-1"), "date": date_str},
+                ),
             )
-        
+
             log_desktop_session_log_in = gazu.user.log_desktop_session_log_in()
-            self.assertEqual(log_desktop_session_log_in['id'], fakeid('user-1'))
-            self.assertEqual(log_desktop_session_log_in['date'], date_str)
+            self.assertEqual(log_desktop_session_log_in["id"], fakeid("user-1"))
+            self.assertEqual(log_desktop_session_log_in["date"], date_str)

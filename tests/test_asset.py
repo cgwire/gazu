@@ -14,9 +14,7 @@ class CastingTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/shots/shot-01/assets"),
-                text=json.dumps(
-                    [{"name": "Asset 01", "project_id": "project-01"}]
-                ),
+                text=json.dumps([{"name": "Asset 01", "project_id": "project-01"}]),
             )
             shot = {"id": "shot-01"}
             assets = gazu.asset.all_assets_for_shot(shot)
@@ -116,9 +114,7 @@ class CastingTestCase(unittest.TestCase):
                 gazu.client.get_full_url(
                     "data/assets/all?project_id=project-01&name=test"
                 ),
-                text=json.dumps(
-                    [{"name": "Asset 01", "project_id": "project-01"}]
-                ),
+                text=json.dumps([{"name": "Asset 01", "project_id": "project-01"}]),
             )
             project = {"id": "project-01"}
             asset = gazu.asset.get_asset_by_name(project, "test")
@@ -143,14 +139,13 @@ class CastingTestCase(unittest.TestCase):
             )
             mock.post(
                 gazu.client.get_full_url(
-                    "data/projects/project-id/asset-types/"
-                    "asset-type-id/assets/new"
+                    "data/projects/project-id/asset-types/" "asset-type-id/assets/new"
                 ),
                 text=json.dumps({"name": "Car"}),
             )
             project = {"id": "project-id"}
             asset_type = {"id": "asset-type-id"}
-            episode = {"id" : "episode-1"}
+            episode = {"id": "episode-1"}
             asset = gazu.asset.new_asset(
                 project, asset_type, "Car", "test description", episode=episode
             )
@@ -222,9 +217,7 @@ class CastingTestCase(unittest.TestCase):
     def test_all_shot_asset_instances_for_asset(self):
         with requests_mock.mock() as mock:
             mock.get(
-                gazu.client.get_full_url(
-                    "data/assets/asset-01/shot-asset-instances"
-                ),
+                gazu.client.get_full_url("data/assets/asset-01/shot-asset-instances"),
                 text=json.dumps(
                     [
                         {
@@ -245,9 +238,7 @@ class CastingTestCase(unittest.TestCase):
     def test_get_scene_asset_instances_for_asset(self):
         with requests_mock.mock() as mock:
             mock.get(
-                gazu.client.get_full_url(
-                    "data/assets/asset-01/scene-asset-instances"
-                ),
+                gazu.client.get_full_url("data/assets/asset-01/scene-asset-instances"),
                 text=json.dumps(
                     [
                         {
@@ -279,9 +270,9 @@ class CastingTestCase(unittest.TestCase):
                     ]
                 ),
             )
-            shot_instance = gazu.asset.all_asset_instances_for_shot(
-                {"id": "shot-01"}
-            )[0]
+            shot_instance = gazu.asset.all_asset_instances_for_shot({"id": "shot-01"})[
+                0
+            ]
             self.assertEqual(shot_instance["asset_id"], "asset-01")
             self.assertEqual(shot_instance["shot_id"], "shot-01")
             self.assertEqual(shot_instance["number"], 1)
@@ -290,9 +281,7 @@ class CastingTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/assets/{}/asset-asset-instances".format(
-                        fakeid("asset-01")
-                    )
+                    "data/assets/{}/asset-asset-instances".format(fakeid("asset-01"))
                 ),
                 text=json.dumps(
                     [
@@ -309,9 +298,7 @@ class CastingTestCase(unittest.TestCase):
             )
             asset_instance = asset_instances[0]
             self.assertEqual(asset_instance["asset_id"], fakeid("asset-02"))
-            self.assertEqual(
-                asset_instance["target_asset_id"], fakeid("asset-01")
-            )
+            self.assertEqual(asset_instance["target_asset_id"], fakeid("asset-01"))
             self.assertEqual(asset_instance["number"], 1)
 
     def test_new_asset_asset_instance(self):
@@ -322,9 +309,7 @@ class CastingTestCase(unittest.TestCase):
                 "target_asset_id": "asset-02",
             }
             mock = mock.post(
-                gazu.client.get_full_url(
-                    "data/assets/asset-01/asset-asset-instances"
-                ),
+                gazu.client.get_full_url("data/assets/asset-01/asset-asset-instances"),
                 text=json.dumps(result),
             )
             asset = {"id": "asset-01"}
@@ -339,16 +324,14 @@ class CastingTestCase(unittest.TestCase):
             asset = {
                 "id": "asset-01",
                 "project_id": "project-01",
-                "episode_id": "episode-01"
+                "episode_id": "episode-01",
             }
             project = {
                 "id": "project-01",
                 "production_type": "tvshow",
             }
             mock.get(
-                gazu.client.get_full_url(
-                    "data/projects/" + "project-01"
-                ),
+                gazu.client.get_full_url("data/projects/" + "project-01"),
                 text=json.dumps(project),
             )
             mock.get(
@@ -359,22 +342,20 @@ class CastingTestCase(unittest.TestCase):
             self.assertEqual(
                 url,
                 "http://gazu.change.serverhost/productions/project-01/"
-                "episodes/episode-01/assets/asset-01/"
+                "episodes/episode-01/assets/asset-01/",
             )
         with requests_mock.mock() as mock:
             asset = {
                 "id": "asset-01",
                 "project_id": "project-01",
-                "episode_id": "episode-01"
+                "episode_id": "episode-01",
             }
             project = {
                 "id": "project-01",
                 "production_type": "movie",
             }
             mock.get(
-                gazu.client.get_full_url(
-                    "data/projects/" + "project-01"
-                ),
+                gazu.client.get_full_url("data/projects/" + "project-01"),
                 text=json.dumps(project),
             )
             mock.get(
@@ -385,7 +366,7 @@ class CastingTestCase(unittest.TestCase):
             self.assertEqual(
                 url,
                 "http://gazu.change.serverhost/productions/project-01/"
-                "assets/asset-01/"
+                "assets/asset-01/",
             )
 
     def test_all_assets_for_open_projects(self):
@@ -402,79 +383,97 @@ class CastingTestCase(unittest.TestCase):
                 gazu.client.get_full_url("data/projects/project-02/assets"),
                 text='[{"name": "Asset 02", "project_id": "project-02"}]',
             )
-            self.assertEqual([{"name": "Asset 01", "project_id": "project-01"}, {"name": "Asset 02", "project_id": "project-02"}], gazu.asset.all_assets_for_open_projects())
+            self.assertEqual(
+                [
+                    {"name": "Asset 01", "project_id": "project-01"},
+                    {"name": "Asset 02", "project_id": "project-02"},
+                ],
+                gazu.asset.all_assets_for_open_projects(),
+            )
 
     def test_all_assets_for_episode(self):
         with requests_mock.mock() as mock:
             mock.get(
-                gazu.client.get_full_url("data/assets?source_id=%s" % fakeid('episode-1')),
-                text=json.dumps([
-                    {"id": fakeid('asset-1'), "name": "asset-1"},
-                ]),
+                gazu.client.get_full_url(
+                    "data/assets?source_id=%s" % fakeid("episode-1")
+                ),
+                text=json.dumps(
+                    [
+                        {"id": fakeid("asset-1"), "name": "asset-1"},
+                    ]
+                ),
             )
 
-            assets = gazu.asset.all_assets_for_episode(fakeid('episode-1'))
+            assets = gazu.asset.all_assets_for_episode(fakeid("episode-1"))
 
             self.assertEqual(len(assets), 1)
-            self.assertEqual(assets[0]['name'], "asset-1")
+            self.assertEqual(assets[0]["name"], "asset-1")
 
     def test_update_asset(self):
         with requests_mock.mock() as mock:
             mock = mock.put(
-                gazu.client.get_full_url("data/entities/%s" % fakeid('asset-1')),
-                text=json.dumps({"id": fakeid('asset-1'), 'episode_id': fakeid('episode_1'), 'source_id': fakeid('episode_1')}),
+                gazu.client.get_full_url("data/entities/%s" % fakeid("asset-1")),
+                text=json.dumps(
+                    {
+                        "id": fakeid("asset-1"),
+                        "episode_id": fakeid("episode_1"),
+                        "source_id": fakeid("episode_1"),
+                    }
+                ),
             )
-            asset = {"id": fakeid('asset-1'), 'episode_id': fakeid('episode_1')}
+            asset = {"id": fakeid("asset-1"), "episode_id": fakeid("episode_1")}
             asset = gazu.asset.update_asset(asset)
-            self.assertEqual(asset["id"], fakeid('asset-1'))
-            self.assertEqual(asset['source_id'], fakeid('episode_1'))
+            self.assertEqual(asset["id"], fakeid("asset-1"))
+            self.assertEqual(asset["source_id"], fakeid("episode_1"))
 
     def test_update_asset_data(self):
         with requests_mock.mock() as mock:
             mock.get(
-                gazu.client.get_full_url("data/assets/%s" % fakeid('asset-1')),
-                text=json.dumps(
-                    {"id": fakeid('asset-1'), "data": {}}),
+                gazu.client.get_full_url("data/assets/%s" % fakeid("asset-1")),
+                text=json.dumps({"id": fakeid("asset-1"), "data": {}}),
             )
             mock.put(
-                gazu.client.get_full_url("data/entities/%s" % fakeid('asset-1')),
+                gazu.client.get_full_url("data/entities/%s" % fakeid("asset-1")),
                 text=json.dumps(
-                    {"id": fakeid('asset-1'), "data": {"metadata-1": "metadata-1"}}),
+                    {"id": fakeid("asset-1"), "data": {"metadata-1": "metadata-1"}}
+                ),
             )
             data = {"metadata-1": "metadata-1"}
-            asset = gazu.asset.update_asset_data(fakeid('asset-1'), data)
-            
+            asset = gazu.asset.update_asset_data(fakeid("asset-1"), data)
+
             self.assertEqual(asset["data"]["metadata-1"], "metadata-1")
 
     def test_get_asset_type_by_name(self):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/entity-types?name=asset-type-1"),
-                text=json.dumps([
-                    {"id": fakeid('asset-type-1'), "name": 'asset-type-1'}
-                ]),
+                text=json.dumps(
+                    [{"id": fakeid("asset-type-1"), "name": "asset-type-1"}]
+                ),
             )
-            asset_type = gazu.asset.get_asset_type_by_name('asset-type-1')
-            self.assertEqual(asset_type["id"], fakeid('asset-type-1'))
+            asset_type = gazu.asset.get_asset_type_by_name("asset-type-1")
+            self.assertEqual(asset_type["id"], fakeid("asset-type-1"))
 
     def test_disable_asset_instance(self):
         with requests_mock.mock() as mock:
             mock.put(
-                "%s/asset-instances/%s" % (gazu.client.host, fakeid('asset-instance-1')),
-                text=json.dumps(
-                    {"id": fakeid('asset-instance-1'), "active": False}
-                ),
+                "%s/asset-instances/%s"
+                % (gazu.client.host, fakeid("asset-instance-1")),
+                text=json.dumps({"id": fakeid("asset-instance-1"), "active": False}),
             )
-            asset_instance = gazu.asset.disable_asset_instance(fakeid('asset-instance-1'))
-            self.assertFalse(asset_instance['active'])
+            asset_instance = gazu.asset.disable_asset_instance(
+                fakeid("asset-instance-1")
+            )
+            self.assertFalse(asset_instance["active"])
 
     def test_enable_asset_instance(self):
         with requests_mock.mock() as mock:
             mock.put(
-                "%s/asset-instances/%s" % (gazu.client.host, fakeid('asset-instance-1')),
-                text=json.dumps(
-                    {"id": fakeid('asset-instance-1'), "active": True}
-                ),
+                "%s/asset-instances/%s"
+                % (gazu.client.host, fakeid("asset-instance-1")),
+                text=json.dumps({"id": fakeid("asset-instance-1"), "active": True}),
             )
-            asset_instance = gazu.asset.enable_asset_instance(fakeid('asset-instance-1'))
-            self.assertTrue(asset_instance['active'])
+            asset_instance = gazu.asset.enable_asset_instance(
+                fakeid("asset-instance-1")
+            )
+            self.assertTrue(asset_instance["active"])

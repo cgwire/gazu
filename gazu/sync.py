@@ -103,7 +103,10 @@ def get_link_list_diff(source_list, target_list):
         and one containing the links that should not be in the target list.
         Links are identified by their in ID and their out ID.
     """
-    def get_link_key(l): return l["entity_in_id"] + "-" + l["entity_out_id"]
+
+    def get_link_key(l):
+        return l["entity_in_id"] + "-" + l["entity_out_id"]
+
     missing = []
     unexpected = []
     source_ids = {get_link_key(m): True for m in source_list}
@@ -137,6 +140,7 @@ def get_id_map_by_name(source_list, target_list):
         if model["name"].lower() in name_map:
             link_map[model["name"]] = name_map[model["name"].lower()]
     return link_map
+
 
 def is_changed(source_model, target_model):
     source_date = source_model["updated_at"]

@@ -46,9 +46,7 @@ def get_person_by_desktop_login(desktop_login, client=default):
     Returns:
         dict: Person corresponding to given desktop computer login.
     """
-    return raw.fetch_first(
-        "persons", {"desktop_login": desktop_login}, client=client
-    )
+    return raw.fetch_first("persons", {"desktop_login": desktop_login}, client=client)
 
 
 @cache
@@ -78,8 +76,9 @@ def get_person_by_full_name(full_name, client=default):
         first_name, last_name = full_name.lower().strip(), ""
     for person in all_persons():
         is_right_first_name = first_name == person["first_name"].lower().strip()
-        is_right_last_name = \
+        is_right_last_name = (
             len(last_name) == 0 or last_name == person["last_name"].lower()
+        )
         if is_right_first_name and is_right_last_name:
             return person
     return None
@@ -112,8 +111,13 @@ def get_organisation(client=default):
 
 
 def new_person(
-    first_name, last_name, email, phone="", role="user", desktop_login="",
-    client=default
+    first_name,
+    last_name,
+    email,
+    phone="",
+    role="user",
+    desktop_login="",
+    client=default,
 ):
     """
     Create a new person based on given parameters. His/her password will is
@@ -143,7 +147,7 @@ def new_person(
                 "role": role,
                 "desktop_login": desktop_login,
             },
-            client=client
+            client=client,
         )
     return person
 
@@ -159,9 +163,7 @@ def set_avatar(person, file_path, client=default):
     """
     person = normalize_model_parameter(person)
     return raw.upload(
-        "/pictures/thumbnails/persons/%s" % person["id"],
-        file_path,
-        client=client
+        "/pictures/thumbnails/persons/%s" % person["id"], file_path, client=client
     )
 
 

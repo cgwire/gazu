@@ -129,9 +129,7 @@ class ShotTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/episodes/episode-1"),
-                text=json.dumps(
-                    {"name": "Episode 01", "project_id": "project-01"}
-                ),
+                text=json.dumps({"name": "Episode 01", "project_id": "project-01"}),
             )
             episode = gazu.shot.get_episode_from_sequence(
                 {"id": "shot-01", "parent_id": "episode-1"}
@@ -142,9 +140,7 @@ class ShotTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/sequences/sequence-01"),
-                text=json.dumps(
-                    {"name": "Sequence 01", "project_id": "project-01"}
-                ),
+                text=json.dumps({"name": "Sequence 01", "project_id": "project-01"}),
             )
             sequence = gazu.shot.get_sequence("sequence-01")
             self.assertEqual(sequence["name"], "Sequence 01")
@@ -153,9 +149,7 @@ class ShotTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/sequences/sequence-01"),
-                text=json.dumps(
-                    {"name": "Sequence 01", "project_id": "project-01"}
-                ),
+                text=json.dumps({"name": "Sequence 01", "project_id": "project-01"}),
             )
             sequence = gazu.shot.get_sequence_from_shot(
                 {"id": "shot-01", "parent_id": "sequence-01"}
@@ -177,9 +171,7 @@ class ShotTestCase(unittest.TestCase):
                 gazu.client.get_full_url(
                     "data/shots/all?sequence_id=sequence-01&name=Shot01"
                 ),
-                text=json.dumps(
-                    [{"name": "Shot01", "project_id": "project-01"}]
-                ),
+                text=json.dumps([{"name": "Shot01", "project_id": "project-01"}]),
             )
             sequence = {"id": "sequence-01"}
             shot = gazu.shot.get_shot_by_name(sequence, "Shot01")
@@ -191,9 +183,7 @@ class ShotTestCase(unittest.TestCase):
                 gazu.client.get_full_url(
                     "data/sequences?project_id=project-01&name=Sequence01"
                 ),
-                text=json.dumps(
-                    [{"name": "Sequence01", "project_id": "project-01"}]
-                ),
+                text=json.dumps([{"name": "Sequence01", "project_id": "project-01"}]),
             )
             project = {"id": "project-01"}
             sequence = gazu.shot.get_sequence_by_name(project, "Sequence01")
@@ -209,9 +199,7 @@ class ShotTestCase(unittest.TestCase):
             )
             mock.post(
                 gazu.client.get_full_url("data/projects/project-01/episodes"),
-                text=json.dumps(
-                    {"id": "episode-01", "project_id": "project-01"}
-                ),
+                text=json.dumps({"id": "episode-01", "project_id": "project-01"}),
             )
             project = {"id": "project-01"}
             shot = gazu.shot.new_episode(project, "Episode 01")
@@ -237,9 +225,7 @@ class ShotTestCase(unittest.TestCase):
             )
             mock.post(
                 gazu.client.get_full_url("data/projects/project-01/sequences"),
-                text=json.dumps(
-                    {"id": "sequence-01", "project_id": "project-01"}
-                ),
+                text=json.dumps({"id": "sequence-01", "project_id": "project-01"}),
             )
             project = {"id": "project-01"}
             episode = {"id": "episode-1"}
@@ -247,25 +233,19 @@ class ShotTestCase(unittest.TestCase):
             self.assertEqual(shot["id"], "sequence-01")
 
             mock.get(
-                gazu.client.get_full_url(
-                    "data/sequences?name=Sequence 01"
-                ),
+                gazu.client.get_full_url("data/sequences?name=Sequence 01"),
                 text=json.dumps([]),
             )
             mock.post(
                 gazu.client.get_full_url("data/projects/project-01/sequences"),
-                text=json.dumps(
-                    {"id": "sequence-01", "project_id": "project-01"}
-                ),
+                text=json.dumps({"id": "sequence-01", "project_id": "project-01"}),
             )
             project = {"id": "project-01"}
             shot = gazu.shot.new_sequence(project, "Sequence 01")
             self.assertEqual(shot["id"], "sequence-01")
 
             mock.get(
-                gazu.client.get_full_url(
-                    "data/sequences?name=Sequence 01"
-                ),
+                gazu.client.get_full_url("data/sequences?name=Sequence 01"),
                 text=json.dumps([{"id": "sequence-01", "project_id": "project-01"}]),
             )
 
@@ -319,9 +299,7 @@ class ShotTestCase(unittest.TestCase):
 
     def test_remove_shot(self):
         with requests_mock.mock() as mock:
-            mock.delete(
-                gazu.client.get_full_url("data/shots/shot-01"), status_code=204
-            )
+            mock.delete(gazu.client.get_full_url("data/shots/shot-01"), status_code=204)
             shot = {"id": "shot-01", "name": "S02"}
             gazu.shot.remove_shot(shot)
             mock.delete(
@@ -369,9 +347,7 @@ class ShotTestCase(unittest.TestCase):
             )
             shot = {"id": "shot-01"}
             asset_instance = {"id": "asset-instance-1"}
-            asset_instance = gazu.shot.add_asset_instance_to_shot(
-                shot, asset_instance
-            )
+            asset_instance = gazu.shot.add_asset_instance_to_shot(shot, asset_instance)
             self.assertEqual(asset_instance, result)
 
     def test_remove_asset_instance(self):
@@ -392,16 +368,14 @@ class ShotTestCase(unittest.TestCase):
             shot = {
                 "id": "shot-01",
                 "project_id": "project-01",
-                "episode_id": "episode-01"
+                "episode_id": "episode-01",
             }
             project = {
                 "id": "project-01",
                 "production_type": "tvshow",
             }
             mock.get(
-                gazu.client.get_full_url(
-                    "data/projects/" + "project-01"
-                ),
+                gazu.client.get_full_url("data/projects/" + "project-01"),
                 text=json.dumps(project),
             )
             mock.get(
@@ -412,22 +386,16 @@ class ShotTestCase(unittest.TestCase):
             self.assertEqual(
                 url,
                 "http://gazu-server/productions/project-01/"
-                "episodes/episode-01/shots/shot-01/"
+                "episodes/episode-01/shots/shot-01/",
             )
 
-            shot = {
-                "id": "shot-01",
-                "project_id": "project-01",
-                "episode_id": None
-            }
+            shot = {"id": "shot-01", "project_id": "project-01", "episode_id": None}
             project = {
                 "id": "project-01",
                 "production_type": "tvshow",
             }
             mock.get(
-                gazu.client.get_full_url(
-                    "data/projects/" + "project-01"
-                ),
+                gazu.client.get_full_url("data/projects/" + "project-01"),
                 text=json.dumps(project),
             )
             mock.get(
@@ -436,17 +404,13 @@ class ShotTestCase(unittest.TestCase):
             )
             url = gazu.shot.get_shot_url(fakeid("shot-01"))
             self.assertEqual(
-                url,
-                "http://gazu-server/productions/project-01/"
-                "shots/shot-01/"
+                url, "http://gazu-server/productions/project-01/" "shots/shot-01/"
             )
 
     def test_all_sequences_for_episode(self):
         with requests_mock.mock() as mock:
             mock.get(
-                gazu.client.get_full_url(
-                    "data/episodes/episode-01/sequences"
-                ),
+                gazu.client.get_full_url("data/episodes/episode-01/sequences"),
                 text='[{"name": "sequence1", "id": "sequence-01"}]',
             )
             episode = {"id": "episode-01"}
@@ -459,113 +423,123 @@ class ShotTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/shots/%s/preview-files" % fakeid('shot-1')
+                    "data/shots/%s/preview-files" % fakeid("shot-1")
                 ),
-                text=json.dumps([
-                    {'id': fakeid('preview-1'), 'name': 'preview-1'},
-                    {'id': fakeid('preview-2'), 'name': 'preview-2'},
-                ]),
+                text=json.dumps(
+                    [
+                        {"id": fakeid("preview-1"), "name": "preview-1"},
+                        {"id": fakeid("preview-2"), "name": "preview-2"},
+                    ]
+                ),
             )
 
-            previews = gazu.shot.all_previews_for_shot(fakeid('shot-1'))
+            previews = gazu.shot.all_previews_for_shot(fakeid("shot-1"))
             self.assertEqual(len(previews), 2)
-            self.assertEqual(previews[0]["id"], fakeid('preview-1'))
-            self.assertEqual(previews[1]["id"], fakeid('preview-2'))
+            self.assertEqual(previews[0]["id"], fakeid("preview-1"))
+            self.assertEqual(previews[1]["id"], fakeid("preview-2"))
 
     def test_get_episode_url(self):
         with requests_mock.mock() as mock:
             mock.get(
-                gazu.client.get_full_url("data/episodes/%s" % fakeid('episode-1')),
-                text=json.dumps({
-                    "id": fakeid('episode-1'),
-                    "project_id": fakeid('project-1'),
-                }),
+                gazu.client.get_full_url("data/episodes/%s" % fakeid("episode-1")),
+                text=json.dumps(
+                    {
+                        "id": fakeid("episode-1"),
+                        "project_id": fakeid("project-1"),
+                    }
+                ),
             )
-            url = gazu.shot.get_episode_url(fakeid('episode-1'))
+            url = gazu.shot.get_episode_url(fakeid("episode-1"))
             self.assertEqual(
                 url,
                 "http://gazu-server/productions/%s/"
-                "episodes/%s/shots" % (fakeid('project-1'), fakeid('episode-1'))
+                "episodes/%s/shots" % (fakeid("project-1"), fakeid("episode-1")),
             )
 
     def test_update_sequence(self):
         with requests_mock.mock() as mock:
             mock.put(
-                gazu.client.get_full_url("data/entities/%s" % fakeid('sequence-1')),
-                text=json.dumps({"id": fakeid('sequence-1'), "name": 'sequence-1'}),
+                gazu.client.get_full_url("data/entities/%s" % fakeid("sequence-1")),
+                text=json.dumps({"id": fakeid("sequence-1"), "name": "sequence-1"}),
             )
-            sequence = {"id": fakeid('sequence-1'), 'name': 'sequence-1'}
+            sequence = {"id": fakeid("sequence-1"), "name": "sequence-1"}
             sequence = gazu.shot.update_sequence(sequence)
-            self.assertEqual(sequence["name"], 'sequence-1')
+            self.assertEqual(sequence["name"], "sequence-1")
 
     def test_get_asset_instances_for_shot(self):
         with requests_mock.mock() as mock:
             mock.get(
-                gazu.client.get_full_url("data/shots/%s/asset-instances" % fakeid('shot-1')),
-                text=json.dumps([
-                    {"id": fakeid('asset_instance-1'), "name": 'asset_instance-1'},
-                    {"id": fakeid('asset_instance-2'), "name": 'asset_instance-2'},
-                ]),
+                gazu.client.get_full_url(
+                    "data/shots/%s/asset-instances" % fakeid("shot-1")
+                ),
+                text=json.dumps(
+                    [
+                        {"id": fakeid("asset_instance-1"), "name": "asset_instance-1"},
+                        {"id": fakeid("asset_instance-2"), "name": "asset_instance-2"},
+                    ]
+                ),
             )
-            asset_instances = gazu.shot.get_asset_instances_for_shot(fakeid('shot-1'))
+            asset_instances = gazu.shot.get_asset_instances_for_shot(fakeid("shot-1"))
             self.assertEqual(len(asset_instances), 2)
-            self.assertEqual(asset_instances[0]['id'], fakeid('asset_instance-1'))
-            self.assertEqual(asset_instances[1]['id'], fakeid('asset_instance-2'))
+            self.assertEqual(asset_instances[0]["id"], fakeid("asset_instance-1"))
+            self.assertEqual(asset_instances[1]["id"], fakeid("asset_instance-2"))
 
     def test_update_shot_data(self):
         with requests_mock.mock() as mock:
             mock.get(
-                gazu.client.get_full_url("data/shots/%s" % fakeid('shot-1')),
-                text=json.dumps(
-                    {"id": fakeid('shot-1'), "data": {}}),
+                gazu.client.get_full_url("data/shots/%s" % fakeid("shot-1")),
+                text=json.dumps({"id": fakeid("shot-1"), "data": {}}),
             )
             mock.put(
-                gazu.client.get_full_url("data/entities/%s" % fakeid('shot-1')),
+                gazu.client.get_full_url("data/entities/%s" % fakeid("shot-1")),
                 text=json.dumps(
-                    {"id": fakeid('shot-1'), "data": {"metadata-1": "metadata-1"}}),
+                    {"id": fakeid("shot-1"), "data": {"metadata-1": "metadata-1"}}
+                ),
             )
             data = {"metadata-1": "metadata-1"}
-            shot = gazu.shot.update_shot_data(fakeid('shot-1'), data)
+            shot = gazu.shot.update_shot_data(fakeid("shot-1"), data)
             self.assertEqual(shot["data"]["metadata-1"], "metadata-1")
 
     def test_update_sequence_data(self):
         with requests_mock.mock() as mock:
             mock.get(
-                gazu.client.get_full_url("data/sequences/%s" % fakeid('sequence-1')),
-                text=json.dumps(
-                    {"id": fakeid('sequence-1'), "data": {}}),
+                gazu.client.get_full_url("data/sequences/%s" % fakeid("sequence-1")),
+                text=json.dumps({"id": fakeid("sequence-1"), "data": {}}),
             )
             mock.put(
-                gazu.client.get_full_url("data/entities/%s" % fakeid('sequence-1')),
+                gazu.client.get_full_url("data/entities/%s" % fakeid("sequence-1")),
                 text=json.dumps(
-                    {"id": fakeid('sequence-1'), "data": {"metadata-1": "metadata-1"}}),
+                    {"id": fakeid("sequence-1"), "data": {"metadata-1": "metadata-1"}}
+                ),
             )
             data = {"metadata-1": "metadata-1"}
-            sequence = gazu.shot.update_sequence_data(fakeid('sequence-1'), data)
+            sequence = gazu.shot.update_sequence_data(fakeid("sequence-1"), data)
             self.assertEqual(sequence["data"]["metadata-1"], "metadata-1")
 
     def test_update_episode(self):
         with requests_mock.mock() as mock:
             mock.put(
                 gazu.client.get_full_url("data/entities/%s" % fakeid("episode-1")),
-                text=json.dumps({"id": fakeid('episode-1'), "project_id": "project-01"}),
+                text=json.dumps(
+                    {"id": fakeid("episode-1"), "project_id": "project-01"}
+                ),
             )
-            episode = {"id": fakeid('episode-1'), "name": "episode-1"}
+            episode = {"id": fakeid("episode-1"), "name": "episode-1"}
             episode = gazu.shot.update_episode(episode)
-            self.assertEqual(episode["id"], fakeid('episode-1'))
+            self.assertEqual(episode["id"], fakeid("episode-1"))
 
     def test_update_episode_data(self):
         with requests_mock.mock() as mock:
             mock.get(
-                gazu.client.get_full_url("data/sequences/%s" % fakeid('episode-1')),
-                text=json.dumps(
-                    {"id": fakeid('episode-1'), "data": {}}),
+                gazu.client.get_full_url("data/sequences/%s" % fakeid("episode-1")),
+                text=json.dumps({"id": fakeid("episode-1"), "data": {}}),
             )
             mock.put(
-                gazu.client.get_full_url("data/entities/%s" % fakeid('episode-1')),
+                gazu.client.get_full_url("data/entities/%s" % fakeid("episode-1")),
                 text=json.dumps(
-                    {"id": fakeid('episode-1'), "data": {"metadata-1": "metadata-1"}}),
+                    {"id": fakeid("episode-1"), "data": {"metadata-1": "metadata-1"}}
+                ),
             )
             data = {"metadata-1": "metadata-1"}
-            episode = gazu.shot.update_episode_data(fakeid('episode-1'), data)
+            episode = gazu.shot.update_episode_data(fakeid("episode-1"), data)
             self.assertEqual(episode["data"]["metadata-1"], "metadata-1")

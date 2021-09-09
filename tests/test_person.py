@@ -75,9 +75,7 @@ class PersonTestCase(unittest.TestCase):
     def test_get_person_by_desktop_login(self):
         with requests_mock.mock() as mock:
             mock.get(
-                gazu.client.get_full_url(
-                    "data/persons?desktop_login=john.doe"
-                ),
+                gazu.client.get_full_url("data/persons?desktop_login=john.doe"),
                 text=json.dumps(
                     [
                         {
@@ -137,7 +135,7 @@ class PersonTestCase(unittest.TestCase):
             )
 
     def test_all_organisations(self):
-        result = [{'id': fakeid("organisation-1"), 'name': 'organisation-1'}]
+        result = [{"id": fakeid("organisation-1"), "name": "organisation-1"}]
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/organisations"),
@@ -155,7 +153,10 @@ class PersonTestCase(unittest.TestCase):
             self.assertEqual(gazu.person.get_person(fakeid("John Doe")), result)
 
     def test_get_person_url(self):
-        wanted_result = '%s/people/%s/' % (gazu.client.get_api_url_from_host(),fakeid("person-1"))
+        wanted_result = "%s/people/%s/" % (
+            gazu.client.get_api_url_from_host(),
+            fakeid("person-1"),
+        )
         self.assertEqual(wanted_result, gazu.person.get_person_url(fakeid("person-1")))
 
     def test_get_organisation(self):
@@ -174,19 +175,19 @@ class PersonTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/persons/presence-logs/2021-08"),
-                text=result
+                text=result,
             )
-            self.assertEqual(gazu.person.get_presence_log('2021', '8'), result)
+            self.assertEqual(gazu.person.get_presence_log("2021", "8"), result)
 
     def test_set_avatar(self):
         with requests_mock.mock() as mock:
-            path = "/pictures/thumbnails/persons/%s" % fakeid('person-1')
+            path = "/pictures/thumbnails/persons/%s" % fakeid("person-1")
             mock.post(
                 gazu.client.get_full_url(path),
-                text=json.dumps(
-                    {"id": fakeid('person-1'), "name": "test-name"}
-                ),
+                text=json.dumps({"id": fakeid("person-1"), "name": "test-name"}),
             )
-            person_id = gazu.person.set_avatar(fakeid('person-1'), "./tests/fixtures/v1.png")
+            person_id = gazu.person.set_avatar(
+                fakeid("person-1"), "./tests/fixtures/v1.png"
+            )
 
-            self.assertEqual(person_id['id'], fakeid("person-1"))
+            self.assertEqual(person_id["id"], fakeid("person-1"))

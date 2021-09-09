@@ -52,12 +52,12 @@ def get_entity_by_name(entity_name, client=default):
 @cache
 def get_entity_type(entity_type_id, client=default):
     """
-    Args:
-        id (str, client=default): ID of claimed entity type.
-, client=client
-    Returns:
-        Retrieve entity type matching given ID (It can be an entity type of any
-        kind).
+        Args:
+            id (str, client=default): ID of claimed entity type.
+    , client=client
+        Returns:
+            Retrieve entity type matching given ID (It can be an entity type of any
+            kind).
     """
     return raw.fetch_one("entity-types", entity_type_id, client=client)
 
@@ -71,9 +71,7 @@ def get_entity_type_by_name(entity_type_name, client=default):
     Returns:
         Retrieve entity type matching given name.
     """
-    return raw.fetch_first(
-        "entity-types", {"name": entity_type_name}, client=client
-    )
+    return raw.fetch_first("entity-types", {"name": entity_type_name}, client=client)
 
 
 def new_entity_type(name, client=default):
