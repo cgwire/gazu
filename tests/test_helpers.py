@@ -20,7 +20,7 @@ class TestCase(unittest.TestCase):
 
         class TestCantCastStr(object):
             def __str__(self):
-                raise TypeError('Can not by stringified')
+                raise TypeError('Cannot be stringified')
 
         with self.assertRaises(ValueError):
             helpers.normalize_model_parameter(TestCantCastStr())
