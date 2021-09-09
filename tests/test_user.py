@@ -14,7 +14,7 @@ class ProjectTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/user/projects/open"),
-                text='[{"name": "Big Buck Bunny", "id": "project-01"}]',
+                text=json.dumps([{"name": "Big Buck Bunny", "id": "project-01"}]),
             )
             projects = gazu.context.all_open_projects(True)
             project_instance = projects[0]
@@ -24,7 +24,7 @@ class ProjectTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/user/projects/project-01/asset-types"),
-                text='[{"name": "Props", "id": "asset-type-01"}]',
+                text=json.dumps([{"name": "Props", "id": "asset-type-01"}]),
             )
 
             project = {"id": "project-01"}
@@ -38,7 +38,7 @@ class ProjectTestCase(unittest.TestCase):
                 gazu.client.get_full_url(
                     "data/user/projects/project-01/asset-types/asset-type-01" "/assets"
                 ),
-                text='[{"name": "Chair", "id": "asset-01"}]',
+                text=json.dumps([{"name": "Chair", "id": "asset-01"}]),
             )
 
             project = {"id": "project-01"}
@@ -53,7 +53,7 @@ class ProjectTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/user/assets/asset-01/tasks"),
-                text='[{"name": "main", "id": "task-01"}]',
+                text=json.dumps([{"name": "main", "id": "task-01"}]),
             )
             asset = {"id": "asset-01"}
             tasks = gazu.user.all_tasks_for_asset(asset)
@@ -64,7 +64,7 @@ class ProjectTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/user/shots/shot-01/tasks"),
-                text='[{"name": "main", "id": "task-01"}]',
+                text=json.dumps([{"name": "main", "id": "task-01"}]),
             )
             shot = {"id": "shot-01"}
             tasks = gazu.user.all_tasks_for_shot(shot)
@@ -75,7 +75,7 @@ class ProjectTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/user/sequences/sequence-1/tasks"),
-                text='[{"name": "main", "id": "task-01"}]',
+                text=json.dumps([{"name": "main", "id": "task-01"}]),
             )
             sequence = {"id": "sequence-1"}
             tasks = gazu.user.all_tasks_for_sequence(sequence)
@@ -86,7 +86,7 @@ class ProjectTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/user/assets/asset-01/task-types"),
-                text='[{"name": "modeling", "id": "task-type-01"}]',
+                text=json.dumps([{"name": "modeling", "id": "task-type-01"}]),
             )
             asset = {"id": "asset-01"}
             task_types = gazu.context.all_task_types_for_asset(asset, True)
@@ -97,7 +97,7 @@ class ProjectTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/user/shots/shot-01/task-types"),
-                text='[{"name": "animation", "id": "task-type-01"}]',
+                text=json.dumps([{"name": "animation", "id": "task-type-01"}]),
             )
 
             shot = {"id": "shot-01"}
@@ -109,7 +109,7 @@ class ProjectTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/user/sequences/sequence-1/task-types"),
-                text='[{"name": "previz", "id": "task-type-01"}]',
+                text=json.dumps([{"name": "previz", "id": "task-type-01"}]),
             )
 
             sequence = {"id": "sequence-1"}
@@ -121,7 +121,7 @@ class ProjectTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/user/projects/project-01/sequences"),
-                text='[{"name": "SEQ01", "id": "sequence-01"}]',
+                text=json.dumps([{"name": "SEQ01", "id": "sequence-01"}]),
             )
             project = {"id": "project-01"}
             sequences = gazu.context.all_sequences_for_project(project, True)
@@ -132,7 +132,7 @@ class ProjectTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/user/sequences/sequence-01/shots"),
-                text='[{"name": "SEQ01", "id": "shot-01"}]',
+                text=json.dumps([{"name": "SEQ01", "id": "shot-01"}]),
             )
             sequence = {"id": "sequence-01"}
             shots = gazu.user.all_shots_for_sequence(sequence)
@@ -143,7 +143,7 @@ class ProjectTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/user/scenes/scene-01/task-types"),
-                text='[{"name": "scene1", "id": "scene-01"}]',
+                text=json.dumps([{"name": "scene1", "id": "scene-01"}]),
             )
             scene = {"id": "scene-01"}
             tasks = gazu.context.all_task_types_for_scene(scene, True)
@@ -198,7 +198,7 @@ class ProjectTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/user/projects/project-01/episodes"),
-                text='[{"name": "Episode 01", "project_id": "project-01"}]',
+                text=json.dumps([{"name": "Episode 01", "project_id": "project-01"}]),
             )
             project = {"id": "project-01"}
             episodes = gazu.context.all_episodes_for_project(project, True)

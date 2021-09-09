@@ -15,7 +15,7 @@ class ShotTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/projects/project-01/shots"),
-                text='[{"name": "Shot 01", "project_id": "project-01"}]',
+                text=json.dumps([{"name": "Shot 01", "project_id": "project-01"}]),
             )
             project = {"id": "project-01"}
             shots = gazu.shot.all_shots_for_project(project)
@@ -72,7 +72,7 @@ class ShotTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/projects/project-01/sequences"),
-                text='[{"name": "Sequence 01", "project_id": "project-01"}]',
+                text=json.dumps([{"name": "Sequence 01", "project_id": "project-01"}]),
             )
             project = {"id": "project-01"}
             sequences = gazu.context.all_sequences_for_project(project, False)
@@ -107,7 +107,7 @@ class ShotTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/projects/project-01/episodes"),
-                text='[{"name": "Episode 01", "project_id": "project-01"}]',
+                text=json.dumps([{"name": "Episode 01", "project_id": "project-01"}]),
             )
             project = {"id": "project-01"}
             episodes = gazu.context.all_episodes_for_project(project, False)
@@ -120,7 +120,7 @@ class ShotTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/episodes/episode-1"),
-                text='{"name": "Episode 01", "project_id": "project-01"}',
+                text=json.dumps({"name": "Episode 01", "project_id": "project-01"}),
             )
             episode = gazu.shot.get_episode("episode-1")
             self.assertEqual(episode["name"], "Episode 01")
@@ -160,7 +160,7 @@ class ShotTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/shots/shot-01"),
-                text='{"name": "Shot 01", "project_id": "project-01"}',
+                text=json.dumps({"name": "Shot 01", "project_id": "project-01"}),
             )
             shot = gazu.shot.get_shot("shot-01")
             self.assertEqual(shot["name"], "Shot 01")
@@ -411,7 +411,7 @@ class ShotTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/episodes/episode-01/sequences"),
-                text='[{"name": "sequence1", "id": "sequence-01"}]',
+                text=json.dumps([{"name": "sequence1", "id": "sequence-01"}]),
             )
             episode = {"id": "episode-01"}
             sequences = gazu.context.all_sequences_for_episode(episode, False)

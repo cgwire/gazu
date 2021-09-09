@@ -14,7 +14,7 @@ class SceneTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/scenes/scene-1"),
-                text='{"name": "Scene 01", "project_id": "project-01"}',
+                text=json.dumps({"name": "Scene 01", "project_id": "project-01"}),
             )
             scene = gazu.scene.get_scene("scene-1")
             self.assertEqual(scene["name"], "Scene 01")

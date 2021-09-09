@@ -13,7 +13,7 @@ class ProjectTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/projects"),
-                text='[{"name": "Agent 327", "id": "project-01"}]',
+                text=json.dumps([{"name": "Agent 327", "id": "project-01"}]),
             )
             projects = gazu.project.all_projects()
             project_instance = projects[0]
@@ -23,7 +23,7 @@ class ProjectTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/projects/open"),
-                text='[{"name": "Agent 327", "id": "project-01"}]',
+                text=json.dumps([{"name": "Agent 327", "id": "project-01"}]),
             )
             projects = gazu.context.all_open_projects(False)
             project_instance = projects[0]
@@ -33,7 +33,7 @@ class ProjectTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/projects/project-01"),
-                text='{"name": "Agent 327", "id": "project-01"}',
+                text=json.dumps({"name": "Agent 327", "id": "project-01"}),
             )
             project = gazu.project.get_project("project-01")
             self.assertEqual(project["name"], "Agent 327")
