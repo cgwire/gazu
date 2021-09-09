@@ -3,6 +3,8 @@ Contains utility routines to be used in gazu tests
 """
 
 import binascii
+import json
+import gazu.client
 
 
 def fakeid(string):
@@ -19,3 +21,11 @@ def fakeid(string):
         hex_string[16:20],
         hex_string[20:32],
     )
+
+
+def mock_route(mock, request_type, path="", **kwargs):
+    if "text" in kwargs and isinstance(kwargs["text"], (list, dict)):
+        kwargs["text"] = json.dumps(kwargs["text"])
+    if not (path.startswith("http://") or path.startswith("https://")):
+        path = gazu.client.get_full_url(path)
+    getattr(mock, request_type.lower())(path, **kwargs)
