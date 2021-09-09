@@ -92,7 +92,7 @@ class CastingTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(path),
-                text='[{"name": "Asset Type 01"}]',
+                text=json.dumps([{"name": "Asset Type 01"}]),
             )
             project = {"id": "project-01"}
             asset_types = gazu.context.all_asset_types_for_project(project, False)
@@ -103,7 +103,7 @@ class CastingTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/assets/asset-01"),
-                text='{"name": "Asset 01", "project_id": "project-01"}',
+                text=json.dumps({"name": "Asset 01", "project_id": "project-01"}),
             )
             asset = gazu.asset.get_asset("asset-01")
             self.assertEqual(asset["name"], "Asset 01")
@@ -124,7 +124,7 @@ class CastingTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/asset-types/asset-type-01"),
-                text='{"name": "Asset Type 01", "id": "asset-type-01"}',
+                text=json.dumps({"name": "Asset Type 01", "id": "asset-type-01"}),
             )
             asset = gazu.asset.get_asset_type("asset-type-01")
             self.assertEqual(asset["name"], "Asset Type 01")
@@ -331,7 +331,7 @@ class CastingTestCase(unittest.TestCase):
                 "production_type": "tvshow",
             }
             mock.get(
-                gazu.client.get_full_url("data/projects/" + "project-01"),
+                gazu.client.get_full_url("data/projects/project-01"),
                 text=json.dumps(project),
             )
             mock.get(
@@ -355,11 +355,11 @@ class CastingTestCase(unittest.TestCase):
                 "production_type": "movie",
             }
             mock.get(
-                gazu.client.get_full_url("data/projects/" + "project-01"),
+                gazu.client.get_full_url("data/projects/project-01"),
                 text=json.dumps(project),
             )
             mock.get(
-                gazu.client.get_full_url("data/assets/" + fakeid("asset-01")),
+                gazu.client.get_full_url("data/assets/%s" % fakeid("asset-01")),
                 text=json.dumps(asset),
             )
             url = gazu.asset.get_asset_url(fakeid("asset-01"))

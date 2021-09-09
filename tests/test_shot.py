@@ -375,11 +375,11 @@ class ShotTestCase(unittest.TestCase):
                 "production_type": "tvshow",
             }
             mock.get(
-                gazu.client.get_full_url("data/projects/" + "project-01"),
+                gazu.client.get_full_url("data/projects/project-01"),
                 text=json.dumps(project),
             )
             mock.get(
-                gazu.client.get_full_url("data/shots/" + fakeid("shot-01")),
+                gazu.client.get_full_url("data/shots/%s" % fakeid("shot-01")),
                 text=json.dumps(shot),
             )
             url = gazu.shot.get_shot_url(fakeid("shot-01"))
@@ -395,11 +395,11 @@ class ShotTestCase(unittest.TestCase):
                 "production_type": "tvshow",
             }
             mock.get(
-                gazu.client.get_full_url("data/projects/" + "project-01"),
+                gazu.client.get_full_url("data/projects/project-01"),
                 text=json.dumps(project),
             )
             mock.get(
-                gazu.client.get_full_url("data/shots/" + fakeid("shot-01")),
+                gazu.client.get_full_url("data/shots/%s" % fakeid("shot-01")),
                 text=json.dumps(shot),
             )
             url = gazu.shot.get_shot_url(fakeid("shot-01"))
