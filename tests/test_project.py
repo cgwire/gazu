@@ -3,9 +3,8 @@ import unittest
 import requests_mock
 import gazu.client
 import gazu.project
-import gazu.context
 import json
-from utils import fakeid
+from utils import fakeid, mock_route
 
 
 class ProjectTestCase(unittest.TestCase):
@@ -21,11 +20,13 @@ class ProjectTestCase(unittest.TestCase):
 
     def test_all_open_projects(self):
         with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url("data/projects/open"),
-                text=json.dumps([{"name": "Agent 327", "id": "project-01"}]),
+            mock_route(
+                mock,
+                "GET",
+                "data/projects/open",
+                text=[{"name": "Agent 327", "id": "project-01"}],
             )
-            projects = gazu.context.all_open_projects(False)
+            projects = gazu.project.all_open_projects()
             project_instance = projects[0]
             self.assertEqual(project_instance["name"], "Agent 327")
 

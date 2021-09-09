@@ -4,9 +4,8 @@ import requests_mock
 
 import gazu.client
 import gazu.scene
-import gazu.context
 
-from utils import fakeid
+from utils import fakeid, mock_route
 
 
 class SceneTestCase(unittest.TestCase):
@@ -46,23 +45,25 @@ class SceneTestCase(unittest.TestCase):
 
     def test_all_scenes(self):
         with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url("data/projects/project-01/scenes"),
-                text=json.dumps([{"name": "Scene 01", "project_id": "project-01"}]),
+            mock_route(
+                mock,
+                "GET",
+                "data/projects/project-01/scenes",
+                text=[{"name": "Scene 01", "project_id": "project-01"}],
             )
-            mock.get(
-                gazu.client.get_full_url("data/scenes"),
-                text=json.dumps([{"name": "Scene 01", "project_id": "project-01"}]),
+            mock_route(
+                mock,
+                "GET",
+                "data/scenes",
+                text=[{"name": "Scene 01", "project_id": "project-01"}],
             )
             project = {"id": "project-01"}
-            scenes = gazu.context.all_scenes_for_project(project, False)
+            scenes = gazu.scene.all_scenes_for_project(project)
             self.assertEqual(len(scenes), 1)
             scene_instance = scenes[0]
             self.assertEqual(scene_instance["name"], "Scene 01")
             self.assertEqual(scene_instance["project_id"], "project-01")
-            scenes = gazu.context.all_scenes_for_project(
-                project=None, user_context=False
-            )
+            scenes = gazu.scene.all_scenes()
             self.assertEqual(len(scenes), 1)
             scene_instance = scenes[0]
             self.assertEqual(scene_instance["name"], "Scene 01")
@@ -70,20 +71,20 @@ class SceneTestCase(unittest.TestCase):
 
     def test_all_scenes_for_sequence(self):
         with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url("data/sequences/sequence-01/scenes"),
-                text=json.dumps(
-                    [
-                        {
-                            "name": "Scene 01",
-                            "project_id": "project-01",
-                            "parent_id": "sequence-01",
-                        }
-                    ]
-                ),
-            )
+            mock_route(
+                mock,
+                "GET",
+                "data/sequences/sequence-01/scenes",
+                text=[
+                    {
+                        "name": "Scene 01",
+                        "project_id": "project-01",
+                        "parent_id": "sequence-01",
+                    }
+                ],
+            ),
             sequence = {"id": "sequence-01"}
-            scenes = gazu.context.all_scenes_for_sequence(sequence, False)
+            scenes = gazu.scene.all_scenes_for_sequence(sequence)
             self.assertEqual(len(scenes), 1)
             scene_instance = scenes[0]
             self.assertEqual(scene_instance["name"], "Scene 01")

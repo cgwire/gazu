@@ -5,9 +5,8 @@ import requests_mock
 
 import gazu.client
 import gazu.shot
-import gazu.context
 
-from utils import fakeid
+from utils import fakeid, mock_route
 
 
 class ShotTestCase(unittest.TestCase):
@@ -26,20 +25,20 @@ class ShotTestCase(unittest.TestCase):
 
     def test_all_shots_for_sequence(self):
         with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url("data/sequences/sequence-01/shots"),
-                text=json.dumps(
-                    [
-                        {
-                            "name": "Shot 01",
-                            "project_id": "project-01",
-                            "parent_id": "sequence-01",
-                        }
-                    ]
-                ),
+            mock_route(
+                mock,
+                "GET",
+                "data/sequences/sequence-01/shots",
+                text=[
+                    {
+                        "name": "Shot 01",
+                        "project_id": "project-01",
+                        "parent_id": "sequence-01",
+                    }
+                ],
             )
             sequence = {"id": "sequence-01"}
-            shots = gazu.context.all_shots_for_sequence(sequence, False)
+            shots = gazu.shot.all_shots_for_sequence(sequence)
             self.assertEqual(len(shots), 1)
             shot_instance = shots[0]
             self.assertEqual(shot_instance["name"], "Shot 01")
@@ -70,12 +69,14 @@ class ShotTestCase(unittest.TestCase):
 
     def test_all_sequences_for_project(self):
         with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url("data/projects/project-01/sequences"),
-                text=json.dumps([{"name": "Sequence 01", "project_id": "project-01"}]),
+            mock_route(
+                mock,
+                "GET",
+                "data/projects/project-01/sequences",
+                text=[{"name": "Sequence 01", "project_id": "project-01"}],
             )
             project = {"id": "project-01"}
-            sequences = gazu.context.all_sequences_for_project(project, False)
+            sequences = gazu.shot.all_sequences_for_project(project)
             self.assertEqual(len(sequences), 1)
             sequence_instance = sequences[0]
             self.assertEqual(sequence_instance["name"], "Sequence 01")
@@ -105,12 +106,14 @@ class ShotTestCase(unittest.TestCase):
 
     def test_all_episodes_for_project(self):
         with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url("data/projects/project-01/episodes"),
-                text=json.dumps([{"name": "Episode 01", "project_id": "project-01"}]),
+            mock_route(
+                mock,
+                "GET",
+                "data/projects/project-01/episodes",
+                text=[{"name": "Episode 01", "project_id": "project-01"}],
             )
             project = {"id": "project-01"}
-            episodes = gazu.context.all_episodes_for_project(project, False)
+            episodes = gazu.shot.all_episodes_for_project(project)
             self.assertEqual(len(episodes), 1)
             episode_instance = episodes[0]
             self.assertEqual(episode_instance["name"], "Episode 01")
@@ -409,12 +412,14 @@ class ShotTestCase(unittest.TestCase):
 
     def test_all_sequences_for_episode(self):
         with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url("data/episodes/episode-01/sequences"),
-                text=json.dumps([{"name": "sequence1", "id": "sequence-01"}]),
+            mock_route(
+                mock,
+                "GET",
+                "data/episodes/episode-01/sequences",
+                text=[{"name": "sequence1", "id": "sequence-01"}],
             )
             episode = {"id": "episode-01"}
-            sequences = gazu.context.all_sequences_for_episode(episode, False)
+            sequences = gazu.shot.all_sequences_for_episode(episode)
             sequence = sequences[0]
             self.assertEqual(len(sequences), 1)
             self.assertEqual(sequence["name"], "sequence1")
