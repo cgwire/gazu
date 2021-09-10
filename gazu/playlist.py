@@ -45,7 +45,7 @@ def all_playlists_for_project(project, client=default, page=1):
         raw.fetch_all(
             "projects/%s/playlists" % project["id"],
             params={"page": page},
-            client=client
+            client=client,
         )
     )
 
@@ -64,11 +64,12 @@ def all_playlists_for_episode(episode, client=default):
     project = normalize_model_parameter(episode["project_id"])
     return sort_by_name(
         raw.fetch_all(
-            "projects/%s/episodes/%s/playlists" % (
+            "projects/%s/episodes/%s/playlists"
+            % (
                 project["id"],
                 episode["id"],
             ),
-            client=client
+            client=client,
         )
     )
 
@@ -98,20 +99,12 @@ def get_playlist_by_name(project, name, client=default):
         dict: Playlist matching given name for given project.
     """
     project = normalize_model_parameter(project)
-    params = {
-        "project_id": project["id"],
-        "name": name
-    }
+    params = {"project_id": project["id"], "name": name}
     return raw.fetch_first("playlists", params=params, client=client)
 
 
 def new_playlist(
-    project,
-    name,
-    episode=None,
-    for_entity="shot",
-    for_client=False,
-    client=default
+    project, name, episode=None, for_entity="shot", for_client=False, client=default
 ):
     """
     Create a new playlist in the database for given project.
@@ -128,7 +121,7 @@ def new_playlist(
         "name": name,
         "project_id": project["id"],
         "for_entity": for_entity,
-        "for_client": for_client
+        "for_client": for_client,
     }
     if episode is not None:
         episode = normalize_model_parameter(episode)
@@ -150,8 +143,4 @@ def update_playlist(playlist, client=default):
     Returns:
         dict: Updated playlist.
     """
-    return raw.put(
-        "data/playlists/%s" % playlist["id"],
-        playlist,
-        client=client
-    )
+    return raw.put("data/playlists/%s" % playlist["id"], playlist, client=client)

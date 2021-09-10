@@ -36,17 +36,13 @@ def all_asset_types_for_project(project, user_context=False):
         return gazu_asset.all_asset_types_for_project(project)
 
 
-def all_assets_for_asset_type_and_project(
-    project, asset_type, user_context=False
-):
+def all_assets_for_asset_type_and_project(project, asset_type, user_context=False):
     """
     Return the list of assets for given project and asset_type and for which
     the user has a task.
     """
     if user_context:
-        return gazu_user.all_assets_for_asset_type_and_project(
-            project, asset_type
-        )
+        return gazu_user.all_assets_for_asset_type_and_project(project, asset_type)
     else:
         return gazu_asset.all_assets_for_project_and_type(project, asset_type)
 

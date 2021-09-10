@@ -73,9 +73,7 @@ def get_project_url(project, section="assets", client=default):
     project = normalize_model_parameter(project)
     path = "{host}/productions/{project_id}/{section}/"
     return path.format(
-        host=raw.get_api_url_from_host(),
-        project_id=project["id"],
-        section=section
+        host=raw.get_api_url_from_host(), project_id=project["id"], section=section
     )
 
 
@@ -135,9 +133,7 @@ def update_project(project, client=default):
     Returns:
         dict: Updated project.
     """
-    return raw.put(
-        "data/projects/%s" % project["id"], project, client=client
-    )
+    return raw.put("data/projects/%s" % project["id"], project, client=client)
 
 
 def update_project_data(project, data={}, client=default):
@@ -157,7 +153,7 @@ def update_project_data(project, data={}, client=default):
     if "data" not in project or project["data"] is None:
         project["data"] = {}
     project["data"].update(data)
-    update_project(project, client=client)
+    return update_project(project, client=client)
 
 
 def close_project(project, client=default):
@@ -170,6 +166,7 @@ def close_project(project, client=default):
     Returns:
         dict: Updated project.
     """
+    project = normalize_model_parameter(project)
     closed_status_id = None
     for status in all_project_status(client=client):
         if status["name"].lower() == "closed":

@@ -101,18 +101,18 @@ class CacheTestCase(unittest.TestCase):
             gazu.project.get_project("project-08")
             gazu.project.get_project("project-08")
             cache_infos = gazu.project.get_project.get_cache_infos()
-            self.assertEqual(cache_infos['misses'], 1)
-            self.assertEqual(cache_infos['hits'], 2)
-            self.assertEqual(cache_infos['current_size'], 1)
+            self.assertEqual(cache_infos["misses"], 1)
+            self.assertEqual(cache_infos["hits"], 2)
+            self.assertEqual(cache_infos["current_size"], 1)
 
             gazu.project.get_project("project-09")
             cache_infos = gazu.project.get_project.get_cache_infos()
-            self.assertEqual(cache_infos['current_size'], 2)
+            self.assertEqual(cache_infos["current_size"], 2)
 
             gazu.project.get_project.set_cache_expire(1)
             time.sleep(1.1)
             gazu.project.get_project("project-09")
             cache_infos = gazu.project.get_project.get_cache_infos()
-            self.assertEqual(cache_infos['expired_hits'], 1)
+            self.assertEqual(cache_infos["expired_hits"], 1)
 
             gazu.cache.disable()

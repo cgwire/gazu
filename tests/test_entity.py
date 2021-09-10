@@ -5,6 +5,8 @@ import requests_mock
 import gazu.asset
 import gazu.client
 
+from utils import fakeid
+
 
 class AssetTestCase(unittest.TestCase):
     def test_all_entities(self):
@@ -53,6 +55,40 @@ class AssetTestCase(unittest.TestCase):
                 gazu.client.get_full_url("data/entity-types"),
                 text=json.dumps(entity_type),
             )
-            self.assertEqual(
-                gazu.entity.new_entity_type(entity_type_name), entity_type
+            self.assertEqual(gazu.entity.new_entity_type(entity_type_name), entity_type)
+
+    def test_all_entity_types(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url("data/entity-types"),
+                text=json.dumps(
+                    [
+                        {"id": fakeid("entity-type-1"), "name": "entity-type-1"},
+                        {"id": fakeid("entity-type-2"), "name": "entity-type-2"},
+                    ]
+                ),
             )
+            entity_types = gazu.entity.all_entity_types()
+            self.assertEqual(len(entity_types), 2)
+            self.assertEqual(entity_types[0]["id"], fakeid("entity-type-1"))
+            self.assertEqual(entity_types[1]["id"], fakeid("entity-type-2"))
+
+    def test_get_entity_by_name(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url("data/entities?name=entity-1"),
+                text=json.dumps([{"id": fakeid("entity-1"), "name": "entity-1"}]),
+            )
+            entity = gazu.entity.get_entity_by_name("entity-1")
+            self.assertEqual(entity["id"], fakeid("entity-1"))
+
+    def test_get_entity_type_by_name(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url("data/entity-types?name=entity-type-1"),
+                text=json.dumps(
+                    [{"id": fakeid("entity-type-1"), "name": "entity-type-1"}]
+                ),
+            )
+            entity_type = gazu.entity.get_entity_type_by_name("entity-type-1")
+            self.assertEqual(entity_type["id"], fakeid("entity-type-1"))
