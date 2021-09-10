@@ -91,6 +91,7 @@ Contributors
 * @aboellinger (Xilam)
 * @BigRoy (Colorbleed)
 * @col-one (Allegorithmic)
+* EvanBldy (CGWire) - *maintainer*
 * @flablog (Les Fées Spéciales)
 * @frankrousseau (CGWire) - *maintainer*
 * @kguyaux
