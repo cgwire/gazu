@@ -2,7 +2,7 @@
    :alt: Gazu Logo
 
 
-Gazu, Python client for the Kitsu API 
+Gazu, Python client for the Kitsu API
 =====================================
 
 Gazu is a Python client that allows to fetch data easily from your animation
@@ -66,9 +66,9 @@ your Kitsu instance. They are listed below:
 * `Nagato <https://github.com/eaxum/nagato>`__: Publishing and file versioning
   for Blender.
 * `Bamboo <https://github.com/nervYu/Bamboo>`__: Pyside2 widgets to publish
-  previews to Kitsu. 
+  previews to Kitsu.
 * `Gazu Publisher <https://github.com/cgwire/gazu-publisher>`__: Our work in
-  progress publisher tool. 
+  progress publisher tool.
 
 
 Contributions
@@ -78,6 +78,14 @@ All contributions are welcome as long as they respect the `C4
 contract <https://rfc.zeromq.org/spec:42/C4>`__.
 
 Code must follow the pep8 convention.
+
+You can use the pre-commit hook for Black (a python code formatter) before commiting :
+
+.. code:: bash
+
+    pip install pre-commit
+    pre-commit install
+
 
 Contributors
 ------------
