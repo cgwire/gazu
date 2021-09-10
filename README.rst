@@ -15,9 +15,7 @@ tools!
 It is made to be used with the `Zou API <https://zou.cg-wire.com>`__. It
 requires an up and running instance of Zou to run properly.
 
-|Build status|
-
-|Slackin badge|
+|Build status| |Discord|
 
 Quickstart
 ----------
@@ -120,7 +118,7 @@ Visit `cg-wire.com <https://cg-wire.com>`__ for more information.
 
 .. |Build status| image:: https://api.travis-ci.com/cgwire/gazu.svg?branch=master
    :target: https://travis-ci.com/cgwire/gazu
-.. |Slackin badge| image:: https://slack.cg-wire.com/badge.svg
-   :target: https://slack.cg-wire.com
+.. |Discord| image:: https://badgen.net/badge/icon/discord?icon=discord&label
+   :target: https://discord.com/invite/VbCxtKN
 .. |CGWire Logo| image:: https://zou.cg-wire.com/cgwire.png
    :target: https://cg-wire.com
