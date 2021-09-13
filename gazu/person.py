@@ -46,7 +46,9 @@ def get_person_by_desktop_login(desktop_login, client=default):
     Returns:
         dict: Person corresponding to given desktop computer login.
     """
-    return raw.fetch_first("persons", {"desktop_login": desktop_login}, client=client)
+    return raw.fetch_first(
+        "persons", {"desktop_login": desktop_login}, client=client
+    )
 
 
 @cache
@@ -75,7 +77,9 @@ def get_person_by_full_name(full_name, client=default):
     else:
         first_name, last_name = full_name.lower().strip(), ""
     for person in all_persons():
-        is_right_first_name = first_name == person["first_name"].lower().strip()
+        is_right_first_name = (
+            first_name == person["first_name"].lower().strip()
+        )
         is_right_last_name = (
             len(last_name) == 0 or last_name == person["last_name"].lower()
         )
@@ -163,7 +167,9 @@ def set_avatar(person, file_path, client=default):
     """
     person = normalize_model_parameter(person)
     return raw.upload(
-        "/pictures/thumbnails/persons/%s" % person["id"], file_path, client=client
+        "/pictures/thumbnails/persons/%s" % person["id"],
+        file_path,
+        client=client,
     )
 
 

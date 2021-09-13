@@ -104,7 +104,12 @@ def get_playlist_by_name(project, name, client=default):
 
 
 def new_playlist(
-    project, name, episode=None, for_entity="shot", for_client=False, client=default
+    project,
+    name,
+    episode=None,
+    for_entity="shot",
+    for_client=False,
+    client=default,
 ):
     """
     Create a new playlist in the database for given project.
@@ -143,4 +148,6 @@ def update_playlist(playlist, client=default):
     Returns:
         dict: Updated playlist.
     """
-    return raw.put("data/playlists/%s" % playlist["id"], playlist, client=client)
+    return raw.put(
+        "data/playlists/%s" % playlist["id"], playlist, client=client
+    )

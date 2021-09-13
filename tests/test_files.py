@@ -14,7 +14,9 @@ class FilesTestCase(unittest.TestCase):
     def test_build_working_file_path(self):
         with requests_mock.mock() as mock:
             mock.post(
-                gazu.client.get_full_url("data/tasks/task-01/working-file-path"),
+                gazu.client.get_full_url(
+                    "data/tasks/task-01/working-file-path"
+                ),
                 text=json.dumps(
                     {"path": "U:/PROD/FX/S01/P01/Tree", "name": "filename.max"}
                 ),
@@ -52,7 +54,10 @@ class FilesTestCase(unittest.TestCase):
 
         with requests_mock.mock() as mock:
             mock.post(
-                path, text=json.dumps({"output_file": {"file_name": "filename.max"}})
+                path,
+                text=json.dumps(
+                    {"output_file": {"file_name": "filename.max"}}
+                ),
             )
             result = gazu.files.new_entity_output_file(
                 entity,
@@ -105,7 +110,10 @@ class FilesTestCase(unittest.TestCase):
 
         with requests_mock.mock() as mock:
             mock.post(
-                path, text=json.dumps({"output_file": {"file_name": "filename.max"}})
+                path,
+                text=json.dumps(
+                    {"output_file": {"file_name": "filename.max"}}
+                ),
             )
             result = gazu.files.new_asset_instance_output_file(
                 asset_instance,
@@ -224,8 +232,12 @@ class FilesTestCase(unittest.TestCase):
             )
             task = {"id": "task-01"}
             working_files_dict = gazu.files.get_last_working_files(task)
-            self.assertEqual(working_files_dict["main"]["id"], "working-file-1")
-            self.assertEqual(working_files_dict["hotfix"]["id"], "working-file-7")
+            self.assertEqual(
+                working_files_dict["main"]["id"], "working-file-1"
+            )
+            self.assertEqual(
+                working_files_dict["hotfix"]["id"], "working-file-7"
+            )
 
     def test_get_last_working_file_revision(self):
         with requests_mock.mock() as mock:
@@ -243,7 +255,9 @@ class FilesTestCase(unittest.TestCase):
 
             working_file = gazu.files.get_last_working_file_revision(task)
             self.assertEqual(working_file["revision"], 2)
-            working_file = gazu.files.get_last_working_file_revision(task, "hotfix")
+            working_file = gazu.files.get_last_working_file_revision(
+                task, "hotfix"
+            )
             self.assertEqual(working_file["revision"], 4)
 
     def test_get_last_output_files_for_entity(self):
@@ -259,7 +273,9 @@ class FilesTestCase(unittest.TestCase):
                 ),
             )
             entity = {"id": "entity-01"}
-            output_files_dict = gazu.files.get_last_output_files_for_entity(entity)
+            output_files_dict = gazu.files.get_last_output_files_for_entity(
+                entity
+            )
             self.assertEqual(
                 output_files_dict["output-type-01"]["main"]["id"],
                 "output-file-1",
@@ -310,8 +326,10 @@ class FilesTestCase(unittest.TestCase):
             )
             asset_instance = {"id": "asset-instance-01"}
             scene = {"id": "scene-01"}
-            output_files_dict = gazu.files.get_last_output_files_for_asset_instance(
-                asset_instance, scene
+            output_files_dict = (
+                gazu.files.get_last_output_files_for_asset_instance(
+                    asset_instance, scene
+                )
             )
             self.assertEqual(
                 output_files_dict["output-type-01"]["main"]["id"],
@@ -331,14 +349,16 @@ class FilesTestCase(unittest.TestCase):
                 ),
             )
 
-            output_files_dict = gazu.files.get_last_output_files_for_asset_instance(
-                {"id": "asset-instance-01"},
-                {"id": "scene-01"},
-                {"id": "output-type-01"},
-                {"id": "task-type-01"},
-                "main",
-                "obj",
-                {"id": "file-status-01"},
+            output_files_dict = (
+                gazu.files.get_last_output_files_for_asset_instance(
+                    {"id": "asset-instance-01"},
+                    {"id": "scene-01"},
+                    {"id": "output-type-01"},
+                    {"id": "task-type-01"},
+                    "main",
+                    "obj",
+                    {"id": "file-status-01"},
+                )
             )
             self.assertEqual(
                 output_files_dict["output-type-01"]["main"]["id"],
@@ -395,7 +415,9 @@ class FilesTestCase(unittest.TestCase):
             path = "/data/output-types"
             mock.get(
                 gazu.client.get_full_url(path),
-                text=json.dumps([{"id": "output-type-01", "name": "geometry"}]),
+                text=json.dumps(
+                    [{"id": "output-type-01", "name": "geometry"}]
+                ),
             )
             output_type = gazu.files.all_output_types()
             self.assertEqual(output_type[0]["name"], "geometry")
@@ -405,7 +427,9 @@ class FilesTestCase(unittest.TestCase):
             path = "/data/entities/asset-01/output-types/"
             mock.get(
                 gazu.client.get_full_url(path),
-                text=json.dumps([{"id": "output-type-01", "name": "geometry"}]),
+                text=json.dumps(
+                    [{"id": "output-type-01", "name": "geometry"}]
+                ),
             )
             asset = {"id": "asset-01"}
             output_type = gazu.files.all_output_types_for_entity(asset)
@@ -419,7 +443,9 @@ class FilesTestCase(unittest.TestCase):
             )
             mock.get(
                 gazu.client.get_full_url(path),
-                text=json.dumps([{"id": "output-type-01", "name": "geometry"}]),
+                text=json.dumps(
+                    [{"id": "output-type-01", "name": "geometry"}]
+                ),
             )
             asset_instance = {"id": "asset-instance-1"}
             scene = {"id": "scene-1"}
@@ -443,7 +469,9 @@ class FilesTestCase(unittest.TestCase):
             path = "/data/output-types?name=geometry"
             mock.get(
                 gazu.client.get_full_url(path),
-                text=json.dumps([{"id": "output-type-01", "name": "geometry"}]),
+                text=json.dumps(
+                    [{"id": "output-type-01", "name": "geometry"}]
+                ),
             )
             output_type = gazu.files.get_output_type_by_name("geometry")
             self.assertEqual(output_type["name"], "geometry")
@@ -570,7 +598,9 @@ class FilesTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             result_path = "/path/to/entity/file_name.cache"
             mock.post(
-                gazu.client.get_full_url("data/entities/asset-01/" "output-file-path"),
+                gazu.client.get_full_url(
+                    "data/entities/asset-01/" "output-file-path"
+                ),
                 text=json.dumps(
                     {
                         "folder_path": "/path/to/entity",
@@ -628,7 +658,8 @@ class FilesTestCase(unittest.TestCase):
                 text=json.dumps([{"id": "output-type-01"}]),
             )
             self.assertEqual(
-                gazu.files.new_output_type("Geometry", "Geo"), {"id": "output-type-01"}
+                gazu.files.new_output_type("Geometry", "Geo"),
+                {"id": "output-type-01"},
             )
 
     def test_new_software(self):
@@ -649,7 +680,8 @@ class FilesTestCase(unittest.TestCase):
                 text=json.dumps([{"id": "software-01"}]),
             )
             self.assertEqual(
-                gazu.files.new_software("3DSMax", "max", ".max"), {"id": "software-01"}
+                gazu.files.new_software("3DSMax", "max", ".max"),
+                {"id": "software-01"},
             )
 
     def test_update_project_file_tree(self):
@@ -661,7 +693,9 @@ class FilesTestCase(unittest.TestCase):
             path = "data/projects/{}".format(fakeid("project-01"))
             mock.put(
                 gazu.client.get_full_url(path),
-                text=json.dumps({"id": fakeid("project-01"), "file_tree": file_tree}),
+                text=json.dumps(
+                    {"id": fakeid("project-01"), "file_tree": file_tree}
+                ),
             )
             file_tree = gazu.files.update_project_file_tree(
                 fakeid("project-01"), file_tree
@@ -674,13 +708,17 @@ class FilesTestCase(unittest.TestCase):
                 path = "data/preview-files/{}".format(fakeid("preview-1"))
                 mock.get(
                     gazu.client.get_full_url(path),
-                    text=json.dumps({"id": fakeid("preview-1"), "extension": "png"}),
+                    text=json.dumps(
+                        {"id": fakeid("preview-1"), "extension": "png"}
+                    ),
                 )
                 path = "pictures/originals/preview-files/{}.png".format(
                     fakeid("preview-1")
                 )
                 mock.get(gazu.client.get_full_url(path), body=thumbnail_file)
-                gazu.files.download_preview_file(fakeid("preview-1"), "./test.png")
+                gazu.files.download_preview_file(
+                    fakeid("preview-1"), "./test.png"
+                )
                 self.assertTrue(os.path.exists("./test.png"))
                 self.assertEqual(
                     os.path.getsize("./test.png"),
@@ -692,13 +730,17 @@ class FilesTestCase(unittest.TestCase):
                 path = "data/preview-files/{}".format(fakeid("preview-1"))
                 mock.get(
                     gazu.client.get_full_url(path),
-                    text=json.dumps({"id": fakeid("preview-1"), "extension": "mp4"}),
+                    text=json.dumps(
+                        {"id": fakeid("preview-1"), "extension": "mp4"}
+                    ),
                 )
                 path = "movies/originals/preview-files/{}.mp4".format(
                     fakeid("preview-1")
                 )
                 mock.get(gazu.client.get_full_url(path), body=thumbnail_file)
-                gazu.files.download_preview_file(fakeid("preview-1"), "./test.mp4")
+                gazu.files.download_preview_file(
+                    fakeid("preview-1"), "./test.mp4"
+                )
                 self.assertTrue(os.path.exists("./test.mp4"))
                 self.assertEqual(
                     os.path.getsize("./test.mp4"),
@@ -714,9 +756,13 @@ class FilesTestCase(unittest.TestCase):
                     gazu.client.get_full_url(path),
                     text=json.dumps({"id": attachment_id, "name": "v1.png"}),
                 )
-                path = "data/attachment-files/{}/file/v1.png".format(attachment_id)
+                path = "data/attachment-files/{}/file/v1.png".format(
+                    attachment_id
+                )
                 mock.get(gazu.client.get_full_url(path), body=attachment_file)
-                gazu.files.download_attachment_file(attachment_id, "./test.png")
+                gazu.files.download_attachment_file(
+                    attachment_id, "./test.png"
+                )
                 self.assertTrue(os.path.exists("./test.png"))
                 self.assertEqual(
                     os.path.getsize("./test.png"),
@@ -799,9 +845,13 @@ class FilesTestCase(unittest.TestCase):
             }
 
             path = "/data/file-status/{}".format(file_status["id"])
-            mock.get(gazu.client.get_full_url(path), text=json.dumps(file_status))
+            mock.get(
+                gazu.client.get_full_url(path), text=json.dumps(file_status)
+            )
 
-            self.assertEqual(file_status, gazu.files.get_file_status(file_status["id"]))
+            self.assertEqual(
+                file_status, gazu.files.get_file_status(file_status["id"])
+            )
 
     def test_get_file_status_by_name(self):
         with requests_mock.mock() as mock:
@@ -822,7 +872,8 @@ class FilesTestCase(unittest.TestCase):
             )
 
             self.assertEqual(
-                file_status, gazu.files.get_file_status_by_name(file_status["name"])
+                file_status,
+                gazu.files.get_file_status_by_name(file_status["name"]),
             )
 
     def test_update_comment(self):
@@ -838,7 +889,9 @@ class FilesTestCase(unittest.TestCase):
                 ),
             )
             working_file = {"id": "working-file-01"}
-            working_file = gazu.files.update_comment(working_file, "test-comment")
+            working_file = gazu.files.update_comment(
+                working_file, "test-comment"
+            )
             self.assertEqual(working_file["id"], "working-file-01")
             self.assertEqual(working_file["comment"], "test-comment")
 
@@ -852,7 +905,9 @@ class FilesTestCase(unittest.TestCase):
                         {"id": fakeid("working_file-1"), "path": "test.png"}
                     ),
                 )
-                path = "data/working-files/{}/file".format(fakeid("working_file-1"))
+                path = "data/working-files/{}/file".format(
+                    fakeid("working_file-1")
+                )
                 mock.get(gazu.client.get_full_url(path), body=working_file)
                 gazu.files.download_working_file(
                     fakeid("working_file-1"),
@@ -868,13 +923,17 @@ class FilesTestCase(unittest.TestCase):
                 path = "data/preview-files/{}".format(fakeid("preview-1"))
                 mock.get(
                     gazu.client.get_full_url(path),
-                    text=json.dumps({"id": fakeid("preview-1"), "extension": "mp4"}),
+                    text=json.dumps(
+                        {"id": fakeid("preview-1"), "extension": "mp4"}
+                    ),
                 )
                 path = "movies/originals/preview-files/{}.mp4".format(
                     fakeid("preview-1")
                 )
                 mock.get(gazu.client.get_full_url(path), body=thumbnail_file)
-                gazu.files.download_preview_file(fakeid("preview-1"), "./test.mp4")
+                gazu.files.download_preview_file(
+                    fakeid("preview-1"), "./test.mp4"
+                )
                 self.assertTrue(os.path.exists("./test.mp4"))
                 self.assertEqual(
                     os.path.getsize("./test.mp4"),
@@ -883,7 +942,9 @@ class FilesTestCase(unittest.TestCase):
 
     def test_upload_working_file(self):
         with requests_mock.mock() as mock:
-            path = "data/working-files/{}/file".format(fakeid("working_file-1"))
+            path = "data/working-files/{}/file".format(
+                fakeid("working_file-1")
+            )
             mock.post(
                 gazu.client.get_full_url(path),
                 text=json.dumps({"id": fakeid("working_file-1")}),
@@ -902,7 +963,10 @@ class FilesTestCase(unittest.TestCase):
             mock.get(
                 gazu.client.get_full_url(path),
                 text=json.dumps(
-                    [{"id": fakeid("working_file-1")}, {"id": fakeid("working_file-2")}]
+                    [
+                        {"id": fakeid("working_file-1")},
+                        {"id": fakeid("working_file-2")},
+                    ]
                 ),
             )
             working_files = gazu.files.get_all_working_files_for_entity(
@@ -926,7 +990,9 @@ class FilesTestCase(unittest.TestCase):
                     }
                 ),
             )
-            preview_file = gazu.files.get_preview_file(fakeid("preview-file-1"))
+            preview_file = gazu.files.get_preview_file(
+                fakeid("preview-file-1")
+            )
             self.assertEqual(preview_file["name"], "preview-file-1")
 
     def test_get_all_preview_files_for_task(self):
@@ -937,12 +1003,20 @@ class FilesTestCase(unittest.TestCase):
                 ),
                 text=json.dumps(
                     [
-                        {"id": fakeid("preview-file-1"), "name": "preview-file-1"},
-                        {"id": fakeid("preview-file-2"), "name": "preview-file-2"},
+                        {
+                            "id": fakeid("preview-file-1"),
+                            "name": "preview-file-1",
+                        },
+                        {
+                            "id": fakeid("preview-file-2"),
+                            "name": "preview-file-2",
+                        },
                     ]
                 ),
             )
-            preview_files = gazu.files.get_all_preview_files_for_task(fakeid("task-1"))
+            preview_files = gazu.files.get_all_preview_files_for_task(
+                fakeid("task-1")
+            )
             self.assertEqual(len(preview_files), 2)
             self.assertEqual(preview_files[0]["name"], "preview-file-1")
             self.assertEqual(preview_files[1]["name"], "preview-file-2")
@@ -960,7 +1034,9 @@ class FilesTestCase(unittest.TestCase):
                 ),
             )
             data = {"name": "test-name"}
-            output_file = gazu.files.update_output_file(fakeid("output-file-1"), data)
+            output_file = gazu.files.update_output_file(
+                fakeid("output-file-1"), data
+            )
             self.assertEqual(output_file["id"], fakeid("output-file-1"))
             self.assertEqual(output_file["name"], "test-name")
 
@@ -977,6 +1053,8 @@ class FilesTestCase(unittest.TestCase):
                 ),
             )
             data = {"name": "test-name"}
-            preview_file = gazu.files.update_preview(fakeid("preview-file-1"), data)
+            preview_file = gazu.files.update_preview(
+                fakeid("preview-file-1"), data
+            )
             self.assertEqual(preview_file["id"], fakeid("preview-file-1"))
             self.assertEqual(preview_file["name"], "test-name")

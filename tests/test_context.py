@@ -39,13 +39,16 @@ class CastingTestCase(unittest.TestCase):
                 gazu.context.all_assets_for_asset_type_and_project(
                     project, asset_type, False
                 ),
-                gazu.asset.all_assets_for_project_and_type(project, asset_type),
+                gazu.asset.all_assets_for_project_and_type(
+                    project, asset_type
+                ),
             )
         with requests_mock.mock() as mock:
             mock_route(
                 mock,
                 "GET",
-                "data/user/projects/project-01/asset-types/asset-type-01" "/assets",
+                "data/user/projects/project-01/asset-types/asset-type-01"
+                "/assets",
                 text=[{"name": "Chair", "id": "asset-01"}],
             )
 
@@ -56,7 +59,9 @@ class CastingTestCase(unittest.TestCase):
                 gazu.context.all_assets_for_asset_type_and_project(
                     project, asset_type, True
                 ),
-                gazu.user.all_assets_for_asset_type_and_project(project, asset_type),
+                gazu.user.all_assets_for_asset_type_and_project(
+                    project, asset_type
+                ),
             )
 
     def test_all_asset_types_for_project(self):
@@ -95,7 +100,8 @@ class CastingTestCase(unittest.TestCase):
                 text=[{"name": "Agent 327", "id": "project-01"}],
             )
             self.assertEqual(
-                gazu.context.all_open_projects(False), gazu.project.all_open_projects()
+                gazu.context.all_open_projects(False),
+                gazu.project.all_open_projects(),
             )
         with requests_mock.mock() as mock:
             mock_route(
@@ -105,7 +111,8 @@ class CastingTestCase(unittest.TestCase):
                 text=[{"name": "Big Buck Bunny", "id": "project-01"}],
             )
             self.assertEqual(
-                gazu.context.all_open_projects(True), gazu.user.all_open_projects()
+                gazu.context.all_open_projects(True),
+                gazu.user.all_open_projects(),
             )
 
     def test_all_scenes(self):

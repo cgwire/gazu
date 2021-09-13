@@ -14,7 +14,9 @@ def init(client=default_client, ssl_verify=True):
     from gazu.client import make_auth_header
 
     path = get_event_host(client)
-    event_client = SocketIO(path, None, headers=make_auth_header(), verify=ssl_verify)
+    event_client = SocketIO(
+        path, None, headers=make_auth_header(), verify=ssl_verify
+    )
     main_namespace = event_client.define(BaseNamespace, "/events")
     event_client.main_namespace = main_namespace
     event_client.on("error", connect_error)

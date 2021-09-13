@@ -134,7 +134,9 @@ def get_episode_by_name(project, episode_name, client=default):
     """
     project = normalize_model_parameter(project)
     return raw.fetch_first(
-        "episodes", {"project_id": project["id"], "name": episode_name}, client=client
+        "episodes",
+        {"project_id": project["id"], "name": episode_name},
+        client=client,
     )
 
 
@@ -221,7 +223,9 @@ def get_shot_by_name(sequence, shot_name, client=default):
     """
     sequence = normalize_model_parameter(sequence)
     return raw.fetch_first(
-        "shots/all", {"sequence_id": sequence["id"], "name": shot_name}, client=client
+        "shots/all",
+        {"sequence_id": sequence["id"], "name": shot_name},
+        client=client,
     )
 
 
@@ -287,7 +291,9 @@ def new_sequence(project, name, episode=None, client=default):
         episode = normalize_model_parameter(episode)
         data["episode_id"] = episode["id"]
 
-    sequence = get_sequence_by_name(project, name, episode=episode, client=client)
+    sequence = get_sequence_by_name(
+        project, name, episode=episode, client=client
+    )
     if sequence is None:
         path = "data/projects/%s/sequences" % project["id"]
         return raw.post(path, data, client=client)
@@ -365,7 +371,9 @@ def update_sequence(sequence, client=default):
     Returns:
         dict: Updated sequence.
     """
-    return raw.put("data/entities/%s" % sequence["id"], sequence, client=client)
+    return raw.put(
+        "data/entities/%s" % sequence["id"], sequence, client=client
+    )
 
 
 @cache
@@ -414,7 +422,10 @@ def update_sequence_data(sequence, data={}, client=default):
     if not current_sequence.get("data"):
         current_sequence["data"] = {}
 
-    updated_sequence = {"id": current_sequence["id"], "data": current_sequence["data"]}
+    updated_sequence = {
+        "id": current_sequence["id"],
+        "data": current_sequence["data"],
+    }
     updated_sequence["data"].update(data)
     return update_sequence(updated_sequence, client)
 
@@ -497,7 +508,10 @@ def update_episode_data(episode, data={}, client=default):
     """
     episode = normalize_model_parameter(episode)
     current_episode = get_sequence(episode["id"], client=client)
-    updated_episode = {"id": current_episode["id"], "data": current_episode["data"]}
+    updated_episode = {
+        "id": current_episode["id"],
+        "data": current_episode["data"],
+    }
     updated_episode["data"].update(data)
     return update_episode(updated_episode, client=client)
 

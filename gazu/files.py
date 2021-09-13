@@ -25,7 +25,9 @@ def all_output_types_for_entity(entity, client=default):
         list: All output types linked to output files for given entity.
     """
     entity = normalize_model_parameter(entity)
-    return raw.fetch_all("entities/%s/output-types" % entity["id"], client=client)
+    return raw.fetch_all(
+        "entities/%s/output-types" % entity["id"], client=client
+    )
 
 
 @cache
@@ -64,7 +66,9 @@ def get_output_type_by_name(output_type_name, client=default):
     Returns:
         dict: Output type matching given name.
     """
-    return raw.fetch_first("output-types", {"name": output_type_name}, client=client)
+    return raw.fetch_first(
+        "output-types", {"name": output_type_name}, client=client
+    )
 
 
 def new_output_type(name, short_name, client=default):
@@ -112,7 +116,9 @@ def get_output_file_by_path(path, client=default):
 
 
 @cache
-def get_all_working_files_for_entity(entity, task=None, name=None, client=default):
+def get_all_working_files_for_entity(
+    entity, task=None, name=None, client=default
+):
     """
     Retrieves all the working files of a given entity and specied parameters
     """
@@ -150,7 +156,9 @@ def get_all_preview_files_for_task(task, client=default):
         task (str, id): Target task
     """
     task = normalize_model_parameter(task)
-    return raw.fetch_all("preview-files", {"task_id": task["id"]}, client=client)
+    return raw.fetch_all(
+        "preview-files", {"task_id": task["id"]}, client=client
+    )
 
 
 def all_output_files_for_entity(
@@ -508,7 +516,9 @@ def new_working_file(
     if software is not None:
         data["software_id"] = software["id"]
 
-    return raw.post("data/tasks/%s/working-files/new" % task["id"], data, client=client)
+    return raw.post(
+        "data/tasks/%s/working-files/new" % task["id"], data, client=client
+    )
 
 
 def new_entity_output_file(
@@ -957,7 +967,9 @@ def update_modification_date(working_file, client=default):
         dict: Modified working file
     """
     return raw.put(
-        "/actions/working-files/%s/modified" % working_file["id"], {}, client=client
+        "/actions/working-files/%s/modified" % working_file["id"],
+        {},
+        client=client,
     )
 
 
@@ -1037,10 +1049,14 @@ def download_working_file(working_file, file_path=None, client=default):
     """
     working_file = normalize_model_parameter(working_file)
     if file_path is None:
-        working_file = raw.fetch_one("working-files", working_file["id"], client=client)
+        working_file = raw.fetch_one(
+            "working-files", working_file["id"], client=client
+        )
         file_path = working_file["path"]
     return raw.download(
-        "data/working-files/%s/file" % (working_file["id"]), file_path, client=client
+        "data/working-files/%s/file" % (working_file["id"]),
+        file_path,
+        client=client,
     )
 
 
@@ -1053,7 +1069,9 @@ def download_preview_file(preview_file, file_path, client=default):
         file_path (str): Location on hard drive where to save the file.
     """
     preview_file = normalize_model_parameter(preview_file)
-    preview_file = raw.fetch_one("preview-files", preview_file["id"], client=client)
+    preview_file = raw.fetch_one(
+        "preview-files", preview_file["id"], client=client
+    )
     file_type = "movies" if preview_file["extension"] == "mp4" else "pictures"
     return raw.download(
         "%s/originals/preview-files/%s.%s"

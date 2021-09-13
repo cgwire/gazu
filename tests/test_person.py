@@ -70,12 +70,16 @@ class PersonTestCase(unittest.TestCase):
             )
             person = gazu.person.get_person_by_full_name("JohnDid")
             self.assertEqual(person["id"], "person-2")
-            self.assertEqual(gazu.person.get_person_by_full_name("Unknown"), None)
+            self.assertEqual(
+                gazu.person.get_person_by_full_name("Unknown"), None
+            )
 
     def test_get_person_by_desktop_login(self):
         with requests_mock.mock() as mock:
             mock.get(
-                gazu.client.get_full_url("data/persons?desktop_login=john.doe"),
+                gazu.client.get_full_url(
+                    "data/persons?desktop_login=john.doe"
+                ),
                 text=json.dumps(
                     [
                         {
@@ -147,17 +151,23 @@ class PersonTestCase(unittest.TestCase):
         result = {"id": fakeid("John Doe"), "full_name": "John Doe"}
         with requests_mock.mock() as mock:
             mock.get(
-                gazu.client.get_full_url("data/persons/%s" % (fakeid("John Doe"))),
+                gazu.client.get_full_url(
+                    "data/persons/%s" % (fakeid("John Doe"))
+                ),
                 text=json.dumps(result),
             )
-            self.assertEqual(gazu.person.get_person(fakeid("John Doe")), result)
+            self.assertEqual(
+                gazu.person.get_person(fakeid("John Doe")), result
+            )
 
     def test_get_person_url(self):
         wanted_result = "%s/people/%s/" % (
             gazu.client.get_api_url_from_host(),
             fakeid("person-1"),
         )
-        self.assertEqual(wanted_result, gazu.person.get_person_url(fakeid("person-1")))
+        self.assertEqual(
+            wanted_result, gazu.person.get_person_url(fakeid("person-1"))
+        )
 
     def test_get_organisation(self):
         with requests_mock.mock() as mock:
@@ -166,7 +176,9 @@ class PersonTestCase(unittest.TestCase):
                 gazu.client.get_full_url("auth/authenticated"),
                 text=json.dumps(result),
             )
-            self.assertEqual(gazu.person.get_organisation(), "test-organisation")
+            self.assertEqual(
+                gazu.person.get_organisation(), "test-organisation"
+            )
 
     def test_get_presence_log(self):
         result = """
@@ -184,7 +196,9 @@ class PersonTestCase(unittest.TestCase):
             path = "/pictures/thumbnails/persons/%s" % fakeid("person-1")
             mock.post(
                 gazu.client.get_full_url(path),
-                text=json.dumps({"id": fakeid("person-1"), "name": "test-name"}),
+                text=json.dumps(
+                    {"id": fakeid("person-1"), "name": "test-name"}
+                ),
             )
             person_id = gazu.person.set_avatar(
                 fakeid("person-1"), "./tests/fixtures/v1.png"

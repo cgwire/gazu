@@ -43,12 +43,16 @@ class SyncestCase(unittest.TestCase):
             {"id": "asset-3"},
         ]
         target_list = [{"id": "asset-2"}, {"id": "asset-4"}]
-        (missing, unexpected) = gazu.sync.get_model_list_diff(source_list, target_list)
+        (missing, unexpected) = gazu.sync.get_model_list_diff(
+            source_list, target_list
+        )
         self.assertEqual(missing, [{"id": "asset-1"}, {"id": "asset-3"}])
         self.assertEqual(unexpected, [{"id": "asset-4"}])
         source_list = []
         target_list = []
-        (missing, unexpected) = gazu.sync.get_model_list_diff(source_list, target_list)
+        (missing, unexpected) = gazu.sync.get_model_list_diff(
+            source_list, target_list
+        )
         self.assertEqual(missing, [])
         self.assertEqual(unexpected, [])
 
@@ -62,7 +66,9 @@ class SyncestCase(unittest.TestCase):
             {"entity_in_id": "shot-2", "entity_out_id": "asset-2"},
             {"entity_in_id": "shot-4", "entity_out_id": "asset-4"},
         ]
-        (missing, unexpected) = gazu.sync.get_link_list_diff(source_list, target_list)
+        (missing, unexpected) = gazu.sync.get_link_list_diff(
+            source_list, target_list
+        )
         self.assertEqual(
             missing,
             [
@@ -78,7 +84,9 @@ class SyncestCase(unittest.TestCase):
         )
         source_list = []
         target_list = []
-        (missing, unexpected) = gazu.sync.get_link_list_diff(source_list, target_list)
+        (missing, unexpected) = gazu.sync.get_link_list_diff(
+            source_list, target_list
+        )
         self.assertEqual(missing, [])
         self.assertEqual(unexpected, [])
 
@@ -106,7 +114,9 @@ class SyncestCase(unittest.TestCase):
             self.assertEqual(gazu.sync.get_last_events(), result)
             self.assertEqual(
                 gazu.sync.get_last_events(
-                    project=fakeid("project-1"), after="2021-11-06", before="2021-11-06"
+                    project=fakeid("project-1"),
+                    after="2021-11-06",
+                    before="2021-11-06",
                 ),
                 result,
             )

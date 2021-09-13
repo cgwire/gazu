@@ -88,7 +88,9 @@ def get_model_list_diff(source_list, target_list):
     for model in source_list:
         if model["id"] not in target_ids:
             missing.append(model)
-    unexpected = [model for model in target_list if model["id"] not in source_ids]
+    unexpected = [
+        model for model in target_list if model["id"] not in source_ids
+    ]
     return (missing, unexpected)
 
 

@@ -40,7 +40,8 @@ class ProjectTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/user/projects/project-01/asset-types/asset-type-01" "/assets",
+                "data/user/projects/project-01/asset-types/asset-type-01"
+                "/assets",
                 text=[{"name": "Chair", "id": "asset-01"}],
             )
 
@@ -77,7 +78,9 @@ class ProjectTestCase(unittest.TestCase):
     def test_tasks_for_sequence(self):
         with requests_mock.mock() as mock:
             mock.get(
-                gazu.client.get_full_url("data/user/sequences/sequence-1/tasks"),
+                gazu.client.get_full_url(
+                    "data/user/sequences/sequence-1/tasks"
+                ),
                 text=json.dumps([{"name": "main", "id": "task-01"}]),
             )
             sequence = {"id": "sequence-1"}
@@ -142,7 +145,9 @@ class ProjectTestCase(unittest.TestCase):
     def test_shot_for_sequences(self):
         with requests_mock.mock() as mock:
             mock.get(
-                gazu.client.get_full_url("data/user/sequences/sequence-01/shots"),
+                gazu.client.get_full_url(
+                    "data/user/sequences/sequence-01/shots"
+                ),
                 text=json.dumps([{"name": "SEQ01", "id": "shot-01"}]),
             )
             sequence = {"id": "sequence-01"}
@@ -268,5 +273,7 @@ class ProjectTestCase(unittest.TestCase):
             )
 
             log_desktop_session_log_in = gazu.user.log_desktop_session_log_in()
-            self.assertEqual(log_desktop_session_log_in["id"], fakeid("user-1"))
+            self.assertEqual(
+                log_desktop_session_log_in["id"], fakeid("user-1")
+            )
             self.assertEqual(log_desktop_session_log_in["date"], date_str)

@@ -466,5 +466,7 @@ def new_asset_asset_instance(
         "description": description,
     }
     return raw.post(
-        "data/assets/%s/asset-asset-instances" % asset["id"], data, client=client
+        "data/assets/%s/asset-asset-instances" % asset["id"],
+        data,
+        client=client,
     )
