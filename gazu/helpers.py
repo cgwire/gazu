@@ -39,11 +39,8 @@ def validate_date_format(date_text):
         try:
             datetime.datetime.strptime(date_text, "%Y-%m-%d")
         except ValueError:
-            try:
-                datetime.datetime.fromisoformat(date_text)
-            except:
-                raise ValueError(
-                    "Incorrect date format for %s, should be YYYY-mm-dd or YYYY-mm-ddTHH:MM:SS"
-                    % date_text
-                )
+            raise ValueError(
+                "Incorrect date format for %s, should be YYYY-mm-dd or YYYY-mm-ddTHH:MM:SS"
+                % date_text
+            )
     return date_text

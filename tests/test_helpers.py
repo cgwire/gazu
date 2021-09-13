@@ -31,7 +31,6 @@ class TestCase(unittest.TestCase):
     def test_validate_date_format(self):
         helpers.validate_date_format("2021-11-06")
         helpers.validate_date_format("2021-11-06T11:25:59")
-        helpers.validate_date_format(datetime.datetime.now().isoformat())
         try:
             helpers.validate_date_format("")
         except Exception as e:
