@@ -188,7 +188,8 @@ def get(path, json_response=True, params=None, client=default_client):
     """
     path = build_path_with_params(path, params)
     response = client.session.get(
-        get_full_url(path, client=client), headers=make_auth_header(client=client)
+        get_full_url(path, client=client),
+        headers=make_auth_header(client=client),
     )
     check_status(response, path)
 
@@ -206,7 +207,9 @@ def post(path, data, client=default_client):
         The request result.
     """
     response = client.session.post(
-        get_full_url(path, client), json=data, headers=make_auth_header(client=client)
+        get_full_url(path, client),
+        json=data,
+        headers=make_auth_header(client=client),
     )
     check_status(response, path)
     return response.json()
@@ -220,7 +223,9 @@ def put(path, data, client=default_client):
         The request result.
     """
     response = client.session.put(
-        get_full_url(path, client), json=data, headers=make_auth_header(client=client)
+        get_full_url(path, client),
+        json=data,
+        headers=make_auth_header(client=client),
     )
     check_status(response, path)
     return response.json()
@@ -284,7 +289,9 @@ def check_status(request, path):
             stacktrace = request.json().get(
                 "stacktrace", "No stacktrace sent by the server"
             )
-            message = request.json().get("message", "No message sent by the server")
+            message = request.json().get(
+                "message", "No message sent by the server"
+            )
             print("A server error occured!\n")
             print("Server stacktrace:\n%s" % stacktrace)
             print("Error message:\n%s\n" % message)
@@ -362,7 +369,9 @@ def update(model_name, model_id, data, client=default_client):
     Returns:
         dict: Updated entry
     """
-    return put(url_path_join("data", model_name, model_id), data, client=client)
+    return put(
+        url_path_join("data", model_name, model_id), data, client=client
+    )
 
 
 def upload(path, file_path, data={}, extra_files=[], client=default_client):

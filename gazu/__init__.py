@@ -37,7 +37,9 @@ def log_in(email, password, client=raw.default_client):
     except ParameterException:
         pass
 
-    if not tokens or ("login" in tokens and tokens.get("login", False) == False):
+    if not tokens or (
+        "login" in tokens and tokens.get("login", False) == False
+    ):
         raise AuthFailedException
     else:
         raw.set_tokens(tokens, client=client)

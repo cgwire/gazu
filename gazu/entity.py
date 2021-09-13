@@ -71,7 +71,9 @@ def get_entity_type_by_name(entity_type_name, client=default):
     Returns:
         Retrieve entity type matching given name.
     """
-    return raw.fetch_first("entity-types", {"name": entity_type_name}, client=client)
+    return raw.fetch_first(
+        "entity-types", {"name": entity_type_name}, client=client
+    )
 
 
 def new_entity_type(name, client=default):

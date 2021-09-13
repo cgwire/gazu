@@ -195,7 +195,9 @@ def cache(function, maxsize=300, expire=120):
 
             else:
                 statistics["misses"] += 1
-                returned_value = insert_value(function, cache_store, args, kwargs)
+                returned_value = insert_value(
+                    function, cache_store, args, kwargs
+                )
                 remove_oldest_entry(cache_store, state["maxsize"])
                 return returned_value
 
