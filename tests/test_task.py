@@ -390,7 +390,7 @@ class TaskTestCase(unittest.TestCase):
 
     def test_add_comment(self):
         with requests_mock.mock() as mock:
-            date = datetime.datetime.now().isoformat()
+            date = "2021-03-13T18:47:15"
             result = {
                 "id": "comment-1",
                 "person_id": fakeid("person-1"),
