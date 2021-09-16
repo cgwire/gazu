@@ -277,3 +277,21 @@ class ProjectTestCase(unittest.TestCase):
                 log_desktop_session_log_in["id"], fakeid("user-1")
             )
             self.assertEqual(log_desktop_session_log_in["date"], date_str)
+
+    def test_is_authenticated(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "auth/authenticated",
+                text={"authenticated": True},
+            )
+            self.assertTrue(gazu.user.is_authenticated())
+
+            mock_route(
+                mock,
+                "GET",
+                "auth/authenticated",
+                status_code=401,
+            )
+            self.assertFalse(gazu.user.is_authenticated())
