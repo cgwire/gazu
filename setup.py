@@ -1,15 +1,11 @@
 #!/usr/bin/env python
-import ast
-import re
-import os
-
 from setuptools import setup
+from distutils.util import convert_path
 
+# Get version without sourcing gazu module
+# (to avoid importing dependencies yet to be installed)
+main_ns = {}
+with open(convert_path('gazu/__version__.py')) as ver_file:
+    exec(ver_file.read(), main_ns)
 
-# We hack our way into getting the version from gazu without imports :
-# running gazu/__init__.py would cause errors due to the import of dependencies yet to be installed
-versionpath = os.path.join(os.path.dirname(__file__), "gazu/__version__.py")
-with open(versionpath, "r") as file:
-    __version__ = ast.literal_eval(re.search('__version__ *= *(\S+)', file.read()).group(1))
-
-setup(version=__version__)
+setup(version=main_ns['__version__'])
