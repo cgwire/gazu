@@ -118,7 +118,7 @@ Visit `cg-wire.com <https://cg-wire.com>`__ for more information.
 |CGWire Logo|
 
 .. |Build status| image:: https://api.travis-ci.com/cgwire/gazu.svg?branch=master
-   :target: https://travis-ci.com/cgwire/gazu
+   :target: https://app.travis-ci.com/cgwire/gazu
 .. |Discord| image:: https://badgen.net/badge/icon/discord?icon=discord&label
    :target: https://discord.com/invite/VbCxtKN
 .. |CGWire Logo| image:: https://zou.cg-wire.com/cgwire.png
