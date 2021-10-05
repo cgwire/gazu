@@ -34,17 +34,18 @@ def mock_route(mock, request_type, path="", **kwargs):
     getattr(mock, request_type.lower())(path, **kwargs)
 
 
-def add_verify_file_callback(mock, dict_assert={}):
+def add_verify_file_callback(mock, dict_assert={}, url=None):
     def verify_file_callback(request):
-        body_file = io.BytesIO(request.body)
-        _, pdict = cgi.parse_header(request.headers["Content-Type"])
-        if sys.version_info[0] == 3:
-            pdict["boundary"] = bytes(pdict["boundary"], "UTF-8")
-        else:
-            pdict["boundary"] = bytes(pdict["boundary"])
-        parsed = cgi.parse_multipart(fp=body_file, pdict=pdict)
-        for key in dict_assert.keys():
-            assert key in parsed and dict_assert[key] == parsed[key][0]
+        if url is None or url == request.url:
+            body_file = io.BytesIO(request.body)
+            _, pdict = cgi.parse_header(request.headers["Content-Type"])
+            if sys.version_info[0] == 3:
+                pdict["boundary"] = bytes(pdict["boundary"], "UTF-8")
+            else:
+                pdict["boundary"] = bytes(pdict["boundary"])
+            parsed = cgi.parse_multipart(fp=body_file, pdict=pdict)
+            for key in dict_assert.keys():
+                assert key in parsed and dict_assert[key] == parsed[key][0]
         return None
 
     mock.add_matcher(verify_file_callback)

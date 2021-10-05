@@ -732,10 +732,12 @@ def upload_preview_file(
         task (str / dict): The task dict or the task ID.
         file_path (str): Path of the file to upload as preview.
     """
-    path = "pictures/preview-files/%s" % preview["id"]
+    path = (
+        "pictures/preview-files/%s" % normalize_model_parameter(preview)["id"]
+    )
     if not normalize_movie:
         path += "?normalize=false"
-    raw.upload(path, file_path, client=client)
+    return raw.upload(path, file_path, client=client)
 
 
 def add_preview(
