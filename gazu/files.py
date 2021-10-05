@@ -1,3 +1,5 @@
+from itertools import chain
+
 from . import client as raw
 from . import task as tsk
 
@@ -158,7 +160,9 @@ def get_all_preview_files_for_task(task, client=default):
     """
     task = normalize_model_parameter(task)
     comments = tsk.all_comments_for_task(task)
-    return [comment['previews'][0] for comment in comments if comment['previews']]
+    return list(chain.from_iterable(
+        [comment['previews'] for comment in comments if comment['previews']]
+    ))
 
 
 def all_output_files_for_entity(
