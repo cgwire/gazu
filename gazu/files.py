@@ -161,7 +161,7 @@ def get_all_preview_files_for_task(task, client=default):
     task = normalize_model_parameter(task)
     comments = tsk.all_comments_for_task(task)
     return list(chain.from_iterable(
-        [comment['previews'] for comment in comments if comment['previews']]
+        comment['previews'] for comment in comments if comment['previews']
     ))
 
 
