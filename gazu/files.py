@@ -1,4 +1,5 @@
 from . import client as raw
+from . import task as tsk
 
 from .cache import cache
 from .helpers import normalize_model_parameter
@@ -156,9 +157,8 @@ def get_all_preview_files_for_task(task, client=default):
         task (str, id): Target task
     """
     task = normalize_model_parameter(task)
-    return raw.fetch_all(
-        "preview-files", {"task_id": task["id"]}, client=client
-    )
+    comments = tsk.all_comments_for_task(task)
+    return [comment['previews'][0] for comment in comments if comment['previews']]
 
 
 def all_output_files_for_entity(
