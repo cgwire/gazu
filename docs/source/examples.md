@@ -21,12 +21,12 @@ Comments without text are allowed too:
 
 ```python
 modeling = gazu.task.get_task_type_by_name("modeling")
-wip = gazu.task.get_task_status_by_short_name(asset, "wip")
+wip = gazu.task.get_task_status_by_short_name("wip")
 
 project = gazu.project.get_project_by_name("Caminandes")
-asset = gazu.asset.get_asset_by_name(asset, "Lama")
+asset = gazu.asset.get_asset_by_name(project, "Lama")
 
-task = gazu.task.get_task_by_name(asset, modelinq)
+task = gazu.task.get_task_by_name(asset, modeling)
 comment = gazu.task.add_comment(task, wip, "Change status to work in progress")
 ```
 
