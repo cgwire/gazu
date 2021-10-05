@@ -723,10 +723,7 @@ def create_preview(task, comment, client=default):
 
 
 def upload_preview_file(
-    preview,
-    file_path,
-    normalize_movie=True,
-    client=default
+    preview, file_path, normalize_movie=True, client=default
 ):
     """
     Create a preview into given comment.
@@ -742,11 +739,7 @@ def upload_preview_file(
 
 
 def add_preview(
-    task,
-    comment,
-    preview_file_path,
-    normalize_movie=True,
-    client=default
+    task, comment, preview_file_path, normalize_movie=True, client=default
 ):
     """
     Add a preview to given comment.
@@ -764,7 +757,7 @@ def add_preview(
         preview_file,
         preview_file_path,
         normalize_movie=normalize_movie,
-        client=client
+        client=client,
     )
     return preview_file
 

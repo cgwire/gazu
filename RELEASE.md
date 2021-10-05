@@ -3,7 +3,7 @@
 We release Gazu versions through Github. Every time a new version is ready, we
 follow this process:
 
-1. Up the version number located the `gazu/__version__` file. 
+1. Up the version number located the `gazu/__version__` file.
 2. Rebase on the master branch.
 2. Push changes to `master` branch.
 3. Build the package from the sources
