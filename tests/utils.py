@@ -45,7 +45,13 @@ def add_verify_file_callback(mock, dict_assert={}, url=None):
                 pdict["boundary"] = bytes(pdict["boundary"])
             parsed = cgi.parse_multipart(fp=body_file, pdict=pdict)
             for key in dict_assert.keys():
-                assert key in parsed and dict_assert[key] == parsed[key][0]
+                assert key in parsed.keys()
+                if isinstance(parsed[key][0], bytes):
+                    try:
+                        parsed[key][0] = parsed[key][0].decode("utf-8")
+                    except UnicodeDecodeError:
+                        pass
+                assert dict_assert[key] == parsed[key][0]
         return None
 
     mock.add_matcher(verify_file_callback)
