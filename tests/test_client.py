@@ -1,7 +1,5 @@
-import cgi
 import datetime
 import json
-import io
 import sys
 
 import unittest
@@ -19,6 +17,8 @@ from gazu.exception import (
     TooBigFileException,
     ServerErrorException,
 )
+
+from utils import add_verify_file_callback, mock_route
 
 
 class ClientTestCase(unittest.TestCase):
@@ -252,39 +252,29 @@ class BaseFuncTestCase(ClientTestCase):
     def test_upload(self):
         with open("./tests/fixtures/v1.png", "rb") as test_file:
             with requests_mock.Mocker() as mock:
-                mock.post(
-                    raw.get_full_url("data/new-file"),
-                    text=json.dumps({"id": "person-01", "first_name": "John"}),
+                mock_route(
+                    mock,
+                    "POST",
+                    "data/new-file",
+                    text={"id": "person-01", "first_name": "John"},
                 )
 
-                def verify_file_callback(request):
-                    body_file = io.BytesIO(request.body)
-                    _, pdict = cgi.parse_header(
-                        request.headers["Content-Type"]
-                    )
-                    if sys.version_info[0] == 3:
-                        pdict["boundary"] = bytes(pdict["boundary"], "UTF-8")
-                    else:
-                        pdict["boundary"] = bytes(pdict["boundary"])
-                    parsed = cgi.parse_multipart(fp=body_file, pdict=pdict)
-                    assert "file" in parsed
-                    assert "test" in parsed and parsed["test"]
-                    assert test_file.read() == parsed["file"][0]
-                    return None
+                add_verify_file_callback(
+                    mock, {"file": test_file.read(), "test": "True"}
+                )
 
-                mock.post("data/new-file", json={})
-                mock.add_matcher(verify_file_callback)
                 raw.upload(
                     "data/new-file",
                     "./tests/fixtures/v1.png",
                     data={"test": True},
                 )
             with requests_mock.Mocker() as mock:
-                mock.post(
-                    raw.get_full_url("data/new-file"),
-                    text=json.dumps({"message": "Error"}),
+                mock_route(
+                    mock,
+                    "POST",
+                    "data/new-file",
+                    text={"message": "Error"},
                 )
-                mock.post("data/new-file", json={})
                 with self.assertRaises(gazu.client.UploadFailedException):
                     raw.upload(
                         "data/new-file",
@@ -295,30 +285,22 @@ class BaseFuncTestCase(ClientTestCase):
     def test_upload_multiple_files(self):
         with open("./tests/fixtures/v1.png", "rb") as test_file:
             with requests_mock.Mocker() as mock:
-                mock.post(
-                    raw.get_full_url("data/new-file"),
-                    text=json.dumps({"id": "person-01", "first_name": "John"}),
+                mock_route(
+                    mock,
+                    "POST",
+                    "data/new-file",
+                    text={"id": "person-01", "first_name": "John"},
+                )
+                test_file_read = test_file.read()
+                add_verify_file_callback(
+                    mock,
+                    {
+                        "file": test_file_read,
+                        "file-2": test_file_read,
+                        "test": "True",
+                    },
                 )
 
-                def verify_file_callback(request):
-                    body_file = io.BytesIO(request.body)
-                    _, pdict = cgi.parse_header(
-                        request.headers["Content-Type"]
-                    )
-                    if sys.version_info[0] == 3:
-                        pdict["boundary"] = bytes(pdict["boundary"], "UTF-8")
-                    else:
-                        pdict["boundary"] = bytes(pdict["boundary"])
-                    parsed = cgi.parse_multipart(fp=body_file, pdict=pdict)
-                    assert "file" in parsed
-                    assert "test" in parsed and parsed["test"]
-                    file_data = test_file.read()
-                    assert file_data == parsed["file"][0]
-                    assert file_data == parsed["file-2"][0]
-                    return None
-
-                mock.post("data/new-file", json={})
-                mock.add_matcher(verify_file_callback)
                 raw.upload(
                     "data/new-file",
                     "./tests/fixtures/v1.png",

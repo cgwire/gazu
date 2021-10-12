@@ -6,7 +6,7 @@ import gazu.client
 import gazu.task
 import datetime
 
-from utils import fakeid, mock_route
+from utils import fakeid, mock_route, add_verify_file_callback
 
 
 class TaskTestCase(unittest.TestCase):
@@ -777,3 +777,97 @@ class TaskTestCase(unittest.TestCase):
             "http://gazu-server/productions/%s/"
             "shots/tasks/%s/" % (fakeid("project-1"), fakeid("task-1")),
         )
+
+    def test_upload_preview_file(self):
+        with open("./tests/fixtures/v1.png", "rb") as test_file:
+            with requests_mock.Mocker() as mock:
+                mock_route(
+                    mock,
+                    "POST",
+                    "pictures/preview-files/%s" % fakeid("preview-1"),
+                    text={"id": fakeid("preview-1")},
+                )
+
+                add_verify_file_callback(mock, {"file": test_file.read()})
+
+                self.assertEqual(
+                    gazu.task.upload_preview_file(
+                        fakeid("preview-1"),
+                        "./tests/fixtures/v1.png",
+                    ),
+                    {"id": fakeid("preview-1")},
+                )
+
+        with open("./tests/fixtures/v1.png", "rb") as test_file:
+            with requests_mock.Mocker() as mock:
+                mock_route(
+                    mock,
+                    "POST",
+                    "pictures/preview-files/%s?normalize=false"
+                    % fakeid("preview-1"),
+                    text={"id": fakeid("preview-1")},
+                )
+
+                add_verify_file_callback(mock, {"file": test_file.read()})
+
+                self.assertEqual(
+                    gazu.task.upload_preview_file(
+                        fakeid("preview-1"), "./tests/fixtures/v1.png", False
+                    ),
+                    {"id": fakeid("preview-1")},
+                )
+
+    def test_create_preview(self):
+        with requests_mock.Mocker() as mock:
+            mock_route(
+                mock,
+                "POST",
+                "actions/tasks/%s/comments/%s/add-preview"
+                % (
+                    fakeid("task-1"),
+                    fakeid("comment-1"),
+                ),
+                text={"id": fakeid("preview-1")},
+            )
+
+            self.assertEqual(
+                gazu.task.create_preview(
+                    fakeid("task-1"), fakeid("comment-1")
+                ),
+                {"id": fakeid("preview-1")},
+            )
+
+    def test_add_preview(self):
+        with open("./tests/fixtures/v1.png", "rb") as test_file:
+            with requests_mock.Mocker() as mock:
+                mock_route(
+                    mock,
+                    "POST",
+                    "actions/tasks/%s/comments/%s/add-preview"
+                    % (
+                        fakeid("task-1"),
+                        fakeid("comment-1"),
+                    ),
+                    text={"id": fakeid("preview-1")},
+                )
+                mock_route(
+                    mock,
+                    "POST",
+                    "pictures/preview-files/%s" % fakeid("preview-1"),
+                    text={"id": fakeid("preview-1")},
+                )
+
+                add_verify_file_callback(
+                    mock,
+                    {"file": test_file.read()},
+                    "pictures/preview-files/%s" % fakeid("preview-1"),
+                )
+
+                self.assertEqual(
+                    gazu.task.add_preview(
+                        fakeid("task-1"),
+                        fakeid("comment-1"),
+                        "./tests/fixtures/v1.png",
+                    ),
+                    {"id": fakeid("preview-1")},
+                )
