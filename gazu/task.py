@@ -755,13 +755,12 @@ def add_preview(
         dict: Created preview file model.
     """
     preview_file = create_preview(task, comment, client=client)
-    upload_preview_file(
+    return upload_preview_file(
         preview_file,
         preview_file_path,
         normalize_movie=normalize_movie,
         client=client,
     )
-    return preview_file
 
 
 def set_main_preview(preview_file, client=default):
