@@ -16,7 +16,13 @@ class EventsNamespace(socketio.ClientNamespace):
         return connect_error(data)
 
 
-def init(client=default_client, ssl_verify=False):
+def init(
+    client=default_client,
+    ssl_verify=False,
+    reconnection=True,
+    logger=False,
+    **kwargs
+):
     """
     Init configuration for SocketIO client.
 
@@ -24,7 +30,9 @@ def init(client=default_client, ssl_verify=False):
         Event client that will be able to set listeners.
     """
     params = {"ssl_verify": ssl_verify} if sys.version_info[0] > 3 else {}
-    event_client = socketio.Client(**params)
+    event_client = socketio.Client(
+        logger=logger, reconnection=reconnection, **params, **kwargs
+    )
     event_client.on("connect_error", connect_error)
     event_client.register_namespace(EventsNamespace("/events"))
     event_client.connect(get_event_host(client), make_auth_header())
