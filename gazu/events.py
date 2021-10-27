@@ -30,8 +30,9 @@ def init(
         Event client that will be able to set listeners.
     """
     params = {"ssl_verify": ssl_verify} if sys.version_info[0] > 3 else {}
+    params.update(kwargs)
     event_client = socketio.Client(
-        logger=logger, reconnection=reconnection, **params, **kwargs
+        logger=logger, reconnection=reconnection, **params
     )
     event_client.on("connect_error", connect_error)
     event_client.register_namespace(EventsNamespace("/events"))
