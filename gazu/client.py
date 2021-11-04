@@ -20,10 +20,11 @@ from .exception import (
 
 
 class KitsuClient(object):
-    def __init__(self, host, ssl_verify=True):
+    def __init__(self, host, ssl_verify=True, cert=None):
         self.tokens = {"access_token": "", "refresh_token": ""}
         self.session = requests.Session()
         self.session.verify = ssl_verify
+        self.session.cert = cert
         self.host = host
         self.event_host = host
 
