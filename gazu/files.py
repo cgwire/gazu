@@ -1068,16 +1068,29 @@ def download_preview_file(preview_file, file_path, client=default):
         preview_file (str / dict): The preview file dict or ID.
         file_path (str): Location on hard drive where to save the file.
     """
+    return raw.download(
+        get_preview_file_url(preview_file),
+        file_path,
+        client=client,
+    )
+
+
+def get_preview_file_url(preview_file, client=default):
+    """
+    Return given preview file URL
+
+    Args:
+        preview_file (str / dict): The preview file dict or ID.
+    """
     preview_file = normalize_model_parameter(preview_file)
     preview_file = raw.fetch_one(
         "preview-files", preview_file["id"], client=client
     )
     file_type = "movies" if preview_file["extension"] == "mp4" else "pictures"
-    return raw.download(
-        "%s/originals/preview-files/%s.%s"
-        % (file_type, preview_file["id"], preview_file["extension"]),
-        file_path,
-        client=client,
+    return "%s/originals/preview-files/%s.%s" % (
+        file_type,
+        preview_file["id"],
+        preview_file["extension"],
     )
 
 
