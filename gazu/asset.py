@@ -470,3 +470,11 @@ def new_asset_asset_instance(
         data,
         client=client,
     )
+
+
+def import_assets_with_csv(project, csv_file_path):
+    project = normalize_model_parameter(project)
+    return raw.upload(
+        "import/csv/projects/%s/assets" % project["id"],
+        csv_file_path,
+    )

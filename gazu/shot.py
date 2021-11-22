@@ -592,3 +592,11 @@ def remove_asset_instance_from_shot(shot, asset_instance, client=default):
         asset_instance["id"],
     )
     return raw.delete(path, client=client)
+
+
+def import_shots_with_csv(project, csv_file_path):
+    project = normalize_model_parameter(project)
+    return raw.upload(
+        "import/csv/projects/%s/shots" % project["id"],
+        csv_file_path,
+    )
