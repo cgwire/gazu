@@ -1139,6 +1139,51 @@ def download_preview_file_thumbnail(preview_file, file_path, client=default):
     )
 
 
+def download_preview_file_cover(preview_file, file_path, client=default):
+    """
+    Download given preview file cover and save it at given location.
+    Args:
+        preview_file (str / dict): The preview file dict or ID.
+        file_path (str): Location on hard drive where to save the file.
+    """
+    preview_file = normalize_model_parameter(preview_file)
+    return raw.download(
+        "pictures/originals/preview-files/%s.png" % (preview_file["id"]),
+        file_path,
+        client=client
+    )
+
+
+def download_person_avatar(person, file_path, client=default):
+    """
+    Download given person's avatar and save it at given location.
+    Args:
+        person (str / dict): The person dict or ID.
+        file_path (str): Location on hard drive where to save the file.
+    """
+    preview_file = normalize_model_parameter(person)
+    return raw.download(
+        "pictures/thumbnails/persons/%s.png" % (preview_file["id"]),
+        file_path,
+        client=client
+    )
+
+
+def download_project_avatar(project, file_path, client=default):
+    """
+    Download given project's avatar and save it at given location.
+    Args:
+        project (str / dict): The project dict or ID.
+        file_path (str): Location on hard drive where to save the file.
+    """
+    preview_file = normalize_model_parameter(project)
+    return raw.download(
+        "pictures/thumbnails/projects/%s.png" % (preview_file["id"]),
+        file_path,
+        client=client
+    )
+
+
 def update_preview(preview_file, data, client=default):
     """
     Update the data of given preview file.
