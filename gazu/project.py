@@ -186,7 +186,7 @@ def add_asset_type(project, asset_type, client=default):
     raw.post(
         "data/projects/%s/settings/asset-types" % project["id"],
         data,
-        client=client
+        client=client,
     )
 
 
@@ -197,7 +197,7 @@ def add_task_type(project, task_type, priority, client=default):
     raw.post(
         "data/projects/%s/settings/task-types" % project["id"],
         data,
-        client=client
+        client=client,
     )
 
 
@@ -208,5 +208,5 @@ def add_task_status(project, task_status, client=default):
     raw.post(
         "data/projects/%s/settings/task-status" % project["id"],
         data,
-        client=client
+        client=client,
     )

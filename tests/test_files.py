@@ -724,6 +724,7 @@ class FilesTestCase(unittest.TestCase):
                     os.path.getsize("./test.png"),
                     os.path.getsize("./tests/fixtures/v1.png"),
                 )
+                os.remove("./test.png")
 
         with open("./tests/fixtures/v1.png", "rb") as thumbnail_file:
             with requests_mock.mock() as mock:
@@ -746,6 +747,7 @@ class FilesTestCase(unittest.TestCase):
                     os.path.getsize("./test.mp4"),
                     os.path.getsize("./tests/fixtures/v1.png"),
                 )
+                os.remove("./test.mp4")
 
     def test_download_attachment_file(self):
         with open("./tests/fixtures/v1.png", "rb") as attachment_file:
@@ -768,6 +770,7 @@ class FilesTestCase(unittest.TestCase):
                     os.path.getsize("./test.png"),
                     os.path.getsize("./tests/fixtures/v1.png"),
                 )
+                os.remove("./test.png")
 
     def test_download_preview_file_thumbnail(self):
         with open("./tests/fixtures/v1.png", "rb") as thumbnail_file:
@@ -784,6 +787,58 @@ class FilesTestCase(unittest.TestCase):
                     os.path.getsize("./test.png"),
                     os.path.getsize("./tests/fixtures/v1.png"),
                 )
+                os.remove("./test.png")
+
+    def test_download_preview_file_cover(self):
+        with open("./tests/fixtures/v1.png", "rb") as thumbnail_file:
+            with requests_mock.mock() as mock:
+                path = "pictures/originals/preview-files/{}.png".format(
+                    fakeid("preview-1")
+                )
+                mock.get(gazu.client.get_full_url(path), body=thumbnail_file)
+                gazu.files.download_preview_file_cover(
+                    fakeid("preview-1"), "./test.png"
+                )
+                self.assertTrue(os.path.exists("./test.png"))
+                self.assertEqual(
+                    os.path.getsize("./test.png"),
+                    os.path.getsize("./tests/fixtures/v1.png"),
+                )
+                os.remove("./test.png")
+
+    def test_download_person_avatar(self):
+        with open("./tests/fixtures/v1.png", "rb") as thumbnail_file:
+            with requests_mock.mock() as mock:
+                path = "pictures/thumbnails/persons/{}.png".format(
+                    fakeid("person-1")
+                )
+                mock.get(gazu.client.get_full_url(path), body=thumbnail_file)
+                gazu.files.download_person_avatar(
+                    fakeid("person-1"), "./test.png"
+                )
+                self.assertTrue(os.path.exists("./test.png"))
+                self.assertEqual(
+                    os.path.getsize("./test.png"),
+                    os.path.getsize("./tests/fixtures/v1.png"),
+                )
+                os.remove("./test.png")
+
+    def test_download_project_avatar(self):
+        with open("./tests/fixtures/v1.png", "rb") as thumbnail_file:
+            with requests_mock.mock() as mock:
+                path = "pictures/thumbnails/projects/{}.png".format(
+                    fakeid("project-1")
+                )
+                mock.get(gazu.client.get_full_url(path), body=thumbnail_file)
+                gazu.files.download_project_avatar(
+                    fakeid("project-1"), "./test.png"
+                )
+                self.assertTrue(os.path.exists("./test.png"))
+                self.assertEqual(
+                    os.path.getsize("./test.png"),
+                    os.path.getsize("./tests/fixtures/v1.png"),
+                )
+                os.remove("./test.png")
 
     def test_new_file_status(self):
         with requests_mock.mock() as mock:
@@ -917,6 +972,7 @@ class FilesTestCase(unittest.TestCase):
                     os.path.getsize("./test.png"),
                     os.path.getsize("./tests/fixtures/v1.png"),
                 )
+                os.remove("./test.png")
 
         with open("./tests/fixtures/v1.png", "rb") as thumbnail_file:
             with requests_mock.mock() as mock:
@@ -939,6 +995,7 @@ class FilesTestCase(unittest.TestCase):
                     os.path.getsize("./test.mp4"),
                     os.path.getsize("./tests/fixtures/v1.png"),
                 )
+                os.remove("./test.mp4")
 
     def test_upload_working_file(self):
         with requests_mock.mock() as mock:
