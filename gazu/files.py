@@ -1150,7 +1150,7 @@ def download_preview_file_cover(preview_file, file_path, client=default):
     return raw.download(
         "pictures/originals/preview-files/%s.png" % (preview_file["id"]),
         file_path,
-        client=client
+        client=client,
     )
 
 
@@ -1165,7 +1165,7 @@ def download_person_avatar(person, file_path, client=default):
     return raw.download(
         "pictures/thumbnails/persons/%s.png" % (person["id"]),
         file_path,
-        client=client
+        client=client,
     )
 
 
@@ -1180,7 +1180,7 @@ def download_project_avatar(project, file_path, client=default):
     return raw.download(
         "pictures/thumbnails/projects/%s.png" % (project["id"]),
         file_path,
-        client=client
+        client=client,
     )
 
 
