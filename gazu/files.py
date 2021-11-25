@@ -1161,9 +1161,9 @@ def download_person_avatar(person, file_path, client=default):
         person (str / dict): The person dict or ID.
         file_path (str): Location on hard drive where to save the file.
     """
-    preview_file = normalize_model_parameter(person)
+    person = normalize_model_parameter(person)
     return raw.download(
-        "pictures/thumbnails/persons/%s.png" % (preview_file["id"]),
+        "pictures/thumbnails/persons/%s.png" % (person["id"]),
         file_path,
         client=client
     )
@@ -1176,9 +1176,9 @@ def download_project_avatar(project, file_path, client=default):
         project (str / dict): The project dict or ID.
         file_path (str): Location on hard drive where to save the file.
     """
-    preview_file = normalize_model_parameter(project)
+    project = normalize_model_parameter(project)
     return raw.download(
-        "pictures/thumbnails/projects/%s.png" % (preview_file["id"]),
+        "pictures/thumbnails/projects/%s.png" % (project["id"]),
         file_path,
         client=client
     )
