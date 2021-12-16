@@ -29,8 +29,8 @@ class KitsuClient(object):
         self.event_host = host
 
 
-def create_client(host, ssl_verify=True):
-    return KitsuClient(host, ssl_verify)
+def create_client(host, ssl_verify=True, cert=None):
+    return KitsuClient(host, ssl_verify, cert=None)
 
 
 default_client = None
