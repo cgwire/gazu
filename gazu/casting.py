@@ -128,12 +128,12 @@ def get_asset_casting(asset, client=default):
 
 def get_asset_cast_in(asset, client=default):
     """
-    Return shot list where given asset is casted.
+    Return entity list where given asset is casted.
     Args:
         asset (dict): The asset dict
 
     Returns:
-        dict: Shot list where given asset is casted.
+        dict: Entity list where given asset is casted.
     """
     asset = normalize_model_parameter(asset)
     path = "/data/assets/%s/cast-in" % asset["id"]
