@@ -238,6 +238,15 @@ def all_tasks_to_do(client=default):
     return raw.fetch_all("user/tasks", client=client)
 
 
+@cache
+def all_tasks_done(client=default):
+    """
+    Returns:
+        list: Tasks assigned to current user which are done.
+    """
+    return raw.fetch_all("user/done-tasks", client=client)
+
+
 def log_desktop_session_log_in(client=default):
     """
     Add a log entry to mention that the user logged in his computer.
