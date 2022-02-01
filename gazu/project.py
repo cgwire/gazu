@@ -262,7 +262,7 @@ def get_metadata_descriptor(project, metadata_descriptor_id, client=default):
     )
 
 
-def get_metadata_descriptors(project, client=default):
+def all_metadata_descriptors(project, client=default):
     """
     Get all the metadata descriptors.
 
@@ -299,11 +299,11 @@ def update_metadata_descriptor(project, metadata_descriptor, client=default):
     )
 
 
-def delete_metadata_descriptor(
+def remove_metadata_descriptor(
     project, metadata_descriptor_id, force=False, client=default
 ):
     """
-    Delete a metadata descriptor.
+    Remove a metadata descriptor.
 
     Args:
         project (dict / ID): The project dict or id.

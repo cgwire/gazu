@@ -212,3 +212,106 @@ class ProjectTestCase(unittest.TestCase):
             self.assertEqual(
                 project["project_status_id"], fakeid("project-status-1")
             )
+
+    def test_add_metadata_descriptor(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "POST",
+                "data/projects/%s/metadata-descriptors" % fakeid("project-1"),
+                text={
+                    "id": fakeid("metadata-descriptor-1"),
+                    "name": "metadata-descriptor-1",
+                },
+            ),
+            metadata_descriptor = gazu.project.add_metadata_descriptor(
+                fakeid("project-1"), "metadata-descriptor-1", "Asset"
+            )
+            self.assertEqual(
+                metadata_descriptor["name"], "metadata-descriptor-1"
+            )
+            self.assertEqual(
+                metadata_descriptor["id"], fakeid("metadata-descriptor-1")
+            )
+
+    def test_get_metadata_descriptor(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/projects/%s/metadata-descriptors/%s"
+                % (fakeid("project-1"), fakeid("metadata-descriptor-1")),
+                text={
+                    "id": fakeid("metadata-descriptor-1"),
+                    "name": "metadata-descriptor-1",
+                },
+            ),
+            metadata_descriptor = gazu.project.get_metadata_descriptor(
+                fakeid("project-1"), {"id": fakeid("metadata-descriptor-1")}
+            )
+            self.assertEqual(
+                metadata_descriptor["name"], "metadata-descriptor-1"
+            )
+            self.assertEqual(
+                metadata_descriptor["id"], fakeid("metadata-descriptor-1")
+            )
+
+    def test_all_metadata_descriptors(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/projects/%s/metadata-descriptors" % fakeid("project-1"),
+                text=[
+                    {
+                        "id": fakeid("metadata-descriptor-1"),
+                    },
+                    {
+                        "id": fakeid("metadata-descriptor-2"),
+                    },
+                ],
+            ),
+            metadata_descriptors = gazu.project.all_metadata_descriptors(
+                fakeid("project-1")
+            )
+            self.assertEqual(len(metadata_descriptors), 2)
+            self.assertEqual(
+                metadata_descriptors[0]["id"], fakeid("metadata-descriptor-1")
+            )
+            self.assertEqual(
+                metadata_descriptors[1]["id"], fakeid("metadata-descriptor-2")
+            )
+
+    def test_update_metadata_descriptor(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "PUT",
+                "data/projects/%s/metadata-descriptors/%s"
+                % (fakeid("project-1"), fakeid("metadata-descriptor-1")),
+                text={
+                    "id": fakeid("metadata-descriptor-1"),
+                },
+            ),
+            metadata_descriptor = gazu.project.update_metadata_descriptor(
+                fakeid("project-1"), {"id": fakeid("metadata-descriptor-1")}
+            )
+            self.assertEqual(
+                metadata_descriptor["id"], fakeid("metadata-descriptor-1")
+            )
+
+    def test_remove_metadata_descriptor(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "DELETE",
+                "data/projects/%s/metadata-descriptors/%s"
+                % (fakeid("project-1"), fakeid("metadata-descriptor-1")),
+                text="",
+            ),
+            response = gazu.project.remove_metadata_descriptor(
+                {"id": fakeid("project-1")},
+                {"id": fakeid("metadata-descriptor-1")},
+                force=True,
+            )
+            self.assertEqual(response, "")
