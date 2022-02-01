@@ -7,7 +7,7 @@ import unittest
 import gazu.client
 import gazu.files
 
-from utils import fakeid
+from utils import fakeid, mock_route
 
 
 class FilesTestCase(unittest.TestCase):
@@ -1115,3 +1115,13 @@ class FilesTestCase(unittest.TestCase):
             )
             self.assertEqual(preview_file["id"], fakeid("preview-file-1"))
             self.assertEqual(preview_file["name"], "test-name")
+
+    def test_get_output_file_by_path(self):
+        with requests_mock.mock() as mock:
+            text = [{"id": fakeid("output-file-1"), "path": "testpath"}]
+            mock_route(
+                mock, "GET", "/data/output-files?path=testpath", text=text
+            )
+            self.assertEqual(
+                gazu.files.get_output_file_by_path("testpath"), text[0]
+            )

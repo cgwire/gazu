@@ -1,3 +1,4 @@
+from pydoc import text
 from typing import Sequence
 import unittest
 import json
@@ -639,3 +640,11 @@ class ShotTestCase(unittest.TestCase):
             data = {"metadata-1": "metadata-1"}
             episode = gazu.shot.update_episode_data(fakeid("episode-1"), data)
             self.assertEqual(episode["data"]["metadata-1"], "metadata-1")
+
+    def test_restore_shot(self):
+        with requests_mock.mock() as mock:
+            text = {"id": fakeid("shot-1"), "canceled": False}
+            mock_route(
+                mock, "PUT", "data/shots/%s" % fakeid("shot-1"), text=text
+            )
+            self.assertEqual(gazu.shot.restore_shot(fakeid("shot-1")), text)

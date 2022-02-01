@@ -107,7 +107,7 @@ def get_output_file(output_file_id, client=default):
 def get_output_file_by_path(path, client=default):
     """
     Args:
-        output_file_id (str, client=default): Path of claimed output file.
+        path (str): Path of claimed output file.
 
     Returns:
         dict: Output file matching given path.
