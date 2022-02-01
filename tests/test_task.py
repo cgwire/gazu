@@ -547,23 +547,20 @@ class TaskTestCase(unittest.TestCase):
 
     def test_all_task_statuses_for_project(self):
         with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url(
-                    "data/projects/%s/settings/task-status"
-                    % (fakeid("project-1"))
-                ),
-                text=json.dumps(
-                    [
-                        {
-                            "name": "task-status-1",
-                            "id": fakeid("task-status-1"),
-                        },
-                        {
-                            "name": "task-status-2",
-                            "id": fakeid("task-status-2"),
-                        },
-                    ]
-                ),
+            mock_route(
+                mock,
+                "GET",
+                "data/projects/%s/settings/task-status" % fakeid("project-1"),
+                text=[
+                    {
+                        "name": "task-status-1",
+                        "id": fakeid("task-status-1"),
+                    },
+                    {
+                        "name": "task-status-2",
+                        "id": fakeid("task-status-2"),
+                    },
+                ],
             )
             tasks = gazu.task.all_task_statuses_for_project(
                 fakeid("project-1")

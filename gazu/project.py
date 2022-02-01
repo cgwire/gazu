@@ -183,7 +183,7 @@ def add_asset_type(project, asset_type, client=default):
     project = normalize_model_parameter(project)
     asset_type = normalize_model_parameter(asset_type)
     data = {"asset_type_id": asset_type["id"]}
-    raw.post(
+    return raw.post(
         "data/projects/%s/settings/asset-types" % project["id"],
         data,
         client=client,
@@ -194,7 +194,7 @@ def add_task_type(project, task_type, priority, client=default):
     project = normalize_model_parameter(project)
     task_type = normalize_model_parameter(task_type)
     data = {"task_type_id": task_type["id"], "priority": priority}
-    raw.post(
+    return raw.post(
         "data/projects/%s/settings/task-types" % project["id"],
         data,
         client=client,
@@ -205,7 +205,7 @@ def add_task_status(project, task_status, client=default):
     project = normalize_model_parameter(project)
     task_status = normalize_model_parameter(task_status)
     data = {"task_status_id": task_status["id"]}
-    raw.post(
+    return raw.post(
         "data/projects/%s/settings/task-status" % project["id"],
         data,
         client=client,

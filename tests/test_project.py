@@ -315,3 +315,87 @@ class ProjectTestCase(unittest.TestCase):
                 force=True,
             )
             self.assertEqual(response, "")
+
+    def test_add_task_status(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "POST",
+                "data/projects/%s/settings/task-status" % fakeid("project-1"),
+                text={
+                    "name": "task-status-1",
+                    "id": fakeid("task-status-1"),
+                },
+            )
+            task_status = gazu.project.add_task_status(
+                fakeid("project-1"),
+                {
+                    "name": "task-status-1",
+                    "id": fakeid("task-status-1"),
+                },
+            )
+
+            self.assertEqual(
+                task_status,
+                {
+                    "name": "task-status-1",
+                    "id": fakeid("task-status-1"),
+                },
+            )
+
+    def test_add_task_type(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "POST",
+                "data/projects/%s/settings/task-types" % fakeid("project-1"),
+                text={
+                    "name": "task-types-1",
+                    "id": fakeid("task-types-1"),
+                    "priority": None,
+                },
+            )
+            task_types = gazu.project.add_task_type(
+                fakeid("project-1"),
+                {
+                    "name": "task-types-1",
+                    "id": fakeid("task-types-1"),
+                },
+                priority=None,
+            )
+
+            self.assertEqual(
+                task_types,
+                {
+                    "name": "task-types-1",
+                    "id": fakeid("task-types-1"),
+                    "priority": None,
+                },
+            )
+
+    def test_add_asset_type(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "POST",
+                "data/projects/%s/settings/asset-types" % fakeid("project-1"),
+                text={
+                    "name": "asset-types-1",
+                    "id": fakeid("asset-types-1"),
+                },
+            )
+            asset_type = gazu.project.add_asset_type(
+                fakeid("project-1"),
+                {
+                    "name": "asset-types-1",
+                    "id": fakeid("asset-types-1"),
+                },
+            )
+
+            self.assertEqual(
+                asset_type,
+                {
+                    "name": "asset-types-1",
+                    "id": fakeid("asset-types-1"),
+                },
+            )
