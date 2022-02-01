@@ -239,7 +239,7 @@ def all_tasks_to_do(client=default):
 
 
 @cache
-def all_tasks_done(client=default):
+def all_done_tasks(client=default):
     """
     Returns:
         list: Tasks assigned to current user which are done.

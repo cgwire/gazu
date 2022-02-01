@@ -262,7 +262,7 @@ class ProjectTestCase(unittest.TestCase):
             self.assertEqual(tasks[0]["name"], "task-1")
             self.assertEqual(tasks[1]["name"], "task-2")
 
-    def test_all_tasks_done(self):
+    def test_all_done_tasks(self):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url("data/user/done-tasks"),
@@ -273,7 +273,7 @@ class ProjectTestCase(unittest.TestCase):
                     ]
                 ),
             )
-            tasks = gazu.user.all_tasks_done()
+            tasks = gazu.user.all_done_tasks()
             self.assertEqual(len(tasks), 2)
             self.assertEqual(tasks[0]["name"], "task-1")
             self.assertEqual(tasks[1]["name"], "task-2")
