@@ -210,3 +210,113 @@ def add_task_status(project, task_status, client=default):
         data,
         client=client,
     )
+
+
+def add_metadata_descriptor(
+    project, name, entity_type, choices=[], for_client=False, client=default
+):
+    """
+    Create a new metadata descriptor for a project.
+
+    Args:
+        project (dict / ID): The project dict or id.
+        name (str): The name of the metadata descriptor
+        entity_type (str): asset, shot or scene.
+        choices (list): A list of possible values, empty list for free values.
+        for_client (bool) : Wheter it should be displayed in Kitsu or not.
+
+    Returns:
+        dict: Created metadata descriptor.
+    """
+    project = normalize_model_parameter(project)
+    data = {
+        "name": name,
+        "choices": choices,
+        "for_client": for_client,
+        "entity_type": entity_type,
+    }
+    return raw.post(
+        "data/projects/%s/metadata-descriptors" % project["id"],
+        data,
+        client=client,
+    )
+
+
+def get_metadata_descriptor(project, metadata_descriptor_id, client=default):
+    """
+    Get a metadata descriptor matchind it's ID.
+
+    Args:
+        project (dict / ID): The project dict or id.
+        metadata_descriptor_id (dict / ID): The metadata descriptor dict or id.
+
+    Returns:
+        dict: The metadata descriptor matchind the ID.
+    """
+    project = normalize_model_parameter(project)
+    metadata_descriptor = normalize_model_parameter(metadata_descriptor_id)
+    return raw.fetch_one(
+        "projects/%s/metadata-descriptors" % project["id"],
+        metadata_descriptor["id"],
+        client=client,
+    )
+
+
+def get_metadata_descriptors(project, client=default):
+    """
+    Get all the metadata descriptors.
+
+    Args:
+        project (dict / ID): The project dict or id.
+
+    Returns:
+        list: The metadata descriptors.
+    """
+    project = normalize_model_parameter(project)
+    return raw.fetch_all(
+        "projects/%s/metadata-descriptors" % project["id"],
+        client=client,
+    )
+
+
+def update_metadata_descriptor(project, metadata_descriptor, client=default):
+    """
+    Update a metadata descriptor.
+
+    Args:
+        project (dict / ID): The project dict or id.
+        metadata_descriptor (dict): The metadata descriptor that needs to be updated.
+
+    Returns:
+        dict: The updated metadata descriptor.
+    """
+    project = normalize_model_parameter(project)
+    return raw.put(
+        "data/projects/%s/metadata-descriptors/%s"
+        % (project["id"], metadata_descriptor["id"]),
+        metadata_descriptor,
+        client=client,
+    )
+
+
+def delete_metadata_descriptor(
+    project, metadata_descriptor_id, force=False, client=default
+):
+    """
+    Delete a metadata descriptor.
+
+    Args:
+        project (dict / ID): The project dict or id.
+        metadata_descriptor_id (dict / ID): The metadata descriptor dict or id.
+    """
+    project = normalize_model_parameter(project)
+    metadata_descriptor = normalize_model_parameter(metadata_descriptor_id)
+    params = {}
+    if force:
+        params = {"force": "true"}
+    return raw.delete(
+        "data/projects/%s/metadata-descriptors/%s"
+        % (project["id"], metadata_descriptor["id"]),
+        params,
+        client=client,
+    )
