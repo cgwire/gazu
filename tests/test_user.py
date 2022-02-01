@@ -262,6 +262,22 @@ class ProjectTestCase(unittest.TestCase):
             self.assertEqual(tasks[0]["name"], "task-1")
             self.assertEqual(tasks[1]["name"], "task-2")
 
+    def test_all_done_tasks(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url("data/user/done-tasks"),
+                text=json.dumps(
+                    [
+                        {"id": fakeid("task-1"), "name": "task-1"},
+                        {"id": fakeid("task-2"), "name": "task-2"},
+                    ]
+                ),
+            )
+            tasks = gazu.user.all_done_tasks()
+            self.assertEqual(len(tasks), 2)
+            self.assertEqual(tasks[0]["name"], "task-1")
+            self.assertEqual(tasks[1]["name"], "task-2")
+
     def test_log_desktop_session_log_in(self):
         with requests_mock.mock() as mock:
             date_str = datetime.datetime.now().isoformat()

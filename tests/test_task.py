@@ -545,6 +545,33 @@ class TaskTestCase(unittest.TestCase):
             self.assertEqual(tasks[0]["name"], "task-type-1")
             self.assertEqual(tasks[1]["name"], "task-type-2")
 
+    def test_all_task_statuses_for_project(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url(
+                    "data/projects/%s/settings/task-status"
+                    % (fakeid("project-1"))
+                ),
+                text=json.dumps(
+                    [
+                        {
+                            "name": "task-status-1",
+                            "id": fakeid("task-status-1"),
+                        },
+                        {
+                            "name": "task-status-2",
+                            "id": fakeid("task-status-2"),
+                        },
+                    ]
+                ),
+            )
+            tasks = gazu.task.all_task_statuses_for_project(
+                fakeid("project-1")
+            )
+
+            self.assertEqual(tasks[0]["name"], "task-status-1")
+            self.assertEqual(tasks[1]["name"], "task-status-2")
+
     def test_all_tasks_for_scene(self):
         with requests_mock.mock() as mock:
             mock.get(

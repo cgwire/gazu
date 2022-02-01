@@ -44,6 +44,19 @@ def all_task_types_for_project(project, client=default):
 
 
 @cache
+def all_task_statuses_for_project(project, client=default):
+    """
+    Returns:
+        list: Task status stored in database.
+    """
+    project = normalize_model_parameter(project)
+    task_statuses = raw.fetch_all(
+        "projects/%s/settings/task-status" % project["id"], client=client
+    )
+    return sort_by_name(task_statuses)
+
+
+@cache
 def all_tasks_for_shot(shot, relations=False, client=default):
     """
     Args:
