@@ -744,7 +744,9 @@ def get_comment(task, comment, client=default):
     """
     task = normalize_model_parameter(task)
     comment = normalize_model_parameter(comment)
-    return raw.fetch_one("tasks/%s/comments" % task["id"], comment["id"])
+    return raw.fetch_one(
+        "tasks/%s/comments" % task["id"], comment["id"], client=client
+    )
 
 
 def remove_comment(comment, client=default):
