@@ -895,3 +895,36 @@ class TaskTestCase(unittest.TestCase):
                     ),
                     {"id": fakeid("preview-1")},
                 )
+
+    def test_add_attachment_to_comment(self):
+        with open("./tests/fixtures/v1.png", "rb") as test_file:
+            with requests_mock.Mocker() as mock:
+                text = {"id": fakeid("attachment-1")}
+                mock_route(
+                    mock,
+                    "POST",
+                    "actions/tasks/%s/comments/%s/add-attachment"
+                    % (fakeid("task-1"), fakeid("comment-1")),
+                    text=text,
+                )
+
+                add_verify_file_callback(
+                    mock,
+                    {"file": test_file.read()},
+                    "actions/tasks/%s/comments/%s/add-attachment"
+                    % (fakeid("task-1"), fakeid("comment-1")),
+                )
+
+                self.assertEqual(
+                    gazu.task.add_attachment_to_comment(
+                        fakeid("task-1"),
+                        fakeid("comment-1"),
+                        "./tests/fixtures/v1.png",
+                    ),
+                    text,
+                )
+
+            with self.assertRaises(ValueError):
+                gazu.task.add_attachment_to_comment(
+                    fakeid("task-1"), fakeid("comment-1")
+                )
