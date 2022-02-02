@@ -1,5 +1,3 @@
-from pydoc import text
-from typing import Sequence
 import unittest
 import json
 import requests_mock
