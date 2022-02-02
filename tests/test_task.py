@@ -934,13 +934,10 @@ class TaskTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/tasks/%s/comments/%s"
-                % (fakeid("task-1"), fakeid("comment-1")),
+                "data/comments/%s" % fakeid("comment-1"),
                 text={"id": fakeid("comment-1")},
             )
             self.assertEqual(
-                gazu.task.get_comment(fakeid("task-1"), fakeid("comment-1"))[
-                    "id"
-                ],
+                gazu.task.get_comment(fakeid("comment-1"))["id"],
                 fakeid("comment-1"),
             )

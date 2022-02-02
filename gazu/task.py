@@ -708,8 +708,8 @@ def add_attachment_to_comment(task, comment, attachments=[], client=default):
     Add attachments to a given command.
 
     Args:
-        task (str / dict): The task dict or the task ID.
-        comment (str / dict): The comment dict or the comment ID.
+        task (dict / ID): The task dict or the task ID.
+        comment (dict / ID): The comment dict or the comment ID.
         attachments (list / str) : A list of path for attachments or directly the path.
 
     Returns:
@@ -731,22 +731,17 @@ def add_attachment_to_comment(task, comment, attachments=[], client=default):
     )
 
 
-def get_comment(task, comment, client=default):
+def get_comment(comment_id, client=default):
     """
     Get comment instance
 
     Args:
-        task (str / dict): The task dict or the task ID.
-        comment (str / dict): The comment dict or the comment ID.
+        comment_id (ID): The comment ID.
 
     Returns:
         dict: Given comment instance.
     """
-    task = normalize_model_parameter(task)
-    comment = normalize_model_parameter(comment)
-    return raw.fetch_one(
-        "tasks/%s/comments" % task["id"], comment["id"], client=client
-    )
+    return raw.fetch_one("comments", comment_id, client=client)
 
 
 def remove_comment(comment, client=default):
