@@ -731,6 +731,22 @@ def add_attachment_to_comment(task, comment, attachments=[], client=default):
     )
 
 
+def get_comment(task, comment, client=default):
+    """
+    Get comment instance
+
+    Args:
+        task (str / dict): The task dict or the task ID.
+        comment (str / dict): The comment dict or the comment ID.
+
+    Returns:
+        dict: Given comment instance.
+    """
+    task = normalize_model_parameter(task)
+    comment = normalize_model_parameter(comment)
+    return raw.fetch_one("tasks/%s/comments" % task["id"], comment["id"])
+
+
 def remove_comment(comment, client=default):
     """
     Remove given comment and related (previews, news, notifications) from
