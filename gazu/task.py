@@ -703,6 +703,34 @@ def add_comment(
         )
 
 
+def add_attachment_to_comment(task, comment, attachments=[], client=default):
+    """
+    Add attachments to a given command.
+
+    Args:
+        task (str / dict): The task dict or the task ID.
+        comment (str / dict): The comment dict or the comment ID.
+        attachments (list / str) : A list of path for attachments or directly the path.
+
+    Returns:
+        dict: Added attachment files.
+    """
+    if isinstance(attachments, str):
+        attachments = [attachments]
+    if len(attachments) == 0:
+        raise ValueError("The attachments list is empty")
+    task = normalize_model_parameter(task)
+    comment = normalize_model_parameter(comment)
+    attachment = attachments.pop()
+    return raw.upload(
+        "actions/tasks/%s/comments/%s/add-attachment"
+        % (task["id"], comment["id"]),
+        attachment,
+        extra_files=attachments,
+        client=client,
+    )
+
+
 def remove_comment(comment, client=default):
     """
     Remove given comment and related (previews, news, notifications) from
