@@ -608,22 +608,39 @@ class TaskTestCase(unittest.TestCase):
 
     def test_all_shot_tasks_for_episode(self):
         with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url(
-                    "data/episodes/%s/shot-tasks?relations=true"
-                    % (fakeid("episode-1"))
-                ),
-                text=json.dumps(
-                    [
-                        {"id": "shot_task-01", "name": "Master Compositing"},
-                    ]
-                ),
+            text = [
+                {"id": "shot_task-01", "name": "Master Compositing"},
+            ]
+            mock_route(
+                mock,
+                "GET",
+                "data/episodes/%s/shot-tasks?relations=true"
+                % fakeid("episode-1"),
+                text=text,
             )
 
-            episode = {"id": fakeid("episode-1")}
-            shot_tasks = gazu.task.all_shot_tasks_for_episode(episode, True)
-            shot_task = shot_tasks[0]
-            self.assertEqual(shot_task["name"], "Master Compositing")
+            shot_tasks = gazu.task.all_shot_tasks_for_episode(
+                fakeid("episode-1"), True
+            )
+            self.assertEqual(shot_tasks, text)
+
+    def test_all_assets_tasks_for_episode(self):
+        with requests_mock.mock() as mock:
+            text = [
+                {"id": "asset_task-01", "name": "asset_task-1"},
+            ]
+            mock_route(
+                mock,
+                "GET",
+                "data/episodes/%s/asset-tasks?relations=true"
+                % fakeid("episode-1"),
+                text=text,
+            )
+
+            asset_tasks = gazu.task.all_assets_tasks_for_episode(
+                fakeid("episode-1"), True
+            )
+            self.assertEqual(asset_tasks, text)
 
     def test_all_tasks_for_entity_and_task_type(self):
         with requests_mock.mock() as mock:
