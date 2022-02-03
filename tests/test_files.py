@@ -1054,29 +1054,49 @@ class FilesTestCase(unittest.TestCase):
 
     def test_get_all_preview_files_for_task(self):
         with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url(
-                    "data/preview-files?task_id=%s" % fakeid("task-1")
-                ),
-                text=json.dumps(
-                    [
-                        {
-                            "id": fakeid("preview-file-1"),
-                            "name": "preview-file-1",
-                        },
-                        {
-                            "id": fakeid("preview-file-2"),
-                            "name": "preview-file-2",
-                        },
-                    ]
-                ),
+            text = [
+                {
+                    "id": fakeid("preview-file-1"),
+                    "name": "preview-file-1",
+                },
+                {
+                    "id": fakeid("preview-file-2"),
+                    "name": "preview-file-2",
+                },
+            ]
+            mock_route(
+                mock,
+                "GET",
+                "data/preview-files?task_id=%s" % fakeid("task-1"),
+                text=text,
             )
             preview_files = gazu.files.get_all_preview_files_for_task(
                 fakeid("task-1")
             )
-            self.assertEqual(len(preview_files), 2)
-            self.assertEqual(preview_files[0]["name"], "preview-file-1")
-            self.assertEqual(preview_files[1]["name"], "preview-file-2")
+            self.assertEqual(preview_files, text)
+
+    def test_get_all_attachment_files_for_task(self):
+        with requests_mock.mock() as mock:
+            text = [
+                {
+                    "id": fakeid("attachment-file-1"),
+                    "name": "attachment-file-1",
+                },
+                {
+                    "id": fakeid("attachment-file-2"),
+                    "name": "attachment-file-2",
+                },
+            ]
+            mock_route(
+                mock,
+                "GET",
+                "data/attachment-files?task_id=%s" % fakeid("task-1"),
+                text=text,
+            )
+            attachment_files = gazu.files.get_all_attachment_files_for_task(
+                fakeid("task-1")
+            )
+            self.assertEqual(attachment_files, text)
 
     def test_update_output_file(self):
         with requests_mock.mock() as mock:
