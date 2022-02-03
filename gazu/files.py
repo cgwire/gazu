@@ -161,6 +161,20 @@ def get_all_preview_files_for_task(task, client=default):
     )
 
 
+@cache
+def get_all_attachment_files_for_task(task, client=default):
+    """
+    Retrieves all the attachment files for a given task.
+
+    Args:
+        task (str, id): Target task
+    """
+    task = normalize_model_parameter(task)
+    return raw.fetch_all(
+        "attachment-files", {"task_id": task["id"]}, client=client
+    )
+
+
 def all_output_files_for_entity(
     entity,
     output_type=None,
