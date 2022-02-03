@@ -170,6 +170,20 @@ def all_shot_tasks_for_episode(episode, relations=False, client=default):
 
 
 @cache
+def all_assets_tasks_for_episode(episode, relations=False, client=default):
+    """
+    Retrieve all tasks directly linked to all assets of given episode.
+    """
+    episode = normalize_model_parameter(episode)
+    params = {}
+    if relations:
+        params = {"relations": "true"}
+    path = "episodes/%s/asset-tasks" % episode["id"]
+    tasks = raw.fetch_all(path, params, client=client)
+    return sort_by_name(tasks)
+
+
+@cache
 def all_tasks_for_task_status(project, task_type, task_status, client=default):
     """
     Args:
