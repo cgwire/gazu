@@ -171,7 +171,7 @@ def get_all_attachment_files_for_task(task, client=default):
     """
     task = normalize_model_parameter(task)
     return raw.fetch_all(
-        "attachment-files", {"task_id": task["id"]}, client=client
+        "tasks/%s/attachment-files" % task["id"], client=client
     )
 
 

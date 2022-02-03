@@ -1090,7 +1090,7 @@ class FilesTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/attachment-files?task_id=%s" % fakeid("task-1"),
+                "data/tasks/%s/attachment-files" % fakeid("task-1"),
                 text=text,
             )
             attachment_files = gazu.files.get_all_attachment_files_for_task(
