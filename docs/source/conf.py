@@ -24,7 +24,7 @@ copyright = u'2021, CGWire'
 author = u'CGWire'
 
 # The short X.Y version
-version = u'0.8.23'
+version = u'0.8.26'
 # The full version, including alpha/beta/rc tags
 release = u'0.8.12'
 
