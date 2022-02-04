@@ -717,9 +717,11 @@ def add_comment(
         )
 
 
-def add_attachment_to_comment(task, comment, attachments=[], client=default):
+def add_attachment_files_to_comment(
+    task, comment, attachments=[], client=default
+):
     """
-    Add attachments to a given command.
+    Add attachments files to a given comment.
 
     Args:
         task (dict / ID): The task dict or the task ID.
