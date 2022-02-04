@@ -698,7 +698,7 @@ def add_comment(
         data["person_id"] = person["id"]
 
     if created_at is not None:
-        data["created_at"] = validate_date_format(created_at)
+        data["created_at"] = created_at
 
     if len(attachments) == 0:
         return raw.post(
