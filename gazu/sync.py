@@ -144,6 +144,28 @@ def get_id_map_by_name(source_list, target_list):
     return link_map
 
 
+def get_id_map_by_id(source_list, target_list, field="name"):
+    """
+    Args:
+        source_list (list): List of links to compare.
+        target_list (list): List of links for which we want a diff.
+
+    Returns:
+        dict: A dict where keys are the source model names and the values are
+        the IDs of the target models with same name.
+        It's useful to match a model from the source list to its relative in
+        the target list based on its name.
+    """
+    link_map = {}
+    name_map = {}
+    for model in target_list:
+        name_map[model[field].lower()] = model["id"]
+    for model in source_list:
+        if model[field].lower() in name_map:
+            link_map[model["id"]] = name_map[model[field].lower()]
+    return link_map
+
+
 def is_changed(source_model, target_model):
     source_date = source_model["updated_at"]
     target_date = target_model["updated_at"]
