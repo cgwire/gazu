@@ -107,7 +107,7 @@ def get_output_file(output_file_id, client=default):
 def get_output_file_by_path(path, client=default):
     """
     Args:
-        output_file_id (str, client=default): Path of claimed output file.
+        path (str): Path of claimed output file.
 
     Returns:
         dict: Output file matching given path.
@@ -158,6 +158,20 @@ def get_all_preview_files_for_task(task, client=default):
     task = normalize_model_parameter(task)
     return raw.fetch_all(
         "preview-files", {"task_id": task["id"]}, client=client
+    )
+
+
+@cache
+def get_all_attachment_files_for_task(task, client=default):
+    """
+    Retrieves all the attachment files for a given task.
+
+    Args:
+        task (str, id): Target task
+    """
+    task = normalize_model_parameter(task)
+    return raw.fetch_all(
+        "tasks/%s/attachment-files" % task["id"], client=client
     )
 
 

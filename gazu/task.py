@@ -170,6 +170,20 @@ def all_shot_tasks_for_episode(episode, relations=False, client=default):
 
 
 @cache
+def all_assets_tasks_for_episode(episode, relations=False, client=default):
+    """
+    Retrieve all tasks directly linked to all assets of given episode.
+    """
+    episode = normalize_model_parameter(episode)
+    params = {}
+    if relations:
+        params = {"relations": "true"}
+    path = "episodes/%s/asset-tasks" % episode["id"]
+    tasks = raw.fetch_all(path, params, client=client)
+    return sort_by_name(tasks)
+
+
+@cache
 def all_tasks_for_task_status(project, task_type, task_status, client=default):
     """
     Args:
@@ -701,6 +715,49 @@ def add_comment(
             extra_files=attachments,
             client=client,
         )
+
+
+def add_attachment_files_to_comment(
+    task, comment, attachments=[], client=default
+):
+    """
+    Add attachments files to a given comment.
+
+    Args:
+        task (dict / ID): The task dict or the task ID.
+        comment (dict / ID): The comment dict or the comment ID.
+        attachments (list / str) : A list of path for attachments or directly the path.
+
+    Returns:
+        dict: Added attachment files.
+    """
+    if isinstance(attachments, str):
+        attachments = [attachments]
+    if len(attachments) == 0:
+        raise ValueError("The attachments list is empty")
+    task = normalize_model_parameter(task)
+    comment = normalize_model_parameter(comment)
+    attachment = attachments.pop()
+    return raw.upload(
+        "actions/tasks/%s/comments/%s/add-attachment"
+        % (task["id"], comment["id"]),
+        attachment,
+        extra_files=attachments,
+        client=client,
+    )
+
+
+def get_comment(comment_id, client=default):
+    """
+    Get comment instance
+
+    Args:
+        comment_id (ID): The comment ID.
+
+    Returns:
+        dict: Given comment instance.
+    """
+    return raw.fetch_one("comments", comment_id, client=client)
 
 
 def remove_comment(comment, client=default):

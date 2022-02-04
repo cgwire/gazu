@@ -547,23 +547,20 @@ class TaskTestCase(unittest.TestCase):
 
     def test_all_task_statuses_for_project(self):
         with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url(
-                    "data/projects/%s/settings/task-status"
-                    % (fakeid("project-1"))
-                ),
-                text=json.dumps(
-                    [
-                        {
-                            "name": "task-status-1",
-                            "id": fakeid("task-status-1"),
-                        },
-                        {
-                            "name": "task-status-2",
-                            "id": fakeid("task-status-2"),
-                        },
-                    ]
-                ),
+            mock_route(
+                mock,
+                "GET",
+                "data/projects/%s/settings/task-status" % fakeid("project-1"),
+                text=[
+                    {
+                        "name": "task-status-1",
+                        "id": fakeid("task-status-1"),
+                    },
+                    {
+                        "name": "task-status-2",
+                        "id": fakeid("task-status-2"),
+                    },
+                ],
             )
             tasks = gazu.task.all_task_statuses_for_project(
                 fakeid("project-1")
@@ -611,22 +608,39 @@ class TaskTestCase(unittest.TestCase):
 
     def test_all_shot_tasks_for_episode(self):
         with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url(
-                    "data/episodes/%s/shot-tasks?relations=true"
-                    % (fakeid("episode-1"))
-                ),
-                text=json.dumps(
-                    [
-                        {"id": "shot_task-01", "name": "Master Compositing"},
-                    ]
-                ),
+            text = [
+                {"id": "shot_task-01", "name": "Master Compositing"},
+            ]
+            mock_route(
+                mock,
+                "GET",
+                "data/episodes/%s/shot-tasks?relations=true"
+                % fakeid("episode-1"),
+                text=text,
             )
 
-            episode = {"id": fakeid("episode-1")}
-            shot_tasks = gazu.task.all_shot_tasks_for_episode(episode, True)
-            shot_task = shot_tasks[0]
-            self.assertEqual(shot_task["name"], "Master Compositing")
+            shot_tasks = gazu.task.all_shot_tasks_for_episode(
+                fakeid("episode-1"), True
+            )
+            self.assertEqual(shot_tasks, text)
+
+    def test_all_assets_tasks_for_episode(self):
+        with requests_mock.mock() as mock:
+            text = [
+                {"id": "asset_task-01", "name": "asset_task-1"},
+            ]
+            mock_route(
+                mock,
+                "GET",
+                "data/episodes/%s/asset-tasks?relations=true"
+                % fakeid("episode-1"),
+                text=text,
+            )
+
+            asset_tasks = gazu.task.all_assets_tasks_for_episode(
+                fakeid("episode-1"), True
+            )
+            self.assertEqual(asset_tasks, text)
 
     def test_all_tasks_for_entity_and_task_type(self):
         with requests_mock.mock() as mock:
@@ -898,3 +912,49 @@ class TaskTestCase(unittest.TestCase):
                     ),
                     {"id": fakeid("preview-1")},
                 )
+
+    def test_add_attachment_to_comment(self):
+        with open("./tests/fixtures/v1.png", "rb") as test_file:
+            with requests_mock.Mocker() as mock:
+                text = {"id": fakeid("attachment-1")}
+                mock_route(
+                    mock,
+                    "POST",
+                    "actions/tasks/%s/comments/%s/add-attachment"
+                    % (fakeid("task-1"), fakeid("comment-1")),
+                    text=text,
+                )
+
+                add_verify_file_callback(
+                    mock,
+                    {"file": test_file.read()},
+                    "actions/tasks/%s/comments/%s/add-attachment"
+                    % (fakeid("task-1"), fakeid("comment-1")),
+                )
+
+                self.assertEqual(
+                    gazu.task.add_attachment_to_comment(
+                        fakeid("task-1"),
+                        fakeid("comment-1"),
+                        "./tests/fixtures/v1.png",
+                    ),
+                    text,
+                )
+
+            with self.assertRaises(ValueError):
+                gazu.task.add_attachment_to_comment(
+                    fakeid("task-1"), fakeid("comment-1")
+                )
+
+    def test_get_comment(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/comments/%s" % fakeid("comment-1"),
+                text={"id": fakeid("comment-1")},
+            )
+            self.assertEqual(
+                gazu.task.get_comment(fakeid("comment-1"))["id"],
+                fakeid("comment-1"),
+            )
