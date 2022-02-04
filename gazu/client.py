@@ -213,7 +213,12 @@ def post(path, data, client=default_client):
         headers=make_auth_header(client=client),
     )
     check_status(response, path)
-    return response.json()
+    try:
+        result = response.json()
+    except json.decoder.JSONDecodeError:
+        print(response.text)
+        raise
+    return result
 
 
 def put(path, data, client=default_client):
@@ -392,7 +397,11 @@ def upload(path, file_path, data={}, extra_files=[], client=default_client):
         url, data=data, headers=make_auth_header(client=client), files=files
     )
     check_status(response, path)
-    result = response.json()
+    try:
+        result = response.json()
+    except json.decoder.JSONDecodeError:
+        print(response.text)
+        raise
     if "message" in result:
         raise UploadFailedException(result["message"])
     return result
