@@ -17,6 +17,15 @@ def all_organisations(client=default):
 
 
 @cache
+def all_departments(client=default):
+    """
+    Returns:
+        list: Departments listed in database.
+    """
+    return sort_by_name(raw.fetch_all("departments", client=client))
+
+
+@cache
 def all_persons(client=default):
     """
     Returns:
