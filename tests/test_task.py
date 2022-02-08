@@ -913,7 +913,7 @@ class TaskTestCase(unittest.TestCase):
                     {"id": fakeid("preview-1")},
                 )
 
-    def test_add_attachment_to_comment(self):
+    def test_add_attachment_files_to_comment(self):
         with open("./tests/fixtures/v1.png", "rb") as test_file:
             with requests_mock.Mocker() as mock:
                 text = {"id": fakeid("attachment-1")}
@@ -933,7 +933,7 @@ class TaskTestCase(unittest.TestCase):
                 )
 
                 self.assertEqual(
-                    gazu.task.add_attachment_to_comment(
+                    gazu.task.add_attachment_files_to_comment(
                         fakeid("task-1"),
                         fakeid("comment-1"),
                         "./tests/fixtures/v1.png",
@@ -942,7 +942,7 @@ class TaskTestCase(unittest.TestCase):
                 )
 
             with self.assertRaises(ValueError):
-                gazu.task.add_attachment_to_comment(
+                gazu.task.add_attachment_files_to_comment(
                     fakeid("task-1"), fakeid("comment-1")
                 )
 
