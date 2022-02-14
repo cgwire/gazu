@@ -51,8 +51,8 @@ Kitsu instance. They are listed below:
   for Blender.
 * `Bamboo <https://github.com/nervYu/Bamboo>`__: Pyside2 widgets to publish
   previews to Kitsu. 
-* `Kitsu Publisher <https://github.com/cgwire/gazu-publisher-next>`__: Our
-  publish tool for Blender and Harmony
+* `Kitsu Publisher <https://github.com/cgwire/kitsu-publisher-next>`__: Our
+  publish tool for Blender and Harmony.
 
 
 Contents
