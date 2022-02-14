@@ -51,8 +51,8 @@ Kitsu instance. They are listed below:
   for Blender.
 * `Bamboo <https://github.com/nervYu/Bamboo>`__: Pyside2 widgets to publish
   previews to Kitsu. 
-* `Gazu Publisher <https://github.com/cgwire/gazu-publisher>`__: Our work in
-  progress publisher tool based on Qt.py. 
+* `Kitsu Publisher <https://github.com/cgwire/gazu-publisher-next>`__: Our
+  publish tool for Blender and Harmony
 
 
 Contents
@@ -69,7 +69,6 @@ Contents
    cache
    events
    specs
-   publisher
    dccutils
 
 Function References
