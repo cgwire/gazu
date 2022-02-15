@@ -2,7 +2,6 @@ import unittest
 import json
 import requests_mock
 
-import gazu.asset
 import gazu.client
 
 from utils import fakeid
@@ -104,3 +103,20 @@ class AssetTestCase(unittest.TestCase):
             )
             entity_type = gazu.entity.get_entity_type_by_name("entity-type-1")
             self.assertEqual(entity_type["id"], fakeid("entity-type-1"))
+
+    def test_remove_entity(self):
+        with requests_mock.mock() as mock:
+            mock.delete(
+                gazu.client.get_full_url(
+                    "data/entities/%s" % fakeid("entity-1")
+                ),
+                status_code=204,
+            )
+            gazu.entity.remove_entity(fakeid("entity-1"))
+            mock.delete(
+                gazu.client.get_full_url(
+                    "data/entities/%s?force=true" % fakeid("entity-1")
+                ),
+                status_code=204,
+            )
+            gazu.entity.remove_entity(fakeid("entity-1"), True)
