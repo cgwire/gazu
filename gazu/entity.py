@@ -2,6 +2,7 @@ from . import client as raw
 
 from .cache import cache
 from .sorting import sort_by_name
+from .helpers import normalize_model_parameter
 
 default = raw.default_client
 
@@ -88,3 +89,18 @@ def new_entity_type(name, client=default):
     """
     data = {"name": name}
     return raw.create("entity-types", data, client=client)
+
+
+def remove_entity(entity, force=False, client=default):
+    """
+    Remove given entity from database.
+
+    Args:
+        entity (dict): Entity to remove.
+    """
+    entity = normalize_model_parameter(entity)
+    path = "data/entities/%s" % entity["id"]
+    params = {}
+    if force:
+        params = {"force": "true"}
+    return raw.delete(path, params, client=client)
