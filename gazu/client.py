@@ -239,7 +239,7 @@ def put(path, data, client=default_client):
 
 def delete(path, params=None, client=default_client):
     """
-    Run a get request toward given path for configured host.
+    Run a delete request toward given path for configured host.
 
     Returns:
         The request result.
