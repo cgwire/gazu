@@ -933,21 +933,19 @@ class FilesTestCase(unittest.TestCase):
 
     def test_update_comment(self):
         with requests_mock.mock() as mock:
-            path = "/actions/working-files/working-file-01/comment"
-            mock.put(
-                gazu.client.get_full_url(path),
-                text=json.dumps(
-                    {
-                        "id": "working-file-01",
-                        "comment": "test-comment",
-                    }
-                ),
+            mock_route(
+                mock,
+                "PUT",
+                "/actions/working-files/%s/comment" % fakeid("working-file-1"),
+                text={
+                    "id": fakeid("working-file-1"),
+                    "comment": "test-comment",
+                },
             )
-            working_file = {"id": "working-file-01"}
             working_file = gazu.files.update_comment(
-                working_file, "test-comment"
+                fakeid("working-file-1"), "test-comment"
             )
-            self.assertEqual(working_file["id"], "working-file-01")
+            self.assertEqual(working_file["id"], fakeid("working-file-1"))
             self.assertEqual(working_file["comment"], "test-comment")
 
     def test_download_working_file(self):
