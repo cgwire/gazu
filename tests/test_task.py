@@ -958,3 +958,20 @@ class TaskTestCase(unittest.TestCase):
                 gazu.task.get_comment(fakeid("comment-1"))["id"],
                 fakeid("comment-1"),
             )
+
+    def test_update_comment(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "PUT",
+                "/data/comments/%s" % fakeid("comment-1"),
+                text={
+                    "id": fakeid("comment-1"),
+                    "text": "test-comment",
+                },
+            )
+            comment = gazu.task.update_comment(
+                {"id": fakeid("comment-1"), "text": "test-comment"}
+            )
+            self.assertEqual(comment["id"], fakeid("comment-1"))
+            self.assertEqual(comment["text"], "test-comment")
