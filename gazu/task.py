@@ -990,3 +990,17 @@ def all_tasks_for_project(project, client=default):
     project = normalize_model_parameter(project)
     path = "/data/projects/%s/tasks" % project["id"]
     return raw.get(path, client=client)
+
+
+def update_comment(comment, client=default):
+    """
+    Save given comment data into the API. Metadata are fully replaced by the ones
+    set on given comment.
+
+    Args:
+        comment (dict): The comment dict to update.
+
+    Returns:
+        dict: Updated comment.
+    """
+    return raw.put("data/comments/%s" % comment["id"], comment, client=client)
