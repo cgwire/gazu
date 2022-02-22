@@ -6,7 +6,9 @@ It's possible to listen to events and run a callback when it occurs. Because lis
 set it up in a different thread than the main one.
 
 ```python
-gazu.set_event_host("https://kitsu.mystudio.com/socket.io")
+gazu.set_host("https://kitsu.mystudio.com/api")
+gazu.set_event_host("https://kitsu.mystudio.com")
+gazu.log_in("email", "password")
 
 
 def my_callback(data):
