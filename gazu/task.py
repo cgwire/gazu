@@ -760,18 +760,16 @@ def get_comment(comment_id, client=default):
     return raw.fetch_one("comments", comment_id, client=client)
 
 
-def remove_comment(task, comment, client=default):
+def remove_comment(comment, client=default):
     """
     Remove given comment and related (previews, news, notifications) from
     database.
 
     Args:
-        task (str / dict): The task dict or the task ID.
         comment (str / dict): The comment dict or the comment ID.
     """
-    task = normalize_model_parameter(task)
     comment = normalize_model_parameter(comment)
-    return raw.delete("data/tasks/%s/comments/%s" % (task["id"], comment["id"]), client=client)
+    return raw.delete("data/comments/%s" % (comment["id"]), client=client)
 
 
 def create_preview(task, comment, client=default):
