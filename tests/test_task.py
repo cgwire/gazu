@@ -415,12 +415,13 @@ class TaskTestCase(unittest.TestCase):
     def test_remove_comment(self):
         with requests_mock.mock() as mock:
             mock.delete(
-                gazu.client.get_full_url("data/comments/comment-01"),
+                gazu.client.get_full_url("data/tasks/task-01/comments/comment-01"),
                 status_code=204,
                 text="",
             )
+            task = {"id": "task-01"}
             comment = {"id": "comment-01"}
-            gazu.task.remove_comment(comment)
+            gazu.task.remove_comment(task, comment)
 
     def test_comments_for_task(self):
         with requests_mock.mock() as mock:
