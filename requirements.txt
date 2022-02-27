@@ -2,3 +2,4 @@ sphinx==1.8.3
 sphinx-rtd-theme==0.4.2
 recommonmark==0.5.0
 gazu==0.8.26
+dccutils==0.1.5
