@@ -443,26 +443,23 @@ class CastingTestCase(unittest.TestCase):
             self.assertEqual(assets[0]["name"], "asset-1")
 
     def test_update_asset(self):
+        result = {
+            "id": fakeid("asset-1"),
+            "episode_id": fakeid("episode_1"),
+            "source_id": fakeid("episode_1"),
+        }
         with requests_mock.mock() as mock:
-            mock = mock.put(
-                gazu.client.get_full_url(
-                    "data/entities/%s" % fakeid("asset-1")
-                ),
-                text=json.dumps(
-                    {
-                        "id": fakeid("asset-1"),
-                        "episode_id": fakeid("episode_1"),
-                        "source_id": fakeid("episode_1"),
-                    }
-                ),
+            mock_route(
+                mock,
+                "PUT",
+                "data/entities/%s" % fakeid("asset-1"),
+                text=result,
             )
             asset = {
                 "id": fakeid("asset-1"),
                 "episode_id": fakeid("episode_1"),
             }
-            asset = gazu.asset.update_asset(asset)
-            self.assertEqual(asset["id"], fakeid("asset-1"))
-            self.assertEqual(asset["source_id"], fakeid("episode_1"))
+            self.assertEqual(gazu.asset.update_asset(asset), result)
 
     def test_update_asset_data(self):
         with requests_mock.mock() as mock:

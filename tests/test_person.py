@@ -5,7 +5,7 @@ import json
 import gazu.client
 import gazu.person
 
-from utils import fakeid
+from utils import fakeid, mock_route
 
 
 class PersonTestCase(unittest.TestCase):
@@ -114,38 +114,64 @@ class PersonTestCase(unittest.TestCase):
 
     def test_new_person(self):
         with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url("data/persons?email=john@gmail.com"),
-                text=json.dumps([]),
+            result = {
+                "first_name": "John",
+                "last_name": "Doe",
+                "email": "john@gmail.com",
+                "desktop_login": "john.doe",
+                "phone": "06 07 07 07 07",
+                "role": "user",
+                "id": "person-01",
+                "departments": [fakeid("department-1")],
+            }
+            mock_route(
+                mock, "GET", "data/persons?email=john@gmail.com", text=[]
             )
-            mock.post(
-                gazu.client.get_full_url("data/persons/new"),
-                text=json.dumps(
-                    [
-                        {
-                            "first_name": "John",
-                            "last_name": "Doe",
-                            "email": "john@gmail.com",
-                            "desktop_login": "john.doe",
-                            "phone": "06 07 07 07 07",
-                            "role": "user",
-                            "id": "person-01",
-                        }
-                    ]
+            mock_route(mock, "POST", "data/persons/new", text=result)
+            self.assertEqual(
+                gazu.person.new_person(
+                    "Jhon",
+                    "Doe",
+                    "john@gmail.com",
+                    "+33 6 07 07 07 07",
+                    "user",
+                    departments=fakeid("department-1"),
                 ),
+                result,
             )
-            gazu.person.new_person(
-                "Jhon", "Doe", "john@gmail.com", "+33 6 07 07 07 07", "user"
+
+    def test_update_person(self):
+        result = {
+            "first_name": "John",
+            "last_name": "Doe",
+            "desktop_login": "john.doe",
+            "id": "person-1",
+            "phone": "+33 6 07 07 07 07",
+        }
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "PUT",
+                "data/persons/%s" % fakeid("person-1"),
+                text=result,
             )
+            person = {
+                "id": fakeid("person-1"),
+                "phone": "+33 6 07 07 07 07",
+            }
+            self.assertEqual(gazu.person.update_person(person), result)
 
     def test_all_organisations(self):
         result = [{"id": fakeid("organisation-1"), "name": "organisation-1"}]
         with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url("data/organisations"),
-                text=json.dumps(result),
-            )
+            mock_route(mock, "GET", "data/organisations", text=result)
             self.assertEqual(gazu.person.all_organisations(), result)
+
+    def test_all_departments(self):
+        result = [{"id": fakeid("departments-1"), "name": "department-1"}]
+        with requests_mock.mock() as mock:
+            mock_route(mock, "GET", "data/departments", text=result)
+            self.assertEqual(gazu.person.all_departments(), result)
 
     def test_get_person(self):
         result = {"id": fakeid("John Doe"), "full_name": "John Doe"}
