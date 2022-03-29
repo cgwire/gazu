@@ -213,7 +213,13 @@ def add_task_status(project, task_status, client=default):
 
 
 def add_metadata_descriptor(
-    project, name, entity_type, choices=[], for_client=False, client=default
+    project,
+    name,
+    entity_type,
+    choices=[],
+    for_client=False,
+    departments=[],
+    client=default,
 ):
     """
     Create a new metadata descriptor for a project.
@@ -224,16 +230,27 @@ def add_metadata_descriptor(
         entity_type (str): asset, shot or scene.
         choices (list): A list of possible values, empty list for free values.
         for_client (bool) : Wheter it should be displayed in Kitsu or not.
+        departments (list): A list of departments dict or id.
 
     Returns:
         dict: Created metadata descriptor.
     """
+
+    if not isinstance(departments, list):
+        departments = [departments]
+
+    departments_ids = [
+        department["id"] if isinstance(department, dict) else department
+        for department in departments
+    ]
+
     project = normalize_model_parameter(project)
     data = {
         "name": name,
         "choices": choices,
         "for_client": for_client,
         "entity_type": entity_type,
+        "departments": departments_ids,
     }
     return raw.post(
         "data/projects/%s/metadata-descriptors" % project["id"],
