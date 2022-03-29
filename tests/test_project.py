@@ -214,24 +214,26 @@ class ProjectTestCase(unittest.TestCase):
             )
 
     def test_add_metadata_descriptor(self):
+        result = {
+            "id": fakeid("metadata-descriptor-1"),
+            "name": "metadata-descriptor-1",
+            "departments": [fakeid("department-1")],
+        }
         with requests_mock.mock() as mock:
             mock_route(
                 mock,
                 "POST",
                 "data/projects/%s/metadata-descriptors" % fakeid("project-1"),
-                text={
-                    "id": fakeid("metadata-descriptor-1"),
-                    "name": "metadata-descriptor-1",
-                },
+                text=result,
             ),
-            metadata_descriptor = gazu.project.add_metadata_descriptor(
-                fakeid("project-1"), "metadata-descriptor-1", "Asset"
-            )
             self.assertEqual(
-                metadata_descriptor["name"], "metadata-descriptor-1"
-            )
-            self.assertEqual(
-                metadata_descriptor["id"], fakeid("metadata-descriptor-1")
+                gazu.project.add_metadata_descriptor(
+                    fakeid("project-1"),
+                    "metadata-descriptor-1",
+                    "Asset",
+                    departments=fakeid("department-1"),
+                ),
+                result,
             )
 
     def test_get_metadata_descriptor(self):
