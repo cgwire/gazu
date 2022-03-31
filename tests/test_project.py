@@ -293,10 +293,15 @@ class ProjectTestCase(unittest.TestCase):
                 % (fakeid("project-1"), fakeid("metadata-descriptor-1")),
                 text={
                     "id": fakeid("metadata-descriptor-1"),
+                    "departments": [fakeid("department-1")],
                 },
             ),
             metadata_descriptor = gazu.project.update_metadata_descriptor(
-                fakeid("project-1"), {"id": fakeid("metadata-descriptor-1")}
+                fakeid("project-1"),
+                {
+                    "id": fakeid("metadata-descriptor-1"),
+                    "departments": fakeid("department-1"),
+                },
             )
             self.assertEqual(
                 metadata_descriptor["id"], fakeid("metadata-descriptor-1")
