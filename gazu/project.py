@@ -307,6 +307,19 @@ def update_metadata_descriptor(project, metadata_descriptor, client=default):
     Returns:
         dict: The updated metadata descriptor.
     """
+    if "departments" in metadata_descriptor:
+        if not isinstance(metadata_descriptor["departments"], list):
+            metadata_descriptor["departments"] = [
+                metadata_descriptor["departments"]
+            ]
+
+        departments_ids = [
+            department["id"] if isinstance(department, dict) else department
+            for department in metadata_descriptor["departments"]
+        ]
+
+        metadata_descriptor["departments"] = departments_ids
+
     project = normalize_model_parameter(project)
     return raw.put(
         "data/projects/%s/metadata-descriptors/%s"
