@@ -3,7 +3,7 @@ import json
 
 from . import client as raw
 from .sorting import sort_by_name
-from .helpers import normalize_model_parameter, validate_date_format
+from .helpers import normalize_model_parameter
 
 from .cache import cache
 
@@ -452,6 +452,21 @@ def get_task_status_by_short_name(task_status_short_name, client=default):
     """
     return raw.fetch_first(
         "task-status", {"short_name": task_status_short_name}, client=client
+    )
+
+
+def remove_task_type(task_type, client=default):
+    """
+    Remove given task type from database.
+
+    Args:
+        task_type (str / dict): The task type dict or ID.
+    """
+    task_type = normalize_model_parameter(task_type)
+    return raw.delete(
+        "data/task-types/%s" % task_type["id"],
+        {"force": "true"},
+        client=client,
     )
 
 

@@ -746,23 +746,33 @@ class TaskTestCase(unittest.TestCase):
 
     def test_remove_task_status(self):
         with requests_mock.mock() as mock:
-            mock.delete(
-                gazu.client.get_full_url(
-                    "data/task-status/%s?force=true" % fakeid("task-status-1")
-                ),
+            mock_route(
+                mock,
+                "DELETE",
+                "data/task-status/%s?force=true" % fakeid("task-status-1"),
                 status_code=204,
             )
             gazu.task.remove_task_status(fakeid("task-status-1"))
 
     def test_remove_task(self):
         with requests_mock.mock() as mock:
-            mock.delete(
-                gazu.client.get_full_url(
-                    "data/tasks/%s?force=true" % fakeid("task-1")
-                ),
+            mock_route(
+                mock,
+                "DELETE",
+                "data/tasks/%s?force=true" % fakeid("task-1"),
                 status_code=204,
             )
             gazu.task.remove_task(fakeid("task-1"))
+
+    def test_remove_task_type(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "DELETE",
+                "data/task-types/%s?force=true" % fakeid("task-type-1"),
+                status_code=204,
+            )
+            gazu.task.remove_task_type(fakeid("task-type-1"))
 
     def test_update_task(self):
         with requests_mock.mock() as mock:

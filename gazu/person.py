@@ -130,6 +130,7 @@ def new_person(
     phone="",
     role="user",
     desktop_login="",
+    departments=[],
     client=default,
 ):
     """
@@ -148,6 +149,15 @@ def new_person(
     Returns:
         dict: Created person.
     """
+
+    if not isinstance(departments, list):
+        departments = [departments]
+
+    departments_ids = [
+        department["id"] if isinstance(department, dict) else department
+        for department in departments
+    ]
+
     person = get_person_by_email(email)
     if person is None:
         person = raw.post(
@@ -159,10 +169,29 @@ def new_person(
                 "phone": phone,
                 "role": role,
                 "desktop_login": desktop_login,
+                "departments": departments_ids,
             },
             client=client,
         )
     return person
+
+
+def update_person(person, client=default):
+    """
+    Update a person.
+
+    Args:
+        person (dict): The person dict that needs to be upgraded.
+
+    Returns:
+        dict: The updated person.
+    """
+    person = normalize_model_parameter(person)
+    return raw.put(
+        "data/persons/%s" % (person["id"]),
+        person,
+        client=client,
+    )
 
 
 def set_avatar(person, file_path, client=default):
