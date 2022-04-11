@@ -186,6 +186,18 @@ def update_person(person, client=default):
     Returns:
         dict: The updated person.
     """
+
+    if "departments" in person:
+        if not isinstance(person["departments"], list):
+            person["departments"] = [person["departments"]]
+
+        departments_ids = [
+            department["id"] if isinstance(department, dict) else department
+            for department in person["departments"]
+        ]
+
+        person["departments"] = departments_ids
+
     person = normalize_model_parameter(person)
     return raw.put(
         "data/persons/%s" % (person["id"]),
