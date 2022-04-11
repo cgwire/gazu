@@ -1,4 +1,4 @@
-release_number=0.8.20
+release_number=0.8.27
 twine --help || exit 1
 echo "__version__ = \"$release_number\"" > gazu/__version__.py
 git add gazu/__version__.py
