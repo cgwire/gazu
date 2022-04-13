@@ -416,7 +416,7 @@ def _build_file_dict(file_path, extra_files):
     return files
 
 
-def download(path, file_path, client=default_client):
+def download(path, file_path, params=None, client=default_client):
     """
     Download file located at *file_path* to given url *path*.
 
@@ -428,9 +428,11 @@ def download(path, file_path, client=default_client):
         Response: Request response object.
 
     """
-    url = get_full_url(path, client)
+    path = build_path_with_params(path, params)
     with client.session.get(
-        url, headers=make_auth_header(client=client), stream=True
+        get_full_url(path, client),
+        headers=make_auth_header(client=client),
+        stream=True,
     ) as response:
         with open(file_path, "wb") as target_file:
             shutil.copyfileobj(response.raw, target_file)
