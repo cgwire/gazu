@@ -1,6 +1,7 @@
 import unittest
 import json
 import requests_mock
+import os
 
 import gazu.client
 import gazu.shot
@@ -646,3 +647,27 @@ class ShotTestCase(unittest.TestCase):
                 mock, "PUT", "data/shots/%s" % fakeid("shot-1"), text=text
             )
             self.assertEqual(gazu.shot.restore_shot(fakeid("shot-1")), text)
+
+    def test_exports_shots_with_csv(self):
+        with requests_mock.mock() as mock:
+            csv = ";;;;"
+            mock_route(
+                mock,
+                "GET",
+                "export/csv/projects/%s/shots.csv?episode_id=%s&assigned_to=%s"
+                % (
+                    fakeid("project-1"),
+                    fakeid("episode-1"),
+                    fakeid("person-1"),
+                ),
+                text=csv,
+            )
+            gazu.shot.export_shots_with_csv(
+                fakeid("project-1"),
+                "./test.csv",
+                fakeid("episode-1"),
+                fakeid("person-1"),
+            )
+            with open("./test.csv", "r") as export_csv:
+                self.assertEqual(csv, export_csv.read())
+            os.remove("./test.csv")

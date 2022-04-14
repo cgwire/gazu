@@ -472,9 +472,29 @@ def new_asset_asset_instance(
     )
 
 
-def import_assets_with_csv(project, csv_file_path):
+def import_assets_with_csv(project, csv_file_path, client=default):
     project = normalize_model_parameter(project)
     return raw.upload(
         "import/csv/projects/%s/assets" % project["id"],
         csv_file_path,
+        client=client,
+    )
+
+
+def export_assets_with_csv(
+    project, csv_file_path, episode=None, assigned_to=None, client=default
+):
+    project = normalize_model_parameter(project)
+    episode = normalize_model_parameter(episode)
+    assigned_to = normalize_model_parameter(assigned_to)
+    params = {}
+    if episode:
+        params["episode_id"] = episode["id"]
+    if assigned_to:
+        params["assigned_to"] = assigned_to["id"]
+    return raw.download(
+        "export/csv/projects/%s/assets.csv" % project["id"],
+        csv_file_path,
+        params=params,
+        client=client,
     )
