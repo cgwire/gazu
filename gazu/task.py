@@ -442,6 +442,18 @@ def get_task_status_by_name(name, client=default):
 
 
 @cache
+def get_default_task_status(client=default):
+    """
+    Args:
+        name (str / dict): The name of claimed task status.
+
+    Returns:
+        dict: Task status matching given name.
+    """
+    return raw.fetch_first("task-status", {"is_default": True}, client=client)
+
+
+@cache
 def get_task_status_by_short_name(task_status_short_name, client=default):
     """
     Args:
@@ -524,7 +536,7 @@ def new_task(
     entity = normalize_model_parameter(entity)
     task_type = normalize_model_parameter(task_type)
     if task_status is None:
-        task_status = get_task_status_by_name("Todo", client=client)
+        task_status = get_default_task_status()
 
     data = {
         "project_id": entity["project_id"],

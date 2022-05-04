@@ -352,7 +352,7 @@ class TaskTestCase(unittest.TestCase):
                 text=json.dumps([]),
             )
             mock.get(
-                gazu.client.get_full_url("data/task-status?name=Todo"),
+                gazu.client.get_full_url("data/task-status?is_default=True"),
                 text=json.dumps([{"id": fakeid("task-status-01")}]),
             )
             mock.post(
