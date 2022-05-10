@@ -573,19 +573,22 @@ def remove_task(task, client=default):
     raw.delete("data/tasks/%s" % task["id"], {"force": "true"}, client=client)
 
 
-def start_task(task, client=default):
+def start_task(task, started_task_status=None, client=default):
     """
-    Change a task status to WIP and set its real start date to now.
+    Create a comment to change task status to started_task_status (by default WIP) and set its real start date to now.
 
     Args:
         task (str / dict): The task dict or the task ID.
 
     Returns:
-        dict: Modified task.
+        dict: Created comment.
     """
-    task = normalize_model_parameter(task)
-    path = "actions/tasks/%s/start" % task["id"]
-    return raw.put(path, {}, client=client)
+    if started_task_status is None:
+        started_task_status = get_task_status_by_short_name(
+            "wip", client=client
+        )
+
+    return add_comment(task, started_task_status, client=client)
 
 
 def task_to_review(
@@ -731,7 +734,6 @@ def add_comment(
         return raw.post(
             "actions/tasks/%s/comment" % task["id"], data, client=client
         )
-
     else:
         attachment = attachments.pop()
         data["checklist"] = json.dumps(checklist)
