@@ -77,3 +77,11 @@ class TooBigFileException(Exception):
     """
 
     pass
+
+
+class TaskStatusNotFound(Exception):
+    """
+    Error raised when a task status is not found.
+    """
+
+    pass

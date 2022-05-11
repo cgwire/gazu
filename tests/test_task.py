@@ -3,6 +3,7 @@ import unittest
 import json
 import requests_mock
 import gazu.client
+from gazu.exception import TaskStatusNotFound
 import gazu.task
 import datetime
 
@@ -201,12 +202,6 @@ class TaskTestCase(unittest.TestCase):
 
     def test_start_task(self):
         with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                "data/task-status?short_name=wip",
-                text=[{"id": fakeid("task-status-1")}],
-            )
             result = {
                 "id": "comment-1",
                 "task_status_id": fakeid("task-status-1"),
@@ -216,6 +211,21 @@ class TaskTestCase(unittest.TestCase):
                 "POST",
                 "actions/tasks/%s/comment" % fakeid("task-1"),
                 text=result,
+            )
+            mock_route(
+                mock,
+                "GET",
+                "data/task-status?short_name=wip",
+                text=[],
+            )
+            self.assertRaises(
+                TaskStatusNotFound, gazu.task.start_task, fakeid("task-1")
+            )
+            mock_route(
+                mock,
+                "GET",
+                "data/task-status?short_name=wip",
+                text=[{"id": fakeid("task-status-1")}],
             )
             self.assertEqual(gazu.task.start_task(fakeid("task-1")), result)
 

@@ -1,6 +1,8 @@
 import string
 import json
 
+from gazu.exception import TaskStatusNotFound
+
 from . import client as raw
 from .sorting import sort_by_name
 from .helpers import normalize_model_parameter
@@ -575,7 +577,8 @@ def remove_task(task, client=default):
 
 def start_task(task, started_task_status=None, client=default):
     """
-    Create a comment to change task status to started_task_status (by default WIP) and set its real start date to now.
+    Create a comment to change task status to started_task_status
+    (by default WIP) and set its real start date to now.
 
     Args:
         task (str / dict): The task dict or the task ID.
@@ -587,6 +590,15 @@ def start_task(task, started_task_status=None, client=default):
         started_task_status = get_task_status_by_short_name(
             "wip", client=client
         )
+        if started_task_status is None:
+            raise TaskStatusNotFound(
+                (
+                    "started_task_status is None : 'wip' task status is "
+                    "non-existent. You have to create it or to set an other "
+                    "task status for started_task_status in the parameters "
+                    "of the function."
+                )
+            )
 
     return add_comment(task, started_task_status, client=client)
 
