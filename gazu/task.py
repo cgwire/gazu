@@ -1,11 +1,12 @@
 import string
 import json
+from urllib import response
 
 from gazu.exception import TaskStatusNotFound
 
 from . import client as raw
 from .sorting import sort_by_name
-from .helpers import normalize_model_parameter
+from .helpers import download_file, normalize_model_parameter
 
 from .cache import cache
 
@@ -852,7 +853,12 @@ def upload_preview_file(
 
 
 def add_preview(
-    task, comment, preview_file_path, normalize_movie=True, client=default
+    task,
+    comment,
+    preview_file_path=None,
+    preview_file_url=None,
+    normalize_movie=True,
+    client=default,
 ):
     """
     Add a preview to given comment.
@@ -865,6 +871,11 @@ def add_preview(
     Returns:
         dict: Created preview file model.
     """
+    if preview_file_url is not None:
+        preview_file_path = download_file(
+            preview_file_url,
+        )
+
     preview_file = create_preview(task, comment, client=client)
     return upload_preview_file(
         preview_file,

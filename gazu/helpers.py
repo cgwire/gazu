@@ -1,5 +1,18 @@
+import os
+import sys
 import re
 import datetime
+import shutil
+import requests
+import tempfile
+import mimetypes
+
+from gazu.exception import DownloadFileException
+
+if sys.version_info[0] == 3:
+    import urllib.parse as urlparse
+else:
+    import urlparse
 
 _UUID_RE = re.compile(
     "([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}){1}"
@@ -44,3 +57,70 @@ def validate_date_format(date_text):
                 % date_text
             )
     return date_text
+
+
+def sanitize_filename(filename):
+    forbidden = "@|():%/,\\[]<>*?;`\n"
+    return "".join(
+        [c for c in filename.replace("..", "_") if c not in forbidden]
+    ).strip()
+
+
+def download_file(url, file_path=None, headers={}):
+    """
+    Download file located at *file_path* to given url *url*.
+
+    Args:
+        url (str): The url path to download file from.
+        file_path (str): The location to store the file on the hard drive.
+        headers (dict): The headers to pass to requests
+
+    Returns:
+        str: The location where the file is stored.
+
+    """
+    with requests.get(
+        url,
+        headers=headers,
+        stream=True,
+    ) as response:
+        if response.ok:
+            if file_path is None:
+                file_path = tempfile.gettempdir()
+
+            if os.path.isdir(file_path):
+                file_path = os.path.join(file_path, "")
+
+            (dir, filename) = os.path.split(file_path)
+
+            if not filename:
+                url_parts = urlparse.urlparse(url)
+                filename = url_parts.path.split("/")[-1]
+            if not dir:
+                dir = os.getcwd()
+
+            name, ext = os.path.splitext(filename)
+
+            if ext == "":
+                if "Content-Type" in response.headers:
+                    guessed_ext = mimetypes.guess_extension(
+                        response.headers["Content-Type"]
+                    )
+                    if guessed_ext is not None:
+                        ext = guessed_ext
+
+            if name == "":
+                name = "file"
+
+            filename = sanitize_filename(name + ext)
+
+            file_path = os.path.join(dir, filename)
+
+            with open(file_path, "wb") as target_file:
+                shutil.copyfileobj(response.raw, target_file)
+            return file_path
+        else:
+            raise DownloadFileException(
+                "File can't be downloaded (%i %s)."
+                % (response.status_code, response.reason)
+            )

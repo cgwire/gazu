@@ -85,3 +85,9 @@ class TaskStatusNotFound(Exception):
     """
 
     pass
+
+
+class DownloadFileException(Exception):
+    """
+    Error raised when a file can't be downloaded.
+    """
