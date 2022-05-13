@@ -3,6 +3,7 @@ import unittest
 import json
 import requests_mock
 import gazu.client
+from gazu.exception import TaskStatusNotFound
 import gazu.task
 import datetime
 
@@ -201,14 +202,32 @@ class TaskTestCase(unittest.TestCase):
 
     def test_start_task(self):
         with requests_mock.mock() as mock:
-            mock.put(
-                gazu.client.get_full_url("actions/tasks/task-01/start"),
-                text=json.dumps(
-                    {"name": "Task 01", "task_status_id": "wip-1"}
-                ),
+            result = {
+                "id": "comment-1",
+                "task_status_id": fakeid("task-status-1"),
+            }
+            mock_route(
+                mock,
+                "POST",
+                "actions/tasks/%s/comment" % fakeid("task-1"),
+                text=result,
             )
-            test_task = gazu.task.start_task({"id": "task-01"})
-            self.assertEqual(test_task["task_status_id"], "wip-1")
+            mock_route(
+                mock,
+                "GET",
+                "data/task-status?short_name=wip",
+                text=[],
+            )
+            self.assertRaises(
+                TaskStatusNotFound, gazu.task.start_task, fakeid("task-1")
+            )
+            mock_route(
+                mock,
+                "GET",
+                "data/task-status?short_name=wip",
+                text=[{"id": fakeid("task-status-1")}],
+            )
+            self.assertEqual(gazu.task.start_task(fakeid("task-1")), result)
 
     def test_to_review(self):
         with requests_mock.mock() as mock:
@@ -352,7 +371,7 @@ class TaskTestCase(unittest.TestCase):
                 text=json.dumps([]),
             )
             mock.get(
-                gazu.client.get_full_url("data/task-status?name=Todo"),
+                gazu.client.get_full_url("data/task-status?is_default=True"),
                 text=json.dumps([{"id": fakeid("task-status-01")}]),
             )
             mock.post(
@@ -396,17 +415,16 @@ class TaskTestCase(unittest.TestCase):
                 "person_id": fakeid("person-1"),
                 "created_at": date,
             }
-            mock.post(
-                gazu.client.get_full_url("actions/tasks/task-01/comment"),
-                text=json.dumps(result),
+            mock_route(
+                mock,
+                "POST",
+                "actions/tasks/%s/comment" % fakeid("task-1"),
+                text=result,
             )
-            task = {"id": "task-01"}
-            task_status = {"id": "task-status-01"}
-            comment = "New comment"
             comment = gazu.task.add_comment(
-                task,
-                task_status,
-                comment,
+                fakeid("task-1"),
+                fakeid("task-status-01"),
+                "New comment",
                 person=fakeid("person-1"),
                 created_at=date,
             )
@@ -733,11 +751,11 @@ class TaskTestCase(unittest.TestCase):
 
     def test_get_task_status_by_short_name(self):
         with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url(
-                    "data/task-status?short_name=task_status_shortname"
-                ),
-                text=json.dumps([{"id": fakeid("task-status-1")}]),
+            mock_route(
+                mock,
+                "GET",
+                "data/task-status?short_name=task_status_shortname",
+                text=[{"id": fakeid("task-status-1")}],
             )
             task_status = gazu.task.get_task_status_by_short_name(
                 "task_status_shortname"

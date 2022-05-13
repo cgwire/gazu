@@ -1,6 +1,8 @@
 import string
 import json
 
+from gazu.exception import TaskStatusNotFound
+
 from . import client as raw
 from .sorting import sort_by_name
 from .helpers import normalize_model_parameter
@@ -442,6 +444,18 @@ def get_task_status_by_name(name, client=default):
 
 
 @cache
+def get_default_task_status(client=default):
+    """
+    Args:
+        name (str / dict): The name of claimed task status.
+
+    Returns:
+        dict: Task status matching given name.
+    """
+    return raw.fetch_first("task-status", {"is_default": True}, client=client)
+
+
+@cache
 def get_task_status_by_short_name(task_status_short_name, client=default):
     """
     Args:
@@ -524,7 +538,7 @@ def new_task(
     entity = normalize_model_parameter(entity)
     task_type = normalize_model_parameter(task_type)
     if task_status is None:
-        task_status = get_task_status_by_name("Todo", client=client)
+        task_status = get_default_task_status()
 
     data = {
         "project_id": entity["project_id"],
@@ -561,19 +575,32 @@ def remove_task(task, client=default):
     raw.delete("data/tasks/%s" % task["id"], {"force": "true"}, client=client)
 
 
-def start_task(task, client=default):
+def start_task(task, started_task_status=None, client=default):
     """
-    Change a task status to WIP and set its real start date to now.
+    Create a comment to change task status to started_task_status
+    (by default WIP) and set its real start date to now.
 
     Args:
         task (str / dict): The task dict or the task ID.
 
     Returns:
-        dict: Modified task.
+        dict: Created comment.
     """
-    task = normalize_model_parameter(task)
-    path = "actions/tasks/%s/start" % task["id"]
-    return raw.put(path, {}, client=client)
+    if started_task_status is None:
+        started_task_status = get_task_status_by_short_name(
+            "wip", client=client
+        )
+        if started_task_status is None:
+            raise TaskStatusNotFound(
+                (
+                    "started_task_status is None : 'wip' task status is "
+                    "non-existent. You have to create it or to set an other "
+                    "task status for started_task_status in the parameters "
+                    "of the function."
+                )
+            )
+
+    return add_comment(task, started_task_status, client=client)
 
 
 def task_to_review(
@@ -719,7 +746,6 @@ def add_comment(
         return raw.post(
             "actions/tasks/%s/comment" % task["id"], data, client=client
         )
-
     else:
         attachment = attachments.pop()
         data["checklist"] = json.dumps(checklist)
