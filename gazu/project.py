@@ -2,7 +2,10 @@ from . import client as raw
 
 from .sorting import sort_by_name
 from .cache import cache
-from .helpers import normalize_model_parameter
+from .helpers import (
+    normalize_model_parameter,
+    normalize_list_of_models_for_links,
+)
 
 default = raw.default_client
 
@@ -91,21 +94,44 @@ def get_project_by_name(project_name, client=default):
     return raw.fetch_first("projects", {"name": project_name}, client=client)
 
 
-def new_project(name, production_type="short", client=default):
+def new_project(
+    name,
+    production_type="short",
+    team=[],
+    asset_types=[],
+    task_statuses=[],
+    task_types=[],
+    client=default,
+):
     """
     Creates a new project.
 
     Args:
         name (str): Name of the project to create.
-        production_type (str): short, featurefilm, tvshow
-
+        production_type (str): short, featurefilm, tvshow.
+        team (list): Team of the project.
+        asset_types (list): Asset types of the project.
+        task_statuses (list): Task statuses of the project.
+        task_types (list): Task types of the project.
     Returns:
         dict: Created project.
     """
-    data = {"name": name, "production_type": production_type}
     project = get_project_by_name(name, client=client)
     if project is None:
-        project = raw.create("projects", data, client=client)
+        project = raw.create(
+            "projects",
+            {
+                "name": name,
+                "production_type": production_type,
+                "team": normalize_list_of_models_for_links(team),
+                "asset_types": normalize_list_of_models_for_links(asset_types),
+                "task_statuses": normalize_list_of_models_for_links(
+                    task_statuses
+                ),
+                "task_types": normalize_list_of_models_for_links(task_types),
+            },
+            client=client,
+        )
     return project
 
 
@@ -135,6 +161,20 @@ def update_project(project, client=default):
     Returns:
         dict: Updated project.
     """
+    if "team" in project:
+        project["team"] = normalize_list_of_models_for_links(project["team"])
+    if "asset_types" in project:
+        project["asset_types"] = normalize_list_of_models_for_links(
+            project["asset_types"]
+        )
+    if "task_statuses" in project:
+        project["task_statuses"] = normalize_list_of_models_for_links(
+            project["task_statuses"]
+        )
+    if "task_types" in project:
+        project["task_types"] = normalize_list_of_models_for_links(
+            project["task_types"]
+        )
     return raw.put("data/projects/%s" % project["id"], project, client=client)
 
 
@@ -235,22 +275,13 @@ def add_metadata_descriptor(
     Returns:
         dict: Created metadata descriptor.
     """
-
-    if not isinstance(departments, list):
-        departments = [departments]
-
-    departments_ids = [
-        department["id"] if isinstance(department, dict) else department
-        for department in departments
-    ]
-
     project = normalize_model_parameter(project)
     data = {
         "name": name,
         "choices": choices,
         "for_client": for_client,
         "entity_type": entity_type,
-        "departments": departments_ids,
+        "departments": normalize_list_of_models_for_links(departments),
     }
     return raw.post(
         "data/projects/%s/metadata-descriptors" % project["id"],
@@ -308,17 +339,11 @@ def update_metadata_descriptor(project, metadata_descriptor, client=default):
         dict: The updated metadata descriptor.
     """
     if "departments" in metadata_descriptor:
-        if not isinstance(metadata_descriptor["departments"], list):
-            metadata_descriptor["departments"] = [
-                metadata_descriptor["departments"]
-            ]
-
-        departments_ids = [
-            department["id"] if isinstance(department, dict) else department
-            for department in metadata_descriptor["departments"]
-        ]
-
-        metadata_descriptor["departments"] = departments_ids
+        metadata_descriptor[
+            "departments"
+        ] = normalize_list_of_models_for_links(
+            metadata_descriptor["departments"]
+        )
 
     project = normalize_model_parameter(project)
     return raw.put(

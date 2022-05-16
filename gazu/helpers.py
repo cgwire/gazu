@@ -45,6 +45,20 @@ def normalize_model_parameter(model_parameter):
             raise ValueError("Wrong format: expected ID string or Data dict")
 
 
+def normalize_list_of_models_for_links(models=[]):
+    """
+    Args:
+        models (list): The models to convert.
+
+    Returns:
+        list: A list of ids of the models.
+    """
+    if not isinstance(models, list):
+        models = [models]
+
+    return [normalize_model_parameter(model)["id"] for model in models]
+
+
 def validate_date_format(date_text):
     try:
         datetime.datetime.strptime(date_text, "%Y-%m-%dT%H:%M:%S")
