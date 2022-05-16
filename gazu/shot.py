@@ -308,6 +308,7 @@ def new_shot(
     nb_frames=None,
     frame_in=None,
     frame_out=None,
+    description=None,
     data={},
     client=default,
 ):
@@ -337,6 +338,9 @@ def new_shot(
     data = {"name": name, "data": data, "sequence_id": sequence["id"]}
     if nb_frames is not None:
         data["nb_frames"] = nb_frames
+
+    if description is not None:
+        data["description"] = description
 
     shot = get_shot_by_name(sequence, name, client=client)
     if shot is None:

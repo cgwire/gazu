@@ -284,49 +284,57 @@ class ShotTestCase(unittest.TestCase):
 
     def test_new_shot(self):
         with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url(
-                    "data/shots/all?sequence_id=sequence-01&name=Shot 01"
-                ),
-                text=json.dumps([]),
+            result = {
+                "id": fakeid("shot-1"),
+                "project_id": fakeid("project-1"),
+                "description": "test description",
+            }
+            mock_route(
+                mock,
+                "GET",
+                "data/shots/all?sequence_id=%s&name=Shot 01"
+                % (fakeid("sequence-1")),
+                text=[],
             )
-            mock = mock.post(
-                gazu.client.get_full_url("data/projects/project-01/shots"),
-                text=json.dumps({"id": "shot-01", "project_id": "project-01"}),
+            mock_route(
+                mock,
+                "POST",
+                "data/projects/%s/shots" % (fakeid("project-1")),
+                text=result,
             )
-            project = {"id": "project-01"}
-            sequence = {"id": "sequence-01"}
             shot = gazu.shot.new_shot(
-                project,
-                sequence,
+                fakeid("project-1"),
+                fakeid("sequence-1"),
                 "Shot 01",
                 nb_frames=10,
                 frame_in=10,
                 frame_out=20,
+                description="test description",
             )
-            self.assertEqual(shot["id"], "shot-01")
-            sent_data = json.loads(mock.request_history[0].text)
-            self.assertEqual(10, sent_data["data"]["frame_in"])
+            self.assertEqual(shot, result)
 
         with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url(
-                    "data/shots/all?sequence_id=sequence-01&name=Shot 01"
-                ),
-                text=json.dumps(
-                    [{"id": "shot-01", "project_id": "project-01"}]
-                ),
+            result = {
+                "id": fakeid("shot-1"),
+                "project_id": fakeid("project-1"),
+            }
+            mock_route(
+                mock,
+                "GET",
+                "data/shots/all?sequence_id=%s&name=Shot 01"
+                % fakeid("sequence-1"),
+                text=[result],
             )
 
             shot = gazu.shot.new_shot(
-                project,
-                sequence,
+                fakeid("project-1"),
+                fakeid("sequence-1"),
                 "Shot 01",
                 nb_frames=10,
                 frame_in=10,
                 frame_out=20,
             )
-            self.assertEqual(shot["id"], "shot-01")
+            self.assertEqual(shot, result)
 
     def test_update_shot(self):
         with requests_mock.mock() as mock:
