@@ -9,7 +9,7 @@ Welcome to Gazu's documentation!
 |logo|
 
 Gazu is a Python client for the Kitsu API. It allows fetching easily
-your CG production data. More than giving access to data, it allows
+your production data. More than giving access to data, it allows
 performing operations on it like marking a task as started or setting a
 thumbnail on a shot. 
 
