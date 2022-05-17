@@ -1,7 +1,10 @@
 from . import client as raw
 
 from .sorting import sort_by_name
-from .helpers import normalize_model_parameter
+from .helpers import (
+    normalize_model_parameter,
+    normalize_list_of_models_for_links,
+)
 from .cache import cache
 
 default = raw.default_client
@@ -145,19 +148,10 @@ def new_person(
         role (str): user, manager, admin (wich match CG artist, Supervisor
                     and studio manager)
         desktop_login (str): The login the users uses to log on its computer.
-
+        departments (list): The departments for the person.
     Returns:
         dict: Created person.
     """
-
-    if not isinstance(departments, list):
-        departments = [departments]
-
-    departments_ids = [
-        department["id"] if isinstance(department, dict) else department
-        for department in departments
-    ]
-
     person = get_person_by_email(email)
     if person is None:
         person = raw.post(
@@ -169,7 +163,7 @@ def new_person(
                 "phone": phone,
                 "role": role,
                 "desktop_login": desktop_login,
-                "departments": departments_ids,
+                "departments": normalize_list_of_models_for_links(departments),
             },
             client=client,
         )
@@ -188,15 +182,9 @@ def update_person(person, client=default):
     """
 
     if "departments" in person:
-        if not isinstance(person["departments"], list):
-            person["departments"] = [person["departments"]]
-
-        departments_ids = [
-            department["id"] if isinstance(department, dict) else department
-            for department in person["departments"]
-        ]
-
-        person["departments"] = departments_ids
+        person["departments"] = normalize_list_of_models_for_links(
+            person["departments"]
+        )
 
     person = normalize_model_parameter(person)
     return raw.put(

@@ -1,6 +1,5 @@
 import string
 import json
-from urllib import response
 
 from gazu.exception import TaskStatusNotFound
 
