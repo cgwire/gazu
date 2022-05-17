@@ -144,13 +144,15 @@ def get_episode_by_name(project, episode_name, client=default):
 def get_episode_from_sequence(sequence, client=default):
     """
     Args:
-        sequence (str / dict): The sequence dict or the sequence ID.
+        sequence (dict): The sequence dict.
 
     Returns:
         dict: Episode which is parent of given sequence.
     """
-    sequence = normalize_model_parameter(sequence)
-    return get_episode(sequence["parent_id"], client=client)
+    if sequence["parent_id"] is None:
+        return None
+    else:
+        return get_episode(sequence["parent_id"], client=client)
 
 
 @cache
