@@ -5,7 +5,11 @@ from gazu.exception import TaskStatusNotFound
 
 from . import client as raw
 from .sorting import sort_by_name
-from .helpers import download_file, normalize_model_parameter
+from .helpers import (
+    download_file,
+    normalize_model_parameter,
+    normalize_list_of_models_for_links,
+)
 
 from .cache import cache
 
@@ -518,7 +522,7 @@ def new_task(
     name="main",
     task_status=None,
     assigner=None,
-    assignees=None,
+    assignees=[],
     client=default,
 ):
     """
@@ -545,18 +549,12 @@ def new_task(
         "entity_id": entity["id"],
         "task_type_id": task_type["id"],
         "task_status_id": task_status["id"],
+        "assignees": normalize_list_of_models_for_links(assignees),
         "name": name,
     }
 
     if assigner is not None:
         data["assigner_id"] = normalize_model_parameter(assigner)["id"]
-
-    if assignees is not None:
-        data["assignees"] = [
-            normalize_model_parameter(person)["id"] for person in assignees
-        ]
-    else:
-        data["assignees"] = []
 
     task = get_task_by_name(entity, task_type, name, client=client)
     if task is None:
@@ -987,6 +985,10 @@ def update_task(task, client=default):
     Returns:
         dict: Updated task.
     """
+    if "assignees" in task:
+        task["assignees"] = normalize_list_of_models_for_links(
+            task["assignees"]
+        )
     return raw.put("data/tasks/%s" % task["id"], task, client=client)
 
 

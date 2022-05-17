@@ -7,6 +7,8 @@ from .sorting import sort_by_name
 
 from .cache import cache
 
+from .shot import get_episode
+
 default = raw.default_client
 
 
@@ -286,15 +288,16 @@ def all_asset_types_for_shot(shot, client=default):
 
 
 @cache
-def get_asset_type(asset_id, client=default):
+def get_asset_type(asset_type_id, client=default):
     """
     Args:
-        asset_type_id (str): Id of claimed asset type.
+        asset_type_id (str/): Id of claimed asset type.
 
     Returns:
         dict: Asset Type matching given ID.
     """
-    return raw.fetch_one("asset-types", asset_id, client=client)
+    asset_type_id = normalize_model_parameter(asset_type_id)["id"]
+    return raw.fetch_one("asset-types", asset_type_id, client=client)
 
 
 @cache
@@ -498,3 +501,30 @@ def export_assets_with_csv(
         params=params,
         client=client,
     )
+
+
+@cache
+def get_episode_from_asset(asset, client=default):
+    """
+    Args:
+        asset (dict): The asset dict.
+
+    Returns:
+        dict: Episode which is parent of given asset.
+    """
+    if asset["parent_id"] is None:
+        return None
+    else:
+        return get_episode(asset["parent_id"], client=client)
+
+
+@cache
+def get_asset_type_from_asset(asset, client=default):
+    """
+    Args:
+        asset (dict): The asset dict.
+
+    Returns:
+        dict: Asset type which is the type of given asset.
+    """
+    return get_asset_type(asset["entity_type_id"], client=client)
