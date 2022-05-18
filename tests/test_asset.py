@@ -132,14 +132,16 @@ class CastingTestCase(unittest.TestCase):
 
     def test_get_asset_type(self):
         with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url("data/asset-types/asset-type-01"),
-                text=json.dumps(
-                    {"name": "Asset Type 01", "id": "asset-type-01"}
-                ),
+            result = {"name": "Asset Type 01", "id": fakeid("asset-type-1")}
+            mock_route(
+                mock,
+                "GET",
+                "data/asset-types/%s" % fakeid("asset-type-1"),
+                text=result,
             )
-            asset = gazu.asset.get_asset_type("asset-type-01")
-            self.assertEqual(asset["name"], "Asset Type 01")
+            self.assertEqual(
+                gazu.asset.get_asset_type(fakeid("asset-type-1")), result
+            )
 
     def test_create_asset(self):
         with requests_mock.mock() as mock:
