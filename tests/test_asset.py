@@ -550,3 +550,22 @@ class CastingTestCase(unittest.TestCase):
             with open("./test.csv", "r") as export_csv:
                 self.assertEqual(csv, export_csv.read())
             os.remove("./test.csv")
+
+    def test_get_episode_from_asset(self):
+        self.assertEqual(
+            gazu.asset.get_episode_from_asset(asset={"parent_id": None}), None
+        )
+        with requests_mock.mock() as mock:
+            result = {"name": "Episode 01", "project_id": "project-01"}
+            mock_route(
+                mock,
+                "GET",
+                "data/episodes/%s" % (fakeid("episode-1")),
+                text=result,
+            )
+            self.assertEqual(
+                gazu.asset.get_episode_from_asset(
+                    {"parent_id": fakeid("episode-1")}
+                ),
+                result,
+            )
