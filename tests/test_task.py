@@ -794,13 +794,18 @@ class TaskTestCase(unittest.TestCase):
 
     def test_update_task(self):
         with requests_mock.mock() as mock:
-            mock.put(
-                gazu.client.get_full_url("data/tasks/%s" % fakeid("task-1")),
-                text=json.dumps({"id": fakeid("task-1"), "name": "task-1"}),
+            task = {
+                "id": fakeid("task-1"),
+                "name": "task-1",
+                "assignees": [fakeid("person-1")],
+            }
+            mock_route(
+                mock,
+                "PUT",
+                "data/tasks/%s" % fakeid("task-1"),
+                text=task,
             )
-            task = {"id": fakeid("task-1"), "name": "task-1"}
-            task = gazu.task.update_task(task)
-            self.assertEqual(task["name"], "task-1")
+            self.assertEqual(gazu.task.update_task(task), task)
 
     def test_update_task_data(self):
         with requests_mock.mock() as mock:
