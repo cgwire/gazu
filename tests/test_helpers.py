@@ -35,3 +35,15 @@ class TestCase(unittest.TestCase):
             helpers.validate_date_format("")
         except Exception as e:
             self.assertIsInstance(e, ValueError)
+
+    def test_sanitize_filename(self):
+        self.assertEqual(
+            helpers.sanitize_filename(" @|():%/,\\[]<>*?;`\nbonjour.."),
+            "bonjour_",
+        )
+
+    def test_normalize_list_of_models_for_links(self):
+        self.assertEqual(
+            helpers.normalize_list_of_models_for_links(fakeid("test-1")),
+            [fakeid("test-1")],
+        )
