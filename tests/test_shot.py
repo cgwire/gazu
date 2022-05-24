@@ -135,17 +135,23 @@ class ShotTestCase(unittest.TestCase):
             )
 
     def test_get_episode_from_sequence(self):
+        self.assertEqual(
+            gazu.shot.get_episode_from_sequence({"parent_id": None}), None
+        )
         with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url("data/episodes/episode-1"),
-                text=json.dumps(
-                    {"name": "Episode 01", "project_id": "project-01"}
+            result = {"name": "Episode 01", "project_id": "project-01"}
+            mock_route(
+                mock,
+                "GET",
+                "data/episodes/%s" % fakeid("episode-1"),
+                text=result,
+            )
+            self.assertEqual(
+                gazu.shot.get_episode_from_sequence(
+                    {"parent_id": fakeid("episode-1")}
                 ),
+                result,
             )
-            episode = gazu.shot.get_episode_from_sequence(
-                {"id": "shot-01", "parent_id": "episode-1"}
-            )
-            self.assertEqual(episode["name"], "Episode 01")
 
     def test_get_sequence(self):
         with requests_mock.mock() as mock:
