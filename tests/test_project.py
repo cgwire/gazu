@@ -137,23 +137,21 @@ class ProjectTestCase(unittest.TestCase):
 
     def test_update_project(self):
         with requests_mock.mock() as mock:
-            mock.put(
-                gazu.client.get_full_url(
-                    "data/projects/%s" % fakeid("project-1")
-                ),
-                text=json.dumps(
-                    {
-                        "id": fakeid("project-1"),
-                        "name": "project-1",
-                    }
-                ),
-            )
             project = {
                 "id": fakeid("project-1"),
                 "name": "project-1",
+                "team": [fakeid("person-1")],
+                "asset_types": [fakeid("asset-type-1")],
+                "task_statuses": [fakeid("task-status-1")],
+                "task_types": [fakeid("task-type-1")],
             }
-            project = gazu.project.update_project(project)
-            self.assertEqual(project["id"], fakeid("project-1"))
+            mock_route(
+                mock,
+                "PUT",
+                "data/projects/%s" % fakeid("project-1"),
+                text=project,
+            )
+            self.assertEqual(gazu.project.update_project(project), project)
 
     def test_update_project_data(self):
         with requests_mock.mock() as mock:

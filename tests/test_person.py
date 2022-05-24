@@ -147,6 +147,7 @@ class PersonTestCase(unittest.TestCase):
             "desktop_login": "john.doe",
             "id": "person-1",
             "phone": "+33 6 07 07 07 07",
+            "departments": [fakeid("department-1")],
         }
         with requests_mock.mock() as mock:
             mock_route(
@@ -158,6 +159,7 @@ class PersonTestCase(unittest.TestCase):
             person = {
                 "id": fakeid("person-1"),
                 "phone": "+33 6 07 07 07 07",
+                "departments": [fakeid("department-1")],
             }
             self.assertEqual(gazu.person.update_person(person), result)
 
