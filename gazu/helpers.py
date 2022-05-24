@@ -135,6 +135,6 @@ def download_file(url, file_path=None, headers={}):
             return file_path
         else:
             raise DownloadFileException(
-                "File can't be downloaded (%i %s)."
-                % (response.status_code, response.reason)
+                "File (%s) can't be downloaded (%i %s)."
+                % (url, response.status_code, response.reason)
             )
