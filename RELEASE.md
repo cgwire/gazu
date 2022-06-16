@@ -15,12 +15,12 @@ You can run the following script to perform these commands at once:
 ```bash
 release_number=0.9.0
 git pull --rebase origin master
-echo "__version__ = \"$release\"" > zou/__init__.py
-git commit gazu/__init__.py -m $release
-git tag v$release
+echo "__version__ = \"$release_number\"" > gazu/__version__.py
+git commit gazu/__version__.py -m $release_number
+git tag v$release_number
 git push origin master --tag
 python setup.py bdist_wheel --universal
-twine upload dist/gazu-$release-py2.py3-none-any.whl
+twine upload dist/gazu-$release_number-py2.py3-none-any.whl
 ```
 
 # Deployment
