@@ -1,19 +1,17 @@
-.. figure:: https://gazu.cg-wire.com/_images/gazu.png
-   :alt: Gazu Logo
+.. figure:: https://zou.cg-wire.com/kitsu.png
+   :alt: Kitsu Logo
 
 
 Gazu, Python client for the Kitsu API
 =====================================
 
-Gazu is a Python client that allows to fetch data easily from your animation
-production environment (tasks, shots, assets, casting and dependencies).
-More than giving access to data, it allows to perform operations like
-generating file paths, marking a task as started, setting a thumbnail on
-a shot and many more. To make it short, it will boost your pipeline
-tools!
+The Kitsu Python client allows to fetch data easily from the Kitsu
+collaboration platform. You can fetch easily your asset and shots data into your
+pipeline tools. It comes with extra features such as preview publishing and 
+event stream listening.
 
-It is made to be used with the `Zou API <https://zou.cg-wire.com>`__. It
-requires an up and running instance of Zou to run properly.
+It is made to be used with the `Kitsu API <https://zou.cg-wire.com>`__. It
+requires an up and running instance of Kitsu to run properly.
 
 |Build status| |Discord| |Downloads|
 
@@ -42,19 +40,17 @@ Let's finish with an example. Fetch all the open projects:
 
     projects = gazu.project.all_open_projects()
 
-Then jump to the `documentation <https://gazu.cg-wire.com>`__ to see
-what features are available!
 
 Documentation
 -------------
 
-Documentation is available on a dedicated website:
+Documentation and specification are available on a dedicated website:
 
 `https://gazu.cg-wire.com <https://gazu.cg-wire.com>`__
 
 
-Projects based on Gazu
-----------------------
+Projects using the Kitsu client
+-------------------------------
 
 Our community built open-source tools to connect your content creation tools to
 your Kitsu instance. They are listed below:
@@ -91,7 +87,7 @@ Contributors
 * @aboellinger (Xilam)
 * @BigRoy (Colorbleed)
 * @col-one (Allegorithmic)
-* EvanBldy (CGWire) - *maintainer*
+* @EvanBldy (CGWire) - *maintainer*
 * @flablog (Les Fées Spéciales)
 * @frankrousseau (CGWire) - *maintainer*
 * @kguyaux
@@ -105,13 +101,7 @@ Contributors
 About authors
 -------------
 
-Gazu is written by CGWire, a company based in France. We help teams of animation
-studios to collaborate better. We provide tools to more than 50 studios spread
-all around the world.
-
-On the technical side, we apply software craftmanship principles as much as
-possible. We love coding and consider that strong quality and good developer
-experience matter a lot.
+Kitsu is written by CGWire, a company based in France. We help animation and VFX studios to collaborate better through efficient tooling. We already work with more than 70 studios around the world.
 
 Visit `cg-wire.com <https://cg-wire.com>`__ for more information.
 
@@ -124,4 +114,4 @@ Visit `cg-wire.com <https://cg-wire.com>`__ for more information.
 .. |CGWire Logo| image:: https://zou.cg-wire.com/cgwire.png
    :target: https://cg-wire.com
 .. |Downloads| image:: https://static.pepy.tech/personalized-badge/gazu?period=total&units=international_system&left_color=grey&right_color=orange&left_text=Downloads
- :target: https://pepy.tech/project/gazu
+   :target: https://pepy.tech/project/gazu
