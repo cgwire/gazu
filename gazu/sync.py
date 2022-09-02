@@ -6,7 +6,12 @@ default = raw.default_client
 
 
 def get_last_events(
-    page_size=20000, project=None, after=None, before=None, only_files=False, client=default
+    page_size=20000,
+    project=None,
+    after=None,
+    before=None,
+    only_files=False,
+    client=default,
 ):
     """
     Get last events that occured on the machine.
