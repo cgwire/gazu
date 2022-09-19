@@ -56,6 +56,24 @@ def log_out(client=raw.default_client):
     return tokens
 
 
+def refresh_token(client=raw.default_client):
+    headers = {"User-Agent": "CGWire Gazu %s" % __version__}
+    if "refresh_token" in client.tokens:
+        headers["Authorization"] = "Bearer %s" % client.tokens["refresh_token"]
+
+    response = client.session.get(
+        raw.get_full_url("auth/refresh-token", client=client),
+        headers=headers,
+    )
+    raw.check_status(response, "auth/refresh-token")
+
+    tokens = response.json()
+
+    client.tokens["access_token"] = tokens["access_token"]
+
+    return tokens
+
+
 def get_event_host(client=raw.default_client):
     return raw.get_event_host(client=client)
 
