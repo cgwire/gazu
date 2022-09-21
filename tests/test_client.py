@@ -382,14 +382,23 @@ class BaseFuncTestCase(ClientTestCase):
 
     def test_init_log_out(self):
         with requests_mock.mock() as mock:
-            mock.head(raw.get_host())
-            mock.get(
-                raw.get_full_url("auth/logout"),
-                text=json.dumps({}),
-                status_code=400,
-            )
+            mock_route(mock, "GET", "auth/logout", text={}, status_code=400)
             gazu.log_out()
             self.assertEqual(raw.default_client.tokens, {})
+
+    def test_init_refresh_token(self):
+        with requests_mock.mock() as mock:
+            raw.default_client.tokens["refresh_token"] = "refresh_token1"
+            mock_route(
+                mock,
+                "GET",
+                "auth/refresh-token",
+                text={"access_token": "tokentest1"},
+            )
+            gazu.refresh_token()
+        self.assertEqual(
+            raw.default_client.tokens["access_token"], "tokentest1"
+        )
 
     def test_init_log_in_fail(self):
         with requests_mock.mock() as mock:
