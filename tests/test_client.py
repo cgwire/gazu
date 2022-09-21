@@ -32,17 +32,19 @@ class ClientTestCase(unittest.TestCase):
 class BaseFuncTestCase(ClientTestCase):
     def test_host_is_up(self):
         with requests_mock.mock() as mock:
-            mock.head(raw.get_host())
+            mock_route(mock, "HEAD", raw.get_host())
             self.assertTrue(raw.host_is_up())
         self.assertFalse(raw.host_is_up())
 
     def test_host_is_valid(self):
         self.assertFalse(raw.host_is_valid())
         with requests_mock.mock() as mock:
-            mock.head(raw.get_host())
-            mock.post(
-                raw.get_full_url("auth/login"),
-                text=json.dumps({}),
+            mock_route(mock, "HEAD", raw.get_host())
+            mock_route(
+                mock,
+                "POST",
+                "auth/login",
+                text={},
                 status_code=400,
             )
             self.assertTrue(raw.host_is_valid())
@@ -84,18 +86,16 @@ class BaseFuncTestCase(ClientTestCase):
 
     def test_get(self):
         with requests_mock.mock() as mock:
-            mock.get(
-                raw.get_full_url("data/persons"),
-                text=json.dumps({"first_name": "John"}),
+            mock_route(
+                mock, "GET", "data/persons", text={"first_name": "John"}
             )
             self.assertEqual(raw.get("data/persons"), {"first_name": "John"})
 
     def test_get_two_clients(self):
         with requests_mock.mock() as mock:
             second_client = gazu.raw.create_client("http://second.host/api")
-            mock.get(
-                raw.get_full_url("data/persons"),
-                text=json.dumps({"first_name": "John"}),
+            mock_route(
+                mock, "GET", "data/persons", text={"first_name": "John"}
             )
             self.assertEqual(raw.get("data/persons"), {"first_name": "John"})
             self.assertRaises(
@@ -104,9 +104,11 @@ class BaseFuncTestCase(ClientTestCase):
                 "data/persons",
                 client=second_client,
             )
-            mock.get(
+            mock_route(
+                mock,
+                "GET",
                 raw.get_full_url("data/persons", client=second_client),
-                text=json.dumps({"first_name": "John2"}),
+                text={"first_name": "John2"},
             )
             self.assertEqual(
                 raw.get("data/persons", client=second_client),
@@ -115,9 +117,11 @@ class BaseFuncTestCase(ClientTestCase):
 
     def test_post(self):
         with requests_mock.mock() as mock:
-            mock.post(
-                raw.get_full_url("data/persons"),
-                text=json.dumps({"id": "person-01", "first_name": "John"}),
+            mock_route(
+                mock,
+                "POST",
+                "data/persons",
+                text={"id": "person-01", "first_name": "John"},
             )
             self.assertEqual(
                 raw.post("data/persons", "person-01"),
@@ -127,9 +131,11 @@ class BaseFuncTestCase(ClientTestCase):
     def test_post_with_a_date_field(self):
         now = datetime.datetime.now()
         with requests_mock.mock() as mock:
-            mock.post(
-                raw.get_full_url("data/persons"),
-                text=json.dumps({"id": "person-01", "first_name": "John"}),
+            mock_route(
+                mock,
+                "POST",
+                "data/persons",
+                text={"id": "person-01", "first_name": "John"},
             )
             self.assertEqual(
                 raw.post("data/persons", {"birth_date": now}),
@@ -138,9 +144,11 @@ class BaseFuncTestCase(ClientTestCase):
 
     def test_put(self):
         with requests_mock.mock() as mock:
-            mock.put(
-                raw.get_full_url("data/persons"),
-                text=json.dumps({"id": "person-01", "first_name": "John"}),
+            mock_route(
+                mock,
+                "PUT",
+                "data/persons",
+                text={"id": "person-01", "first_name": "John"},
             )
             self.assertEqual(
                 raw.put("data/persons", "person-01"),
@@ -149,15 +157,15 @@ class BaseFuncTestCase(ClientTestCase):
 
     def test_update(self):
         with requests_mock.mock() as mock:
-            mock.put(
-                raw.get_full_url("data/persons/person-1"),
-                text=json.dumps(
-                    {
-                        "id": "person-1",
-                        "first_name": "John",
-                        "last_name": "Doe",
-                    }
-                ),
+            mock_route(
+                mock,
+                "PUT",
+                "data/persons/person-1",
+                text={
+                    "id": "person-1",
+                    "first_name": "John",
+                    "last_name": "Doe",
+                },
             )
             data = {"last_name": "Doe"}
             self.assertEqual(
@@ -167,14 +175,16 @@ class BaseFuncTestCase(ClientTestCase):
 
     def test_delete(self):
         with requests_mock.mock() as mock:
-            mock.delete(raw.get_full_url("data/persons/person-01"), text="")
+            mock_route(mock, "DELETE", "data/persons/person-01", text="")
             self.assertEqual(raw.delete("data/persons/person-01"), "")
 
     def test_fetch_all(self):
         with requests_mock.mock() as mock:
-            mock.get(
-                raw.get_full_url("data/persons"),
-                text=json.dumps([{"first_name": "John"}]),
+            mock_route(
+                mock,
+                "GET",
+                "data/persons",
+                text=[{"first_name": "John"}],
             )
             self.assertEqual(
                 raw.fetch_all("persons"), [{"first_name": "John"}]
@@ -182,38 +192,42 @@ class BaseFuncTestCase(ClientTestCase):
 
     def test_fetch_first(self):
         with requests_mock.mock() as mock:
-            mock.get(
-                raw.get_full_url("data/persons"),
-                text=json.dumps(
-                    [{"first_name": "John"}, {"first_name": "Jane"}]
-                ),
+            mock_route(
+                mock,
+                "GET",
+                "data/persons",
+                text=[{"first_name": "John"}, {"first_name": "Jane"}],
             )
             self.assertEqual(
                 raw.fetch_first("persons"), {"first_name": "John"}
             )
 
-            mock.get(raw.get_full_url("data/persons"), text=json.dumps([]))
+            mock_route(mock, "GET", "data/persons", text=[])
             self.assertIsNone(raw.fetch_first("persons"))
 
     def test_query_string(self):
         with requests_mock.mock() as mock:
-            mock.get(
-                raw.get_full_url("data/projects?name=Test"),
-                text=json.dumps([{"name": "Project"}]),
+            mock_route(
+                mock,
+                "GET",
+                "data/projects?name=Test",
+                text=[{"name": "Project"}],
             )
             self.assertEqual(
                 raw.fetch_first("projects", {"name": "Test"}),
                 {"name": "Project"},
             )
 
-            mock.get(raw.get_full_url("data/persons"), text=json.dumps([]))
+            mock_route(mock, "GET", "data/persons", text=[])
             self.assertIsNone(raw.fetch_first("persons"))
 
     def test_fetch_one(self):
         with requests_mock.mock() as mock:
-            mock.get(
-                raw.get_full_url("data/persons/person-01"),
-                text=json.dumps({"id": "person-01", "first_name": "John"}),
+            mock_route(
+                mock,
+                "GET",
+                "data/persons/person-01",
+                text={"id": "person-01", "first_name": "John"},
             )
             self.assertEqual(
                 raw.fetch_one("persons", "person-01"),
@@ -222,9 +236,11 @@ class BaseFuncTestCase(ClientTestCase):
 
     def test_create(self):
         with requests_mock.mock() as mock:
-            mock.post(
-                raw.get_full_url("data/persons"),
-                text=json.dumps({"id": "person-01", "first_name": "John"}),
+            mock_route(
+                mock,
+                "POST",
+                "data/persons",
+                text={"id": "person-01", "first_name": "John"},
             )
             self.assertEqual(
                 raw.create("persons", {"first_name": "John"}),
@@ -233,9 +249,7 @@ class BaseFuncTestCase(ClientTestCase):
 
     def test_version(self):
         with requests_mock.mock() as mock:
-            mock.get(
-                raw.get_host() + "/", text=json.dumps({"version": "0.2.0"})
-            )
+            mock_route(mock, "GET", "/", text={"version": "0.2.0"})
             self.assertEqual(raw.get_api_version(), "0.2.0")
 
     def test_make_auth_token(self):
@@ -369,11 +383,11 @@ class BaseFuncTestCase(ClientTestCase):
 
     def test_init_log_in(self):
         with requests_mock.mock() as mock:
-            mock.post(
-                raw.get_full_url("auth/login"),
-                text=json.dumps(
-                    {"login": True, "tokens": {"access_token": "tokentest"}}
-                ),
+            mock_route(
+                mock,
+                "POST",
+                "auth/login",
+                text={"login": True, "tokens": {"access_token": "tokentest"}},
             )
             gazu.log_in("frank", "test")
         self.assertEqual(
@@ -402,19 +416,22 @@ class BaseFuncTestCase(ClientTestCase):
 
     def test_init_log_in_fail(self):
         with requests_mock.mock() as mock:
-            mock.post(
-                raw.get_full_url("auth/login"),
-                text=json.dumps({"login": False}),
+            mock_route(
+                mock,
+                "POST",
+                "auth/login",
+                text={"login": False},
             )
             self.assertRaises(
                 AuthFailedException, gazu.log_in, "frank", "test"
             )
             self.assertRaises(AuthFailedException, gazu.log_in, "", "")
         with requests_mock.mock() as mock:
-            mock.head(raw.get_host())
-            mock.post(
-                raw.get_full_url("auth/login"),
-                text=json.dumps({}),
+            mock_route(
+                mock,
+                "POST",
+                "auth/login",
+                text={},
                 status_code=400,
             )
             with self.assertRaises(AuthFailedException):
@@ -422,17 +439,18 @@ class BaseFuncTestCase(ClientTestCase):
 
     def test_get_current_user(self):
         with requests_mock.mock() as mock:
-            mock.get(
-                raw.get_full_url("auth/authenticated"),
-                text=json.dumps({"user": {"id": "123"}}),
+            mock_route(
+                mock, "GET", "auth/authenticated", text={"user": {"id": "123"}}
             )
             current_user = raw.get_current_user()
             self.assertEqual(current_user["id"], "123")
 
     def test_get_file_data_from_url(self):
         with requests_mock.mock() as mock:
-            mock.get(
-                raw.get_full_url("test_url"),
+            mock_route(
+                mock,
+                "GET",
+                "test_url",
                 text="test",
             )
             self.assertEqual(raw.get_file_data_from_url("test_url"), b"test")
