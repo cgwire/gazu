@@ -6,7 +6,12 @@ default = raw.default_client
 
 
 def get_last_events(
-    page_size=20000, project=None, after=None, before=None, client=default
+    page_size=20000,
+    project=None,
+    after=None,
+    before=None,
+    only_files=False,
+    client=default,
 ):
     """
     Get last events that occured on the machine.
@@ -16,13 +21,13 @@ def get_last_events(
         project (dict/id): Get only events related to this project.
         after (dict/id): Get only events occuring after given date.
         before (dict/id): Get only events occuring before given date.
-
+        only_files (bool): Get only events related to files.
 
     Returns:
         dict: Last events matching criterions.
     """
     path = "/data/events/last"
-    params = {"page_size": page_size}
+    params = {"page_size": page_size, "only_files": only_files}
     if project is not None:
         project = normalize_model_parameter(project)
         params["project_id"] = project["id"]

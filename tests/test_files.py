@@ -78,17 +78,17 @@ class FilesTestCase(unittest.TestCase):
             self.assertEqual(
                 mock.last_request.json(),
                 {
-                    u"comment": comment,
-                    u"name": name,
-                    u"nb_elements": 1,
-                    u"output_type_id": output_type["id"],
-                    u"person_id": person["id"],
-                    u"representation": u"",
-                    u"revision": 0,
-                    u"sep": u"/",
-                    u"task_type_id": task_type["id"],
-                    u"working_file_id": working_file["id"],
-                    u"file_status_id": file_status["id"],
+                    "comment": comment,
+                    "name": name,
+                    "nb_elements": 1,
+                    "output_type_id": output_type["id"],
+                    "person_id": person["id"],
+                    "representation": "",
+                    "revision": 0,
+                    "sep": "/",
+                    "task_type_id": task_type["id"],
+                    "working_file_id": working_file["id"],
+                    "file_status_id": file_status["id"],
                 },
             )
 
@@ -490,7 +490,7 @@ class FilesTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             base_path = "entities/asset-01/output-files"
             path = gazu.client.url_path_join("data", base_path)
-            params = {"output_type_id": u"output-type-1"}
+            params = {"output_type_id": "output-type-1"}
 
             mock.get(
                 gazu.client.get_full_url(
@@ -505,8 +505,8 @@ class FilesTestCase(unittest.TestCase):
 
             # test with representation
             params = {
-                "output_type_id": u"output-type-1",
-                "representation": u"obj",
+                "output_type_id": "output-type-1",
+                "representation": "obj",
             }
             mock.get(
                 gazu.client.get_full_url(
@@ -537,8 +537,8 @@ class FilesTestCase(unittest.TestCase):
             base_path = "asset-instances/asset-instance-1/output-files"
             path = gazu.client.url_path_join("data", base_path)
             params = {
-                "temporal_entity_id": u"scene-1",
-                "output_type_id": u"output-type-1",
+                "temporal_entity_id": "scene-1",
+                "output_type_id": "output-type-1",
             }
 
             mock.get(
