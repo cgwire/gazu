@@ -22,6 +22,32 @@ The audience for this Python client is Technical Artists, Technical Directors
 and Software Engineers from animation/VFX studios. With Gazu they can augment their tools
 with the production data. 
 
+Quickstart
+----------
+
+Install Gazu in your application environment via pip:
+
+.. code:: bash
+
+    pip install gazu
+
+The client requires a few extra configuration before being used. It
+needs to know where is located the API server and to log in:
+
+.. code:: python
+
+    import gazu
+
+    gazu.set_host("https://zou-server-url/api")
+    gazu.log_in("user@yourdomain.com", "password")
+
+Let's finish with an example. Fetch all the open projects:
+
+::
+
+    projects = gazu.project.all_open_projects()
+
+
 Use cases
 =========
 
