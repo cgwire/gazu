@@ -19,8 +19,8 @@ Who is it for?
 ==============
 
 The audience for this Python client is Technical Artists, Technical Directors
-and Software Engineers from CG studios. With Gazu they can augment their tools
-with the CG production data. 
+and Software Engineers from animation/VFX studios. With Gazu they can augment their tools
+with the production data. 
 
 Use cases
 =========
@@ -82,10 +82,7 @@ Function References
 About authors
 =============
 
-Gazu is written by CG Wire, a company based in France. We help small to
-midsize CG studios to manage their production efficiently.
-We apply software craftmanship principles as much as possible. We love
-coding and consider that good developer experience matters.
+Gazu is written by CGWire, a company based in France. We help animation and VFX studios to collaborate better through efficient tooling. We already work with more than 70 studios around the world.
 
 Visit our website_ for more information.
 
