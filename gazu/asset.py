@@ -270,6 +270,7 @@ def all_asset_types_for_project(project, client=default):
     Returns:
         list: Asset types from assets listed in given project.
     """
+    project = normalize_model_parameter(project)
     path = "projects/%s/asset-types" % project["id"]
     return sort_by_name(raw.fetch_all(path, client=client))
 
