@@ -375,3 +375,14 @@ def remove_metadata_descriptor(
         params,
         client=client,
     )
+
+
+def get_team(project, client=default):
+    """
+    Get team for project.
+
+    Args:
+        project (dict / ID): The project dict or id.
+    """
+    project = normalize_model_parameter(project)
+    return raw.fetch_all("projects/%s/team" % project["id"], client=client)

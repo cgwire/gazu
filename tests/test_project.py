@@ -404,3 +404,23 @@ class ProjectTestCase(unittest.TestCase):
                     "id": fakeid("asset-types-1"),
                 },
             )
+
+    def test_get_team(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/projects/%s/team" % fakeid("project-1"),
+                text=[
+                    {
+                        "id": fakeid("person-1"),
+                    },
+                    {
+                        "id": fakeid("person-2"),
+                    },
+                ],
+            ),
+            team = gazu.project.get_team(fakeid("project-1"))
+            self.assertEqual(len(team), 2)
+            self.assertEqual(team[0]["id"], fakeid("person-1"))
+            self.assertEqual(team[1]["id"], fakeid("person-2"))
