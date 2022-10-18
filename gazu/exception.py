@@ -79,7 +79,7 @@ class TooBigFileException(Exception):
     pass
 
 
-class TaskStatusNotFound(Exception):
+class TaskStatusNotFoundException(Exception):
     """
     Error raised when a task status is not found.
     """
@@ -91,3 +91,7 @@ class DownloadFileException(Exception):
     """
     Error raised when a file can't be downloaded.
     """
+
+
+class TaskMustBeADictException(Exception):
+    """ """

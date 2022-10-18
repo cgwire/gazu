@@ -1,7 +1,10 @@
 import string
 import json
 
-from gazu.exception import TaskStatusNotFound
+from gazu.exception import (
+    TaskStatusNotFoundException,
+    TaskMustBeADictException,
+)
 
 from . import client as raw
 from .sorting import sort_by_name
@@ -589,7 +592,7 @@ def start_task(task, started_task_status=None, client=default):
             "wip", client=client
         )
         if started_task_status is None:
-            raise TaskStatusNotFound(
+            raise TaskStatusNotFoundException(
                 (
                     "started_task_status is None : 'wip' task status is "
                     "non-existent. You have to create it or to set an other "
@@ -1018,12 +1021,13 @@ def update_task_data(task, data={}, client=default):
 def get_task_url(task, client=default):
     """
     Args:
-        task (str / dict): The task dict or the task ID.
+        task (dict): The task dict.
 
     Returns:
         url (str): Web url associated to the given task
     """
-    task = normalize_model_parameter(task)
+    if not isinstance(task, dict):
+        raise TaskMustBeADictException
     path = "{host}/productions/{project_id}/shots/tasks/{task_id}/"
     return path.format(
         host=raw.get_api_url_from_host(client=client),
