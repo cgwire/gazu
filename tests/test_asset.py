@@ -94,20 +94,19 @@ class CastingTestCase(unittest.TestCase):
 
     def test_all_asset_types_for_project(self):
         with requests_mock.mock() as mock:
-            random_uuid = "beda37a9-c257-41ea-9337-d9cf0d746898"
+            project_id = fakeid("project-1")
             mock_route(
                 mock,
                 "GET",
-                "data/projects/%s/asset-types" % random_uuid,
+                "data/projects/%/asset-types" % project_id,
                 text=[{"name": "Asset Type 01"}],
             )
-            project = {"id": random_uuid}
-            asset_types = gazu.asset.all_asset_types_for_project(project)
+            asset_types = gazu.asset.all_asset_types_for_project(project_id)
             asset_type = asset_types[0]
             self.assertEqual(asset_type["name"], "Asset Type 01")
 
             # Test that the function accepts both an ID and dict
-            asset_types = gazu.asset.all_asset_types_for_project(random_uuid)
+            asset_types = gazu.asset.all_asset_types_for_project(project_id)
             other_asset_type = asset_types[0]
             self.assertEqual(asset_type["name"], other_asset_type["name"])
 
