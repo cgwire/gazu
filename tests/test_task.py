@@ -859,7 +859,7 @@ class TaskTestCase(unittest.TestCase):
         )
         task = "test"
         self.assertRaises(
-            gazu.task.get_task_url(task), TaskMustBeADictException
+            TaskMustBeADictException, gazu.task.get_task_url, task
         )
 
     def test_upload_preview_file(self):

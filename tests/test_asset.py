@@ -98,7 +98,7 @@ class CastingTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/projects/%/asset-types" % project_id,
+                "data/projects/%s/asset-types" % project_id,
                 text=[{"name": "Asset Type 01"}],
             )
             asset_types = gazu.asset.all_asset_types_for_project(project_id)
