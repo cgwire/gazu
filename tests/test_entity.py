@@ -4,7 +4,7 @@ import requests_mock
 
 import gazu.client
 
-from utils import fakeid
+from utils import fakeid, mock_route
 
 
 class AssetTestCase(unittest.TestCase):
@@ -82,13 +82,24 @@ class AssetTestCase(unittest.TestCase):
 
     def test_get_entity_by_name(self):
         with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url("data/entities?name=entity-1"),
-                text=json.dumps(
-                    [{"id": fakeid("entity-1"), "name": "entity-1"}]
-                ),
+            mock_route(
+                mock,
+                "GET",
+                "data/entities?name=entity-1",
+                text=[{"id": fakeid("entity-1"), "name": "entity-1"}],
             )
             entity = gazu.entity.get_entity_by_name("entity-1")
+            self.assertEqual(entity["id"], fakeid("entity-1"))
+            mock_route(
+                mock,
+                "GET",
+                "data/entities?name=entity-1&project_id=%s"
+                % fakeid("project-1"),
+                text=[{"id": fakeid("entity-1"), "name": "entity-1"}],
+            )
+            entity = gazu.entity.get_entity_by_name(
+                "entity-1", fakeid("project-1")
+            )
             self.assertEqual(entity["id"], fakeid("entity-1"))
 
     def test_get_entity_type_by_name(self):

@@ -29,36 +29,39 @@ def all_entity_types(client=default):
 def get_entity(entity_id, client=default):
     """
     Args:
-        id (str, client=default): ID of claimed entity.
+        entity_id (str): ID of claimed entity.
 
     Returns:
-        dict: Retrieve entity matching given ID (It can be an entity of any
+        dict: Retrieve entity matching given ID (it can be an entity of any
         kind: asset, shot, sequence or episode).
     """
     return raw.fetch_one("entities", entity_id, client=client)
 
 
 @cache
-def get_entity_by_name(entity_name, client=default):
+def get_entity_by_name(entity_name, project=None, client=default):
     """
     Args:
-        name (str, client=default): The name of the claimed entity.
-
+        name (str): The name of the claimed entity.
+        project (str, dict): Project ID or dict.
     Returns:
-        Retrieve entity matching given name.
+        Retrieve entity matching given name (and project if given).
     """
-    return raw.fetch_first("entities", {"name": entity_name}, client=client)
+    params = {"name": entity_name}
+    if project is not None:
+        project = normalize_model_parameter(project)
+        params["project_id"] = project["id"]
+    return raw.fetch_first("entities", params, client=client)
 
 
 @cache
 def get_entity_type(entity_type_id, client=default):
     """
-        Args:
-            id (str, client=default): ID of claimed entity type.
-    , client=client
-        Returns:
-            Retrieve entity type matching given ID (It can be an entity type of any
-            kind).
+    Args:
+        entity_type_id (str): ID of claimed entity type.
+    Returns:
+        Retrieve entity type matching given ID (It can be an entity type of any
+        kind).
     """
     return raw.fetch_one("entity-types", entity_type_id, client=client)
 
