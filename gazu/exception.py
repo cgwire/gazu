@@ -94,4 +94,6 @@ class DownloadFileException(Exception):
 
 
 class TaskMustBeADictException(Exception):
-    """ """
+    """
+    Error raised when a task should be a dict.
+    """
