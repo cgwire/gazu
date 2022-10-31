@@ -45,7 +45,7 @@ class BaseFuncTestCase(ClientTestCase):
                 "POST",
                 "auth/login",
                 text={},
-                status_code=400,
+                status_code=401,
             )
             self.assertTrue(raw.host_is_valid())
 
@@ -432,7 +432,7 @@ class BaseFuncTestCase(ClientTestCase):
                 "POST",
                 "auth/login",
                 text={},
-                status_code=400,
+                status_code=401,
             )
             with self.assertRaises(AuthFailedException):
                 gazu.log_in("", "")

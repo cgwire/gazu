@@ -16,7 +16,11 @@ from . import task
 from . import user
 from . import playlist
 
-from .exception import AuthFailedException, ParameterException
+from .exception import (
+    AuthFailedException,
+    ParameterException,
+    NotAuthenticatedException,
+)
 from .__version__ import __version__
 
 
@@ -34,7 +38,7 @@ def log_in(email, password, client=raw.default_client):
         tokens = raw.post(
             "auth/login", {"email": email, "password": password}, client=client
         )
-    except ParameterException:
+    except (NotAuthenticatedException, ParameterException):
         pass
 
     if not tokens or (

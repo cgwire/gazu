@@ -74,9 +74,9 @@ def host_is_valid(client=default_client):
     if not host_is_up(client):
         return False
     try:
-        post("auth/login", {"email": "", "password": ""})
+        post("auth/login", {"email": ""})
     except Exception as exc:
-        return type(exc) == ParameterException
+        return isinstance(exc, NotAuthenticatedException)
 
 
 def get_host(client=default_client):

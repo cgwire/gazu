@@ -3,7 +3,10 @@ import unittest
 import json
 import requests_mock
 import gazu.client
-from gazu.exception import TaskStatusNotFound
+from gazu.exception import (
+    TaskStatusNotFoundException,
+    TaskMustBeADictException,
+)
 import gazu.task
 import datetime
 
@@ -219,7 +222,9 @@ class TaskTestCase(unittest.TestCase):
                 text=[],
             )
             self.assertRaises(
-                TaskStatusNotFound, gazu.task.start_task, fakeid("task-1")
+                TaskStatusNotFoundException,
+                gazu.task.start_task,
+                fakeid("task-1"),
             )
             mock_route(
                 mock,
@@ -851,6 +856,10 @@ class TaskTestCase(unittest.TestCase):
             gazu.task.get_task_url(task),
             "http://gazu-server/productions/%s/"
             "shots/tasks/%s/" % (fakeid("project-1"), fakeid("task-1")),
+        )
+        task = "test"
+        self.assertRaises(
+            TaskMustBeADictException, gazu.task.get_task_url, task
         )
 
     def test_upload_preview_file(self):
