@@ -14,9 +14,9 @@ def new_scene(project, sequence, name, client=default):
     """
     project = normalize_model_parameter(project)
     sequence = normalize_model_parameter(sequence)
-    shot = {"name": name, "sequence_id": sequence["id"]}
+    scene = {"name": name, "sequence_id": sequence["id"]}
     return raw.post(
-        "data/projects/%s/scenes" % project["id"], shot, client=client
+        "data/projects/%s/scenes" % project["id"], scene, client=client
     )
 
 
