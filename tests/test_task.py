@@ -253,17 +253,23 @@ class TaskTestCase(unittest.TestCase):
 
     def test_get_time_spent(self):
         with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url(
-                    "actions/tasks/task-01/time-spents/2017-09-23"
-                ),
-                text=json.dumps(
-                    {"person1": {"duration": 3600}, "total": 3600}
-                ),
+            mock_route(
+                mock,
+                "GET",
+                "actions/tasks/task-01/time-spents/2017-09-23",
+                text={"person1": {"duration": 3600}, "total": 3600},
             )
             time_spents = gazu.task.get_time_spent(
                 {"id": "task-01"}, "2017-09-23"
             )
+            self.assertEqual(time_spents["total"], 3600)
+            mock_route(
+                mock,
+                "GET",
+                "actions/tasks/task-01/time-spents",
+                text={"person1": {"duration": 3600}, "total": 3600},
+            )
+            time_spents = gazu.task.get_time_spent({"id": "task-01"})
             self.assertEqual(time_spents["total"], 3600)
 
     def test_set_time_spent(self):

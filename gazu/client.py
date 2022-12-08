@@ -76,7 +76,7 @@ def host_is_valid(client=default_client):
     try:
         post("auth/login", {"email": ""})
     except Exception as exc:
-        return isinstance(exc, NotAuthenticatedException)
+        return isinstance(exc, (NotAuthenticatedException, ParameterException))
 
 
 def get_host(client=default_client):
