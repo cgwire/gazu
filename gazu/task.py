@@ -636,9 +636,9 @@ def task_to_review(
 
 
 @cache
-def get_time_spent(task, date, client=default):
+def get_time_spent(task, date=None, client=default):
     """
-    Get the time spent by CG artists on a task at a given date. A field contains
+    Get the time spent by CG artists on a task at a given date if given. A field contains
     the total time spent.  Durations are given in seconds. Date format is
     YYYY-MM-DD.
 
@@ -650,7 +650,9 @@ def get_time_spent(task, date, client=default):
         dict: A dict with person ID as key and time spent object as value.
     """
     task = normalize_model_parameter(task)
-    path = "actions/tasks/%s/time-spents/%s" % (task["id"], date)
+    path = "actions/tasks/%s/time-spents" % (task["id"])
+    if date is not None:
+        path += "/%s" % (date)
     return raw.get(path, client=client)
 
 
