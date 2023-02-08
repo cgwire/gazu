@@ -180,9 +180,13 @@ class PersonTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/persons/%s" % (fakeid("John Doe"))
+                    "data/persons?id=%s" % (fakeid("John Doe"))
                 ),
-                text=json.dumps(result),
+                text=json.dumps(
+                    [
+                        result,
+                    ]
+                ),
             )
             self.assertEqual(
                 gazu.person.get_person(fakeid("John Doe")), result
