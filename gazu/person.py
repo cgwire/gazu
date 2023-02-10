@@ -54,15 +54,20 @@ def get_all_month_time_spents(id, date, client=default):
 
 
 @cache
-def get_person(id, client=default):
+def get_person(id, relations=False, client=default):
     """
     Args:
         id (str): An uuid identifying a person.
+        relations (bool): Whether to get the relations for the given person.
 
     Returns:
         dict: Person corresponding to given id.
     """
-    return raw.fetch_one("persons", id, client=client)
+    params = {"id": id}
+    if relations:
+        params["relations"] = "true"
+
+    return raw.fetch_first("persons", params=params, client=client)
 
 
 @cache
