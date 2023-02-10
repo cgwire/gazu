@@ -32,11 +32,28 @@ def set_host(url, client=raw.default_client):
     raw.set_host(url, client=client)
 
 
-def log_in(email, password, client=raw.default_client):
+def log_in(
+    email,
+    password,
+    totp=None,
+    email_otp=None,
+    fido_authentication_response=None,
+    recovery_code=None,
+    client=raw.default_client,
+):
     tokens = {}
     try:
         tokens = raw.post(
-            "auth/login", {"email": email, "password": password}, client=client
+            "auth/login",
+            {
+                "email": email,
+                "password": password,
+                "totp": totp,
+                "email_otp": email_otp,
+                "fido_authentication_response": fido_authentication_response,
+                "recovery_code": recovery_code,
+            },
+            client=client,
         )
     except (NotAuthenticatedException, ParameterException):
         pass
@@ -48,6 +65,10 @@ def log_in(email, password, client=raw.default_client):
     else:
         raw.set_tokens(tokens, client=client)
     return tokens
+
+
+def send_email_otp(email, client=raw.default_client):
+    return raw.get("auth/email-otp", params={"email": email}, client=client)
 
 
 def log_out(client=raw.default_client):

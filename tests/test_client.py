@@ -400,6 +400,17 @@ class BaseFuncTestCase(ClientTestCase):
             gazu.log_out()
             self.assertEqual(raw.default_client.tokens, {})
 
+    def test_init_send_email_otp(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "auth/email-otp?email=test@test.com",
+                text={"success": True},
+            )
+            success = gazu.send_email_otp("test@test.com")
+            self.assertEqual(success, {"success": True})
+
     def test_init_refresh_token(self):
         with requests_mock.mock() as mock:
             raw.default_client.tokens["refresh_token"] = "refresh_token1"
