@@ -37,6 +37,22 @@ def all_persons(client=default):
     return sort_by_name(raw.fetch_all("persons", client=client))
 
 
+def get_all_month_time_spents(id, date, client=default):
+    """
+    Args:
+        id (str): An uuid identifying a person.
+        date (datetime.date): The date of the month to query.
+
+    Returns:
+        list: All of the person's time spents for the given month.
+    """
+    date = date.strftime("%Y/%m")
+    return raw.get(
+        "data/persons/{}/time-spents/month/all/{}".format(id, date),
+        client=client,
+    )
+
+
 @cache
 def get_person(id, client=default):
     """
