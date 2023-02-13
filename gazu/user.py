@@ -247,6 +247,26 @@ def all_done_tasks(client=default):
     return raw.fetch_all("user/done-tasks", client=client)
 
 
+@cache
+def get_timespents_range(start_date, end_date, client=default):
+    """
+    Gets the timespents of the current user for the given date range.
+
+    Args:
+        start_date (str): The first day of the date range as a date string with
+                          the following format: YYYY-MM-DD
+        end_date (str): The last day of the date range as a date string with
+                        the following format: YYYY-MM-DD
+    Returns:
+        list: All of the person's time spents
+    """
+    date_range = {
+        "start_date": start_date,
+        "end_date": end_date,
+    }
+    return raw.get("/data/user/time-spents", params=date_range, client=client)
+
+
 def log_desktop_session_log_in(client=default):
     """
     Add a log entry to mention that the user logged in his computer.

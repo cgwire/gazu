@@ -37,6 +37,31 @@ def all_persons(client=default):
     return sort_by_name(raw.fetch_all("persons", client=client))
 
 
+@cache
+def get_time_spents_range(person_id, start_date, end_date, client=default):
+    """
+    Gets the time spents of the current user for the given date range.
+
+    Args:
+        person_id (str): An uuid identifying a person.
+        start_date (str): The first day of the date range as a date string with
+                          the following format: YYYY-MM-DD
+        end_date (str): The last day of the date range as a date string with
+                        the following format: YYYY-MM-DD
+    Returns:
+        list: All of the person's time spents
+    """
+    date_range = {
+        "start_date": start_date,
+        "end_date": end_date,
+    }
+    return raw.get(
+        "/data/persons/{}/time-spents".format(person_id),
+        params=date_range,
+        client=client,
+    )
+
+
 def get_all_month_time_spents(id, date, client=default):
     """
     Args:
