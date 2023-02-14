@@ -80,6 +80,41 @@ def get_entity_type_by_name(entity_type_name, client=default):
     )
 
 
+@cache
+def guess_from_path(project_id, path, sep="/"):
+    """
+    Get list of possible project file tree templates matching a file path
+    and data ids corresponding to template tokens.
+
+    Args:
+        project_id (str): Project id of given file
+        file_path (str): Path to a file
+        sep (str): File path separator, defaults to "/"
+    Returns:
+        list: dictionnaries with the corresponding entities and template name.
+
+    Example:
+        .. code-block:: text
+
+        [
+            {
+                'Asset': '<asset_id>',
+                'Project': '<project_id>',
+                'Template': 'asset'
+            },
+            {
+                'Project': '<project_id>',
+                'Template': 'instance'
+            },
+            ...
+        ]
+    """
+    return raw.post(
+        "/data/entities/guess_from_path",
+        {"project_id": project_id, "file_path": path, "sep": sep},
+    )
+
+
 def new_entity_type(name, client=default):
     """
     Creates an entity type with the given name.
