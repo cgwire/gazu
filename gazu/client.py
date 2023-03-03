@@ -1,15 +1,9 @@
-import sys
 import functools
 import json
 import shutil
 import urllib
 
 from .encoder import CustomJSONEncoder
-
-if sys.version_info[0] == 3:
-    from json import JSONDecodeError
-else:
-    JSONDecodeError = ValueError
 
 from .__version__ import __version__
 
@@ -221,7 +215,7 @@ def post(path, data, client=default_client):
     check_status(response, path)
     try:
         result = response.json()
-    except JSONDecodeError:
+    except json.JSONDecodeError:
         print(response.text)
         raise
     return result
@@ -405,7 +399,7 @@ def upload(path, file_path, data={}, extra_files=[], client=default_client):
     check_status(response, path)
     try:
         result = response.json()
-    except JSONDecodeError:
+    except json.JSONDecodeError:
         print(response.text)
         raise
     if "message" in result:

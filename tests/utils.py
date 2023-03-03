@@ -7,7 +7,6 @@ import json
 import gazu.client
 import io
 import cgi
-import sys
 
 
 def fakeid(string):
@@ -39,10 +38,7 @@ def add_verify_file_callback(mock, dict_assert={}, url=None):
         if url is None or url == request.url:
             body_file = io.BytesIO(request.body)
             _, pdict = cgi.parse_header(request.headers["Content-Type"])
-            if sys.version_info[0] == 3:
-                pdict["boundary"] = bytes(pdict["boundary"], "UTF-8")
-            else:
-                pdict["boundary"] = bytes(pdict["boundary"])
+            pdict["boundary"] = bytes(pdict["boundary"], "UTF-8")
             parsed = cgi.parse_multipart(fp=body_file, pdict=pdict)
             for key in dict_assert.keys():
                 assert key in parsed.keys()

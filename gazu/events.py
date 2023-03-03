@@ -2,7 +2,6 @@ from .exception import AuthFailedException
 from .client import default_client, get_event_host
 from gazu.client import make_auth_header
 import socketio
-import sys
 
 
 class EventsNamespace(socketio.ClientNamespace):
@@ -29,7 +28,7 @@ def init(
     Returns:
         Event client that will be able to set listeners.
     """
-    params = {"ssl_verify": ssl_verify} if sys.version_info[0] > 3 else {}
+    params = {"ssl_verify": ssl_verify}
     params.update(kwargs)
     event_client = socketio.Client(
         logger=logger, reconnection=reconnection, **params
