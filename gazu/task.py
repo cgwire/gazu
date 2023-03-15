@@ -945,17 +945,22 @@ def assign_task(task, person, client=default):
     return raw.put(path, {"task_ids": task["id"]}, client=client)
 
 
-def new_task_type(name, client=default):
+def new_task_type(name, color="#000000", client=default):
     """
     Create a new task type with the given name.
 
     Args:
         name (str): The name of the task type
+        color (str): The color of the task type as an hexadecimal string
+        with # as first character. ex : #00FF00
 
     Returns:
         dict: The created task type
     """
-    data = {"name": name}
+    data = {
+        "name": name,
+        "color": color
+    }
     return raw.post("data/task-types", data, client=client)
 
 
@@ -966,7 +971,7 @@ def new_task_status(name, short_name, color, client=default):
     Args:
         name (str): The name of the task status
         short_name (str): The short name of the task status
-        color (str): The color of the task status has an hexadecimal string
+        color (str): The color of the task status as an hexadecimal string
         with # as first character. ex : #00FF00
 
     Returns:
