@@ -1083,7 +1083,7 @@ def download_preview_file(preview_file, file_path, client=default):
         file_path (str): Location on hard drive where to save the file.
     """
     return raw.download(
-        get_preview_file_url(preview_file),
+        get_preview_file_url(preview_file, client=client),
         file_path,
         client=client,
     )

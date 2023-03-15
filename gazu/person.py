@@ -198,7 +198,7 @@ def new_person(
     Returns:
         dict: Created person.
     """
-    person = get_person_by_email(email)
+    person = get_person_by_email(email, client=client)
     if person is None:
         person = raw.post(
             "data/persons/new",
