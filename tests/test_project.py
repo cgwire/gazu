@@ -256,6 +256,27 @@ class ProjectTestCase(unittest.TestCase):
                 metadata_descriptor["id"], fakeid("metadata-descriptor-1")
             )
 
+    def test_get_metadata_descriptor_by_field_name(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/metadata-descriptors?project_id=%s&field_name=studio" % fakeid("project-1"),
+                text=[{
+                    "id": fakeid("metadata-descriptor-1"),
+                    "name": "metadata-descriptor-1",
+                    "field_name": "studio",
+                }],
+            )
+            metadata_descriptor = \
+                gazu.project.get_metadata_descriptor_by_field_name(
+                    fakeid("project-1"),
+                    "studio"
+                )
+            self.assertEqual(
+                metadata_descriptor["name"], "metadata-descriptor-1"
+            )
+
     def test_all_metadata_descriptors(self):
         with requests_mock.mock() as mock:
             mock_route(
@@ -424,3 +445,34 @@ class ProjectTestCase(unittest.TestCase):
             self.assertEqual(len(team), 2)
             self.assertEqual(team[0]["id"], fakeid("person-1"))
             self.assertEqual(team[1]["id"], fakeid("person-2"))
+
+    def test_add_person_to_team(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "POST",
+                "data/projects/%s/team" % fakeid("project-1"),
+                text={
+                    "team": [fakeid("person-1")],
+                },
+            )
+            team = gazu.project.add_person_to_team(
+                fakeid("project-1"),
+                {
+                    "id": fakeid("person-1"),
+                },
+            )
+            self.assertEqual(
+                team,
+                {
+                    "team": [fakeid("person-1")],
+                },
+            )
+
+    def test_remove_person_from_team(self):
+        with requests_mock.mock() as mock:
+            project_id = fakeid("project-1")
+            person_id = fakeid("person-1")
+            path = "data/projects/%s/team/%s" % (project_id, person_id)
+            mock_route(mock, "DELETE", path, text="")
+            gazu.project.remove_person_from_team(project_id, person_id)

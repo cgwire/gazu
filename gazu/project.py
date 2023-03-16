@@ -292,7 +292,27 @@ def add_metadata_descriptor(
 
 def get_metadata_descriptor(project, metadata_descriptor_id, client=default):
     """
-    Get a metadata descriptor matchind it's ID.
+    Retrieve a the metadata descriptor matching given ID.
+
+    Args:
+        project (dict / ID): The project dict or id.
+        metadata_descriptor_id (dict / ID): The metadata descriptor dict or id.
+
+    Returns:
+        dict: The metadata descriptor matching the ID.
+    """
+    project = normalize_model_parameter(project)
+    metadata_descriptor = normalize_model_parameter(metadata_descriptor_id)
+    return raw.fetch_one(
+        "projects/%s/metadata-descriptors" % project["id"],
+        metadata_descriptor["id"],
+        client=client,
+    )
+
+
+def get_metadata_descriptor_by_field_name(project, field_name, client=default):
+    """
+    Get a metadata descriptor matchind given project and name.
 
     Args:
         project (dict / ID): The project dict or id.
@@ -302,10 +322,12 @@ def get_metadata_descriptor(project, metadata_descriptor_id, client=default):
         dict: The metadata descriptor matchind the ID.
     """
     project = normalize_model_parameter(project)
-    metadata_descriptor = normalize_model_parameter(metadata_descriptor_id)
-    return raw.fetch_one(
-        "projects/%s/metadata-descriptors" % project["id"],
-        metadata_descriptor["id"],
+    return raw.fetch_first(
+        "metadata-descriptors",
+        params={
+            "project_id": project["id"],
+            "field_name": field_name,
+        },
         client=client,
     )
 
@@ -386,3 +408,37 @@ def get_team(project, client=default):
     """
     project = normalize_model_parameter(project)
     return raw.fetch_all("projects/%s/team" % project["id"], client=client)
+
+
+def add_person_to_team(project, person, client=default):
+    """
+    Add a person to the team project.
+
+    Args:
+        project (dict / ID): The project dict or id.
+        person (dict / ID): The person dict or id.
+    """
+    project = normalize_model_parameter(project)
+    person = normalize_model_parameter(person)
+    data = { "person_id": person["id"] }
+    return raw.post(
+        "data/projects/%s/team" % project["id"],
+        data,
+        client=client
+    )
+
+
+def remove_person_from_team(project, person, client=default):
+    """
+    Remove a person from the team project.
+
+    Args:
+        project (dict / ID): The project dict or id.
+        person (dict / ID): The person dict or id.
+    """
+    project = normalize_model_parameter(project)
+    person = normalize_model_parameter(person)
+    return raw.delete(
+        "data/projects/%s/team/%s" % (project["id"], person["id"]),
+        client=client
+    )

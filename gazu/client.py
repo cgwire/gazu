@@ -2,6 +2,7 @@ import functools
 import json
 import shutil
 import urllib
+import os
 
 from .encoder import CustomJSONEncoder
 
@@ -17,6 +18,8 @@ from .exception import (
     ServerErrorException,
     UploadFailedException,
 )
+
+DEBUG = os.getenv("GAZU_DEBUG", "false").lower() == "true"
 
 
 class KitsuClient(object):
@@ -96,6 +99,7 @@ def set_host(new_host, client=default_client):
     """
     client.host = new_host
     return client.host
+
 
 
 def get_event_host(client=default_client):
@@ -187,6 +191,8 @@ def get(path, json_response=True, params=None, client=default_client):
     Returns:
         The request result.
     """
+    if DEBUG:
+        print("GET", get_full_url(path, client))
     path = build_path_with_params(path, params)
     response = client.session.get(
         get_full_url(path, client=client),
@@ -207,6 +213,10 @@ def post(path, data, client=default_client):
     Returns:
         The request result.
     """
+    if DEBUG:
+        print("POST", get_full_url(path, client))
+        if not "password" in data:
+            print("Body:", data)
     response = client.session.post(
         get_full_url(path, client),
         json=data,
@@ -228,6 +238,9 @@ def put(path, data, client=default_client):
     Returns:
         The request result.
     """
+    if DEBUG:
+        print("PUT", get_full_url(path, client))
+        print("Body:", data)
     response = client.session.put(
         get_full_url(path, client),
         json=data,
@@ -244,6 +257,8 @@ def delete(path, params=None, client=default_client):
     Returns:
         The request result.
     """
+    if DEBUG:
+        print("DELETE", get_full_url(path, client))
     path = build_path_with_params(path, params)
 
     response = client.session.delete(

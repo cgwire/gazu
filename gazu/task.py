@@ -427,6 +427,19 @@ def get_task_by_path(project, file_path, entity_type="shot", client=default):
 
 
 @cache
+def get_default_task_status(client=default):
+    """
+    Returns:
+        dict: The unique task status flagged with `is_default`.
+    """
+    return raw.fetch_first(
+        "task-status",
+        params={ "is_default": True },
+        client=client
+    )
+
+
+@cache
 def get_task_status(task_status_id, client=default):
     """
     Args:
@@ -725,7 +738,9 @@ def add_comment(
         task_status (str / dict): The task status dict or ID.
         comment (str): Comment text
         person (str / dict): Comment author
-        date (str): Comment date
+        checklist (list): Comment checklist
+        attachments (list[file_path]): Attachments file paths
+        created_at (str): Comment date
 
     Returns:
         dict: Created comment.
@@ -869,7 +884,9 @@ def add_preview(
         task (str / dict): The task dict or the task ID.
         comment (str / dict): The comment or the comment ID.
         preview_file_path (str): Path of the file to upload as preview.
-
+        preview_file_path (str): Path of the file to upload as preview.
+        preview_file_url (str): Url to download the preview file if no path is
+        given.
     Returns:
         dict: Created preview file model.
     """
@@ -886,6 +903,58 @@ def add_preview(
         client=client,
     )
 
+
+def publish_preview(
+    task,
+    task_status,
+    comment="",
+    person=None,
+    checklist=[],
+    attachments=[],
+    created_at=None,
+    client=default,
+    preview_file_path=None,
+    preview_file_url=None,
+    normalize_movie=True,
+):
+    """
+    Publish a comment and include given preview for given task and set given
+    task status.
+
+    Args:
+        task (str / dict): The task dict or the task ID.
+        task_status (str / dict): The task status dict or ID.
+        comment (str): Comment text
+        person (str / dict): Comment author
+        checklist (list): Comment checklist
+        attachments (list[file_path]): Attachments file paths
+        created_at (str): Comment date
+        preview_file_path (str): Path of the file to upload as preview.
+        preview_file_url (str): Url to download the preview file if no path is
+        given.
+        normalize_movie (bool): Set to false to not do operations on it on the
+        server side.
+    Returns:
+        dict: Created preview file model.
+    """
+    new_comment = add_comment(
+        task,
+        task_status,
+        comment=comment,
+        person=person,
+        checklist=checklist,
+        attachments=[],
+        created_at=created_at,
+        client=client
+    )
+    add_preview(
+        task,
+        new_comment,
+        preview_file_path=preview_file_path,
+        preview_file_url=preview_file_url,
+        normalize_movie=normalize_movie,
+    )
+    return new_comment
 
 def set_main_preview(preview_file, client=default):
     """
@@ -945,17 +1014,22 @@ def assign_task(task, person, client=default):
     return raw.put(path, {"task_ids": task["id"]}, client=client)
 
 
-def new_task_type(name, client=default):
+def new_task_type(name, color="#000000", client=default):
     """
     Create a new task type with the given name.
 
     Args:
         name (str): The name of the task type
+        color (str): The color of the task type as an hexadecimal string
+        with # as first character. ex : #00FF00
 
     Returns:
         dict: The created task type
     """
-    data = {"name": name}
+    data = {
+        "name": name,
+        "color": color
+    }
     return raw.post("data/task-types", data, client=client)
 
 
@@ -966,7 +1040,7 @@ def new_task_status(name, short_name, color, client=default):
     Args:
         name (str): The name of the task status
         short_name (str): The short name of the task status
-        color (str): The color of the task status has an hexadecimal string
+        color (str): The color of the task status as an hexadecimal string
         with # as first character. ex : #00FF00
 
     Returns:
