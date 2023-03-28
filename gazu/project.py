@@ -256,6 +256,7 @@ def add_metadata_descriptor(
     project,
     name,
     entity_type,
+    data_type="string",
     choices=[],
     for_client=False,
     departments=[],
@@ -278,6 +279,7 @@ def add_metadata_descriptor(
     project = normalize_model_parameter(project)
     data = {
         "name": name,
+        "data_type": data_type,
         "choices": choices,
         "for_client": for_client,
         "entity_type": entity_type,
@@ -420,11 +422,9 @@ def add_person_to_team(project, person, client=default):
     """
     project = normalize_model_parameter(project)
     person = normalize_model_parameter(person)
-    data = { "person_id": person["id"] }
+    data = {"person_id": person["id"]}
     return raw.post(
-        "data/projects/%s/team" % project["id"],
-        data,
-        client=client
+        "data/projects/%s/team" % project["id"], data, client=client
     )
 
 
@@ -440,5 +440,5 @@ def remove_person_from_team(project, person, client=default):
     person = normalize_model_parameter(person)
     return raw.delete(
         "data/projects/%s/team/%s" % (project["id"], person["id"]),
-        client=client
+        client=client,
     )
