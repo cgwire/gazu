@@ -383,7 +383,7 @@ def get_task_by_name(entity, task_type, name="main", client=default):
 def get_task_type(task_type_id, client=default):
     """
     Args:
-        task_type_id (str): Id of claimed task type.
+        task_type_id (str): ID of claimed task type.
 
     Returns:
         dict: Task type matching given ID.
@@ -441,7 +441,7 @@ def get_default_task_status(client=default):
 def get_task_status(task_status_id, client=default):
     """
     Args:
-        task_status_id (str): Id of claimed task status.
+        task_status_id (str): ID of claimed task status.
 
     Returns:
         dict: Task status matching given ID.
@@ -521,7 +521,7 @@ def remove_task_status(task_status, client=default):
 def get_task(task_id, client=default):
     """
     Args:
-        task_id (str): Id of claimed task.
+        task_id (str): ID of claimed task.
 
     Returns:
         dict: Task matching given ID.

@@ -179,24 +179,21 @@ class ShotTestCase(unittest.TestCase):
 
     def test_get_shot(self):
         with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url("data/shots/shot-01"),
-                text=json.dumps(
-                    {"name": "Shot 01", "project_id": "project-01"}
-                ),
+            mock_route(
+                mock,
+                "GET",
+                "data/shots/shot-01",
+                text={"name": "Shot 01", "project_id": "project-01"},
             )
-            shot = gazu.shot.get_shot("shot-01")
-            self.assertEqual(shot["name"], "Shot 01")
+            self.assertEqual(gazu.shot.get_shot("shot-01")["name"], "Shot 01")
 
     def test_get_shot_by_name(self):
         with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url(
-                    "data/shots/all?sequence_id=sequence-01&name=Shot01"
-                ),
-                text=json.dumps(
-                    [{"name": "Shot01", "project_id": "project-01"}]
-                ),
+            mock_route(
+                mock,
+                "GET",
+                "data/shots/all?sequence_id=sequence-01&name=Shot01",
+                text=[{"name": "Shot01", "project_id": "project-01"}],
             )
             sequence = {"id": "sequence-01"}
             shot = gazu.shot.get_shot_by_name(sequence, "Shot01")
@@ -346,9 +343,11 @@ class ShotTestCase(unittest.TestCase):
 
     def test_update_shot(self):
         with requests_mock.mock() as mock:
-            mock.put(
-                gazu.client.get_full_url("data/entities/shot-01"),
-                text=json.dumps({"id": "shot-01", "project_id": "project-01"}),
+            mock_route(
+                mock,
+                "PUT",
+                "data/entities/shot-01",
+                text={"id": "shot-01", "project_id": "project-01"},
             )
             shot = {"id": "shot-01", "name": "S02"}
             shot = gazu.shot.update_shot(shot)
@@ -356,13 +355,13 @@ class ShotTestCase(unittest.TestCase):
 
     def test_remove_shot(self):
         with requests_mock.mock() as mock:
-            mock.delete(
-                gazu.client.get_full_url("data/shots/shot-01"), status_code=204
-            )
+            mock_route(mock, "DELETE", "data/shots/shot-01", status_code=204)
             shot = {"id": "shot-01", "name": "S02"}
             gazu.shot.remove_shot(shot)
-            mock.delete(
-                gazu.client.get_full_url("data/shots/shot-01?force=true"),
+            mock_route(
+                mock,
+                "DELETE",
+                "data/shots/shot-01?force=true",
                 status_code=204,
             )
             shot = {"id": "shot-01", "name": "S02"}
@@ -437,13 +436,17 @@ class ShotTestCase(unittest.TestCase):
                 "id": "project-01",
                 "production_type": "tvshow",
             }
-            mock.get(
-                gazu.client.get_full_url("data/projects/project-01"),
-                text=json.dumps(project),
+            mock_route(
+                mock,
+                "GET",
+                "data/projects/project-01",
+                text=project,
             )
-            mock.get(
-                gazu.client.get_full_url("data/shots/%s" % fakeid("shot-01")),
-                text=json.dumps(shot),
+            mock_route(
+                mock,
+                "GET",
+                "data/shots/%s" % fakeid("shot-01"),
+                text=shot,
             )
             url = gazu.shot.get_shot_url(fakeid("shot-01"))
             self.assertEqual(
@@ -461,13 +464,17 @@ class ShotTestCase(unittest.TestCase):
                 "id": "project-01",
                 "production_type": "tvshow",
             }
-            mock.get(
-                gazu.client.get_full_url("data/projects/project-01"),
-                text=json.dumps(project),
+            mock_route(
+                mock,
+                "GET",
+                "data/projects/project-01",
+                text=project,
             )
-            mock.get(
-                gazu.client.get_full_url("data/shots/%s" % fakeid("shot-01")),
-                text=json.dumps(shot),
+            mock_route(
+                mock,
+                "GET",
+                "data/shots/%s" % fakeid("shot-01"),
+                text=shot,
             )
             url = gazu.shot.get_shot_url(fakeid("shot-01"))
             self.assertEqual(
@@ -575,20 +582,20 @@ class ShotTestCase(unittest.TestCase):
 
     def test_update_shot_data(self):
         with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url("data/shots/%s" % fakeid("shot-1")),
-                text=json.dumps({"id": fakeid("shot-1"), "data": {}}),
+            mock_route(
+                mock,
+                "GET",
+                "data/shots/%s" % fakeid("shot-1"),
+                text={"id": fakeid("shot-1"), "data": {}},
             )
-            mock.put(
-                gazu.client.get_full_url(
-                    "data/entities/%s" % fakeid("shot-1")
-                ),
-                text=json.dumps(
-                    {
-                        "id": fakeid("shot-1"),
-                        "data": {"metadata-1": "metadata-1"},
-                    }
-                ),
+            mock_route(
+                mock,
+                "PUT",
+                "data/entities/%s" % fakeid("shot-1"),
+                text={
+                    "id": fakeid("shot-1"),
+                    "data": {"metadata-1": "metadata-1"},
+                },
             )
             data = {"metadata-1": "metadata-1"}
             shot = gazu.shot.update_shot_data(fakeid("shot-1"), data)
