@@ -1,3 +1,4 @@
+import sys
 import functools
 import json
 import shutil
@@ -18,6 +19,11 @@ from .exception import (
     ServerErrorException,
     UploadFailedException,
 )
+
+if sys.version_info[0] == 3:
+    from json import JSONDecodeError
+else:
+    JSONDecodeError = ValueError
 
 DEBUG = os.getenv("GAZU_DEBUG", "false").lower() == "true"
 
@@ -99,7 +105,6 @@ def set_host(new_host, client=default_client):
     """
     client.host = new_host
     return client.host
-
 
 
 def get_event_host(client=default_client):
@@ -225,7 +230,7 @@ def post(path, data, client=default_client):
     check_status(response, path)
     try:
         result = response.json()
-    except json.JSONDecodeError:
+    except JSONDecodeError:
         print(response.text)
         raise
     return result
@@ -414,7 +419,7 @@ def upload(path, file_path, data={}, extra_files=[], client=default_client):
     check_status(response, path)
     try:
         result = response.json()
-    except json.JSONDecodeError:
+    except JSONDecodeError:
         print(response.text)
         raise
     if "message" in result:

@@ -1,7 +1,11 @@
 from . import client as raw
 from . import cache
 from . import helpers
-from . import events
+
+try:
+    from . import events
+except ImportError:
+    pass
 
 from . import asset
 from . import casting

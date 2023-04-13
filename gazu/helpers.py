@@ -1,3 +1,4 @@
+import sys
 import os
 import re
 import datetime
@@ -5,9 +6,13 @@ import shutil
 import requests
 import tempfile
 import mimetypes
-import urllib.parse as urlparse
 
 from gazu.exception import DownloadFileException
+
+if sys.version_info[0] == 3:
+    import urllib.parse as urlparse
+else:
+    import urlparse
 
 _UUID_RE = re.compile(
     "([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}){1}"

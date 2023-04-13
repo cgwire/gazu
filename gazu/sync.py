@@ -282,9 +282,7 @@ def get_sync_person_id_map(source_client, target_client):
     return get_id_map_by_id(persons_source, persons_target, field="email")
 
 
-def push_assets(
-    project_source, project_target, client_source, client_target
-):
+def push_assets(project_source, project_target, client_source, client_target):
     """
     Copy assets from source to target and preserve audit fields (`id`,
     `created_at`, and `updated_at`)
@@ -297,20 +295,15 @@ def push_assets(
     Returns:
         list: Pushed assets
     """
-    asset_types_map = get_sync_asset_type_id_map(
-       client_source, client_target
-    )
-    task_types_map = get_sync_task_type_id_map(
-       client_source, client_target
-    )
+    asset_types_map = get_sync_asset_type_id_map(client_source, client_target)
+    task_types_map = get_sync_task_type_id_map(client_source, client_target)
     assets = asset_module.all_assets_for_project(
-        project_source,
-        client=client_source
+        project_source, client=client_source
     )
     for asset in assets:
         asset["entity_type_id"] = asset_types_map[asset["entity_type_id"]]
         if asset["ready_for"] is not None:
-           asset["ready_for"] = task_types_map[asset["ready_for"]]
+            asset["ready_for"] = task_types_map[asset["ready_for"]]
         asset["project_id"] = project_target["id"]
     return import_entities(assets, client=client_target)
 
@@ -331,7 +324,8 @@ def push_episodes(
         list: Pushed episodes
     """
     episodes = shot_module.all_episodes_for_project(
-        project_source, client=client_source)
+        project_source, client=client_source
+    )
     for episode in episodes:
         episode["project_id"] = project_target["id"]
     return import_entities(episodes, client=client_target)
@@ -353,15 +347,14 @@ def push_sequences(
         list: Pushed sequences
     """
     sequences = shot_module.all_sequences_for_project(
-        project_source, client=client_source)
+        project_source, client=client_source
+    )
     for sequence in sequences:
         sequence["project_id"] = project_target["id"]
     return import_entities(sequences, client=client_target)
 
 
-def push_shots(
-    project_source, project_target, client_source, client_target
-):
+def push_shots(project_source, project_target, client_source, client_target):
     """
     Copy shots from source to target and preserve audit fields (`id`,
     `created_at`, and `updated_at`)
@@ -375,8 +368,7 @@ def push_shots(
         list: Pushed shots
     """
     shots = shot_module.all_shots_for_project(
-        project_source,
-        client=client_source
+        project_source, client=client_source
     )
     for shot in shots:
         shot["project_id"] = project_target["id"]
@@ -399,8 +391,7 @@ def push_entity_links(
         list: Pushed entity links
     """
     links = casting_module.all_entity_links_for_project(
-        project_source,
-        client=client_source
+        project_source, client=client_source
     )
     return import_entity_links(links, client=client_target)
 
@@ -422,7 +413,7 @@ def push_project_entities(
     """
     assets = push_assets(project_source, project_target)
     episodes = []
-    if (project_source["production_type"] == "tvshow"):
+    if project_source["production_type"] == "tvshow":
         episodes = push_episodes(project_source, project_target)
     sequences = push_sequences(project_source, project_target)
     shots = push_shots(project_source, project_target)
@@ -441,7 +432,7 @@ def push_tasks(
     project_target,
     default_status,
     client_source,
-    client_target
+    client_target,
 ):
     """
     Copy tasks from source to target and preserve audit fields (`id`,
@@ -463,8 +454,7 @@ def push_tasks(
     person_map = get_sync_person_id_map(client_source, client_target)
 
     tasks = task_module.all_tasks_for_project(
-        project_source,
-        client=client_source
+        project_source, client=client_source
     )
     for task in tasks:
         task["task_type_id"] = task_type_map[task["task_type_id"]]
@@ -493,20 +483,14 @@ def push_tasks_comments(project_source, client_source, client_target):
         list: Created comments
     """
 
-
     task_status_map = get_sync_task_status_id_map(client_source, client_target)
     person_map = get_sync_person_id_map(client_source, client_target)
     tasks = task_module.all_tasks_for_project(
-        project_source,
-        client=client_source
+        project_source, client=client_source
     )
     for task in tasks:
         push_task_comments(
-            task_status_map,
-            person_map,
-            task,
-            client_source,
-            client_target
+            task_status_map, person_map, task, client_source, client_target
         )
     return tasks
 
@@ -537,7 +521,7 @@ def push_task_comments(
             task,
             comment,
             client_source,
-            client_target
+            client_target,
         )
         comments_target.append(comment_target)
     return comments_target
@@ -579,24 +563,31 @@ def push_task_comment(
         else:
             preview_file_id = preview_file["id"]
         preview_file = files_module.get_preview_file(
-            preview_file_id,
-            client=client_source
+            preview_file_id, client=client_source
         )
-        if preview_file["original_name"] is not None and \
-           preview_file["extension"] is not None:
-            file_path = "/tmp/zou/sync/" + \
-                preview_file["original_name"] + "." + preview_file["extension"]
+        if (
+            preview_file["original_name"] is not None
+            and preview_file["extension"] is not None
+        ):
+            file_path = (
+                "/tmp/zou/sync/"
+                + preview_file["original_name"]
+                + "."
+                + preview_file["extension"]
+            )
             files_module.download_preview_file(
                 preview_file, file_path, client=client_source
             )
-            previews.append({
-                "file_path": file_path,
-                "annotations": preview_file["annotations"]
-            })
+            previews.append(
+                {
+                    "file_path": file_path,
+                    "annotations": preview_file["annotations"],
+                }
+            )
 
     task_status = {"id": task_status_map[comment["task_status_id"]]}
     author_id = person_map[comment["person_id"]]
-    person = { "id": author_id }
+    person = {"id": author_id}
 
     comment_target = task_module.add_comment(
         task,
@@ -606,19 +597,18 @@ def push_task_comment(
         created_at=comment["created_at"],
         person=person,
         checklist=comment["checklist"] or [],
-        client=client_target
+        client=client_target,
     )
 
     for preview in previews:
         new_preview_file = task_module.add_preview(
-            task,
-            comment_target,
-            preview["file_path"],
-            client=client_target
+            task, comment_target, preview["file_path"], client=client_target
         )
-        files_module.update_preview(new_preview_file, {
-            "annotations": preview["annotations"]
-        }, client=client_target)
+        files_module.update_preview(
+            new_preview_file,
+            {"annotations": preview["annotations"]},
+            client=client_target,
+        )
         os.remove(preview["file_path"])
 
     for attachment_path in attachments:
@@ -636,6 +626,4 @@ def convert_id_list(ids, model_map):
     Returns:
         list: Ids converted through given model map.
     """
-    return [
-        model_map[id] for id in ids
-    ]
+    return [model_map[id] for id in ids]

@@ -1,3 +1,9 @@
+import sys
+
+if sys.version_info[0] == 2:
+    raise ImportError(
+        "The events part of Gazu is not available for Python 2.7"
+    )
 from .exception import AuthFailedException
 from .client import default_client, get_event_host
 from gazu.client import make_auth_header
