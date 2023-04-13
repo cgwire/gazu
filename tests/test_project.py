@@ -261,18 +261,21 @@ class ProjectTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/metadata-descriptors?project_id=%s&field_name=studio" % fakeid("project-1"),
-                text=[{
-                    "id": fakeid("metadata-descriptor-1"),
-                    "name": "metadata-descriptor-1",
-                    "field_name": "studio",
-                }],
+                "data/metadata-descriptors?project_id=%s&field_name=studio"
+                % fakeid("project-1"),
+                text=[
+                    {
+                        "id": fakeid("metadata-descriptor-1"),
+                        "name": "metadata-descriptor-1",
+                        "field_name": "studio",
+                    }
+                ],
             )
-            metadata_descriptor = \
+            metadata_descriptor = (
                 gazu.project.get_metadata_descriptor_by_field_name(
-                    fakeid("project-1"),
-                    "studio"
+                    fakeid("project-1"), "studio"
                 )
+            )
             self.assertEqual(
                 metadata_descriptor["name"], "metadata-descriptor-1"
             )

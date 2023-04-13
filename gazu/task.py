@@ -433,9 +433,7 @@ def get_default_task_status(client=default):
         dict: The unique task status flagged with `is_default`.
     """
     return raw.fetch_first(
-        "task-status",
-        params={ "is_default": True },
-        client=client
+        "task-status", params={"is_default": True}, client=client
     )
 
 
@@ -945,7 +943,7 @@ def publish_preview(
         checklist=checklist,
         attachments=[],
         created_at=created_at,
-        client=client
+        client=client,
     )
     add_preview(
         task,
@@ -955,6 +953,7 @@ def publish_preview(
         normalize_movie=normalize_movie,
     )
     return new_comment
+
 
 def set_main_preview(preview_file, client=default):
     """
@@ -1026,10 +1025,7 @@ def new_task_type(name, color="#000000", client=default):
     Returns:
         dict: The created task type
     """
-    data = {
-        "name": name,
-        "color": color
-    }
+    data = {"name": name, "color": color}
     return raw.post("data/task-types", data, client=client)
 
 

@@ -181,7 +181,6 @@ def cache(function, maxsize=300, expire=120):
 
     @wraps(function)
     def wrapper(*args, **kwargs):
-
         if is_cache_enabled(state):
             key = get_cache_key(args, kwargs)
 
