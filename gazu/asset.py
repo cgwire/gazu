@@ -124,7 +124,7 @@ def get_asset_by_name(project, name, asset_type=None, client=default):
 def get_asset(asset_id, client=default):
     """
     Args:
-        asset_id (str): Id of claimed asset.
+        asset_id (str): ID of claimed asset.
 
     Returns:
         dict: Asset matching given ID.
@@ -292,7 +292,7 @@ def all_asset_types_for_shot(shot, client=default):
 def get_asset_type(asset_type_id, client=default):
     """
     Args:
-        asset_type_id (str/): Id of claimed asset type.
+        asset_type_id (str/): ID of claimed asset type.
 
     Returns:
         dict: Asset Type matching given ID.
@@ -359,7 +359,7 @@ def remove_asset_type(asset_type, client=default):
 def get_asset_instance(asset_instance_id, client=default):
     """
     Args:
-        asset_instance_id (str): Id of claimed asset instance.
+        asset_instance_id (str): ID of claimed asset instance.
 
     Returns:
         dict: Asset Instance matching given ID.

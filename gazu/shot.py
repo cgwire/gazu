@@ -114,7 +114,7 @@ def all_episodes_for_project(project, client=default):
 def get_episode(episode_id, client=default):
     """
     Args:
-        episode_id (str): Id of claimed episode.
+        episode_id (str): ID of claimed episode.
 
     Returns:
         dict: Episode corresponding to given episode ID.
@@ -205,7 +205,7 @@ def get_sequence_from_shot(shot, client=default):
 def get_shot(shot_id, client=default):
     """
     Args:
-        shot_id (str): Id of claimed shot.
+        shot_id (str): ID of claimed shot.
 
     Returns:
         dict: Shot corresponding to given shot ID.
