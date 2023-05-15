@@ -45,6 +45,7 @@ extensions = [
     "sphinx.ext.coverage",
     "sphinx.ext.viewcode",
     "sphinx.ext.napoleon",
+    "sphinx_rtd_theme",
     "recommonmark",
 ]
 
