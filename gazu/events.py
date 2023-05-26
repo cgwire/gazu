@@ -47,6 +47,7 @@ def init(
 
 def connect_error(data):
     print("The connection failed!")
+    print(data)
     return data
 
 
