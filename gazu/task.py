@@ -955,19 +955,21 @@ def publish_preview(
     return new_comment
 
 
-def set_main_preview(preview_file, client=default):
+def set_main_preview(preview_file, frame_number, client=default):
     """
     Set given preview as thumbnail of given entity.
 
     Args:
         preview_file (str / dict): The preview file dict or ID.
+        frame_number (int): Frame of preview video to set as main preview
 
     Returns:
         dict: Created preview file model.
     """
+    data = {"frame_number": frame_number} if frame_number > 1 else {}
     preview_file = normalize_model_parameter(preview_file)
     path = "actions/preview-files/%s/set-main-preview" % preview_file["id"]
-    return raw.put(path, {}, client=client)
+    return raw.put(path, data, client=client)
 
 
 @cache
