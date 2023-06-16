@@ -74,6 +74,20 @@ def get_all_edits_with_tasks(relations=False, client=default):
     return sort_by_name(edits_with_tasks)
 
 
+@cache
+def all_tasks_for_edit(edit, relations=False, client=default):
+    """
+    Retrieve all tasks directly linked to given edit.
+    """
+    edit = normalize_model_parameter(edit)
+    params = {}
+    if relations:
+        params = {"relations": "true"}
+    path = "edits/%s/tasks" % edit["id"]
+    tasks = raw.fetch_all(path, params, client=client)
+    return sort_by_name(tasks)
+
+
 def new_edit(
     project,
     name,
