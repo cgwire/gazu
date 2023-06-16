@@ -2,6 +2,7 @@ from . import client as raw
 
 from .cache import cache
 from .helpers import normalize_model_parameter
+from gazu.sorting import sort_by_name
 
 default = raw.default_client
 
@@ -58,6 +59,19 @@ def get_edit_url(edit, client=default):
         edit_id=edit["id"],
         episode_id=edit["episode_id"],
     )
+
+
+@cache
+def get_all_edits_with_tasks(relations=False, client=default):
+    """
+    Retrieve all edit entries.
+    """
+    params = {}
+    if relations:
+        params = {"relations": "true"}
+    path = "edits/with-tasks"
+    edits_with_tasks = raw.fetch_all(path, params, client=client)
+    return sort_by_name(edits_with_tasks)
 
 
 def new_edit(
