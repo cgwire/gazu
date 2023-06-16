@@ -88,6 +88,23 @@ def all_tasks_for_edit(edit, relations=False, client=default):
     return sort_by_name(tasks)
 
 
+@cache
+def get_all_previews_for_edit(edit, client=default):
+    """
+    Args:
+        episode (str / dict): The episode dict or the episode ID.
+
+    Returns:
+        list: Shots which are children of given episode.
+    """
+    edit = normalize_model_parameter(edit)
+    edit_previews = raw.fetch_all(
+        f"edits/{edit['id']}/preview-files", client=client
+    )
+    for key in [key for key in enumerate(edit_previews.keys())]:
+        return edit_previews[key[1]]
+
+
 def new_edit(
     project,
     name,
