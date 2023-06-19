@@ -9,16 +9,21 @@ Even better, you can contribute by directly adding it to the code.
 
 The client is divided in eight modules:
 
-* *person*: functions related to studio members
-* *project*: functions related to running productions
 * *asset*: functions related to asset and asset types.
-* *shot*: functions related to shots, sequences and episodes.
-* *scene*: functions related to layout scenes (which will lead to shots).
-* *task*: functions related to tasks, task types and assignations.
-* *files*: functions related to file path generation.
-* *user*: functions related to current user data.
-* *playlist*: functions related to project playlists.
+* *casting*: functions related to casting.
 * *client*: generic functions to deal with the API.
+* *edit*: functions related to edits.
+* *entity*: functions related to entities.
+* *exceptions*: exceptions raised by Gazu.
+* *files*: functions related to file path generation.
+* *person*: functions related to studio members.
+* *playlist*: functions related to project playlists.
+* *project*: functions related to running productions.
+* *scene*: functions related to layout scenes (which will lead to shots).
+* *shot*: functions related to shots, sequences and episodes.
+* *sync*: functions related to sync.
+* *task*: functions related to tasks, task types and assignations.
+* *user*: functions related to current user data.
 
 In the following, we are going to describe all functions available in the Gazu
 client.
@@ -41,11 +46,25 @@ gazu.client
 .. automodule:: gazu.client
     :members:
 
+gazu.edit
+---------------
+
+.. automodule:: gazu.edit
+    :members:
+
+
 gazu.entity
 -----------
 
 .. automodule:: gazu.entity
     :members:
+
+gazu.exceptions
+---------------
+
+.. automodule:: gazu.exception
+    :members:
+
 
 gazu.files
 ----------
@@ -72,10 +91,22 @@ gazu.project
 .. automodule:: gazu.project
     :members:
 
+gazu.scene
+-----------
+
+.. automodule:: gazu.scene
+    :members:
+
 gazu.shot
 -----------
 
 .. automodule:: gazu.shot
+    :members:
+
+gazu.sync
+-----------
+
+.. automodule:: gazu.sync
     :members:
 
 gazu.task
@@ -88,16 +119,4 @@ gazu.user
 -----------
 
 .. automodule:: gazu.user
-    :members:
-
-gazu.sync
------------
-
-.. automodule:: gazu.sync
-    :members:
-
-gazu.exceptions
----------------
-
-.. automodule:: gazu.exception
     :members:

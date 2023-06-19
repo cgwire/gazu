@@ -22,13 +22,13 @@ sys.path.insert(0, os.path.abspath("/home/frank/Projets/cgwire/dccutils"))
 # -- Project information -----------------------------------------------------
 
 project = "Kitsu Python Client (Gazu)"
-copyright = "2022, CGWire"
+copyright = "2023, CGWire"
 author = "CGWire"
 
 # The short X.Y version
-version = "0.9.1"
+version = "0.9.4"
 # The full version, including alpha/beta/rc tags
-release = "0.9.1"
+release = "0.9.4"
 
 
 # -- General configuration ---------------------------------------------------
