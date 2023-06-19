@@ -609,6 +609,19 @@ def import_shots_with_csv(project, csv_file_path, client=default):
     )
 
 
+def import_edl(project, edl_file_path, episode=None, client=default):
+    project = normalize_model_parameter(project)
+    path = "import/edl/projects/%s" % project["id"]
+    if episode is not None:
+        episode = normalize_model_parameter(episode)
+        path += "/episodes/%s" % episode["id"]
+    return raw.upload(
+        path,
+        edl_file_path,
+        client=client,
+    )
+
+
 def export_shots_with_csv(
     project, csv_file_path, episode=None, assigned_to=None, client=default
 ):
