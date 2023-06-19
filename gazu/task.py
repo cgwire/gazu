@@ -955,7 +955,7 @@ def publish_preview(
     return new_comment
 
 
-def set_main_preview(preview_file, frame_number, client=default):
+def set_main_preview(preview_file, frame_number=0, client=default):
     """
     Set given preview as thumbnail of given entity.
 
