@@ -151,7 +151,7 @@ def all_task_types_for_scene(scene, client=default):
         scene (str / dict): The scene dict or the scene ID.
 
     Returns:
-        list: Task Types of tasks assigned to current user for given scene.
+        list: Task types of tasks assigned to current user for given scene.
     """
     scene = normalize_model_parameter(scene)
     path = "user/scenes/%s/task-types" % scene["id"]
@@ -162,7 +162,8 @@ def all_task_types_for_scene(scene, client=default):
 @cache
 def all_task_types_for_sequence(sequence, client=default):
     """
-    return the list of task_tyes for given asset and current user.
+    Returns:
+        list: Task types for given asset and current user.
     """
     sequence = normalize_model_parameter(sequence)
     path = "user/sequences/%s/task-types" % sequence["id"]
@@ -282,9 +283,72 @@ def log_desktop_session_log_in(client=default):
 def is_authenticated(client=default):
     """
     Returns:
-        boolean: Current user authenticated or not
+        bool: Current user authenticated or not
     """
     try:
-        return raw.get("auth/authenticated")["authenticated"]
+        return raw.get("auth/authenticated", client=client)["authenticated"]
     except NotAuthenticatedException:
         return False
+
+
+def all_filters(client=default):
+    """
+    Return:
+        list: all filters for current user.
+    """
+    return raw.fetch_all("user/filters", client=client)
+
+
+def new_filter(
+    name, query, list_type, project=None, entity_type=None, client=default
+):
+    """
+    Create a new filter for current user.
+
+    Args:
+        name (str): The filter name.
+        query (str): The query for the filter.
+        list_type (str): "asset", "shot" or "edit".
+        project (str / dict): The project dict or the project ID.
+        entity_type (str): "Asset", "Shot" or "Edit".
+
+    Returns:
+        dict: Created filter.
+    """
+    project_id = (
+        normalize_model_parameter(project) if project is not None else None
+    )
+
+    return raw.post(
+        "data/user/filters",
+        {
+            "name": name,
+            "query": query,
+            "list_type": list_type,
+            "project_id": project_id,
+            "entity_type": entity_type,
+        },
+        client=client,
+    )
+
+
+def remove_filter(filter, client=default):
+    """
+    Remove given filter from database.
+
+    Args:
+        filter (str / dict): The filter dict or the filter ID.
+    """
+    return raw.delete("data/user/filters/%s" % filter["id"], client=client)
+
+
+def update_filter(filter, client=default):
+    """
+    Save given filter data into the API.
+
+    Args:
+        filter (dict): Filter to save.
+    """
+    return raw.put(
+        "data/user/filters/%s" % filter["id"], filter, client=client
+    )
