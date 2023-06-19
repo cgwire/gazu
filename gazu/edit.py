@@ -62,47 +62,30 @@ def get_edit_url(edit, client=default):
 
 
 @cache
-def get_all_edits_with_tasks(relations=False, client=default):
-    """
-    Retrieve all edit entries.
-    """
-    params = {}
-    if relations:
-        params = {"relations": "true"}
-    path = "edits/with-tasks"
-    edits_with_tasks = raw.fetch_all(path, params, client=client)
-    return sort_by_name(edits_with_tasks)
-
-
-@cache
-def all_tasks_for_edit(edit, relations=False, client=default):
-    """
-    Retrieve all tasks directly linked to given edit.
-    """
-    edit = normalize_model_parameter(edit)
-    params = {}
-    if relations:
-        params = {"relations": "true"}
-    path = "edits/%s/tasks" % edit["id"]
-    tasks = raw.fetch_all(path, params, client=client)
-    return sort_by_name(tasks)
-
-
-@cache
-def get_all_previews_for_edit(edit, client=default):
+def all_edits_for_project(project, client=default):
     """
     Args:
-        episode (str / dict): The episode dict or the episode ID.
+        project (str / dict): The project dict or the project ID.
 
     Returns:
-        list: Shots which are children of given episode.
+        list: Edits from database or for given project.
+    """
+    project = normalize_model_parameter(project)
+    edits = raw.fetch_all("projects/%s/edits" % project["id"], client=client)
+    return sort_by_name(edits)
+
+
+@cache
+def all_previews_for_edit(edit, client=default):
+    """
+    Args:
+        edit (str / dict): The edit dict or the edit ID.
+
+    Returns:
+        list: Previews from database for given edit.
     """
     edit = normalize_model_parameter(edit)
-    edit_previews = raw.fetch_all(
-        f"edits/{edit['id']}/preview-files", client=client
-    )
-    for key in [key for key in enumerate(edit_previews.keys())]:
-        return edit_previews[key[1]]
+    return raw.fetch_all("edits/%s/preview-files" % edit["id"], client=client)
 
 
 def new_edit(

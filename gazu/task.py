@@ -83,6 +83,23 @@ def all_tasks_for_shot(shot, relations=False, client=default):
 
 
 @cache
+def all_tasks_for_edit(edit, relations=False, client=default):
+    """
+    Args:
+        edit (str / dict): The edit dict or the edit ID.
+
+    Returns:
+        list: Tasks linked to given edit.
+    """
+    edit = normalize_model_parameter(edit)
+    params = {}
+    if relations:
+        params = {"relations": "true"}
+    tasks = raw.fetch_all("edits/%s/tasks" % edit["id"], params, client=client)
+    return sort_by_name(tasks)
+
+
+@cache
 def all_tasks_for_sequence(sequence, relations=False, client=default):
     """
     Args:

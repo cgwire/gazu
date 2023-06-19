@@ -31,7 +31,6 @@ def all_shots_for_project(project, client=default):
     """
     project = normalize_model_parameter(project)
     shots = raw.fetch_all("projects/%s/shots" % project["id"], client=client)
-
     return sort_by_name(shots)
 
 
