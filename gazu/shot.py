@@ -601,10 +601,38 @@ def remove_asset_instance_from_shot(shot, asset_instance, client=default):
 
 
 def import_shots_with_csv(project, csv_file_path, client=default):
+    """
+    Import shots from a csv file.
+
+    Args:
+        project (str / dict): The project dict or the project ID.
+        csv_file_path (str): The csv file path.
+    """
     project = normalize_model_parameter(project)
     return raw.upload(
         "import/csv/projects/%s/shots" % project["id"],
         csv_file_path,
+        client=client,
+    )
+
+
+def import_edl(project, edl_file_path, episode=None, client=default):
+    """
+    Import shots from an EDL file.
+
+    Args:
+        project (str / dict): The project dict or the project ID.
+        edl_file_path (str): The EDL file path.
+        episode (str / dict): The episode dict or the episode ID.
+    """
+    project = normalize_model_parameter(project)
+    path = "import/edl/projects/%s" % project["id"]
+    if episode is not None:
+        episode = normalize_model_parameter(episode)
+        path += "/episodes/%s" % episode["id"]
+    return raw.upload(
+        path,
+        edl_file_path,
         client=client,
     )
 

@@ -829,13 +829,14 @@ def remove_comment(comment, client=default):
     return raw.delete("data/comments/%s" % (comment["id"]), client=client)
 
 
-def create_preview(task, comment, client=default):
+def create_preview(task, comment, revision=None, client=default):
     """
     Create a preview into given comment.
 
     Args:
         task (str / dict): The task dict or the task ID.
         comment (str / dict): The comment or the comment ID.
+        revision (int): Revision number.
 
     Returns:
         dict: Created preview file model.
@@ -846,7 +847,10 @@ def create_preview(task, comment, client=default):
         task["id"],
         comment["id"],
     )
-    return raw.post(path, {}, client=client)
+    data = {}
+    if revision is not None:
+        data["revision"] = revision
+    return raw.post(path, revision, client=client)
 
 
 def upload_preview_file(
@@ -873,6 +877,7 @@ def add_preview(
     preview_file_path=None,
     preview_file_url=None,
     normalize_movie=True,
+    revision=None,
     client=default,
 ):
     """
@@ -885,6 +890,7 @@ def add_preview(
         preview_file_path (str): Path of the file to upload as preview.
         preview_file_url (str): Url to download the preview file if no path is
         given.
+        revision (int): Revision number.
     Returns:
         dict: Created preview file model.
     """
@@ -893,7 +899,9 @@ def add_preview(
             preview_file_url,
         )
 
-    preview_file = create_preview(task, comment, client=client)
+    preview_file = create_preview(
+        task, comment, revision=revision, client=client
+    )
     return upload_preview_file(
         preview_file,
         preview_file_path,
@@ -910,10 +918,11 @@ def publish_preview(
     checklist=[],
     attachments=[],
     created_at=None,
-    client=default,
     preview_file_path=None,
     preview_file_url=None,
     normalize_movie=True,
+    revision=None,
+    client=default,
 ):
     """
     Publish a comment and include given preview for given task and set given
@@ -932,6 +941,7 @@ def publish_preview(
         given.
         normalize_movie (bool): Set to false to not do operations on it on the
         server side.
+        revision (int): Revision number.
     Returns:
         dict: Created preview file model.
     """
@@ -941,7 +951,7 @@ def publish_preview(
         comment=comment,
         person=person,
         checklist=checklist,
-        attachments=[],
+        attachments=attachments,
         created_at=created_at,
         client=client,
     )
@@ -951,11 +961,13 @@ def publish_preview(
         preview_file_path=preview_file_path,
         preview_file_url=preview_file_url,
         normalize_movie=normalize_movie,
+        revision=revision,
+        client=client,
     )
     return new_comment
 
 
-def set_main_preview(preview_file, frame_number, client=default):
+def set_main_preview(preview_file, frame_number=None, client=default):
     """
     Set given preview as thumbnail of given entity.
 
@@ -966,7 +978,9 @@ def set_main_preview(preview_file, frame_number, client=default):
     Returns:
         dict: Created preview file model.
     """
-    data = {"frame_number": frame_number} if frame_number > 1 else {}
+    data = {}
+    if frame_number is not None:
+        data["frame_number"] = frame_number
     preview_file = normalize_model_parameter(preview_file)
     path = "actions/preview-files/%s/set-main-preview" % preview_file["id"]
     return raw.put(path, data, client=client)
