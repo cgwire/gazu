@@ -32,7 +32,6 @@ def update_asset_casting(project, asset, casting, client=default):
     Args:
         asset (str / dict): The asset dict or the asset ID.
         casting (dict): The casting description.
-        Ex: `casting = [{"asset_id": "asset-1", "nb_occurences": 3}]`
 
     Returns:
         dict: Related asset.
@@ -49,11 +48,7 @@ def update_asset_casting(project, asset, casting, client=default):
 def get_asset_type_casting(project, asset_type, client=default):
     """
     Return casting for given asset_type.
-    `casting = {
-        "asset-id": [{"asset_id": "asset-1", "nb_occurences": 3}],
-        ...
-      }
-    `
+
     Args:
         project (str / dict): The project dict or the project ID.
         asset_type (str / dict): The asset_type dict or the asset_type ID.
@@ -74,11 +69,7 @@ def get_asset_type_casting(project, asset_type, client=default):
 def get_sequence_casting(sequence, client=default):
     """
     Return casting for given sequence.
-    `casting = {
-        "shot-id": [{"asset_id": "asset-1", "nb_occurences": 3}]},
-        ...
-     }
-    `
+
     Args:
         sequence (dict): The sequence dict
 
@@ -95,7 +86,7 @@ def get_sequence_casting(sequence, client=default):
 def get_shot_casting(shot, client=default):
     """
     Return casting for given shot.
-    `[{"asset_id": "asset-1", "nb_occurences": 3}]}`
+
     Args:
         shot (dict): The shot dict
 

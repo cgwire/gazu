@@ -33,7 +33,7 @@ def get_entity(entity_id, client=default):
 
     Returns:
         dict: Retrieve entity matching given ID (it can be an entity of any
-        kind: asset, shot, sequence or episode).
+        kind: asset, shot, sequence, episode, etc).
     """
     return raw.fetch_one("entities", entity_id, client=client)
 
@@ -44,6 +44,7 @@ def get_entity_by_name(entity_name, project=None, client=default):
     Args:
         name (str): The name of the claimed entity.
         project (str, dict): Project ID or dict.
+
     Returns:
         Retrieve entity matching given name (and project if given).
     """
@@ -70,7 +71,7 @@ def get_entity_type(entity_type_id, client=default):
 def get_entity_type_by_name(entity_type_name, client=default):
     """
     Args:
-        name (str, client=default): The name of the claimed entity type
+        entity_type_name (str): The name of the claimed entity type
 
     Returns:
         Retrieve entity type matching given name.
@@ -92,22 +93,6 @@ def guess_from_path(project_id, path, sep="/"):
         sep (str): File path separator, defaults to "/"
     Returns:
         list: dictionnaries with the corresponding entities and template name.
-
-    Example:
-        .. code-block:: text
-
-        [
-            {
-                'Asset': '<asset_id>',
-                'Project': '<project_id>',
-                'Template': 'asset'
-            },
-            {
-                'Project': '<project_id>',
-                'Template': 'instance'
-            },
-            ...
-        ]
     """
     return raw.post(
         "/data/entities/guess_from_path",

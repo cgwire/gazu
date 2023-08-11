@@ -871,17 +871,18 @@ def create_preview(task, comment, revision=None, client=default):
 
 
 def upload_preview_file(
-    preview, file_path, normalize_movie=True, client=default
+    preview_file, file_path, normalize_movie=True, client=default
 ):
     """
     Create a preview into given comment.
 
     Args:
-        task (str / dict): The task dict or the task ID.
+        preview_file (str / dict): The preview_file dict or the preview_file ID.
         file_path (str): Path of the file to upload as preview.
     """
     path = (
-        "pictures/preview-files/%s" % normalize_model_parameter(preview)["id"]
+        "pictures/preview-files/%s"
+        % normalize_model_parameter(preview_file)["id"]
     )
     if not normalize_movie:
         path += "?normalize=false"
@@ -904,9 +905,9 @@ def add_preview(
         task (str / dict): The task dict or the task ID.
         comment (str / dict): The comment or the comment ID.
         preview_file_path (str): Path of the file to upload as preview.
-        preview_file_path (str): Path of the file to upload as preview.
         preview_file_url (str): Url to download the preview file if no path is
         given.
+        normalize_movie (bool): Normalize the movie or not.
         revision (int): Revision number.
     Returns:
         dict: Created preview file model.
