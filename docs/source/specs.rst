@@ -7,9 +7,10 @@ development faster. If you think that one is missing, feel free to ask for
 it in the Github issues.
 Even better, you can contribute by directly adding it to the code.
 
-The client is divided in eight modules:
+The client is divided in multiple modules:
 
 * *asset*: functions related to asset and asset types.
+* *cache*: functions related to the cache.
 * *casting*: functions related to casting.
 * *client*: generic functions to deal with the API.
 * *edit*: functions related to edits.
@@ -28,10 +29,35 @@ The client is divided in eight modules:
 In the following, we are going to describe all functions available in the Gazu
 client.
 
+gazu
+-----------
+
+.. autofunction:: gazu.log_in
+
+.. autofunction:: gazu.get_host
+
+.. autofunction:: gazu.set_host
+
+.. autofunction:: gazu.send_email_otp
+
+.. autofunction:: gazu.log_out
+
+.. autofunction:: gazu.refresh_token
+
+.. autofunction:: gazu.get_event_host
+
+.. autofunction:: gazu.set_event_host
+
 gazu.asset
 -----------
 
 .. automodule:: gazu.asset
+    :members:
+
+gazu.cache
+-------------
+
+.. automodule:: gazu.cache
     :members:
 
 gazu.casting
