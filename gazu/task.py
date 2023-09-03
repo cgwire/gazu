@@ -1,4 +1,5 @@
 import string
+
 import json
 
 from gazu.exception import (
@@ -940,6 +941,7 @@ def publish_preview(
     preview_file_url=None,
     normalize_movie=True,
     revision=None,
+    set_thumbnail=False,
     client=default,
 ):
     """
@@ -960,8 +962,10 @@ def publish_preview(
         normalize_movie (bool): Set to false to not do operations on it on the
         server side.
         revision (int): Revision number.
+        set_thumbnail (bool): Set the preview as thumbnail of the entity.
     Returns:
-        dict: Created preview file model.
+        tuple(dict, dict): Created comment model and created preview file
+        model.
     """
     new_comment = add_comment(
         task,
@@ -973,7 +977,7 @@ def publish_preview(
         created_at=created_at,
         client=client,
     )
-    add_preview(
+    preview_file = add_preview(
         task,
         new_comment,
         preview_file_path=preview_file_path,
@@ -982,7 +986,9 @@ def publish_preview(
         revision=revision,
         client=client,
     )
-    return new_comment
+    if set_thumbnail:
+        set_main_preview(preview_file, client=client)
+    return new_comment, preview_file
 
 
 def set_main_preview(preview_file, frame_number=None, client=default):
