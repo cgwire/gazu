@@ -12,21 +12,31 @@ on:
 jobs:
   ci:
     name: Test with different versions of Python 🐍
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
         version: [2.7, 3.6, 3.11]
+        include:
+          - version: 2.7
+            container: python:2.7.18-buster
+    container: ${{ matrix.container }}
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python
+        if: matrix.version != '2.7'
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.version }}
+      - name: Upgrade pip 📦
+        run: >-
+          python -m
+          pip install
+          --upgrade
+          pip
       - name: Install packages 📦
         run: >-
-          python3 -m
+          python -m
           pip install
-          --user
           -r requirements.txt
       - name: Run tests 🧪
         run: >-
