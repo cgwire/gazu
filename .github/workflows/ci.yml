@@ -1,0 +1,33 @@
+---
+name: Gazu CI
+
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+
+jobs:
+  ci:
+    name: Test with different versions of Python 🐍
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: [2.7, 3.6, 3.11]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.version }}
+      - name: Install packages 📦
+        run: >-
+          python3 -m
+          pip install
+          --user
+          -r requirements.txt
+      - name: Run tests 🧪
+        run: >-
+          py.test
