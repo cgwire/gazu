@@ -13,7 +13,7 @@ event stream listening.
 It is made to be used with the `Kitsu API <https://zou.cg-wire.com>`__. It
 requires an up and running instance of Kitsu to run properly.
 
-|Build status| |Discord| |Downloads|
+|CI badge| |Discord| |Downloads|
 
 Quickstart
 ----------
@@ -107,8 +107,8 @@ Visit `cg-wire.com <https://cg-wire.com>`__ for more information.
 
 |CGWire Logo|
 
-.. |Build status| image:: https://api.travis-ci.com/cgwire/gazu.svg?branch=master
-   :target: https://app.travis-ci.com/cgwire/gazu
+.. |CI badge| image:: https://github.com/cgwire/gazu/actions/workflows/ci.yml/badge.svg
+   :target: https://github.com/cgwire/gazu/actions/workflows/ci.yml
 .. |Discord| image:: https://badgen.net/badge/icon/discord?icon=discord&label
    :target: https://discord.com/invite/VbCxtKN
 .. |CGWire Logo| image:: https://zou.cg-wire.com/cgwire.png
