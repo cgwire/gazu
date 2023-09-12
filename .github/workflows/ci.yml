@@ -21,7 +21,7 @@ jobs:
             container: python:2.7.18-buster
     container: ${{ matrix.container }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up Python
         if: matrix.version != '2.7'
         uses: actions/setup-python@v4
