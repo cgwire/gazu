@@ -868,7 +868,7 @@ def create_preview(task, comment, revision=None, client=default):
     data = {}
     if revision is not None:
         data["revision"] = revision
-    return raw.post(path, revision, client=client)
+    return raw.post(path, data, client=client)
 
 
 def upload_preview_file(
