@@ -180,6 +180,7 @@ def new_person(
     role="user",
     desktop_login="",
     departments=[],
+    password=None,
     client=default,
 ):
     """
@@ -210,6 +211,7 @@ def new_person(
                 "role": role,
                 "desktop_login": desktop_login,
                 "departments": normalize_list_of_models_for_links(departments),
+                "password": password,
             },
             client=client,
         )
@@ -268,3 +270,21 @@ def get_presence_log(year, month, client=default):
     """
     path = "data/persons/presence-logs/%s-%s" % (year, str(month).zfill(2))
     return raw.get(path, json_response=False, client=client)
+
+
+def change_password_for_person(person, password, client=default):
+    """
+    Change the password for given person.
+
+    Args:
+        person (str / dict): The person dict or the person ID.
+        password (str): The new password.
+    Returns:
+        dict: success or not.
+    """
+    person = normalize_model_parameter(person)
+    return raw.post(
+        "actions/persons/%s/change-password" % (person["id"]),
+        {"password": password, "password_2": password},
+        client=client,
+    )
