@@ -237,3 +237,17 @@ class PersonTestCase(unittest.TestCase):
             )
 
             self.assertEqual(person_id["id"], fakeid("person-1"))
+
+    def test_change_password_for_person(self):
+        with requests_mock.mock() as mock:
+            person_id = fakeid("person-1")
+            mock_route(
+                mock,
+                "POST",
+                "actions/persons/%s/change-password" % person_id,
+                text={"success": True},
+            )
+            self.assertEqual(
+                gazu.person.change_password_for_person(person_id, "password"),
+                {"success": True},
+            )
