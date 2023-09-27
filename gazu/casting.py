@@ -131,7 +131,9 @@ def get_asset_cast_in(asset, client=default):
     return raw.get(path, client=client)
 
 
-def all_entity_links_for_project(project, client=default):
+def all_entity_links_for_project(
+    project, page=None, limit=None, client=default
+):
     """
     Args:
         project (dict): The project
@@ -141,4 +143,9 @@ def all_entity_links_for_project(project, client=default):
     """
     project = normalize_model_parameter(project)
     path = "/data/projects/%s/entity-links" % project["id"]
-    return raw.get(path, client=client)
+    params = {}
+    if page is not None:
+        params["page"] = page
+        if limit is not None:
+            params["limit"] = limit
+    return raw.get(path, params=params, client=client)
