@@ -181,6 +181,8 @@ def new_person(
     desktop_login="",
     departments=[],
     password=None,
+    is_bot=False,
+    expiration_date=None,
     client=default,
 ):
     """
@@ -196,6 +198,9 @@ def new_person(
                     and studio manager)
         desktop_login (str): The login the users uses to log on its computer.
         departments (list): The departments for the person.
+        password (str): The password for the person.
+        is_bot (bool): Whether the person is a bot or not.
+        expiration_date (str): The expiration date for the person.
     Returns:
         dict: Created person.
     """
@@ -212,6 +217,8 @@ def new_person(
                 "desktop_login": desktop_login,
                 "departments": normalize_list_of_models_for_links(departments),
                 "password": password,
+                "is_bot": is_bot,
+                "expiration_date": expiration_date,
             },
             client=client,
         )

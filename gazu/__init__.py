@@ -110,3 +110,18 @@ def get_event_host(client=raw.default_client):
 
 def set_event_host(url, client=raw.default_client):
     raw.set_event_host(url, client=client)
+
+
+def set_token(token, client=raw.default_client):
+    """
+    Store authentication token to reuse them for all requests.
+
+    Args:
+        new_tokens (dict): Tokens to use for authentication.
+    """
+    tokens = {}
+    if isinstance(token, dict):
+        tokens["access_token"] = token["access_token"]
+    else:
+        tokens["access_token"] = token
+    return raw.set_tokens(tokens, client=client)
