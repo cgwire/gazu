@@ -101,6 +101,7 @@ def new_project(
     asset_types=[],
     task_statuses=[],
     task_types=[],
+    production_style="2d3d",
     client=default,
 ):
     """
@@ -113,6 +114,8 @@ def new_project(
         asset_types (list): Asset types of the project.
         task_statuses (list): Task statuses of the project.
         task_types (list): Task types of the project.
+        production_style (str): 2d, 3d, 2d3d, ar, vfx, stop-motion, motion-design,
+            archviz, commercial, catalog, immersive, nft, video-game, vr.
     Returns:
         dict: Created project.
     """
@@ -129,6 +132,7 @@ def new_project(
                     task_statuses
                 ),
                 "task_types": normalize_list_of_models_for_links(task_types),
+                "production_style": production_style,
             },
             client=client,
         )
