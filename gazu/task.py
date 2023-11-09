@@ -1053,6 +1053,31 @@ def assign_task(task, person, client=default):
     return raw.put(path, {"task_ids": task["id"]}, client=client)
 
 
+def clear_assignations(tasks, person=None, client=default):
+    """
+    Clear assignations for a single or multiple tasks.
+    If no person is given, all assignations are cleared.
+    Args:
+        tasks (list / str / dict): Task dict or the task ID, single or list.
+        person (str / dict): The person dict or the person ID.
+
+    Returns:
+        (dict) List of affected Task IDs
+    """
+    if not isinstance(tasks, list):
+        tasks = [tasks]
+    data = {}
+    for task in tasks:
+        task = normalize_model_parameter(task)
+        data.setdefault("task_ids", []).append(task["id"])
+    if person is not None:
+        person = normalize_model_parameter(person)
+        data["person_id"] = person["id"]
+    return raw.put(
+        "/actions/tasks/clear-assignation", data=data, client=client
+    )
+
+
 def new_task_type(name, color="#000000", client=default):
     """
     Create a new task type with the given name.
