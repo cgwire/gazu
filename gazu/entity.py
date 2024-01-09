@@ -127,3 +127,16 @@ def remove_entity(entity, force=False, client=default):
     if force:
         params = {"force": "true"}
     return raw.delete(path, params, client=client)
+
+
+def all_entities_with_tasks_linked_to_entity(entity, client=default):
+    """
+    Args:
+        entity (dict): Entity to get linked entities.
+    Returns:
+        list: Retrieve all entities linked to given entity.
+    """
+    entity = normalize_model_parameter(entity)
+    return raw.fetch_all(
+        "entities/%s/entities-linked/with-tasks" % entity["id"], client=client
+    )

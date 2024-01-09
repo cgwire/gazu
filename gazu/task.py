@@ -84,6 +84,25 @@ def all_tasks_for_shot(shot, relations=False, client=default):
 
 
 @cache
+def all_tasks_for_concept(concept, relations=False, client=default):
+    """
+    Args:
+        concept (str / dict): The concept dict or the concept ID.
+
+    Returns:
+        list: Tasks linked to given concept.
+    """
+    concept = normalize_model_parameter(concept)
+    params = {}
+    if relations:
+        params = {"relations": "true"}
+    tasks = raw.fetch_all(
+        "concepts/%s/tasks" % concept["id"], params, client=client
+    )
+    return sort_by_name(tasks)
+
+
+@cache
 def all_tasks_for_edit(edit, relations=False, client=default):
     """
     Args:
@@ -268,6 +287,21 @@ def all_task_types_for_shot(shot, client=default):
     """
     shot = normalize_model_parameter(shot)
     path = "shots/%s/task-types" % shot["id"]
+    task_types = raw.fetch_all(path, client=client)
+    return sort_by_name(task_types)
+
+
+@cache
+def all_task_types_for_concept(concept, client=default):
+    """
+    Args:
+        concept (str / dict): The concept dict or the concept ID.
+
+    Returns
+        list: Task types of task linked to given concept.
+    """
+    concept = normalize_model_parameter(concept)
+    path = "concepts/%s/task-types" % concept["id"]
     task_types = raw.fetch_all(path, client=client)
     return sort_by_name(task_types)
 

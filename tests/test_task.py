@@ -8,24 +8,21 @@ from gazu.exception import (
     TaskMustBeADictException,
 )
 import gazu.task
-import datetime
 
 from utils import fakeid, mock_route, add_verify_file_callback
 
 
 class TaskTestCase(unittest.TestCase):
-    def test_all_for_shot(self):
+    def test_all_tasks_for_shot(self):
         with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url(
-                    "data/shots/shot-01/tasks?relations=true"
-                ),
-                text=json.dumps(
-                    [
-                        {"id": 1, "name": "Master Compositing"},
-                        {"id": 2, "name": "Master Animation"},
-                    ]
-                ),
+            mock_route(
+                mock,
+                "GET",
+                "data/shots/shot-01/tasks?relations=true",
+                text=[
+                    {"id": 1, "name": "Master Compositing"},
+                    {"id": 2, "name": "Master Animation"},
+                ],
             )
 
             shot = {"id": "shot-01"}
@@ -33,7 +30,24 @@ class TaskTestCase(unittest.TestCase):
             task = tasks[0]
             self.assertEqual(task["name"], "Master Animation")
 
-    def test_all_for_sequence(self):
+    def test_all_tasks_for_concept(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/concepts/concept-01/tasks?relations=true",
+                text=[
+                    {"id": 1, "name": "Master Compositing"},
+                    {"id": 2, "name": "Master Animation"},
+                ],
+            )
+
+            concept = {"id": "concept-01"}
+            tasks = gazu.task.all_tasks_for_concept(concept, True)
+            task = tasks[0]
+            self.assertEqual(task["name"], "Master Animation")
+
+    def test_all_tasks_for_sequence(self):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
@@ -52,7 +66,7 @@ class TaskTestCase(unittest.TestCase):
             task = tasks[0]
             self.assertEqual(task["name"], "Master Animation")
 
-    def test_all_for_asset(self):
+    def test_all_tasks_for_asset(self):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
@@ -71,7 +85,7 @@ class TaskTestCase(unittest.TestCase):
             task = tasks[0]
             self.assertEqual(task["name"], "Master Modeling")
 
-    def test_all_for_episode(self):
+    def test_all_tasks_for_episode(self):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
@@ -106,6 +120,20 @@ class TaskTestCase(unittest.TestCase):
 
             shot = {"id": "shot-01"}
             task_types = gazu.task.all_task_types_for_shot(shot)
+            task_type = task_types[0]
+            self.assertEqual(task_type["name"], "Modeling")
+
+    def test_all_task_types_for_concept(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/concepts/concept-01/task-types",
+                text=[{"id": "task-type-01", "name": "Modeling"}],
+            )
+
+            concept = {"id": "concept-01"}
+            task_types = gazu.task.all_task_types_for_concept(concept)
             task_type = task_types[0]
             self.assertEqual(task_type["name"], "Modeling")
 
