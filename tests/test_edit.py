@@ -117,6 +117,26 @@ class EditTestCase(unittest.TestCase):
             )
             self.assertEqual(edit, result)
 
+        with requests_mock.mock() as mock:
+            result = {
+                "id": fakeid("edit-1"),
+                "project_id": fakeid("project-1"),
+            }
+            mock_route(
+                mock,
+                "GET",
+                "data/edits/all?project_id=%s&name=Concept 01"
+                % fakeid("project-1"),
+                text=[result],
+            )
+
+            edit = gazu.edit.new_edit(
+                fakeid("project-1"),
+                "Concept 01",
+                episode=fakeid("episode-1"),
+            )
+            self.assertEqual(edit, result)
+
     def test_remove_edit(self):
         with requests_mock.mock() as mock:
             mock_route(mock, "DELETE", "data/edits/edit-01", status_code=204)
@@ -163,3 +183,35 @@ class EditTestCase(unittest.TestCase):
             data = {"metadata-1": "metadata-1"}
             edit = gazu.edit.update_edit_data(fakeid("edit-1"), data)
             self.assertEqual(edit["data"]["metadata-1"], "metadata-1")
+
+    def test_all_edits_for_project(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/projects/project-01/edits",
+                text=[{"name": "Edit 01", "project_id": "project-01"}],
+            )
+            project = {"id": "project-01"}
+            edits = gazu.edit.all_edits_for_project(project)
+            self.assertEqual(len(edits), 1)
+            edit_instance = edits[0]
+            self.assertEqual(edit_instance["name"], "Edit 01")
+            self.assertEqual(edit_instance["project_id"], "project-01")
+
+    def test_all_previews_for_edit(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/edits/%s/preview-files" % fakeid("edit-1"),
+                text=[
+                    {"id": fakeid("preview-1"), "name": "preview-1"},
+                    {"id": fakeid("preview-2"), "name": "preview-2"},
+                ],
+            )
+
+            previews = gazu.edit.all_previews_for_edit(fakeid("edit-1"))
+            self.assertEqual(len(previews), 2)
+            self.assertEqual(previews[0]["id"], fakeid("preview-1"))
+            self.assertEqual(previews[1]["id"], fakeid("preview-2"))
