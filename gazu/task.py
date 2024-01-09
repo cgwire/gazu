@@ -1112,7 +1112,7 @@ def clear_assignations(tasks, person=None, client=default):
     )
 
 
-def new_task_type(name, color="#000000", client=default):
+def new_task_type(name, color="#000000", for_entity="Asset", client=default):
     """
     Create a new task type with the given name.
 
@@ -1120,11 +1120,12 @@ def new_task_type(name, color="#000000", client=default):
         name (str): The name of the task type
         color (str): The color of the task type as an hexadecimal string
         with # as first character. ex : #00FF00
+        for_entity (str): The entity type for which the task type is created.
 
     Returns:
         dict: The created task type
     """
-    data = {"name": name, "color": color}
+    data = {"name": name, "color": color, "for_entity": for_entity}
     return raw.post("data/task-types", data, client=client)
 
 
