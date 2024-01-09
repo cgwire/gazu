@@ -20,6 +20,7 @@ from . import sync
 from . import task
 from . import user
 from . import playlist
+from . import concept
 
 from .exception import (
     AuthFailedException,

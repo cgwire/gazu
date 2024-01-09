@@ -84,6 +84,25 @@ def all_tasks_for_shot(shot, relations=False, client=default):
 
 
 @cache
+def all_tasks_for_concept(concept, relations=False, client=default):
+    """
+    Args:
+        concept (str / dict): The concept dict or the concept ID.
+
+    Returns:
+        list: Tasks linked to given concept.
+    """
+    concept = normalize_model_parameter(concept)
+    params = {}
+    if relations:
+        params = {"relations": "true"}
+    tasks = raw.fetch_all(
+        "concepts/%s/tasks" % concept["id"], params, client=client
+    )
+    return sort_by_name(tasks)
+
+
+@cache
 def all_tasks_for_edit(edit, relations=False, client=default):
     """
     Args:
@@ -268,6 +287,21 @@ def all_task_types_for_shot(shot, client=default):
     """
     shot = normalize_model_parameter(shot)
     path = "shots/%s/task-types" % shot["id"]
+    task_types = raw.fetch_all(path, client=client)
+    return sort_by_name(task_types)
+
+
+@cache
+def all_task_types_for_concept(concept, client=default):
+    """
+    Args:
+        concept (str / dict): The concept dict or the concept ID.
+
+    Returns
+        list: Task types of task linked to given concept.
+    """
+    concept = normalize_model_parameter(concept)
+    path = "concepts/%s/task-types" % concept["id"]
     task_types = raw.fetch_all(path, client=client)
     return sort_by_name(task_types)
 
@@ -1078,7 +1112,7 @@ def clear_assignations(tasks, person=None, client=default):
     )
 
 
-def new_task_type(name, color="#000000", client=default):
+def new_task_type(name, color="#000000", for_entity="Asset", client=default):
     """
     Create a new task type with the given name.
 
@@ -1086,11 +1120,12 @@ def new_task_type(name, color="#000000", client=default):
         name (str): The name of the task type
         color (str): The color of the task type as an hexadecimal string
         with # as first character. ex : #00FF00
+        for_entity (str): The entity type for which the task type is created.
 
     Returns:
         dict: The created task type
     """
-    data = {"name": name, "color": color}
+    data = {"name": name, "color": color, "for_entity": for_entity}
     return raw.post("data/task-types", data, client=client)
 
 

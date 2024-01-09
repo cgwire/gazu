@@ -12,11 +12,11 @@ from utils import fakeid, mock_route
 class ShotTestCase(unittest.TestCase):
     def test_all_shots_for_project(self):
         with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url("data/projects/project-01/shots"),
-                text=json.dumps(
-                    [{"name": "Shot 01", "project_id": "project-01"}]
-                ),
+            mock_route(
+                mock,
+                "GET",
+                "data/projects/project-01/shots",
+                text=[{"name": "Shot 01", "project_id": "project-01"}],
             )
             project = {"id": "project-01"}
             shots = gazu.shot.all_shots_for_project(project)
@@ -498,16 +498,14 @@ class ShotTestCase(unittest.TestCase):
 
     def test_all_previews_for_shot(self):
         with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url(
-                    "data/shots/%s/preview-files" % fakeid("shot-1")
-                ),
-                text=json.dumps(
-                    [
-                        {"id": fakeid("preview-1"), "name": "preview-1"},
-                        {"id": fakeid("preview-2"), "name": "preview-2"},
-                    ]
-                ),
+            mock_route(
+                mock,
+                "GET",
+                "data/shots/%s/preview-files" % fakeid("shot-1"),
+                text=[
+                    {"id": fakeid("preview-1"), "name": "preview-1"},
+                    {"id": fakeid("preview-2"), "name": "preview-2"},
+                ],
             )
 
             previews = gazu.shot.all_previews_for_shot(fakeid("shot-1"))
