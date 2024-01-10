@@ -444,7 +444,9 @@ def get_task_type(task_type_id, client=default):
 
 
 @cache
-def get_task_type_by_name(task_type_name, client=default):
+def get_task_type_by_name(
+    task_type_name, for_entity=None, department=None, client=default
+):
     """
     Args:
         task_type_name (str): Name of claimed task type.
@@ -452,9 +454,12 @@ def get_task_type_by_name(task_type_name, client=default):
     Returns:
         dict: Task type object for given name.
     """
-    return raw.fetch_first(
-        "task-types", {"name": task_type_name}, client=client
-    )
+    params = {"name": task_type_name}
+    if for_entity is not None:
+        params["for_entity"] = for_entity
+    if department is not None:
+        params["department_id"] = normalize_model_parameter(department)["id"]
+    return raw.fetch_first("task-types", params, client=client)
 
 
 @cache
