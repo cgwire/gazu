@@ -450,6 +450,8 @@ def get_task_type_by_name(
     """
     Args:
         task_type_name (str): Name of claimed task type.
+        for_entity (str): The entity type for which the task type is created.
+        department (str): The department for which the task type is created.
 
     Returns:
         dict: Task type object for given name.
