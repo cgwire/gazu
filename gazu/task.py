@@ -2,6 +2,8 @@ import string
 
 import json
 
+from deprecated import deprecated
+
 from gazu.exception import (
     TaskStatusNotFoundException,
     TaskMustBeADictException,
@@ -403,12 +405,7 @@ def all_done_tasks_for_person(person, client=default):
 
 
 @cache
-def get_task_by_entity(entity, task_type, client=default):
-    return get_task_by_name(entity, task_type, client=client)
-
-
-@cache
-def get_task_by_name(entity, task_type, name="main", client=default):
+def get_task_by_entity(entity, task_type, name="main", client=default):
     """
     Args:
         entity (str / dict): The entity dict or the entity ID.
@@ -416,7 +413,7 @@ def get_task_by_name(entity, task_type, name="main", client=default):
         name (str): Name of the task to look for.
 
     Returns:
-        Task matching given name for given entity and task type.
+        Task matching given entity, task type and name.
     """
     entity = normalize_model_parameter(entity)
     task_type = normalize_model_parameter(task_type)
@@ -429,6 +426,15 @@ def get_task_by_name(entity, task_type, name="main", client=default):
         },
         client=client,
     )
+
+
+@deprecated(
+    version="0.9.17",
+    reason="You should use another function: gazu.task.get_task_by_entity, it will be removed in a future version of Gazu (0.10.0).",
+)
+@cache
+def get_task_by_name(entity, task_type, name="main", client=default):
+    return get_task_by_entity(entity, task_type, name=name, client=client)
 
 
 @cache
@@ -450,6 +456,8 @@ def get_task_type_by_name(
     """
     Args:
         task_type_name (str): Name of claimed task type.
+        for_entity (str): The entity type for which the task type is created.
+        department (str): The department for which the task type is created.
 
     Returns:
         dict: Task type object for given name.
