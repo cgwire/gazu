@@ -26,9 +26,9 @@ copyright = "2023, CGWire"
 author = "CGWire"
 
 # The short X.Y version
-version = "0.9.4"
+version = "0.9.17"
 # The full version, including alpha/beta/rc tags
-release = "0.9.4"
+release = "0.9.17"
 
 
 # -- General configuration ---------------------------------------------------

@@ -13,6 +13,7 @@ The client is divided in multiple modules:
 * *cache*: functions related to the cache.
 * *casting*: functions related to casting.
 * *client*: generic functions to deal with the API.
+* *concept*: functions related to concepts.
 * *edit*: functions related to edits.
 * *entity*: functions related to entities.
 * *exceptions*: exceptions raised by Gazu.
@@ -70,6 +71,12 @@ gazu.client
 ------------
 
 .. automodule:: gazu.client
+    :members:
+
+gazu.concept
+------------
+
+.. automodule:: gazu.concept
     :members:
 
 gazu.edit
