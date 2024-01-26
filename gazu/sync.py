@@ -547,7 +547,7 @@ def push_task_comment(
     for attachment_id in comment["attachment_files"]:
         if type(attachment_id) == dict:
             attachment_id = attachment_id["id"]
-        attachment_file = gazu.files.get_attachment_file(
+        attachment_file = files_module.get_attachment_file(
             attachment_id, client=client_source
         )
         file_path = "/tmp/zou/sync/" + attachment_file["name"]
