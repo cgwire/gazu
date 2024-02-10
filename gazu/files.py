@@ -270,6 +270,52 @@ def all_output_files_for_asset_instance(
     return raw.fetch_all(path, params, client=client)
 
 
+def all_output_files_for_project(
+    project,
+    output_type=None,
+    task_type=None,
+    name=None,
+    representation=None,
+    file_status=None,
+    client=default,
+):
+    """
+    Args:
+        entity (str / dict): The entity dict or ID.
+        output_type (str / dict): The output type dict or ID.
+        task_type (str / dict): The task type dict or ID.
+        name (str): The file name
+        representation (str): The file representation
+        file_status (str / dict): The file status
+
+    Returns:
+        list:
+            Output files for a given project (asset or shot), output type,
+            task_type, name and representation
+    """
+    project = normalize_model_parameter(project)
+    output_type = normalize_model_parameter(output_type)
+    task_type = normalize_model_parameter(task_type)
+    file_status = normalize_model_parameter(file_status)
+    path = "projects/{project_id}/output-files".format(
+        project_id=project["id"]
+    )
+
+    params = {}
+    if output_type:
+        params["output_type_id"] = output_type["id"]
+    if task_type:
+        params["task_type_id"] = task_type["id"]
+    if representation:
+        params["representation"] = representation
+    if name:
+        params["name"] = name
+    if file_status:
+        params["file_status_id"] = file_status["id"]
+
+    return raw.fetch_all(path, params, client=client)
+
+
 @cache
 def all_softwares(client=default):
     """
