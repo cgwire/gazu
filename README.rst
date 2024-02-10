@@ -5,13 +5,13 @@
 Gazu, Python client for the Kitsu API
 =====================================
 
-The Kitsu Python client allows to fetch data easily from the Kitsu
-collaboration platform. You can fetch easily your asset and shots data into your
+The Kitsu Python client allows you to fetch data easily from the Kitsu
+collaboration platform. With Gazu, you bring assets and shots data into your
 pipeline tools. It comes with extra features such as preview publishing and 
 event stream listening.
 
 It is made to be used with the `Kitsu API <https://zou.cg-wire.com>`__. It
-requires an up and running instance of Kitsu to run properly.
+requires an up-and-running instance of Kitsu to run correctly.
 
 |CI badge| |Discord| |Downloads|
 
@@ -24,7 +24,7 @@ Install Gazu in your application environment via pip:
 
     pip install gazu
 
-The client requires a few extra configuration before being used. It
+The client requires a few extra configurations before being used. It
 needs to know where is located the API server and to log in:
 
 .. code:: python
@@ -52,7 +52,7 @@ Documentation and specification are available on a dedicated website:
 Projects using the Kitsu client
 -------------------------------
 
-Our community built open-source tools to connect your content creation tools to
+Our community-built open-source tools connect your content creation tools to
 your Kitsu instance. They are listed below:
 
 * `Qtazu <https://github.com/Colorbleed/qtazu>`__: Qt Widgets such as a login
@@ -71,9 +71,9 @@ Contributions
 All contributions are welcome as long as they respect the `C4
 contract <https://rfc.zeromq.org/spec:42/C4>`__.
 
-Code must follow the pep8 convention.
+The code must follow the pep8 convention.
 
-You can use the pre-commit hook for Black (a python code formatter) before commiting :
+You can use the pre-commit hook for Black (a Python code formatter) before committing :
 
 .. code:: bash
 
