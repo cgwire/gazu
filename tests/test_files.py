@@ -562,6 +562,23 @@ class FilesTestCase(unittest.TestCase):
             self.assertEqual(output_files[0]["id"], "output-file-01")
             self.assertEqual(output_files[0]["name"], "main")
 
+    def test_get_output_files_for_project(self):
+        with requests_mock.mock() as mock:
+            base_path = "projects/project-01/output-files"
+            path = gazu.client.url_path_join("data", base_path)
+            params = {"output_type_id": "output-type-1"}
+
+            mock.get(
+                gazu.client.get_full_url(
+                    gazu.client.build_path_with_params(path, params)
+                ),
+                text=json.dumps([{"id": "output-file-01", "name": "main"}]),
+            )
+            output_files = gazu.files.all_output_files_for_project(
+                {"id": "project-01"}, output_type={"id": "output-type-1"}
+            )
+            self.assertEqual(output_files[0]["name"], "main")
+
     def test_update_modification_date(self):
         with requests_mock.mock() as mock:
             path = "/actions/working-files/working-file-01/modified"
