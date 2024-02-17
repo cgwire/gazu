@@ -1067,6 +1067,16 @@ class FilesTestCase(unittest.TestCase):
             )
             self.assertEqual(preview_file["name"], "preview-file-1")
 
+    def test_remove_preview_file(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "DELETE",
+                "data/preview-files/%s" % fakeid("preview-file-1"),
+                status_code=204,
+            )
+            gazu.files.remove_preview_file(fakeid("preview-file-1"))
+
     def test_get_all_preview_files_for_task(self):
         with requests_mock.mock() as mock:
             text = [

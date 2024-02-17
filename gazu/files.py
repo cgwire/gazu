@@ -147,6 +147,20 @@ def get_preview_file(preview_file_id, client=default):
     return raw.fetch_one("preview-files", preview_file_id, client=client)
 
 
+def remove_preview_file(preview_file, client=default):
+    """
+    Remove given preview file from database.
+
+    Args:
+        preview_file (str / dict): The preview_file dict or ID.
+    """
+    preview_file = normalize_model_parameter(preview_file)
+    return raw.delete(
+        "data/preview-files/%s" % preview_file["id"],
+        client=client,
+    )
+
+
 @cache
 def get_all_preview_files_for_task(task, client=default):
     """
