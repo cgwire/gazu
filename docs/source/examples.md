@@ -2,22 +2,22 @@
 
 ## Introduction
 
-In this section we are going to describe through examples what is possible to do
-with Kitsu client. We assume here that the `gazu` module is properly imported
+In this section, we will describe through examples what is possible to do
+with the Kitsu client. We assume that the `gazu` module is imported correctly
 and configured.
 
 ## Get user todo list 
 
-To get the todo list of the currently logged in user use the following code:
+To get the todo list of the currently logged-in user, use the following code:
 
 ```python
 tasks = gazu.user.all_tasks_to_do()
 ```
 
-## Post a comment / change task status
+## Post a comment/change task status
 
-To change task status, you have to post a new comment with the desired status.
-Comments without text are allowed too:
+To change the task status, you have to post a new comment with the desired status.
+Comments without text are allowed, too:
 
 ```python
 modeling = gazu.task.get_task_type_by_name("modeling")
@@ -26,14 +26,14 @@ wip = gazu.task.get_task_status_by_short_name("wip")
 project = gazu.project.get_project_by_name("Caminandes")
 asset = gazu.asset.get_asset_by_name(project, "Lama")
 
-task = gazu.task.get_task_by_name(asset, modeling)
+task = gazu.task.get_task_by_entity(asset, modeling)
 comment = gazu.task.add_comment(task, wip, "Change status to work in progress")
 ```
 
 ## Post a preview
 
-We assume here you already have retrieved related task and comment. To add a
-preview you need to specify what you which to upload as a new preview:
+We assume you have already retrieved the related task and comment. To add a
+preview, you need to specify what you want to upload as a new preview:
 
 ```python
 preview_file = gazu.task.add_preview(
@@ -44,9 +44,21 @@ preview_file = gazu.task.add_preview(
 gazu.task.set_main_preview(preview_file) #  Set preview as asset thumbnail
 ```
 
+Another alternative is to use the `publish` shortcut to post a comment and 
+link a preview file to it:
+
+```python
+(comment, preview_file) = gazu.task.publish_preview(
+    task,
+    wip,
+    comment="Change status to work in progress",
+    preview_file_path="/path/to/my/file.mp4"
+)
+```
+
 ## Deal with Persons 
 
-Retrieve all persons listed in database:
+Retrieve all persons listed in the database:
 
 ```python
 persons = gazu.person.all_persons()
@@ -61,7 +73,7 @@ person = gazu.person.get_person_by_desktop_login("john.doe")
 
 ## Deal with Projects 
 
-Retrieve all projects listed in database:
+Retrieve all projects listed in the database:
 
 ```python
 projects = gazu.project.all_projects()
@@ -73,7 +85,7 @@ Retrieve all open projects (open means still running on):
 projects = gazu.project.all_open_projects()
 ```
 
-Retrieve given project:
+Retrieve the given project:
 
 ```python
 project = gazu.project.get_project(project_id)
@@ -88,7 +100,7 @@ project = gazu.project.new_project("Agent 327")
 
 ## Deal with Assets 
 
-Retrieve all assets for a given project, shot or asset type:
+Retrieve all assets for a given project, shot, or asset type:
 
 ```python
 assets = gazu.asset.all_assets_for_project(project_dict)
@@ -152,21 +164,21 @@ asset_instances = all_asset_instances_for_shot(shot_dict)
 
 ## Deal with Shots 
 
-Retrieve all shots for given project or sequence:
+Retrieve all shots for a given project or sequence:
 
 ```python
 shots = gazu.shot.all_shots_for_project(project_dict)
 shots = gazu.shot.all_shots_for_sequence(sequence_dict)
 ```
 
-Retrieve all sequences for given project or episode
+Retrieve all sequences for a given project or episode.
 
 ```python
 sequences = gazu.shot.all_sequences_for_project(project_id)
 sequences = gazu.shot.all_sequences_for_episode(episode_dict)
 ```
 
-Retrieve all episodes for given project:
+Retrieve all episodes for a given project:
 
 ```python
 episodes = gazu.shot.all_episodes_for_project(project_dict)
@@ -179,7 +191,7 @@ shot = gazu.shot.get_shot(shot_id)
 shot = gazu.shot.get_shot_by_name(sequence_dict, "SH01")
 ```
 
-Retrieve given sequence:
+Retrieve the given sequence:
 
 ```python
 sequence = gazu.shot.get_sequence(shot_id)
@@ -193,7 +205,7 @@ episode = gazu.shot.get_episode(shot_id)
 episode = gazu.shot.get_episode_by_name(project_dict, "SE01")
 ```
 
-Create shot, sequence and episode:
+Create shot, sequence, and episode:
 
 ```python
 shot = gazu.shot.new_shot(
@@ -224,7 +236,7 @@ asset_instances = gazu.shot.all_asset_instances_for_shot(shot_dict)
 
 ## Deal with Tasks
 
-Retrieve all tasks related to given asset, shot or sequence:
+Retrieve all tasks related to a given asset, shot, or sequence:
 
 ```python
 tasks = gazu.task.all_tasks_for_asset(asset_dict)
@@ -334,13 +346,13 @@ output_types = gazu.files.all_output_types_for_entity(shot_dict)
 output_types = gazu.files.all_output_types_for_asset_instance(asset_dict)
 ```
 
-Create new output file:
+Create a new output file:
 
 ```python
 output_type = gazu.files.new_output_type("Geometry", "geo")
 ```
 
-Get all softwares:
+Get all software:
 
 ```python
 softwares = gazu.files.all_softwares()
@@ -353,14 +365,14 @@ software = gazu.files.get_software(software_id)
 software = gazu.files.get_software_by_name("Maya")
 ```
 
-Retrieve given output file:
+Retrieve the given output file:
 
 ```python
 output_file = gazu.files.get_output_file(output_file_id)
 output_file = gazu.files.get_output_file_by_path(path)
 ```
 
-Retrieve output files related to give entity:
+Retrieve output files related to given entity:
 
 ```python
 output_files = gazu.files.all_output_files_for_entity(
@@ -373,7 +385,7 @@ output_files_dict = gazu.files.get_last_output_files_for_asset_instance(
     asset_instance_dict)
 ```
 
-Manage output files revisions:
+Manage output file revisions:
 
 ```python
 next_revision = gazu.files.get_next_entity_ouput_revision(task, output_type)
@@ -384,7 +396,7 @@ last_revision = gazu.files.get_last_asset_instance_ouput_revision(
     task, output_type)
 ```
 
-Create new output file:
+Create a new output file:
 
 ```python
 output_file = gazu.files.new_entity_output_file(
@@ -500,7 +512,7 @@ gazu.files.download_preview_file_thumbnail(preview_file, "./target.png")
 
 ## Deal with User
 
-This routes returns data related to currently logged user (for which he has
+This route returns data related to the currently logged user (for which he has
 assigned tasks linked to expected result):
 
 Projects:
