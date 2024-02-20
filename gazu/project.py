@@ -367,10 +367,10 @@ def update_metadata_descriptor(project, metadata_descriptor, client=default):
         dict: The updated metadata descriptor.
     """
     if "departments" in metadata_descriptor:
-        metadata_descriptor[
-            "departments"
-        ] = normalize_list_of_models_for_links(
-            metadata_descriptor["departments"]
+        metadata_descriptor["departments"] = (
+            normalize_list_of_models_for_links(
+                metadata_descriptor["departments"]
+            )
         )
 
     project = normalize_model_parameter(project)
