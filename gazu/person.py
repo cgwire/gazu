@@ -123,14 +123,13 @@ def get_person_by_email(email, client=default):
 
 @cache
 def get_person_by_full_name(
-    full_name,
-    first_name=None,
-    last_name=None,
-    client=default
+    full_name, first_name=None, last_name=None, client=default
 ):
     """
     Args:
         full_name (str): User's full name
+        first_name (str): User's first name
+        last_name (str): User's last name
 
     Returns:
         dict: Person corresponding to given name.
@@ -142,19 +141,11 @@ def get_person_by_full_name(
             client=client,
         )
     else:
-        if " " in full_name:
-            first_name, last_name = full_name.lower().split(" ")
-        else:
-            first_name, last_name = full_name.lower().strip(), ""
-        for person in all_persons():
-            is_right_first_name = (
-                first_name == person["first_name"].lower().strip()
-            )
-            is_right_last_name = (
-                len(last_name) == 0 or last_name == person["last_name"].lower()
-            )
-            if is_right_first_name and is_right_last_name:
-                return person
+        return raw.fetch_first(
+            "persons",
+            {"full_name": full_name},
+            client=client,
+        )
     return None
 
 

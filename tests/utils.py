@@ -1,6 +1,7 @@
 """
 Contains utility routines to be used in gazu tests
 """
+
 import sys
 import binascii
 import json

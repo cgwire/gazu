@@ -22,23 +22,13 @@ class PersonTestCase(unittest.TestCase):
     def test_get_person_by_full_name(self):
         with requests_mock.mock() as mock:
             mock.get(
-                gazu.client.get_full_url("data/persons"),
+                gazu.client.get_full_url("data/persons?full_name=John Doe"),
                 text=json.dumps(
                     [
                         {
                             "first_name": "John",
                             "last_name": "Doe",
                             "id": "person-1",
-                        },
-                        {
-                            "first_name": "Alex",
-                            "last_name": "Doe",
-                            "id": "person-2",
-                        },
-                        {
-                            "first_name": "Ema",
-                            "last_name": "Doe",
-                            "id": "person-3",
                         },
                     ]
                 ),
@@ -47,32 +37,21 @@ class PersonTestCase(unittest.TestCase):
             self.assertEqual(person["id"], "person-1")
         with requests_mock.mock() as mock:
             mock.get(
-                gazu.client.get_full_url("data/persons"),
+                gazu.client.get_full_url(
+                    "data/persons?first_name=John&last_name=Doe"
+                ),
                 text=json.dumps(
                     [
                         {
                             "first_name": "John",
                             "last_name": "Doe",
-                            "id": "person-01",
-                        },
-                        {
-                            "first_name": "JohnDid",
-                            "last_name": "",
-                            "id": "person-2",
-                        },
-                        {
-                            "first_name": "Ema",
-                            "last_name": "Doe",
-                            "id": "person-3",
+                            "id": "person-1",
                         },
                     ]
                 ),
             )
-            person = gazu.person.get_person_by_full_name("JohnDid")
-            self.assertEqual(person["id"], "person-2")
-            self.assertEqual(
-                gazu.person.get_person_by_full_name("Unknown"), None
-            )
+            person = gazu.person.get_person_by_full_name("", "John", "Doe")
+            self.assertEqual(person["id"], "person-1")
 
     def test_get_person_by_desktop_login(self):
         with requests_mock.mock() as mock:
