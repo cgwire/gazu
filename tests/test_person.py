@@ -106,7 +106,7 @@ class PersonTestCase(unittest.TestCase):
             mock_route(
                 mock, "GET", "data/persons?email=john@gmail.com", text=[]
             )
-            mock_route(mock, "POST", "data/persons/new", text=result)
+            mock_route(mock, "POST", "data/persons", text=result)
             self.assertEqual(
                 gazu.person.new_person(
                     "Jhon",

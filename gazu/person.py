@@ -210,7 +210,7 @@ def new_person(
     person = get_person_by_email(email, client=client)
     if person is None:
         person = raw.post(
-            "data/persons/new",
+            "data/persons",
             {
                 "first_name": first_name,
                 "last_name": last_name,
