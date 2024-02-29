@@ -1,18 +1,18 @@
 import gazu
 
-gazu.set_host("http://localhost:8080/api")
-gazu.set_event_host("http://localhost:8080/")
-gazu.log_in("jhon@doe.com", "password")
+gazu.set_host("https://your-instance.cg-wire.com/api")
+gazu.set_event_host("https://your-instance.cg-wire.com")
+gazu.log_in("your@email.com", "yourpassword")
 
 
-def my_callback(data):
-    print("Task status changed:")
-    print(data)
+def my_callback(event, data):
+    print(f"event:{event}")
+    print(f"data:{data}")
 
 
 try:
     event_client = gazu.events.init()
-    gazu.events.add_listener(event_client, "task:status-changed", my_callback)
+    gazu.events.add_listener(event_client, "*", my_callback)
     gazu.events.run_client(event_client)
 except KeyboardInterrupt:
     print("Stop listening.")
