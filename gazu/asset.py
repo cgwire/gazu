@@ -248,7 +248,7 @@ def remove_asset(asset, force=False, client=default):
     path = "data/assets/%s" % asset["id"]
     params = {}
     if force:
-        params = {"force": "true"}
+        params = {"force": True}
     return raw.delete(path, params, client=client)
 
 

@@ -446,7 +446,7 @@ def remove_shot(shot, force=False, client=default):
     path = "data/shots/%s" % shot["id"]
     params = {}
     if force:
-        params = {"force": "true"}
+        params = {"force": True}
     return raw.delete(path, params, client=client)
 
 
@@ -532,7 +532,7 @@ def remove_episode(episode, force=False, client=default):
     path = "data/episodes/%s" % episode["id"]
     params = {}
     if force:
-        params = {"force": "true"}
+        params = {"force": True}
     return raw.delete(path, params=params, client=client)
 
 
@@ -547,7 +547,7 @@ def remove_sequence(sequence, force=False, client=default):
     path = "data/sequences/%s" % sequence["id"]
     params = {}
     if force:
-        params = {"force": "true"}
+        params = {"force": True}
     return raw.delete(path, params=params, client=client)
 
 

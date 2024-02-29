@@ -138,7 +138,7 @@ def remove_edit(edit, force=False, client=default):
     path = "data/edits/%s" % edit["id"]
     params = {}
     if force:
-        params = {"force": "true"}
+        params = {"force": True}
     return raw.delete(path, params, client=client)
 
 

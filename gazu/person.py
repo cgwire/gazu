@@ -89,8 +89,8 @@ def get_person(id, relations=False, client=default):
         dict: Person corresponding to given id.
     """
     params = {"id": id}
-    if relations:
-        params["relations"] = "true"
+    if not relations:
+        params["relations"] = False
 
     return raw.fetch_first("persons", params=params, client=client)
 
@@ -105,7 +105,9 @@ def get_person_by_desktop_login(desktop_login, client=default):
         dict: Person corresponding to given desktop computer login.
     """
     return raw.fetch_first(
-        "persons", {"desktop_login": desktop_login}, client=client
+        "persons",
+        {"desktop_login": desktop_login, "is_bot": False},
+        client=client,
     )
 
 
@@ -118,7 +120,9 @@ def get_person_by_email(email, client=default):
     Returns:
         dict:  Person corresponding to given email.
     """
-    return raw.fetch_first("persons", {"email": email}, client=client)
+    return raw.fetch_first(
+        "persons", {"email": email, "is_bot": False}, client=client
+    )
 
 
 @cache
@@ -137,16 +141,19 @@ def get_person_by_full_name(
     if first_name is not None and last_name is not None:
         return raw.fetch_first(
             "persons",
-            {"first_name": first_name, "last_name": last_name},
+            {
+                "first_name": first_name,
+                "last_name": last_name,
+                "is_bot": False,
+            },
             client=client,
         )
     else:
         return raw.fetch_first(
             "persons",
-            {"full_name": full_name},
+            {"full_name": full_name, "is_bot": False},
             client=client,
         )
-    return None
 
 
 @cache
@@ -184,8 +191,8 @@ def new_person(
     desktop_login="",
     departments=[],
     password=None,
-    is_bot=False,
-    expiration_date=None,
+    active=True,
+    contract_type="open-ended",
     client=default,
 ):
     """
@@ -193,17 +200,16 @@ def new_person(
     set automatically to default.
 
     Args:
-        first_name (str):
-        last_name (str):
-        email (str):
-        phone (str):
+        first_name (str): the first name of the person.
+        last_name (str): the last name of the person.
+        email (str): the email of the person.
+        phone (str): the phone number of the person.
         role (str): user, manager, admin (wich match CG artist, Supervisor
                     and studio manager)
         desktop_login (str): The login the users uses to log on its computer.
         departments (list): The departments for the person.
         password (str): The password for the person.
-        is_bot (bool): Whether the person is a bot or not.
-        expiration_date (str): The expiration date for the person.
+        active (bool): Whether the person is active or not.
     Returns:
         dict: Created person.
     """
@@ -220,8 +226,8 @@ def new_person(
                 "desktop_login": desktop_login,
                 "departments": normalize_list_of_models_for_links(departments),
                 "password": password,
-                "is_bot": is_bot,
-                "expiration_date": expiration_date,
+                "active": active,
+                "contract_type": contract_type,
             },
             client=client,
         )
@@ -250,6 +256,85 @@ def update_person(person, client=default):
         person,
         client=client,
     )
+
+
+def remove_person(person, force=False, client=default):
+    """
+    Remove given person from database.
+
+    Args:
+        person (dict): Person to remove.
+    """
+    person = normalize_model_parameter(person)
+    path = "data/persons/%s" % person["id"]
+    params = {}
+    if force:
+        params = {"force": True}
+    return raw.delete(path, params, client=client)
+
+
+def new_bot(
+    name,
+    email,
+    role="user",
+    departments=[],
+    active=True,
+    expiration_date=None,
+    client=default,
+):
+    """
+    Create a new bot based on given parameters. His access token will be in the
+    return dict.
+
+    Args:
+        name (str): the name of the bot.
+        email (str): the email of the bot.
+        role (str): user, manager, admin (wich match CG artist, Supervisor
+                    and studio manager)
+        departments (list): The departments for the person.
+        active (bool): Whether the person is active or not.
+        expiration_date (str): The expiration date for the bot.
+    Returns:
+        dict: Created bot.
+    """
+    bot = raw.post(
+        "data/persons",
+        {
+            "first_name": name,
+            "last_name": "",
+            "email": email,
+            "role": role,
+            "departments": normalize_list_of_models_for_links(departments),
+            "active": active,
+            "expiration_date": expiration_date,
+            "is_bot": True,
+        },
+        client=client,
+    )
+    return bot
+
+
+def update_bot(bot, client=default):
+    """
+    Update a bot.
+
+    Args:
+        bot (dict): The bot dict that needs to be upgraded.
+
+    Returns:
+        dict: The updated bot.
+    """
+    return update_person(bot, client=client)
+
+
+def remove_bot(bot, force=False, client=default):
+    """
+    Remove given bot from database.
+
+    Args:
+        bot (dict): Bot to remove.
+    """
+    return remove_person(bot, force=force, client=client)
 
 
 def set_avatar(person, file_path, client=default):

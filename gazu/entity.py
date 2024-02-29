@@ -125,7 +125,7 @@ def remove_entity(entity, force=False, client=default):
     path = "data/entities/%s" % entity["id"]
     params = {}
     if force:
-        params = {"force": "true"}
+        params = {"force": True}
     return raw.delete(path, params, client=client)
 
 
