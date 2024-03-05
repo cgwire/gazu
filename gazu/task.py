@@ -80,7 +80,7 @@ def all_tasks_for_shot(shot, relations=False, client=default):
     shot = normalize_model_parameter(shot)
     params = {}
     if relations:
-        params = {"relations": "true"}
+        params = {"relations": True}
     tasks = raw.fetch_all("shots/%s/tasks" % shot["id"], params, client=client)
     return sort_by_name(tasks)
 
@@ -97,7 +97,7 @@ def all_tasks_for_concept(concept, relations=False, client=default):
     concept = normalize_model_parameter(concept)
     params = {}
     if relations:
-        params = {"relations": "true"}
+        params = {"relations": True}
     tasks = raw.fetch_all(
         "concepts/%s/tasks" % concept["id"], params, client=client
     )
@@ -116,7 +116,7 @@ def all_tasks_for_edit(edit, relations=False, client=default):
     edit = normalize_model_parameter(edit)
     params = {}
     if relations:
-        params = {"relations": "true"}
+        params = {"relations": True}
     tasks = raw.fetch_all("edits/%s/tasks" % edit["id"], params, client=client)
     return sort_by_name(tasks)
 
@@ -133,7 +133,7 @@ def all_tasks_for_sequence(sequence, relations=False, client=default):
     sequence = normalize_model_parameter(sequence)
     params = {}
     if relations:
-        params = {"relations": "true"}
+        params = {"relations": True}
     path = "sequences/%s/tasks" % sequence["id"]
     tasks = raw.fetch_all(path, params, client=client)
     return sort_by_name(tasks)
@@ -151,7 +151,7 @@ def all_tasks_for_scene(scene, relations=False, client=default):
     scene = normalize_model_parameter(scene)
     params = {}
     if relations:
-        params = {"relations": "true"}
+        params = {"relations": True}
     path = "scenes/%s/tasks" % scene["id"]
     tasks = raw.fetch_all(path, params, client=client)
     return sort_by_name(tasks)
@@ -169,7 +169,7 @@ def all_tasks_for_asset(asset, relations=False, client=default):
     asset = normalize_model_parameter(asset)
     params = {}
     if relations:
-        params = {"relations": "true"}
+        params = {"relations": True}
     path = "assets/%s/tasks" % asset["id"]
     tasks = raw.fetch_all(path, params, client=client)
     return sort_by_name(tasks)
@@ -183,7 +183,7 @@ def all_tasks_for_episode(episode, relations=False, client=default):
     episode = normalize_model_parameter(episode)
     params = {}
     if relations:
-        params = {"relations": "true"}
+        params = {"relations": True}
     path = "episodes/%s/tasks" % episode["id"]
     tasks = raw.fetch_all(path, params, client=client)
     return sort_by_name(tasks)
@@ -197,7 +197,7 @@ def all_shot_tasks_for_sequence(sequence, relations=False, client=default):
     sequence = normalize_model_parameter(sequence)
     params = {}
     if relations:
-        params = {"relations": "true"}
+        params = {"relations": True}
     path = "sequences/%s/shot-tasks" % sequence["id"]
     tasks = raw.fetch_all(path, params, client=client)
     return sort_by_name(tasks)
@@ -211,7 +211,7 @@ def all_shot_tasks_for_episode(episode, relations=False, client=default):
     episode = normalize_model_parameter(episode)
     params = {}
     if relations:
-        params = {"relations": "true"}
+        params = {"relations": True}
     path = "episodes/%s/shot-tasks" % episode["id"]
     tasks = raw.fetch_all(path, params, client=client)
     return sort_by_name(tasks)
@@ -225,7 +225,7 @@ def all_assets_tasks_for_episode(episode, relations=False, client=default):
     episode = normalize_model_parameter(episode)
     params = {}
     if relations:
-        params = {"relations": "true"}
+        params = {"relations": True}
     path = "episodes/%s/asset-tasks" % episode["id"]
     tasks = raw.fetch_all(path, params, client=client)
     return sort_by_name(tasks)
@@ -562,7 +562,7 @@ def remove_task_type(task_type, client=default):
     task_type = normalize_model_parameter(task_type)
     return raw.delete(
         "data/task-types/%s" % task_type["id"],
-        {"force": "true"},
+        {"force": True},
         client=client,
     )
 
@@ -577,7 +577,7 @@ def remove_task_status(task_status, client=default):
     task_status = normalize_model_parameter(task_status)
     return raw.delete(
         "data/task-status/%s" % task_status["id"],
-        {"force": "true"},
+        {"force": True},
         client=client,
     )
 
@@ -649,7 +649,7 @@ def remove_task(task, client=default):
         task (str / dict): The task dict or the task ID.
     """
     task = normalize_model_parameter(task)
-    raw.delete("data/tasks/%s" % task["id"], {"force": "true"}, client=client)
+    raw.delete("data/tasks/%s" % task["id"], {"force": True}, client=client)
 
 
 def start_task(task, started_task_status=None, client=default):

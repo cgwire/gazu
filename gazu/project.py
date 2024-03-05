@@ -396,7 +396,7 @@ def remove_metadata_descriptor(
     metadata_descriptor = normalize_model_parameter(metadata_descriptor_id)
     params = {}
     if force:
-        params = {"force": "true"}
+        params = {"force": True}
     return raw.delete(
         "data/projects/%s/metadata-descriptors/%s"
         % (project["id"], metadata_descriptor["id"]),

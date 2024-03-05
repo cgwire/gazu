@@ -198,9 +198,8 @@ class CastingTestCase(unittest.TestCase):
 
     def test_remove_asset_type(self):
         with requests_mock.mock() as mock:
-            mock.delete(
-                gazu.client.get_full_url("data/asset-types/asset-type-01"),
-                text="",
+            mock_route(
+                mock, "DELETE", "data/asset-types/asset-type-01", text=""
             )
             asset_type = {"id": "asset-type-01", "name": "Modeling edited"}
             response = gazu.asset.remove_asset_type(asset_type)
@@ -208,14 +207,13 @@ class CastingTestCase(unittest.TestCase):
 
     def test_remove_asset(self):
         with requests_mock.mock() as mock:
-            mock.delete(
-                gazu.client.get_full_url("data/assets/asset-01"),
-                status_code=204,
-            )
+            mock_route(mock, "DELETE", "data/assets/asset-01", status_code=204)
             asset = {"id": "asset-01", "name": "Table"}
             gazu.asset.remove_asset(asset)
-            mock.delete(
-                gazu.client.get_full_url("data/assets/asset-01?force=true"),
+            mock_route(
+                mock,
+                "DELETE",
+                "data/assets/asset-01?force=True",
                 status_code=204,
             )
             asset = {"id": "asset-01", "name": "Table"}

@@ -106,7 +106,7 @@ class PersonTestCase(unittest.TestCase):
             mock_route(
                 mock, "GET", "data/persons?email=john@gmail.com", text=[]
             )
-            mock_route(mock, "POST", "data/persons/new", text=result)
+            mock_route(mock, "POST", "data/persons", text=result)
             self.assertEqual(
                 gazu.person.new_person(
                     "Jhon",
@@ -114,6 +114,26 @@ class PersonTestCase(unittest.TestCase):
                     "john@gmail.com",
                     "+33 6 07 07 07 07",
                     "user",
+                    departments=fakeid("department-1"),
+                ),
+                result,
+            )
+
+    def test_new_bot(self):
+        with requests_mock.mock() as mock:
+            result = {
+                "first_name": "Bot 1",
+                "last_name": "",
+                "is_bot": True,
+                "id": "bot-1",
+                "departments": [fakeid("department-1")],
+            }
+            mock_route(mock, "POST", "data/persons", text=result)
+            self.assertEqual(
+                gazu.person.new_bot(
+                    "Bot 1",
+                    "test@test.com",
+                    "admin",
                     departments=fakeid("department-1"),
                 ),
                 result,
@@ -142,6 +162,27 @@ class PersonTestCase(unittest.TestCase):
             }
             self.assertEqual(gazu.person.update_person(person), result)
 
+    def test_update_bot(self):
+        result = {
+            "first_name": "Bot 1",
+            "last_name": "",
+            "is_bot": True,
+            "id": "bot-1",
+            "departments": [fakeid("department-1")],
+        }
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "PUT",
+                "data/persons/%s" % fakeid("bot-1"),
+                text=result,
+            )
+            bot = {
+                "id": fakeid("bot-1"),
+                "departments": [fakeid("department-1")],
+            }
+            self.assertEqual(gazu.person.update_bot(bot), result)
+
     def test_all_organisations(self):
         result = [{"id": fakeid("organisation-1"), "name": "organisation-1"}]
         with requests_mock.mock() as mock:
@@ -155,21 +196,58 @@ class PersonTestCase(unittest.TestCase):
             self.assertEqual(gazu.person.all_departments(), result)
 
     def test_get_person(self):
-        result = {"id": fakeid("John Doe"), "full_name": "John Doe"}
+        result = [{"id": fakeid("John Doe"), "full_name": "John Doe"}]
         with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url(
-                    "data/persons?id=%s" % (fakeid("John Doe"))
-                ),
-                text=json.dumps(
-                    [
-                        result,
-                    ]
-                ),
+            mock_route(
+                mock,
+                "GET",
+                "data/persons?id=%s" % (fakeid("John Doe")),
+                text=result,
             )
             self.assertEqual(
-                gazu.person.get_person(fakeid("John Doe")), result
+                gazu.person.get_person(fakeid("John Doe")), result[0]
             )
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/persons?id=%s&relations=False" % (fakeid("John Doe")),
+                text=result,
+            )
+            self.assertEqual(
+                gazu.person.get_person(fakeid("John Doe"), relations=False),
+                result[0],
+            )
+
+    def test_remove_person(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock, "DELETE", "data/persons/person-01", status_code=204
+            )
+            person = {"id": "person-01", "name": "Table"}
+            gazu.person.remove_person(person)
+            mock_route(
+                mock,
+                "DELETE",
+                "data/persons/person-01?force=True",
+                status_code=204,
+            )
+            person = {"id": "person-01", "name": "Table"}
+            gazu.person.remove_person(person, True)
+
+    def test_remove_bot(self):
+        with requests_mock.mock() as mock:
+            mock_route(mock, "DELETE", "data/persons/bot-01", status_code=204)
+            bot = {"id": "bot-01", "name": "Table"}
+            gazu.person.remove_bot(bot)
+            mock_route(
+                mock,
+                "DELETE",
+                "data/persons/bot-01?force=True",
+                status_code=204,
+            )
+            bot = {"id": "bot-01", "name": "Table"}
+            gazu.person.remove_bot(bot, True)
 
     def test_get_person_url(self):
         wanted_result = "%s/people/%s/" % (

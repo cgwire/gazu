@@ -62,7 +62,7 @@ def remove_concept(concept, force=False, client=default):
     path = "data/concepts/%s" % concept["id"]
     params = {}
     if force:
-        params = {"force": "true"}
+        params = {"force": True}
     return raw.delete(path, params, client=client)
 
 
