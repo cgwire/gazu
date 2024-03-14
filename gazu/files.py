@@ -1109,8 +1109,7 @@ def upload_working_file(working_file, file_path, client=default):
     """
     working_file = normalize_model_parameter(working_file)
     url_path = "/data/working-files/%s/file" % working_file["id"]
-    raw.upload(url_path, file_path, client=client)
-    return working_file
+    return raw.upload(url_path, file_path, client=client)
 
 
 def download_working_file(working_file, file_path=None, client=default):
@@ -1243,6 +1242,21 @@ def download_person_avatar(person, file_path, client=default):
     )
 
 
+def upload_person_avatar(person, file_path, client=default):
+    """
+    Upload given file as person avatar.
+
+    Args:
+        person (str / dict): The person dict or the person ID.
+        file_path (str): Path of the file to upload as avatar.
+    """
+    path = (
+        "/pictures/thumbnails/persons/%s"
+        % normalize_model_parameter(person)["id"]
+    )
+    return raw.upload(path, file_path, client=client)
+
+
 def download_project_avatar(project, file_path, client=default):
     """
     Download given project's avatar and save it at given location.
@@ -1256,6 +1270,21 @@ def download_project_avatar(project, file_path, client=default):
         file_path,
         client=client,
     )
+
+
+def upload_project_avatar(project, file_path, client=default):
+    """
+    Upload given file as project avatar.
+
+    Args:
+        project (str / dict): The project dict or the project ID.
+        file_path (str): Path of the file to upload as avatar.
+    """
+    path = (
+        "/pictures/thumbnails/projects/%s"
+        % normalize_model_parameter(project)["id"]
+    )
+    return raw.upload(path, file_path, client=client)
 
 
 def update_preview(preview_file, data, client=default):
