@@ -7,7 +7,7 @@ import unittest
 import gazu.client
 import gazu.files
 
-from utils import fakeid, mock_route
+from utils import fakeid, mock_route, add_verify_file_callback
 
 
 class FilesTestCase(unittest.TestCase):
@@ -1170,3 +1170,43 @@ class FilesTestCase(unittest.TestCase):
             self.assertEqual(
                 gazu.files.get_output_file_by_path("testpath"), text[0]
             )
+
+    def test_upload_person_avatar(self):
+        with open("./tests/fixtures/v1.png", "rb") as test_file:
+            with requests_mock.Mocker() as mock:
+                mock_route(
+                    mock,
+                    "POST",
+                    "pictures/thumbnails/persons/%s" % fakeid("person-1"),
+                    text={"id": fakeid("person-1")},
+                )
+
+                add_verify_file_callback(mock, {"file": test_file.read()})
+
+                self.assertEqual(
+                    gazu.files.upload_person_avatar(
+                        fakeid("person-1"),
+                        "./tests/fixtures/v1.png",
+                    ),
+                    {"id": fakeid("person-1")},
+                )
+
+    def test_upload_project_avatar(self):
+        with open("./tests/fixtures/v1.png", "rb") as test_file:
+            with requests_mock.Mocker() as mock:
+                mock_route(
+                    mock,
+                    "POST",
+                    "pictures/thumbnails/projects/%s" % fakeid("project-1"),
+                    text={"id": fakeid("project-1")},
+                )
+
+                add_verify_file_callback(mock, {"file": test_file.read()})
+
+                self.assertEqual(
+                    gazu.files.upload_project_avatar(
+                        fakeid("project-1"),
+                        "./tests/fixtures/v1.png",
+                    ),
+                    {"id": fakeid("project-1")},
+                )
