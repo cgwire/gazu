@@ -615,23 +615,42 @@ def import_shots_with_csv(project, csv_file_path, client=default):
     )
 
 
-def import_edl(project, edl_file_path, episode=None, client=default):
+def import_otio(
+    project,
+    otio_file_path,
+    episode=None,
+    naming_convention=None,
+    match_case=True,
+    client=default,
+):
     """
-    Import shots from an EDL file.
+    Import shots from an OpenTimelineIO file (works also for every OTIO
+    adapters).
 
     Args:
         project (str / dict): The project dict or the project ID.
-        edl_file_path (str): The EDL file path.
+        otio_file_path (str): The OTIO file path.
         episode (str / dict): The episode dict or the episode ID.
     """
+    if naming_convention is None:
+        if episode is not None:
+            naming_convention = (
+                "${project_name}_${episode_name}-${sequence_name}-${shot_name}"
+            )
+        else:
+            naming_convention = "${project_name}_${sequence_name}-${shot_name}"
     project = normalize_model_parameter(project)
-    path = "import/edl/projects/%s" % project["id"]
+    path = "/import/otio/projects/%s" % project["id"]
     if episode is not None:
         episode = normalize_model_parameter(episode)
         path += "/episodes/%s" % episode["id"]
     return raw.upload(
         path,
-        edl_file_path,
+        otio_file_path,
+        data={
+            "naming_convention": naming_convention,
+            "match_case": match_case,
+        },
         client=client,
     )
 

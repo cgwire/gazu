@@ -6,7 +6,7 @@ import os
 import gazu.client
 import gazu.shot
 
-from utils import fakeid, mock_route
+from utils import fakeid, mock_route, add_verify_file_callback
 
 
 class ShotTestCase(unittest.TestCase):
@@ -692,3 +692,75 @@ class ShotTestCase(unittest.TestCase):
             with open("./test.csv", "r") as export_csv:
                 self.assertEqual(csv, export_csv.read())
             os.remove("./test.csv")
+
+    def test_import_otio(self):
+        with open("./tests/fixtures/test.edl", "rb") as test_file:
+            with requests_mock.Mocker() as mock:
+                mock_route(
+                    mock,
+                    "POST",
+                    "/import/otio/projects/%s" % fakeid("project-1"),
+                    text={"success": True},
+                )
+
+                add_verify_file_callback(
+                    mock,
+                    {"file": test_file.read()},
+                    "/import/otio/projects/%s" % fakeid("project-1"),
+                )
+
+                self.assertEqual(
+                    gazu.shot.import_otio(
+                        fakeid("project-1"), "./tests/fixtures/test.edl"
+                    ),
+                    {"success": True},
+                )
+
+        with open("./tests/fixtures/test.edl", "rb") as test_file:
+            with requests_mock.Mocker() as mock:
+                mock_route(
+                    mock,
+                    "POST",
+                    "/import/otio/projects/%s/episodes/%s"
+                    % (fakeid("project-1"), fakeid("episode-1")),
+                    text={"success": True},
+                )
+
+                add_verify_file_callback(
+                    mock,
+                    {"file": test_file.read()},
+                    "/import/otio/projects/%s/episodes/%s"
+                    % (fakeid("project-1"), fakeid("episode-1")),
+                )
+
+                self.assertEqual(
+                    gazu.shot.import_otio(
+                        fakeid("project-1"),
+                        "./tests/fixtures/test.edl",
+                        episode=fakeid("episode-1"),
+                    ),
+                    {"success": True},
+                )
+
+    def test_import_shots_with_csv(self):
+        with open("./tests/fixtures/test.csv", "rb") as test_file:
+            with requests_mock.Mocker() as mock:
+                mock_route(
+                    mock,
+                    "POST",
+                    "import/csv/projects/%s/shots" % fakeid("project-1"),
+                    text={"success": True},
+                )
+
+                add_verify_file_callback(
+                    mock,
+                    {"file": test_file.read()},
+                    "import/csv/projects/%s/shots" % fakeid("project-1"),
+                )
+
+                self.assertEqual(
+                    gazu.shot.import_shots_with_csv(
+                        fakeid("project-1"), "./tests/fixtures/test.csv"
+                    ),
+                    {"success": True},
+                )
