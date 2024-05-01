@@ -88,7 +88,7 @@ def import_entity_links(links, client=default):
     return raw.post("import/kitsu/entity-links", links, client=client)
 
 
-def get_model_list_diff(source_list, target_list):
+def get_model_list_diff(source_list, target_list, id_field="id"):
     """
     Args:
         source_list (list): List of models to compare.
@@ -99,13 +99,15 @@ def get_model_list_diff(source_list, target_list):
         and one containing the models that should not be in the target list.
     """
     missing = []
-    source_ids = {m["id"]: True for m in source_list}
-    target_ids = {m["id"]: True for m in target_list}
-    for model in source_list:
-        if model["id"] not in target_ids:
-            missing.append(model)
+    source_ids = {m[id_field]: True for m in source_list}
+    target_ids = {m[id_field]: True for m in target_list}
+    missing = [
+        model for model in source_list
+        if not target_ids.get(model[id_field], False)
+    ]
     unexpected = [
-        model for model in target_list if model["id"] not in source_ids
+        model for model in target_list
+        if not source_ids.get(model[id_field], False)
     ]
     return (missing, unexpected)
 
