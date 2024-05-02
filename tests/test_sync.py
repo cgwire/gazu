@@ -44,28 +44,30 @@ class SyncestCase(unittest.TestCase):
         ]
         target_list = [
             {"id": "asset-2", "name": "Asset 2"},
-            {"id": "asset-4", "name": "Asset 4"}
+            {"id": "asset-4", "name": "Asset 4"},
         ]
         missing, unexpected = gazu.sync.get_model_list_diff(
             source_list, target_list
         )
-        self.assertEqual(missing, [
-            {"id": "asset-1", "name": "Asset 1"},
-            {"id": "asset-3", "name": "Asset 3"}
-        ])
-        self.assertEqual(unexpected, [
-            {"id": "asset-4", "name": "Asset 4"}
-        ])
+        self.assertEqual(
+            missing,
+            [
+                {"id": "asset-1", "name": "Asset 1"},
+                {"id": "asset-3", "name": "Asset 3"},
+            ],
+        )
+        self.assertEqual(unexpected, [{"id": "asset-4", "name": "Asset 4"}])
         missing, unexpected = gazu.sync.get_model_list_diff(
             source_list, target_list, id_field="name"
         )
-        self.assertEqual(missing, [
-            {"id": "asset-1", "name": "Asset 1"},
-            {"id": "asset-3", "name": "Asset 3"}
-        ])
-        self.assertEqual(unexpected, [
-            {"id": "asset-4", "name": "Asset 4"}
-        ])
+        self.assertEqual(
+            missing,
+            [
+                {"id": "asset-1", "name": "Asset 1"},
+                {"id": "asset-3", "name": "Asset 3"},
+            ],
+        )
+        self.assertEqual(unexpected, [{"id": "asset-4", "name": "Asset 4"}])
         source_list = []
         target_list = []
         (missing, unexpected) = gazu.sync.get_model_list_diff(

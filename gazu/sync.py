@@ -102,11 +102,13 @@ def get_model_list_diff(source_list, target_list, id_field="id"):
     source_ids = {m[id_field]: True for m in source_list}
     target_ids = {m[id_field]: True for m in target_list}
     missing = [
-        model for model in source_list
+        model
+        for model in source_list
         if not target_ids.get(model[id_field], False)
     ]
     unexpected = [
-        model for model in target_list
+        model
+        for model in target_list
         if not source_ids.get(model[id_field], False)
     ]
     return (missing, unexpected)
