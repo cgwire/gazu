@@ -454,7 +454,6 @@ def push_tasks(
 
     default_status_id = normalize_model_parameter(default_status)["id"]
     task_type_map = get_sync_task_type_id_map(client_source, client_target)
-    task_status_map = get_sync_task_status_id_map(client_source, client_target)
     person_map = get_sync_person_id_map(client_source, client_target)
 
     tasks = task_module.all_tasks_for_project(
@@ -532,7 +531,13 @@ def push_task_comments(
 
 
 def push_task_comment(
-    task_status_map, person_map, task, comment, client_source, client_target
+    task_status_map,
+    person_map,
+    task,
+    comment,
+    client_source,
+    client_target,
+    author_id=None,
 ):
     """
     Create a new comment into target api for each comment in source task
@@ -590,7 +595,10 @@ def push_task_comment(
             )
 
     task_status = {"id": task_status_map[comment["task_status_id"]]}
-    author_id = person_map[comment["person_id"]]
+    if author_id is not None:
+        author_id = author_id
+    else:
+        author_id = person_map[comment["person_id"]]
     person = {"id": author_id}
 
     comment_target = task_module.add_comment(
