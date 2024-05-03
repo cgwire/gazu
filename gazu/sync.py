@@ -22,6 +22,7 @@ def get_last_events(
     after=None,
     before=None,
     only_files=False,
+    name=None,
     client=default,
 ):
     """
@@ -46,6 +47,8 @@ def get_last_events(
         params["after"] = validate_date_format(after)
     if before is not None:
         params["before"] = validate_date_format(before)
+    if name is not None:
+        params["name"] = name
     return raw.get(path, params=params, client=client)
 
 
@@ -102,11 +105,13 @@ def get_model_list_diff(source_list, target_list, id_field="id"):
     source_ids = {m[id_field]: True for m in source_list}
     target_ids = {m[id_field]: True for m in target_list}
     missing = [
-        model for model in source_list
+        model
+        for model in source_list
         if not target_ids.get(model[id_field], False)
     ]
     unexpected = [
-        model for model in target_list
+        model
+        for model in target_list
         if not source_ids.get(model[id_field], False)
     ]
     return (missing, unexpected)
@@ -452,7 +457,6 @@ def push_tasks(
 
     default_status_id = normalize_model_parameter(default_status)["id"]
     task_type_map = get_sync_task_type_id_map(client_source, client_target)
-    task_status_map = get_sync_task_status_id_map(client_source, client_target)
     person_map = get_sync_person_id_map(client_source, client_target)
 
     tasks = task_module.all_tasks_for_project(
@@ -530,7 +534,13 @@ def push_task_comments(
 
 
 def push_task_comment(
-    task_status_map, person_map, task, comment, client_source, client_target
+    task_status_map,
+    person_map,
+    task,
+    comment,
+    client_source,
+    client_target,
+    author_id=None,
 ):
     """
     Create a new comment into target api for each comment in source task
@@ -588,7 +598,10 @@ def push_task_comment(
             )
 
     task_status = {"id": task_status_map[comment["task_status_id"]]}
-    author_id = person_map[comment["person_id"]]
+    if author_id is not None:
+        author_id = author_id
+    else:
+        author_id = person_map[comment["person_id"]]
     person = {"id": author_id}
 
     comment_target = task_module.add_comment(
