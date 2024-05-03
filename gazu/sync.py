@@ -22,6 +22,7 @@ def get_last_events(
     after=None,
     before=None,
     only_files=False,
+    name=None,
     client=default,
 ):
     """
@@ -46,6 +47,8 @@ def get_last_events(
         params["after"] = validate_date_format(after)
     if before is not None:
         params["before"] = validate_date_format(before)
+    if name is not None:
+        params["name"] = name
     return raw.get(path, params=params, client=client)
 
 
