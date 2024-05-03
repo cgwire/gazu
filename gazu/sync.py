@@ -56,6 +56,7 @@ def import_entities(entities, client=default):
     """
     Import entities from another instance to target instance (keep id and audit
     dates).
+
     Args:
         entities (list): Entities to import.
 
@@ -69,6 +70,7 @@ def import_tasks(tasks, client=default):
     """
     Import tasks from another instance to target instance (keep id and audit
     dates).
+
     Args:
         tasks (list): Tasks to import.
 
@@ -82,6 +84,7 @@ def import_entity_links(links, client=default):
     """
     Import enitity links from another instance to target instance (keep id and
     audit dates).
+
     Args:
         links (list): Entity links to import.
 
@@ -292,7 +295,8 @@ def get_sync_person_id_map(source_client, target_client):
 def push_assets(project_source, project_target, client_source, client_target):
     """
     Copy assets from source to target and preserve audit fields (`id`,
-    `created_at`, and `updated_at`)
+    `created_at`, and `updated_at`).
+
     Args:
         project_source (dict): The project to get assets from
         project_target (dict): The project to push assets to
@@ -321,6 +325,7 @@ def push_episodes(
     """
     Copy episodes from source to target and preserve audit fields (`id`,
     `created_at`, and `updated_at`)
+
     Args:
         project_source (dict): The project to get episodes from
         project_target (dict): The project to push episodes to
@@ -344,6 +349,7 @@ def push_sequences(
     """
     Copy sequences from source to target and preserve audit fields (`id`,
     `created_at`, and `updated_at`)
+
     Args:
         project_source (dict): The project to get sequences from
         project_target (dict): The project to push sequences to
@@ -364,7 +370,8 @@ def push_sequences(
 def push_shots(project_source, project_target, client_source, client_target):
     """
     Copy shots from source to target and preserve audit fields (`id`,
-    `created_at`, and `updated_at`)
+    `created_at`, and `updated_at`).
+
     Args:
         project_source (dict): The project to get shots from
         project_target (dict): The project to push shots to
@@ -386,8 +393,9 @@ def push_entity_links(
     project_source, project_target, client_source, client_target
 ):
     """
-    Copy assets from source to target and preserve audit fields (`id`,
-    `created_at`, and `updated_at`)
+    Copy entity links (breakdown, concepts) from source to target and preserve
+    audit fields (`id`, `created_at`, and `updated_at`).
+
     Args:
         project_source (dict): The project to get assets from
         project_target (dict): The project to push assets to
@@ -408,7 +416,8 @@ def push_project_entities(
 ):
     """
     Copy assets, episodes, sequences, shots and entity links from source to
-    target and preserve audit fields (`id`, `created_at`, and `updated_at`)
+    target and preserve audit fields (`id`, `created_at`, and `updated_at`).
+
     Args:
         project_source (dict): The project to get assets from
         project_target (dict): The project to push assets to
@@ -445,6 +454,7 @@ def push_tasks(
     Copy tasks from source to target and preserve audit fields (`id`,
     `created_at`, and `updated_at`)
     Attachments and previews are created too.
+
     Args:
         project_source (dict): The project to get assets from
         project_target (dict): The project to push assets to
@@ -479,6 +489,7 @@ def push_tasks_comments(project_source, client_source, client_target):
     Create a new comment into target api for each comment in source project
     but preserve only `created_at` field.
     Attachments and previews are created too.
+
     Args:
         project_source (dict): The project to get assets from
         project_target (dict): The project to push assets to
@@ -508,6 +519,7 @@ def push_task_comments(
     Create a new comment into target api for each comment in source task
     but preserve only `created_at` field.
     Attachments and previews are created too.
+
     Args:
         project_source (dict): The project to get assets from
         project_target (dict): The project to push assets to
@@ -547,6 +559,7 @@ def push_task_comment(
     Create a new comment into target api for each comment in source task
     but preserve only `created_at` field.
     Attachments and previews are created too.
+
     Args:
         project_source (dict): The project to get assets from
         project_target (dict): The project to push assets to
