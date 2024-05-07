@@ -789,6 +789,7 @@ def add_comment(
     checklist=[],
     attachments=[],
     created_at=None,
+    links=[],
     client=default,
 ):
     """
@@ -804,6 +805,7 @@ def add_comment(
         checklist (list): Comment checklist
         attachments (list[file_path]): Attachments file paths
         created_at (str): Comment date
+        links (list): List of links to add to the comment
 
     Returns:
         dict: Created comment.
