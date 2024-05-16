@@ -541,6 +541,7 @@ def push_task_comment(
     client_source,
     client_target,
     author_id=None,
+    tmp_path="/tmp/zou/sync/",
 ):
     """
     Create a new comment into target api for each comment in source task
@@ -562,7 +563,7 @@ def push_task_comment(
         attachment_file = files_module.get_attachment_file(
             attachment_id, client=client_source
         )
-        file_path = "/tmp/zou/sync/" + attachment_file["name"]
+        file_path = os.path.join(tmp_path, attachment_file["name"])
         files_module.download_attachment_file(
             attachment_file, file_path, client=client_source
         )
@@ -581,11 +582,11 @@ def push_task_comment(
             preview_file["original_name"] is not None
             and preview_file["extension"] is not None
         ):
-            file_path = (
-                "/tmp/zou/sync/"
-                + preview_file["original_name"]
+            file_path = os.path.join(
+                tmp_path,
+                preview_file["original_name"]
                 + "."
-                + preview_file["extension"]
+                + preview_file["extension"],
             )
             files_module.download_preview_file(
                 preview_file, file_path, client=client_source
