@@ -625,10 +625,16 @@ def push_task_comment(
             {"annotations": preview["annotations"]},
             client=client_target,
         )
-        os.remove(preview["file_path"])
+        try:
+            os.remove(preview["file_path"])
+        except OSError:
+            pass
 
     for attachment_path in attachments:
-        os.remove(attachment_path)
+        try:
+            os.remove(attachment_path)
+        except OSError:
+            pass
 
     return comment
 
