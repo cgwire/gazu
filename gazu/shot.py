@@ -658,6 +658,15 @@ def import_otio(
 def export_shots_with_csv(
     project, csv_file_path, episode=None, assigned_to=None, client=default
 ):
+    """
+    Export shots in a csv file.
+
+    Args:
+        project (str / dict): The project dict or the project ID.
+        csv_file_path (str): The csv file path.
+        episode (str / dict): The episode dict or the episode ID (optional).
+        assigned_to (str / dict): The user dict or the user ID (optional).
+    """
     project = normalize_model_parameter(project)
     episode = normalize_model_parameter(episode)
     assigned_to = normalize_model_parameter(assigned_to)
