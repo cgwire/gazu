@@ -120,9 +120,8 @@ def set_token(token, client=raw.default_client):
     Args:
         new_tokens (dict): Tokens to use for authentication.
     """
-    tokens = {}
+
     if isinstance(token, dict):
-        tokens["access_token"] = token["access_token"]
+        return raw.set_tokens(token, client=client)
     else:
-        tokens["access_token"] = token
-    return raw.set_tokens(tokens, client=client)
+        return raw.set_tokens({"access_token": token}, client=client)
