@@ -35,7 +35,7 @@ class KitsuClient(object):
         host,
         ssl_verify=True,
         cert=None,
-        automatic_refresh=False,
+        automatic_refresh_token=False,
         callback_not_authenticated=None,
     ):
         self.tokens = {"access_token": "", "refresh_token": ""}
@@ -44,7 +44,7 @@ class KitsuClient(object):
         self.session.cert = cert
         self.host = host
         self.event_host = host
-        self.automatic_refresh = automatic_refresh
+        self.automatic_refresh_token = automatic_refresh_token
         self.callback_not_authenticated = callback_not_authenticated
 
 
@@ -52,14 +52,14 @@ def create_client(
     host,
     ssl_verify=True,
     cert=None,
-    automatic_refresh=False,
+    automatic_refresh_token=False,
     callback_not_authenticated=None,
 ):
     return KitsuClient(
         host,
         ssl_verify,
         cert=cert,
-        automatic_refresh=automatic_refresh,
+        automatic_refresh_token=automatic_refresh_token,
         callback_not_authenticated=callback_not_authenticated,
     )
 
@@ -340,7 +340,7 @@ def check_status(request, path, client=None):
         )
     elif status_code in [401, 422]:
         try:
-            if client is not None and client.automatic_refresh:
+            if client is not None and client.automatic_refresh_token:
                 from . import refresh_token
 
                 refresh_token(client=client)
