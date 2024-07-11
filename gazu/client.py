@@ -356,7 +356,7 @@ def check_status(request, path, client=None):
                 retry = client.callback_not_authenticated(client, path)
                 if retry:
                     return status_code, True
-                raise
+            raise
     elif status_code in [500, 502]:
         try:
             stacktrace = request.json().get(
