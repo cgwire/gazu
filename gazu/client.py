@@ -20,6 +20,7 @@ from .exception import (
     UploadFailedException,
 )
 
+
 if sys.version_info[0] == 3:
     from json import JSONDecodeError
 else:
@@ -29,17 +30,38 @@ DEBUG = os.getenv("GAZU_DEBUG", "false").lower() == "true"
 
 
 class KitsuClient(object):
-    def __init__(self, host, ssl_verify=True, cert=None):
+    def __init__(
+        self,
+        host,
+        ssl_verify=True,
+        cert=None,
+        automatic_refresh=False,
+        callback_not_authenticated=None,
+    ):
         self.tokens = {"access_token": "", "refresh_token": ""}
         self.session = requests.Session()
         self.session.verify = ssl_verify
         self.session.cert = cert
         self.host = host
         self.event_host = host
+        self.automatic_refresh = automatic_refresh
+        self.callback_not_authenticated = callback_not_authenticated
 
 
-def create_client(host, ssl_verify=True, cert=None):
-    return KitsuClient(host, ssl_verify, cert=None)
+def create_client(
+    host,
+    ssl_verify=True,
+    cert=None,
+    automatic_refresh=False,
+    callback_not_authenticated=None,
+):
+    return KitsuClient(
+        host,
+        ssl_verify,
+        cert=cert,
+        automatic_refresh=automatic_refresh,
+        callback_not_authenticated=callback_not_authenticated,
+    )
 
 
 default_client = None
@@ -199,11 +221,13 @@ def get(path, json_response=True, params=None, client=default_client):
     if DEBUG:
         print("GET", get_full_url(path, client))
     path = build_path_with_params(path, params)
-    response = client.session.get(
-        get_full_url(path, client=client),
-        headers=make_auth_header(client=client),
-    )
-    check_status(response, path)
+    retry = True
+    while retry:
+        response = client.session.get(
+            get_full_url(path, client=client),
+            headers=make_auth_header(client=client),
+        )
+        _, retry = check_status(response, path, client=client)
 
     if json_response:
         return response.json()
@@ -222,12 +246,14 @@ def post(path, data, client=default_client):
         print("POST", get_full_url(path, client))
         if not "password" in data:
             print("Body:", data)
-    response = client.session.post(
-        get_full_url(path, client),
-        json=data,
-        headers=make_auth_header(client=client),
-    )
-    check_status(response, path)
+    retry = True
+    while retry:
+        response = client.session.post(
+            get_full_url(path, client),
+            json=data,
+            headers=make_auth_header(client=client),
+        )
+        _, retry = check_status(response, path, client=client)
     try:
         result = response.json()
     except JSONDecodeError:
@@ -246,12 +272,14 @@ def put(path, data, client=default_client):
     if DEBUG:
         print("PUT", get_full_url(path, client))
         print("Body:", data)
-    response = client.session.put(
-        get_full_url(path, client),
-        json=data,
-        headers=make_auth_header(client=client),
-    )
-    check_status(response, path)
+    retry = True
+    while retry:
+        response = client.session.put(
+            get_full_url(path, client),
+            json=data,
+            headers=make_auth_header(client=client),
+        )
+        _, retry = check_status(response, path, client=client)
     return response.json()
 
 
@@ -266,14 +294,16 @@ def delete(path, params=None, client=default_client):
         print("DELETE", get_full_url(path, client))
     path = build_path_with_params(path, params)
 
-    response = client.session.delete(
-        get_full_url(path, client), headers=make_auth_header(client=client)
-    )
-    check_status(response, path)
+    retry = True
+    while retry:
+        response = client.session.delete(
+            get_full_url(path, client), headers=make_auth_header(client=client)
+        )
+        _, retry = check_status(response, path, client=client)
     return response.text
 
 
-def check_status(request, path):
+def check_status(request, path, client=None):
     """
     Raise an exception related to status code, if the status code does not
     match a success code. Print error message when it's relevant.
@@ -309,7 +339,24 @@ def check_status(request, path):
             "Change your proxy configuration to allow bigger files." % path
         )
     elif status_code in [401, 422]:
-        raise NotAuthenticatedException(path)
+        try:
+            if client is not None and client.automatic_refresh:
+                from . import refresh_token
+
+                refresh_token(client=client)
+
+                return status_code, True
+            else:
+                raise NotAuthenticatedException(path)
+        except NotAuthenticatedException:
+            if (
+                client is not None
+                and client.callback_not_authenticated is not None
+            ):
+                retry = client.callback_not_authenticated(client, path)
+                if retry:
+                    return status_code, True
+                raise
     elif status_code in [500, 502]:
         try:
             stacktrace = request.json().get(
@@ -324,7 +371,7 @@ def check_status(request, path):
         except Exception:
             print(request.text)
         raise ServerErrorException(path)
-    return status_code
+    return status_code, False
 
 
 def fetch_all(path, params=None, client=default_client):
@@ -413,10 +460,15 @@ def upload(path, file_path, data={}, extra_files=[], client=default_client):
     """
     url = get_full_url(path, client)
     files = _build_file_dict(file_path, extra_files)
-    response = client.session.post(
-        url, data=data, headers=make_auth_header(client=client), files=files
-    )
-    check_status(response, path)
+    retry = True
+    while retry:
+        response = client.session.post(
+            url,
+            data=data,
+            headers=make_auth_header(client=client),
+            files=files,
+        )
+        _, retry = check_status(response, path, client=client)
     try:
         result = response.json()
     except JSONDecodeError:
@@ -465,12 +517,14 @@ def get_file_data_from_url(url, full=False, client=default_client):
     """
     if not full:
         url = get_full_url(url)
-    response = requests.get(
-        url,
-        stream=True,
-        headers=make_auth_header(client=client),
-    )
-    check_status(response, url)
+    retry = True
+    while retry:
+        response = requests.get(
+            url,
+            stream=True,
+            headers=make_auth_header(client=client),
+        )
+        _, retry = check_status(response, url, client=client)
     return response.content
 
 
