@@ -846,6 +846,36 @@ class TaskTestCase(unittest.TestCase):
             )
             self.assertEqual(gazu.task.update_task(task), task)
 
+    def test_update_task_status(self):
+        with requests_mock.mock() as mock:
+            task_status = {
+                "id": fakeid("task-status-1"),
+                "archived": True,
+            }
+            mock_route(
+                mock,
+                "PUT",
+                "data/task-status/%s" % fakeid("task-status-1"),
+                text=task_status,
+            )
+            self.assertEqual(
+                gazu.task.update_task_status(task_status), task_status
+            )
+
+    def test_update_task_type(self):
+        with requests_mock.mock() as mock:
+            task_type = {
+                "id": fakeid("task-type-1"),
+                "archived": True,
+            }
+            mock_route(
+                mock,
+                "PUT",
+                "data/task-types/%s" % fakeid("task-type-1"),
+                text=task_type,
+            )
+            self.assertEqual(gazu.task.update_task_type(task_type), task_type)
+
     def test_update_task_data(self):
         with requests_mock.mock() as mock:
             mock.get(

@@ -582,6 +582,40 @@ def remove_task_status(task_status, client=default):
     )
 
 
+def update_task_type(task_type, client=default):
+    """
+    Update given task type into the API.
+
+    Args:
+        task_type (dict): The task type dict to update.
+
+    Returns:
+        dict: Updated task type.
+    """
+    return raw.put(
+        "data/task-types/%s" % task_type["id"],
+        task_type,
+        client=client,
+    )
+
+
+def update_task_status(task_status, client=default):
+    """
+    Update given task status into the API.
+
+    Args:
+        task_status (dict): The task status dict to update.
+
+    Returns:
+        dict: Updated task status.
+    """
+    return raw.put(
+        "data/task-status/%s" % task_status["id"],
+        task_status,
+        client=client,
+    )
+
+
 @cache
 def get_task(task_id, client=default):
     """
@@ -1166,7 +1200,7 @@ def new_task_status(name, short_name, color, client=default):
 
 def update_task(task, client=default):
     """
-    Save given task data into the API. Metadata are fully replaced by the ones
+    Update given task into the API. Metadata are fully replaced by the ones
     set on given task.
 
     Args:
