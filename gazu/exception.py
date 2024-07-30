@@ -98,12 +98,14 @@ class TaskMustBeADictException(Exception):
     Error raised when a task should be a dict.
     """
 
-class FileDoesntExist(Exception):
+
+class FileDoesntExistException(Exception):
     """
     Error raised when a file should be existed when we submit a preview.
     """
 
-class ProjectDoesntExist(Exception):
+
+class ProjectDoesntExistException(Exception):
     """
     Error raised when a project isn't available.
     """
