@@ -53,6 +53,39 @@ class PersonTestCase(unittest.TestCase):
             person = gazu.person.get_person_by_full_name("", "John", "Doe")
             self.assertEqual(person["id"], "person-1")
 
+    def test_get_department_by_name(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/departments?name=department-1",
+                text=[{"name": "department-1"}],
+            )
+            department = gazu.person.get_department_by_name("department-1")
+            self.assertEqual(department["name"], "department-1")
+
+    def test_get_department(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/departments/%s" % fakeid("department-1"),
+                text={"name": "department-1"},
+            )
+            department = gazu.person.get_department(fakeid("department-1"))
+            self.assertEqual(department["name"], "department-1")
+
+    def test_new_department(self):
+        with requests_mock.mock() as mock:
+            result = {"name": "department-1"}
+            mock_route(
+                mock, "GET", "data/departments?name=department-1", text=[]
+            )
+            mock_route(mock, "POST", "data/departments", text=result)
+            self.assertEqual(
+                gazu.person.new_department("department-1"), result
+            )
+
     def test_get_person_by_desktop_login(self):
         with requests_mock.mock() as mock:
             mock.get(

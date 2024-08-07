@@ -95,15 +95,15 @@ def get_department_by_name(name, client=default):
 
 
 @cache
-def get_department(id, client=default):
+def get_department(department_id, client=default):
     """
     Args:
-        id (str): An uuid identifying a department.
+        department_id (str): An uuid identifying a department.
 
     Returns:
-        dict: Department corresponding to given id.
+        dict: Department corresponding to given department_id.
     """
-    return raw.fetch_first("departments", {"id": id}, client=client)
+    return raw.fetch_one("departments", department_id, client=client)
 
 
 @cache
