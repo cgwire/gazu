@@ -508,13 +508,10 @@ class TaskTestCase(unittest.TestCase):
             self.assertIn("person-01", task["assignees"])
 
     def test_new_task_type(self):
-        task_type_name = "task-type-name"
         with requests_mock.mock() as mock:
-            task_type = {"id": "task-type-01", "name": task_type_name}
-            mock.post(
-                gazu.client.get_full_url("data/task-types"),
-                text=json.dumps(task_type),
-            )
+            task_type = {"id": "task-type-01", "name": "task-type-name"}
+            mock_route(mock, "GET", "data/task-types", text=[])
+            mock_route(mock, "POST", "data/task-types", text=task_type)
             self.assertEqual(gazu.task.new_task_type(task_type), task_type)
 
     def test_new_task_status(self):
