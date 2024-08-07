@@ -1,13 +1,12 @@
 import datetime
 import json
-import sys
 
 import unittest
 import requests_mock
 import gazu
 from gazu.__version__ import __version__
 
-from gazu import client as raw, set_event_host
+from gazu import client as raw
 from gazu.exception import (
     RouteNotFoundException,
     AuthFailedException,

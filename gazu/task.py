@@ -1178,7 +1178,8 @@ def new_task_type(name, color="#000000", for_entity="Asset", client=default):
     if task_type is None:
         data = {"name": name, "color": color, "for_entity": for_entity}
         task_type = raw.post("data/task-types", data, client=client)
-    return(task_type)
+    return task_type
+
 
 def new_task_status(name, short_name, color, client=default):
     """

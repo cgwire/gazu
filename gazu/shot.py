@@ -404,7 +404,9 @@ def update_shot_data(shot, data={}, client=default):
     """
     shot = normalize_model_parameter(shot)
     current_shot = get_shot(shot["id"], client=client)
-    current_data = current_shot["data"] if current_shot["data"] is not None else {}
+    current_data = (
+        current_shot["data"] if current_shot["data"] is not None else {}
+    )
     updated_shot = {"id": current_shot["id"], "data": current_data}
     updated_shot["data"].update(data)
     return update_shot(updated_shot, client=client)

@@ -1,7 +1,5 @@
 import unittest
-import json
 import requests_mock
-import os
 
 import gazu.client
 import gazu.edit

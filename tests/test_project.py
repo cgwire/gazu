@@ -1,4 +1,3 @@
-from gazu.helpers import normalize_model_parameter
 import unittest
 import requests_mock
 import gazu.client
