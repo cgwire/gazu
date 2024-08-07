@@ -7,7 +7,7 @@ import gazu.scene
 import gazu.shot
 import gazu.project
 import requests_mock
-from utils import mock_route, fakeid
+from utils import mock_route
 
 
 class CastingTestCase(unittest.TestCase):
