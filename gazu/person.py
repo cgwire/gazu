@@ -77,20 +77,34 @@ def get_all_month_time_spents(id, date, client=default):
         client=client,
     )
 
+
 @cache
 def get_department_by_name(name, client=default):
     """
     Args:
-        name (str): department name.
+        name (str): Department name.
 
     Returns:
-        dict: department corresponding to given name.
+        dict: Department corresponding to given name.
     """
     return raw.fetch_first(
         "departments",
         {"name": name},
         client=client,
     )
+
+
+@cache
+def get_department(id, client=default):
+    """
+    Args:
+        id (str): An uuid identifying a department.
+
+    Returns:
+        dict: Department corresponding to given id.
+    """
+    return raw.fetch_first("departments", {"id": id}, client=client)
+
 
 @cache
 def get_person(id, relations=False, client=default):
@@ -196,14 +210,9 @@ def get_organisation(client=default):
     return raw.get("auth/authenticated", client=client)["organisation"]
 
 
-def new_department(
-    name,
-    color="",
-    archived=False,
-    client=default
-    ):
+def new_department(name, color="", archived=False, client=default):
     """
-    Create a new departement based on given parameters. 
+    Create a new departement based on given parameters.
 
     Args:
         name (str): the name of the departement.
@@ -216,14 +225,11 @@ def new_department(
     if department is None:
         department = raw.post(
             "data/departments",
-            {
-                "name": name,
-                "color": color,
-                "archived": archived
-            },
+            {"name": name, "color": color, "archived": archived},
             client=client,
         )
     return department
+
 
 def new_person(
     first_name,
