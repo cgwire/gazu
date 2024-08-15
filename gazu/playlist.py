@@ -151,3 +151,115 @@ def update_playlist(playlist, client=default):
     return raw.put(
         "data/playlists/%s" % playlist["id"], playlist, client=client
     )
+
+
+def get_entity_preview_files(entity, client=default):
+    """
+    Get all preview files grouped by task type for a given entity.
+
+    Args:
+        entity (str / dict): The entity to retrieve files from or its ID.
+
+    Returns:
+        dict: A dict where keys are task type IDs and value array of revisions.
+    """
+    entity = normalize_model_parameter(entity)
+    return raw.get(
+        "data/playlists/entities/%s/preview-files" % entity["id"],
+        client=client
+    )
+
+
+def add_entity_to_playlist(
+    playlist,
+    entity,
+    preview_file=None,
+    persist=True,
+    client=default
+):
+    """
+    Add an entity to the playlist, use the last uploaded preview as revision
+    to review.
+
+    Args:
+        playlist (dict): Playlist object to modify.
+        entity (str / dict): The entity to add or its ID.
+        preview_file (str / dict): Set it to force a give revision to review.
+        persist (bool): Set it to True to save the result to the API.
+
+    Returns:
+        dict: Updated playlist.
+    """
+    entity = normalize_model_parameter(entity)
+
+    if preview_file is None:
+        preview_files = get_entity_preview_files(entity)
+        for task_type_id in preview_files.keys():
+            task_type_files = preview_files[task_type_id]
+            first_file = task_type_files[0]
+            if preview_file is None or \
+               preview_file["created_at"] < first_file["created_at"]:
+                preview_file = first_file
+
+    preview_file = normalize_model_parameter(preview_file)
+    playlist["shots"].append({
+        "entity_id": entity["id"],
+        "preview_file_id": preview_file["id"]
+    })
+    if persist:
+        update_playlist(playlist, client=client)
+    return playlist
+
+
+def remove_entity_from_playlist(
+    playlist,
+    entity,
+    persist=True,
+    client=default
+):
+    """
+    Remove all occurences of a given entity from a playlist.
+
+    Args:
+        playlist (dict): Playlist object to modify
+        entity (str / dict): the entity to remove or its ID
+
+    Returns:
+        dict: Updated playlist.
+    """
+    entity = normalize_model_parameter(entity)
+    playlist["shots"] = [
+        entry
+        for entry in playlist["shots"]
+        if entry["entity_id"] != entity["id"]
+    ]
+    if persist:
+        update_playlist(playlist, client=client)
+    return playlist
+
+
+def update_entity_preview(
+    playlist,
+    entity,
+    preview_file,
+    persist=True,
+    client=default
+):
+    """
+    Remove all occurences of a given entity from a playlist.
+
+    Args:
+        playlist (dict): Playlist object to modify
+        entity (str / dict): the entity to add or its ID
+
+    Returns:
+        dict: Updated playlist.
+    """
+    entity = normalize_model_parameter(entity)
+    preview_file = normalize_model_parameter(preview_file)
+    for entry in playlist["shots"]:
+        if entry["entity_id"] == entity["id"]:
+            entry["preview_file_id"] = preview_file["id"]
+    if persist:
+        update_playlist(playlist, client=client)
+    return playlist

@@ -166,3 +166,48 @@ class TaskTestCase(unittest.TestCase):
             playlist = {"id": fakeid("playlist-1"), "name": "name_changed"}
             playlist = gazu.playlist.update_playlist(playlist)
             self.assertEqual(playlist["id"], fakeid("playlist-1"))
+
+    def test_add_entity_to_playlist(self):
+        with requests_mock.mock() as mock:
+            mock.put(
+                gazu.client.get_full_url(
+                    "data/playlists/%s" % fakeid("playlist-1")
+                ),
+                text=json.dumps(
+                    {"id": fakeid("playlist-1"), "name": "name_changed"}
+                ),
+            )
+            mock.get(
+                gazu.client.get_full_url(
+                    "data/playlists/entities/%s/preview-files" % fakeid("shot-1")
+                ),
+                text=json.dumps(
+                    {fakeid("task-type-1"): [{"id": fakeid("preview-1")}]}
+                ),
+            )
+            playlist = {
+                "id": fakeid("playlist-1"),
+                "name": "name_changed",
+                "shots": []
+            }
+            shot = {
+                "id": fakeid("shot-1"),
+                "name": "SH01"
+            }
+            playlist = gazu.playlist.add_entity_to_playlist(playlist, shot)
+            self.assertEqual(playlist["id"], fakeid("playlist-1"))
+            self.assertEqual(playlist["shots"], [{
+                "entity_id": fakeid("shot-1"),
+                "preview_file_id": fakeid("preview-1")
+            }])
+            playlist = gazu.playlist.update_entity_preview(
+                playlist,
+                shot,
+                fakeid("preview-2")
+            )
+            self.assertEqual(playlist["shots"], [{
+                "entity_id": fakeid("shot-1"),
+                "preview_file_id": fakeid("preview-2")
+            }])
+            playlist = gazu.playlist.remove_entity_from_playlist(playlist, shot)
+            self.assertEqual(playlist["shots"], [])
