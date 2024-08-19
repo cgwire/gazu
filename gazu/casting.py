@@ -45,6 +45,25 @@ def update_asset_casting(project, asset, casting, client=default):
     return raw.put(path, casting, client=client)
 
 
+def update_episode_casting(project, episode, casting, client=default):
+    """
+    Change casting of given episode with given casting (list of asset ids displayed
+    into the episode).
+
+    Args:
+        episode (str / dict): The episode dict or the episode ID.
+        casting (dict): The casting description.
+        Ex: `casting = [{"asset_id": "asset-1", "nb_occurences": 3}]`
+
+    Returns:
+        dict: Related episode.
+    """
+    episode = normalize_model_parameter(episode)
+    project = normalize_model_parameter(project)
+    path = "data/projects/%s/entities/%s/casting" % (project["id"], episode["id"])
+    return raw.put(path, casting, client=client)
+
+
 def get_asset_type_casting(project, asset_type, client=default):
     """
     Return casting for given asset_type.
@@ -113,6 +132,23 @@ def get_asset_casting(asset, client=default):
     path = "/data/projects/%s/entities/%s/casting" % (
         asset["project_id"],
         asset["id"],
+    )
+    return raw.get(path, client=client)
+
+
+def get_episode_casting(episode, client=default):
+    """
+    Return casting for given episode.
+    `[{"episode_id": "episode-1", "nb_occurences": 3}]}`
+    Args:
+        episode (dict): The episode dict
+
+    Returns:
+        dict: Casting for given episode.
+    """
+    path = "/data/projects/%s/entities/%s/casting" % (
+        episode["project_id"],
+        episode["id"],
     )
     return raw.get(path, client=client)
 
