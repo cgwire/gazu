@@ -75,3 +75,15 @@ class TaskMustBeADictException(Exception):
     """
     Error raised when a task should be a dict.
     """
+
+
+class FileDoesntExistException(Exception):
+    """
+    Error raised when a file should be existed when we submit a preview.
+    """
+
+
+class ProjectDoesntExistException(Exception):
+    """
+    Error raised when a project isn't available.
+    """
