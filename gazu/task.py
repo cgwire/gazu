@@ -257,25 +257,31 @@ def all_tasks_for_task_status(project, task_type, task_status, client=default):
 
 
 @cache
-def all_tasks_for_task_type(project, task_type, client=default):
+def all_tasks_for_task_type(
+    project,
+    task_type,
+    episode=None,
+    client=default
+):
     """
     Args:
         project (str / dict): The project dict or the project ID.
         task_type (str / dict): The task type dict or ID.
+        episode_id (str / dict): The episode dict or ID.
 
     Returns:
         list: Tasks for given project and task type.
     """
     project = normalize_model_parameter(project)
     task_type = normalize_model_parameter(task_type)
-    return raw.fetch_all(
-        "tasks",
-        {
-            "project_id": project["id"],
-            "task_type_id": task_type["id"],
-        },
-        client=client,
-    )
+    params = {
+        "project_id": project["id"],
+        "task_type_id": task_type["id"],
+    }
+    if episode is not None:
+        episode = normalize_model_parameter(episode)
+        params["episode_id"] = episode["id"]
+    return raw.fetch_all("tasks", params, client=client)
 
 
 @cache
@@ -1260,17 +1266,31 @@ def get_task_url(task, client=default):
     )
 
 
-def all_tasks_for_project(project, client=default):
+def all_tasks_for_project(
+    project,
+    task_type=None,
+    episode=None,
+    client=default
+):
     """
     Args:
-        project (str / dict): The project
+        project (str / dict): The project (or its ID) to get tasks from.
+        task_type (str / dict): The task type (or its ID) to filter tasks.
+        episode (str / dict): The episode (or its ID) to filter tasks.
 
     Returns:
         dict: Tasks related to given project.
     """
     project = normalize_model_parameter(project)
     path = "/data/projects/%s/tasks" % project["id"]
-    return raw.get(path, client=client)
+    params = {}
+    if task_type is not None:
+        task_type = normalize_model_parameter(task_type)
+        params["task_type_id"] = task_type["id"]
+    if episode is not None:
+        episode = normalize_model_parameter(episode)
+        params["episode_id"] = episode["id"]
+    return raw.get(path, params=params, client=client)
 
 
 def update_comment(comment, client=default):
