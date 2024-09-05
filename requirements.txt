@@ -1,5 +1,5 @@
 Sphinx==7.1.2
 sphinx-rtd-theme==2.0.0
 recommonmark==0.7.1
-gazu==0.10.10
+gazu==0.10.15
 dccutils==0.1.8
