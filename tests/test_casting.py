@@ -47,7 +47,9 @@ class CastingTestCase(unittest.TestCase):
             mock.put(gazu.client.get_full_url(path), text=json.dumps(casting))
             episode = {"id": fakeid("episode-01")}
             project = {"id": fakeid("project-01")}
-            casting = gazu.casting.update_episode_casting(project, episode, casting)
+            casting = gazu.casting.update_episode_casting(
+                project, episode, casting
+            )
             self.assertEqual(casting[0]["asset_id"], fakeid("asset-1"))
 
     def test_get_asset_type_casting(self):

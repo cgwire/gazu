@@ -166,16 +166,12 @@ def get_entity_preview_files(entity, client=default):
     entity = normalize_model_parameter(entity)
     return raw.get(
         "data/playlists/entities/%s/preview-files" % entity["id"],
-        client=client
+        client=client,
     )
 
 
 def add_entity_to_playlist(
-    playlist,
-    entity,
-    preview_file=None,
-    persist=True,
-    client=default
+    playlist, entity, preview_file=None, persist=True, client=default
 ):
     """
     Add an entity to the playlist, use the last uploaded preview as revision
@@ -197,25 +193,23 @@ def add_entity_to_playlist(
         for task_type_id in preview_files.keys():
             task_type_files = preview_files[task_type_id]
             first_file = task_type_files[0]
-            if preview_file is None or \
-               preview_file["created_at"] < first_file["created_at"]:
+            if (
+                preview_file is None
+                or preview_file["created_at"] < first_file["created_at"]
+            ):
                 preview_file = first_file
 
     preview_file = normalize_model_parameter(preview_file)
-    playlist["shots"].append({
-        "entity_id": entity["id"],
-        "preview_file_id": preview_file["id"]
-    })
+    playlist["shots"].append(
+        {"entity_id": entity["id"], "preview_file_id": preview_file["id"]}
+    )
     if persist:
         update_playlist(playlist, client=client)
     return playlist
 
 
 def remove_entity_from_playlist(
-    playlist,
-    entity,
-    persist=True,
-    client=default
+    playlist, entity, persist=True, client=default
 ):
     """
     Remove all occurences of a given entity from a playlist.
@@ -239,11 +233,7 @@ def remove_entity_from_playlist(
 
 
 def update_entity_preview(
-    playlist,
-    entity,
-    preview_file,
-    persist=True,
-    client=default
+    playlist, entity, preview_file, persist=True, client=default
 ):
     """
     Remove all occurences of a given entity from a playlist.
