@@ -60,7 +60,10 @@ def update_episode_casting(project, episode, casting, client=default):
     """
     episode = normalize_model_parameter(episode)
     project = normalize_model_parameter(project)
-    path = "data/projects/%s/entities/%s/casting" % (project["id"], episode["id"])
+    path = "data/projects/%s/entities/%s/casting" % (
+        project["id"],
+        episode["id"],
+    )
     return raw.put(path, casting, client=client)
 
 

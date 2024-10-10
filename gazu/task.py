@@ -257,12 +257,7 @@ def all_tasks_for_task_status(project, task_type, task_status, client=default):
 
 
 @cache
-def all_tasks_for_task_type(
-    project,
-    task_type,
-    episode=None,
-    client=default
-):
+def all_tasks_for_task_type(project, task_type, episode=None, client=default):
     """
     Args:
         project (str / dict): The project dict or the project ID.
@@ -533,18 +528,6 @@ def get_task_status_by_name(name, client=default):
 
 
 @cache
-def get_default_task_status(client=default):
-    """
-    Args:
-        name (str / dict): The name of claimed task status.
-
-    Returns:
-        dict: Task status matching given name.
-    """
-    return raw.fetch_first("task-status", {"is_default": True}, client=client)
-
-
-@cache
 def get_task_status_by_short_name(task_status_short_name, client=default):
     """
     Args:
@@ -661,7 +644,7 @@ def new_task(
     entity = normalize_model_parameter(entity)
     task_type = normalize_model_parameter(task_type)
     if task_status is None:
-        task_status = get_default_task_status()
+        task_status = get_default_task_status(client=client)
 
     data = {
         "project_id": entity["project_id"],
@@ -1267,10 +1250,7 @@ def get_task_url(task, client=default):
 
 
 def all_tasks_for_project(
-    project,
-    task_type=None,
-    episode=None,
-    client=default
+    project, task_type=None, episode=None, client=default
 ):
     """
     Args:
