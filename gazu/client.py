@@ -303,6 +303,30 @@ def delete(path, params=None, client=default_client):
     return response.text
 
 
+def get_message_from_response(response: requests.Request, default_message: str = "No additional information") -> str:
+    """
+    A utility function that handles Zou's inconsistent message keys.
+    For a given request, checks if any error messages or regular messages were given and returns their value.
+    If no messages are found, returns a default message.
+
+    Args:
+        response: requests.Request - A response to check.
+        default_message: str - An optional default value to revert to if no message is detected.
+
+    Returns:
+        The message of a given response, or a default message - if any.
+    """
+    message = default_message
+    message_json = response.json()
+
+    for key in ['error', 'message']:
+        if message_json.get(key):
+            message = message_json[key]
+            break
+
+    return message
+
+
 def check_status(request, path, client=None):
     """
     Raise an exception related to status code, if the status code does not
@@ -329,8 +353,7 @@ def check_status(request, path, client=None):
     elif status_code == 403:
         raise NotAllowedException(path)
     elif status_code == 400:
-        text = request.json().get("message", "No additional information")
-        raise ParameterException(path, text)
+        raise ParameterException(path, get_message_from_response(request))
     elif status_code == 405:
         raise MethodNotAllowedException(path)
     elif status_code == 413:
@@ -362,9 +385,8 @@ def check_status(request, path, client=None):
             stacktrace = request.json().get(
                 "stacktrace", "No stacktrace sent by the server"
             )
-            message = request.json().get(
-                "message", "No message sent by the server"
-            )
+            message = get_message_from_response(response=request,
+                                                default_message="No message sent by the server")
             print("A server error occured!\n")
             print("Server stacktrace:\n%s" % stacktrace)
             print("Error message:\n%s\n" % message)
@@ -474,8 +496,11 @@ def upload(path, file_path, data={}, extra_files=[], client=default_client):
     except JSONDecodeError:
         print(response.text)
         raise
-    if "message" in result:
-        raise UploadFailedException(result["message"])
+
+    result_message = get_message_from_response(response, default_message='')
+    if result_message:
+        raise UploadFailedException(result_message)
+
     return result
 
 

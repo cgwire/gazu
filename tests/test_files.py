@@ -39,6 +39,16 @@ class FilesTestCase(unittest.TestCase):
             )
             self.assertEqual(working_file["id"], 1)
 
+            mock.post(gazu.client.get_full_url(path),
+                      text=json.dumps({"error": "The given working file already exists."}),
+                      status_code=400)
+
+            with self.assertRaises(gazu.client.ParameterException) as context:
+                gazu.files.new_working_file(
+                    task, person={"id": "person-01"}, software={"id": "software-1"})
+
+                self.assertTrue(str(context.exception) == "The given working file already exists.")
+
     def test_new_entity_output_file(self):
         entity = {"id": "asset-01"}
         output_type = {"id": "output-type-01"}
