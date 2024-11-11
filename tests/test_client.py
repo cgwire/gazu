@@ -1,5 +1,7 @@
 import datetime
 import json
+import random
+import string
 
 import unittest
 import requests_mock
@@ -281,19 +283,24 @@ class BaseFuncTestCase(ClientTestCase):
                     "./tests/fixtures/v1.png",
                     data={"test": True},
                 )
+
+            error_value = ''.join([random.choice(string.ascii_uppercase + string.ascii_lowercase) for _ in range(10)])
+
             with requests_mock.Mocker() as mock:
-                mock_route(
-                    mock,
-                    "POST",
-                    "data/new-file",
-                    text={"message": "Error"},
-                )
-                with self.assertRaises(gazu.client.UploadFailedException):
-                    raw.upload(
+                for field in ['message', 'error']:
+                    mock_route(
+                        mock,
+                        "POST",
                         "data/new-file",
-                        "./tests/fixtures/v1.png",
-                        data={"test": True},
-                    )
+                        text={field: error_value})
+
+                    with self.assertRaises(gazu.client.UploadFailedException) as context:
+                        raw.upload(
+                            "data/new-file",
+                            "./tests/fixtures/v1.png",
+                            data={"test": True})
+
+                    self.assertTrue(str(context.exception) == error_value)
 
     def test_upload_multiple_files(self):
         with open("./tests/fixtures/v1.png", "rb") as test_file:
