@@ -303,7 +303,7 @@ def delete(path, params=None, client=default_client):
     return response.text
 
 
-def get_message_from_response(response: requests.Request, default_message: str = "No additional information"):
+def get_message_from_response(response, default_message="No additional information"):
     """
     A utility function that handles Zou's inconsistent message keys.
     For a given request, checks if any error messages or regular messages were given and returns their value.
