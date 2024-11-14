@@ -384,15 +384,15 @@ def check_status(request, path, client=None):
             raise
     elif status_code in [500, 502]:
         try:
+            print("A server error occured!\n")
             stacktrace = request.json().get(
                 "stacktrace", "No stacktrace sent by the server"
             )
+            print("Server stacktrace:\n%s" % stacktrace)
             message = get_message_from_response(
                 response=request,
                 default_message="No message sent by the server",
             )
-            print("A server error occured!\n")
-            print("Server stacktrace:\n%s" % stacktrace)
             print("Error message:\n%s\n" % message)
         except Exception:
             print(request.text)
