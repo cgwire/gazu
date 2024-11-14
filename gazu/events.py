@@ -7,7 +7,25 @@ if sys.version_info[0] == 2:
 from .exception import AuthFailedException
 from .client import default_client, get_event_host
 from gazu.client import make_auth_header
+from engineio.base_client import signal_handler
 import socketio
+import os
+import inspect
+import signal
+import socketio
+
+if os.name == "nt":
+    from win32api import SetConsoleCtrlHandler
+
+    def WindowsSignalHandler(event):
+        if event == 0:
+            try:
+                signal_handler(signal.SIGINT, inspect.currentframe())
+            except:
+                # SetConsoleCtrlHandler handle cannot raise exceptions
+                pass
+
+    SetConsoleCtrlHandler(WindowsSignalHandler, 1)
 
 
 class EventsNamespace(socketio.ClientNamespace):
