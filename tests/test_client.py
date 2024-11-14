@@ -284,21 +284,32 @@ class BaseFuncTestCase(ClientTestCase):
                     data={"test": True},
                 )
 
-            error_value = ''.join([random.choice(string.ascii_uppercase + string.ascii_lowercase) for _ in range(10)])
+            error_value = "".join(
+                [
+                    random.choice(
+                        string.ascii_uppercase + string.ascii_lowercase
+                    )
+                    for _ in range(10)
+                ]
+            )
 
             with requests_mock.Mocker() as mock:
-                for field in ['message', 'error']:
+                for field in ["message", "error"]:
                     mock_route(
                         mock,
                         "POST",
                         "data/new-file",
-                        text={field: error_value})
+                        text={field: error_value},
+                    )
 
-                    with self.assertRaises(gazu.client.UploadFailedException) as context:
+                    with self.assertRaises(
+                        gazu.client.UploadFailedException
+                    ) as context:
                         raw.upload(
                             "data/new-file",
                             "./tests/fixtures/v1.png",
-                            data={"test": True})
+                            data={"test": True},
+                        )
 
                     self.assertTrue(str(context.exception) == error_value)
 

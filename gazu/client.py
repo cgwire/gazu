@@ -303,7 +303,9 @@ def delete(path, params=None, client=default_client):
     return response.text
 
 
-def get_message_from_response(response, default_message="No additional information"):
+def get_message_from_response(
+    response, default_message="No additional information"
+):
     """
     A utility function that handles Zou's inconsistent message keys.
     For a given request, checks if any error messages or regular messages were given and returns their value.
@@ -319,7 +321,7 @@ def get_message_from_response(response, default_message="No additional informati
     message = default_message
     message_json = response.json()
 
-    for key in ['error', 'message']:
+    for key in ["error", "message"]:
         if message_json.get(key):
             message = message_json[key]
             break
@@ -385,8 +387,10 @@ def check_status(request, path, client=None):
             stacktrace = request.json().get(
                 "stacktrace", "No stacktrace sent by the server"
             )
-            message = get_message_from_response(response=request,
-                                                default_message="No message sent by the server")
+            message = get_message_from_response(
+                response=request,
+                default_message="No message sent by the server",
+            )
             print("A server error occured!\n")
             print("Server stacktrace:\n%s" % stacktrace)
             print("Error message:\n%s\n" % message)
@@ -497,7 +501,7 @@ def upload(path, file_path, data={}, extra_files=[], client=default_client):
         print(response.text)
         raise
 
-    result_message = get_message_from_response(response, default_message='')
+    result_message = get_message_from_response(response, default_message="")
     if result_message:
         raise UploadFailedException(result_message)
 
