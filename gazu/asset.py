@@ -166,7 +166,7 @@ def new_asset(
     project,
     asset_type,
     name,
-    description="",
+    description=None,
     extra_data={},
     episode=None,
     client=default,
@@ -189,7 +189,10 @@ def new_asset(
     asset_type = normalize_model_parameter(asset_type)
     episode = normalize_model_parameter(episode)
 
-    data = {"name": name, "description": description, "data": extra_data}
+    data = {"name": name, "data": extra_data}
+
+    if description is not None:
+        data["description"] = description
 
     if episode is not None:
         data["episode_id"] = episode["id"]
@@ -449,7 +452,7 @@ def all_asset_instances_for_asset(asset, client=default):
 
 
 def new_asset_asset_instance(
-    asset, asset_to_instantiate, description="", client=default
+    asset, asset_to_instantiate, description=None, client=default
 ):
     """
     Creates a new asset instance for given asset. The instance number is
@@ -465,10 +468,11 @@ def new_asset_asset_instance(
     """
     asset = normalize_model_parameter(asset)
     asset_to_instantiate = normalize_model_parameter(asset_to_instantiate)
-    data = {
-        "asset_to_instantiate_id": asset_to_instantiate["id"],
-        "description": description,
-    }
+    data = {"asset_to_instantiate_id": asset_to_instantiate["id"]}
+
+    if description is not None:
+        data["description"] = description
+
     return raw.post(
         "data/assets/%s/asset-asset-instances" % asset["id"],
         data,

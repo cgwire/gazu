@@ -85,14 +85,18 @@ def update_scene(scene, client=default):
     return raw.put("data/entities/%s" % scene["id"], scene, client=client)
 
 
-def new_scene_asset_instance(scene, asset, description="", client=default):
+def new_scene_asset_instance(scene, asset, description=None, client=default):
     """
     Creates a new asset instance on given scene. The instance number is
     automatically generated (increment highest number).
     """
     scene = normalize_model_parameter(scene)
     asset = normalize_model_parameter(asset)
-    data = {"asset_id": asset["id"], "description": description}
+    data = {"asset_id": asset["id"]}
+
+    if description is not None:
+        data["description"] = description
+
     return raw.post(
         "data/scenes/%s/asset-instances" % scene["id"], data, client=client
     )
