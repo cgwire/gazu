@@ -2,7 +2,6 @@ import sys
 import functools
 import json
 import shutil
-import urllib
 import os
 
 from .encoder import CustomJSONEncoder
@@ -23,8 +22,10 @@ from .exception import (
 
 if sys.version_info[0] == 3:
     from json import JSONDecodeError
+    from urllib.parse import urlencode
 else:
     JSONDecodeError = ValueError
+    from urllib import urlencode
 
 DEBUG = os.getenv("GAZU_DEBUG", "false").lower() == "true"
 
@@ -192,7 +193,7 @@ def get_full_url(path, client=default_client):
 
 def build_path_with_params(path, params):
     """
-    Add params to a path using urllib encoding
+    Add params to a path using urllib encoding.
 
     Args:
         path (str): The url base path
@@ -204,10 +205,13 @@ def build_path_with_params(path, params):
     if not params:
         return path
 
-    if hasattr(urllib, "urlencode"):
-        path = "%s?%s" % (path, urllib.urlencode(params))
-    else:
-        path = "%s?%s" % (path, urllib.parse.urlencode(params))
+    query_string = urlencode(params)
+
+    if query_string:
+        # Support base paths that already contain query parameters.
+        path += "&" if "?" in path else "?"
+        path += query_string
+
     return path
 
 
@@ -400,16 +404,49 @@ def check_status(request, path, client=None):
     return status_code, False
 
 
-def fetch_all(path, params=None, client=default_client):
+def fetch_all(
+    path, params=None, client=default_client, paginated=False, limit=None
+):
     """
     Args:
         path (str): The path for which we want to retrieve all entries.
+        paginated (bool): Will query entries page by page.
+        limit (int): Limit the number of entries per page.
 
     Returns:
         list: All entries stored in database for a given model. You can add a
         filter to the model name like this: "tasks?project_id=project-id"
     """
-    return get(url_path_join("data", path), params=params, client=client)
+
+    if paginated:
+        if not params:
+            params = {}
+        params["page"] = 1
+        if limit is not None:
+            params["limit"] = limit
+
+    url = url_path_join("data", path)
+
+    response = get(url, params=params, client=client)
+
+    if not paginated:
+        return response
+
+    nb_pages = response.get("nb_pages", 1)
+    current_page = response.get("page", 1)
+    results = response.get("data", [])
+
+    if current_page != nb_pages:
+        for page in range(2, nb_pages + 1):
+            params["page"] = page
+            response = get(
+                url,
+                params=params,
+                client=client,
+            )
+            results += response.get("data", [])
+
+    return results
 
 
 def fetch_first(path, params=None, client=default_client):
