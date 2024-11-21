@@ -3,6 +3,8 @@ import functools
 import json
 import shutil
 import os
+import jwt
+from datetime import datetime
 
 from .encoder import CustomJSONEncoder
 
@@ -47,6 +49,60 @@ class KitsuClient(object):
         self.event_host = host
         self.automatic_refresh_token = automatic_refresh_token
         self.callback_not_authenticated = callback_not_authenticated
+
+    @property
+    def access_token(self):
+        return self.tokens.get("access_token", None)
+
+    @access_token.setter
+    def access_token(self, token):
+        self.tokens["access_token"] = token
+
+    @property
+    def refresh_token(self):
+        return self.tokens.get("refresh_token", None)
+
+    @property
+    def access_token_has_expired(self):
+        """ Returns: Whether this client's access token needs to be refreshed. """
+        if not self.access_token:
+            # No access token is present, refresh only when able with a refresh token.
+            return True if self.refresh_token else False
+
+        # Decode the access token.
+        decoded_token = jwt.decode(jwt=self.access_token, options={'verify_signature': False})
+        expiration_datetime = datetime.fromtimestamp(decoded_token['exp'])
+
+        # NOTE - Due to shenanigans caused by possible timezone differences
+        #        between server and client, the access token is considered
+        #        stale when less than 24 hours remain to its expiration.
+
+        return bool((expiration_datetime - datetime.now()).days < 1)
+
+    def refresh_authentication_tokens(self):
+        """ Refresh access tokens for this client."""
+        response = self.session.get(
+            get_full_url("auth/refresh-token", client=self),
+            headers={"User-Agent": "CGWire Gazu " + __version__,
+                     "Authorization": "Bearer " + self.refresh_token})
+        check_status(response, "auth/refresh-token")
+        tokens = response.json()
+
+        self.access_token = tokens["access_token"]
+
+        return tokens
+
+    def make_auth_header(self):
+        """ Returns: Headers required to authenticate. """
+        headers = {"User-Agent": "CGWire Gazu " + __version__}
+
+        if self.access_token:
+            if self.access_token_has_expired and self.automatic_refresh_token:
+                self.refresh_authentication_tokens()
+
+            headers["Authorization"] = "Bearer " + self.access_token
+
+        return headers
 
 
 def create_client(
@@ -159,14 +215,7 @@ def set_tokens(new_tokens, client=default_client):
 
 
 def make_auth_header(client=default_client):
-    """
-    Returns:
-        Headers required to authenticate.
-    """
-    headers = {"User-Agent": "CGWire Gazu %s" % __version__}
-    if "access_token" in client.tokens:
-        headers["Authorization"] = "Bearer %s" % client.tokens["access_token"]
-    return headers
+    return client.make_auth_header()
 
 
 def url_path_join(*items):
@@ -369,19 +418,13 @@ def check_status(request, path, client=None):
         )
     elif status_code in [401, 422]:
         try:
-            if client is not None and client.automatic_refresh_token:
-                from . import refresh_token
-
-                refresh_token(client=client)
-
+            if client and client.automatic_refresh_token:
+                client.refresh_token()
                 return status_code, True
             else:
                 raise NotAuthenticatedException(path)
         except NotAuthenticatedException:
-            if (
-                client is not None
-                and client.callback_not_authenticated is not None
-            ):
+            if client and client.callback_not_authenticated:
                 retry = client.callback_not_authenticated(client, path)
                 if retry:
                     return status_code, True

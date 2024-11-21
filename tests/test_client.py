@@ -2,6 +2,7 @@ import datetime
 import json
 import random
 import string
+import jwt
 
 import unittest
 import requests_mock
@@ -70,7 +71,8 @@ class BaseFuncTestCase(ClientTestCase):
         pass
 
     def test_make_auth_header(self):
-        pass
+        self.assertEqual(first=raw.default_client.make_auth_header(),
+                         second=raw.make_auth_header())
 
     def test_url_path_join(self):
         root = raw.get_host()
@@ -254,15 +256,72 @@ class BaseFuncTestCase(ClientTestCase):
             self.assertEqual(raw.get_api_version(), "0.2.0")
 
     def test_make_auth_token(self):
-        tokens = {"access_token": "token_test"}
+        tokens = {"access_token": jwt.encode(
+            payload={'exp': (datetime.datetime.now() + datetime.timedelta(days=30)).timestamp()},
+            key='secretkey')}
         raw.set_tokens(tokens)
-        self.assertEqual(
-            raw.make_auth_header(),
-            {
-                "Authorization": "Bearer token_test",
-                "User-Agent": "CGWire Gazu %s" % __version__,
-            },
-        )
+        self.assertEqual(raw.make_auth_header(),
+                         {"Authorization": "Bearer " + tokens["access_token"],
+                          "User-Agent": "CGWire Gazu " + __version__})
+
+    def test_access_token_has_expired(self):
+        client = raw.KitsuClient(host='http://localhost')
+        test_cases = {'fresh': (datetime.timedelta(days=30), False),
+                      'expired': (datetime.timedelta(days=-1), True)}
+        for testcase in test_cases.items():
+            client.access_token = jwt.encode(
+                payload={'exp': (datetime.datetime.now() + testcase[-1][0]).timestamp()},
+                key='secretkey')
+
+            self.assertEqual(
+                first=client.access_token_has_expired, second=testcase[-1][-1],
+                msg=testcase[0] + ' Access Token correctly detected.')
+
+        client.access_token = None
+        self.assertEqual(first=client.access_token_has_expired, second=False,
+                         msg='')
+
+        client.tokens["refresh_token"] = 'placeholder'
+        self.assertEqual(first=client.access_token_has_expired, second=True)
+
+    def test_automatic_token_refresh(self):
+        def encode(timestamp):
+            return jwt.encode(payload={'exp': timestamp}, key='secretkey')
+
+        expired_access_token = encode((datetime.datetime.now() + datetime.timedelta(days=-30)).timestamp())
+        fresh_access_token = encode((datetime.datetime.now() + datetime.timedelta(days=30)).timestamp())
+        new_access_token = encode((datetime.datetime.now() + datetime.timedelta(days=90)).timestamp())
+
+        client = raw.KitsuClient(host='http://localhost')
+        client.tokens["refresh_token"] = 'placeholder'
+
+        with requests_mock.Mocker() as mock:
+            mock_route(mock, "GET", "http://localhost/auth/refresh-token",
+                       text={'access_token': new_access_token})
+            mock_route(mock, "GET", "http://localhost/test", text={})
+
+            client.automatic_refresh_token = False
+            client.access_token = expired_access_token
+            client.session.get(raw.get_full_url(path='test', client=client), headers=client.make_auth_header())
+            # Expired tokens are not refreshed if automatic_refresh is False.
+            self.assertEqual(client.access_token, expired_access_token)
+
+            client.access_token = fresh_access_token
+            client.session.get(raw.get_full_url(path='test', client=client), headers=client.make_auth_header())
+            # Fresh tokens are not changed.
+            self.assertEqual(client.access_token, fresh_access_token)
+
+            client.automatic_refresh_token = True
+            client.access_token = expired_access_token
+            client.session.get(raw.get_full_url(path='test', client=client), headers=client.make_auth_header())
+            # Expired tokens are updated if automatic_refresh is True
+            self.assertEqual(client.access_token, new_access_token)
+
+            client.automatic_refresh_token = True
+            client.access_token = fresh_access_token
+            client.session.get(raw.get_full_url(path='test', client=client), headers=client.make_auth_header())
+            # Fresh tokens are not changed.
+            self.assertEqual(client.access_token, fresh_access_token)
 
     def test_upload(self):
         with open("./tests/fixtures/v1.png", "rb") as test_file:
@@ -429,18 +488,14 @@ class BaseFuncTestCase(ClientTestCase):
             self.assertEqual(success, {"success": True})
 
     def test_init_refresh_token(self):
+        access_token = jwt.encode(payload={'exp': datetime.datetime.now()}, key='secretkey')
+
         with requests_mock.mock() as mock:
             raw.default_client.tokens["refresh_token"] = "refresh_token1"
-            mock_route(
-                mock,
-                "GET",
-                "auth/refresh-token",
-                text={"access_token": "tokentest1"},
-            )
+            mock_route(mock, "GET", "auth/refresh-token", text={"access_token": access_token})
             gazu.refresh_token()
-        self.assertEqual(
-            raw.default_client.tokens["access_token"], "tokentest1"
-        )
+
+        self.assertEqual(raw.default_client.access_token, access_token)
 
     def test_init_log_in_fail(self):
         with requests_mock.mock() as mock:
