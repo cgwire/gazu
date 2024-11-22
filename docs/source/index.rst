@@ -73,8 +73,8 @@ Kitsu instance. They are listed below:
 
 * `Qtazu <https://github.com/Colorbleed/qtazu>`__: Qt Widgets such as a login
   modal.
-* `Nagato <https://github.com/eaxum/nagato>`__: Publishing and file versioning
-  for Blender.
+* `blender-kitsu <https://studio.blender.org/tools/addons/blender_kitsu>`__: A
+  Blender add-on made by Blender to publish previews to Kitsu.
 * `Bamboo <https://github.com/nervYu/Bamboo>`__: Pyside2 widgets to publish
   previews to Kitsu. 
 * `Kitsu Publisher <https://github.com/cgwire/kitsu-publisher-next>`__: Our
