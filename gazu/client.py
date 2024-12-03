@@ -464,7 +464,7 @@ def fetch_first(path, params=None, client=default_client):
         return None
 
 
-def fetch_one(model_name, id, client=default_client):
+def fetch_one(model_name, id, params=None, client=default_client):
     """
     Function dedicated at targeting routes that returns a single model
     instance.
@@ -476,7 +476,9 @@ def fetch_one(model_name, id, client=default_client):
     Returns:
         dict: The model instance matching id and model name.
     """
-    return get(url_path_join("data", model_name, id), client=client)
+    return get(
+        url_path_join("data", model_name, id), params=params, client=client
+    )
 
 
 def create(model_name, data, client=default_client):
