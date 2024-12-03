@@ -65,6 +65,10 @@ class KitsuClient(object):
     @property
     def access_token_has_expired(self):
         """ Returns: Whether this client's access token needs to be refreshed. """
+        # Python 2 is too deprecated to support this feature. (Lack of datetime.timestamp())
+        if sys.version_info.major == 2:
+            return False
+
         if not self.access_token:
             # No access token is present, refresh only when able with a refresh token.
             return True if self.refresh_token else False

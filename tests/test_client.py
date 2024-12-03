@@ -1,3 +1,4 @@
+import sys
 import datetime
 import json
 import random
@@ -256,15 +257,23 @@ class BaseFuncTestCase(ClientTestCase):
             self.assertEqual(raw.get_api_version(), "0.2.0")
 
     def test_make_auth_token(self):
-        tokens = {"access_token": jwt.encode(
-            payload={'exp': (datetime.datetime.now() + datetime.timedelta(days=30)).timestamp()},
-            key='secretkey')}
+        if sys.version_info.major == 2:
+            tokens = {"access_token": "secretaccesstoken"}
+        else:
+            tokens = {"access_token": jwt.encode(
+                payload={'exp': (datetime.datetime.now() + datetime.timedelta(days=30)).timestamp()},
+                key='secretkey')}
+
         raw.set_tokens(tokens)
         self.assertEqual(raw.make_auth_header(),
                          {"Authorization": "Bearer " + tokens["access_token"],
                           "User-Agent": "CGWire Gazu " + __version__})
 
     def test_access_token_has_expired(self):
+        # Automatic token refresh is not supported in Python 2.
+        if sys.version_info.major == 2:
+            return True
+
         client = raw.KitsuClient(host='http://localhost')
         test_cases = {'fresh': (datetime.timedelta(days=30), False),
                       'expired': (datetime.timedelta(days=-1), True)}
@@ -285,6 +294,10 @@ class BaseFuncTestCase(ClientTestCase):
         self.assertEqual(first=client.access_token_has_expired, second=True)
 
     def test_automatic_token_refresh(self):
+        # Automatic token refresh is not supported in Python 2.
+        if sys.version_info.major == 2:
+            return True
+
         def encode(timestamp):
             return jwt.encode(payload={'exp': timestamp}, key='secretkey')
 
