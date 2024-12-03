@@ -1,3 +1,1 @@
-python-jwt==1.7.0; python_version == "2.7"
-python-jwt==2.9.0; python_version >= "3.6"
 -e .[dev,test]
