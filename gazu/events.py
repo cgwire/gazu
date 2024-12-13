@@ -52,11 +52,13 @@ def init(
     Returns:
         Event client that will be able to set listeners.
     """
-    params = {"ssl_verify": ssl_verify}
+    params = {
+        "ssl_verify": ssl_verify,
+        "reconnection": reconnection,
+        "logger": logger,
+    }
     params.update(kwargs)
-    event_client = socketio.Client(
-        logger=logger, reconnection=reconnection, **params
-    )
+    event_client = socketio.Client(**params)
     event_client.on("connect_error", connect_error)
     event_client.register_namespace(EventsNamespace("/events"))
     event_client.connect(get_event_host(client), make_auth_header())

@@ -70,7 +70,10 @@ class BaseFuncTestCase(ClientTestCase):
         pass
 
     def test_make_auth_header(self):
-        pass
+        self.assertEqual(
+            raw.default_client.make_auth_header(),
+            raw.make_auth_header(),
+        )
 
     def test_url_path_join(self):
         root = raw.get_host()
@@ -255,6 +258,7 @@ class BaseFuncTestCase(ClientTestCase):
 
     def test_make_auth_token(self):
         tokens = {"access_token": "token_test"}
+
         raw.set_tokens(tokens)
         self.assertEqual(
             raw.make_auth_header(),
@@ -437,7 +441,7 @@ class BaseFuncTestCase(ClientTestCase):
                 "auth/refresh-token",
                 text={"access_token": "tokentest1"},
             )
-            gazu.refresh_token()
+            gazu.refresh_access_token()
         self.assertEqual(
             raw.default_client.tokens["access_token"], "tokentest1"
         )
