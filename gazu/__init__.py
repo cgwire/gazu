@@ -87,8 +87,8 @@ def log_out(client=raw.default_client):
     return tokens
 
 
-def refresh_token(client=raw.default_client):
-    return client.refresh_authentication_tokens()
+def refresh_access_token(client=raw.default_client):
+    return client.refresh_access_token()
 
 
 def get_event_host(client=raw.default_client):
