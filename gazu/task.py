@@ -839,6 +839,7 @@ def add_comment(
         "task_status_id": task_status["id"],
         "comment": comment,
         "checklist": checklist,
+        "links": links,
     }
 
     if person is not None:
@@ -1014,6 +1015,7 @@ def publish_preview(
     normalize_movie=True,
     revision=None,
     set_thumbnail=False,
+    links=[],
     client=default,
 ):
     """
@@ -1035,6 +1037,7 @@ def publish_preview(
         server side.
         revision (int): Revision number.
         set_thumbnail (bool): Set the preview as thumbnail of the entity.
+        links (list): List of links to add to the comment
     Returns:
         tuple(dict, dict): Created comment model and created preview file
         model.
@@ -1047,6 +1050,7 @@ def publish_preview(
         checklist=checklist,
         attachments=attachments,
         created_at=created_at,
+        links=links,
         client=client,
     )
     preview_file = add_preview(
@@ -1061,6 +1065,39 @@ def publish_preview(
     if set_thumbnail:
         set_main_preview(preview_file, client=client)
     return new_comment, preview_file
+
+
+def publish_comments_previews(task, comments=[], client=default):
+    """
+    Publish a list of comments (with attachments and previews) for given task.
+    Each dict comments may contain a list of attachment files path and preview
+    files path in the keys "attachment_files" and "preview_files".
+
+    Args:
+        task (str / dict): The task dict or the task ID.
+        comments (list): List of comments to publish.
+
+    Returns:
+        list: List of created comments.
+    """
+    task = normalize_model_parameter(task)
+
+    files = {}
+    for x, comment in enumerate(comments):
+        if comment.get("attachment_files"):
+            for y, file_path in enumerate(comment["attachment_files"]):
+                files["attachment_file-%i-%i" % (x, y)] = open(file_path, "rb")
+        if comment.get("preview_files"):
+            for y, file_path in enumerate(comment["preview_files"]):
+                files["preview_file-%i-%i" % (x, y)] = open(file_path, "rb")
+
+    files["comments"] = (None, json.dumps(comments), "application/json")
+    return raw.upload(
+        "actions/tasks/%s/add-comments-previews" % task["id"],
+        file_path=None,
+        files=files,
+        client=client,
+    )
 
 
 def set_main_preview(preview_file, frame_number=None, client=default):
