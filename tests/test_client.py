@@ -331,7 +331,7 @@ class BaseFuncTestCase(ClientTestCase):
                     mock,
                     {
                         "file": test_file_read,
-                        "file-2": test_file_read,
+                        "file-1": test_file_read,
                         "test": "True",
                     },
                 )

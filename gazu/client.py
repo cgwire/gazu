@@ -467,10 +467,11 @@ def get_message_from_response(
     message = default_message
     message_json = response.json()
 
-    for key in ["error", "message"]:
-        if message_json.get(key):
-            message = message_json[key]
-            break
+    if hasattr(message_json, "get"):
+        for key in ["error", "message"]:
+            if message_json.get(key):
+                message = message_json[key]
+                break
 
     return message
 
@@ -663,7 +664,14 @@ def update(model_name, model_id, data, client=default_client):
     )
 
 
-def upload(path, file_path, data={}, extra_files=[], client=default_client):
+def upload(
+    path,
+    file_path=None,
+    data={},
+    extra_files=[],
+    files=None,
+    client=default_client,
+):
     """
     Upload file located at *file_path* to given url *path*.
 
@@ -672,13 +680,15 @@ def upload(path, file_path, data={}, extra_files=[], client=default_client):
         file_path (str): The file location on the hard drive.
         data (dict): The data to send with the file.
         extra_files (list): List of extra files to upload.
+        files (dict): The dictionary of files to upload.
         client (KitsuClient): The client to use for the request.
 
     Returns:
         Response: Request response object.
     """
     url = get_full_url(path, client)
-    files = _build_file_dict(file_path, extra_files)
+    if not files:
+        files = _build_file_dict(file_path, extra_files)
     retry = True
     while retry:
         response = client.session.post(
@@ -714,10 +724,11 @@ def _build_file_dict(file_path, extra_files):
     """
 
     files = {"file": open(file_path, "rb")}
-    i = 2
+    i = 0
     for file_path in extra_files:
-        files["file-%s" % i] = open(file_path, "rb")
         i += 1
+        files["file-%s" % i] = open(file_path, "rb")
+
     return files
 
 
