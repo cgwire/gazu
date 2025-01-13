@@ -1067,20 +1067,22 @@ def publish_preview(
     return new_comment, preview_file
 
 
-def publish_comments_previews(task, comments=[], client=default):
+def batch_comments(comments=[], task=None, client=default):
     """
     Publish a list of comments (with attachments and previews) for given task.
     Each dict comments may contain a list of attachment files path and preview
-    files path in the keys "attachment_files" and "preview_files".
+    files path in the keys "attachment_files" and "preview_files". If no task is
+    given each comments needs to have a task_id key.
 
     Args:
-        task (str / dict): The task dict or the task ID.
         comments (list): List of comments to publish.
+        task (str / dict): The task dict or the task ID.
 
     Returns:
         list: List of created comments.
     """
-    task = normalize_model_parameter(task)
+    if task is not None:
+        task = normalize_model_parameter(task)
 
     files = {}
     for x, comment in enumerate(comments):
@@ -1093,7 +1095,7 @@ def publish_comments_previews(task, comments=[], client=default):
 
     files["comments"] = (None, json.dumps(comments), "application/json")
     return raw.upload(
-        "actions/tasks/%s/add-comments-previews" % task["id"],
+        "actions/tasks/%sbatch-comment" % ("%s/" % task["id"] if task else ""),
         file_path=None,
         files=files,
         client=client,
