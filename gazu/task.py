@@ -675,13 +675,15 @@ def remove_task(task, client=default):
     raw.delete("data/tasks/%s" % task["id"], {"force": True}, client=client)
 
 
-def start_task(task, started_task_status=None, client=default):
+def start_task(task, started_task_status=None, person=None, client=default):
     """
     Create a comment to change task status to started_task_status
     (by default WIP) and set its real start date to now.
 
     Args:
         task (str / dict): The task dict or the task ID.
+        started_task_status (str / dict): The task status dict or ID.
+        person (str / dict): The person dict or the person ID.
 
     Returns:
         dict: Created comment.
@@ -700,7 +702,7 @@ def start_task(task, started_task_status=None, client=default):
                 )
             )
 
-    return add_comment(task, started_task_status, client=client)
+    return add_comment(task, started_task_status, person=person, client=client)
 
 
 def task_to_review(

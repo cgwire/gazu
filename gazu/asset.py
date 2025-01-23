@@ -182,6 +182,7 @@ def new_asset(
         description (str): Additional information.
         extra_data (dict): Free field to add any kind of metadata.
         episode (str / dict): The episode this asset is linked to.
+        is_shared (bool): True if asset is shared between multiple projects.
 
     Returns:
         dict: Created asset.
