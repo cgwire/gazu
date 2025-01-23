@@ -147,7 +147,7 @@ def get_preview_file(preview_file_id, client=default):
     return raw.fetch_one("preview-files", preview_file_id, client=client)
 
 
-def remove_preview_file(preview_file, client=default):
+def remove_preview_file(preview_file, force=False, client=default):
     """
     Remove given preview file from database.
 
@@ -155,8 +155,12 @@ def remove_preview_file(preview_file, client=default):
         preview_file (str / dict): The preview_file dict or ID.
     """
     preview_file = normalize_model_parameter(preview_file)
+    params = {}
+    if force:
+        params = {"force": True}
     return raw.delete(
         "data/preview-files/%s" % preview_file["id"],
+        params=params,
         client=client,
     )
 

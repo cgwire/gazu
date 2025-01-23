@@ -169,6 +169,7 @@ def new_asset(
     description=None,
     extra_data={},
     episode=None,
+    is_shared=False,
     client=default,
 ):
     """
@@ -181,6 +182,7 @@ def new_asset(
         description (str): Additional information.
         extra_data (dict): Free field to add any kind of metadata.
         episode (str / dict): The episode this asset is linked to.
+        is_shared (bool): True if asset is shared between multiple projects.
 
     Returns:
         dict: Created asset.
@@ -189,7 +191,7 @@ def new_asset(
     asset_type = normalize_model_parameter(asset_type)
     episode = normalize_model_parameter(episode)
 
-    data = {"name": name, "data": extra_data}
+    data = {"name": name, "data": extra_data, "is_shared": is_shared}
 
     if description is not None:
         data["description"] = description
