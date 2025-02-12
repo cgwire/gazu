@@ -244,11 +244,11 @@ class PersonTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/persons?id=%s&relations=False" % (fakeid("John Doe")),
+                "data/persons?id=%s&relations=True" % (fakeid("John Doe")),
                 text=result,
             )
             self.assertEqual(
-                gazu.person.get_person(fakeid("John Doe"), relations=False),
+                gazu.person.get_person(fakeid("John Doe"), relations=True),
                 result[0],
             )
 
