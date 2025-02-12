@@ -76,7 +76,7 @@ def get_project_url(project, section="assets", client=default):
     project = normalize_model_parameter(project)
     path = "{host}/productions/{project_id}/{section}/"
     return path.format(
-        host=raw.get_api_url_from_host(),
+        host=raw.get_api_url_from_host(client=client),
         project_id=project["id"],
         section=section,
     )

@@ -740,7 +740,7 @@ def task_to_review(
 def get_time_spent(task, date=None, client=default):
     """
     Get the time spent by CG artists on a task at a given date if given. A field contains
-    the total time spent.  Durations are given in seconds. Date format is
+    the total time spent.  Durations are given in minutes. Date format is
     YYYY-MM-DD.
 
     Args:
@@ -759,14 +759,13 @@ def get_time_spent(task, date=None, client=default):
 
 def set_time_spent(task, person, date, duration, client=default):
     """
-    Set the time spent by a CG artist on a given task at a given date. Durations
-    must be set in seconds. Date format is YYYY-MM-DD.
+    Set the time spent by a CG artist on a given task at a given date.
 
     Args:
         task (str / dict): The task dict or the task ID.
         person (str / dict): The person who spent the time on given task.
-        date (str): The date for which time spent must be set.
-        duration (int): The duration of the time spent on given task.
+        date (str): The date ("YYYY-MM-DD") for which time spent must be set.
+        duration (int): The duration (in minutes) of the time spent on given task.
 
     Returns:
         dict: Created time spent entry.
@@ -784,14 +783,13 @@ def set_time_spent(task, person, date, duration, client=default):
 def add_time_spent(task, person, date, duration, client=default):
     """
     Add given duration to the already logged duration for given task and person
-    at a given date. Durations must be set in seconds. Date format is
-    YYYY-MM-DD.
+    at a given date.
 
     Args:
         task (str / dict): The task dict or the task ID.
         person (str / dict): The person who spent the time on given task.
-        date (str): The date for which time spent must be added.
-        duration (int): The duration to add on the time spent on given task.
+        date (str): The date ("YYYY-MM-DD") for which time spent must be set.
+        duration (int): The duration (in minutes) of the time spent on given task.
 
     Returns:
         dict: Updated time spent entry.
