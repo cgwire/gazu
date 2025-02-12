@@ -117,8 +117,8 @@ def get_person(id, relations=False, client=default):
         dict: Person corresponding to given id.
     """
     params = {"id": id}
-    if not relations:
-        params["relations"] = False
+    if relations:
+        params["relations"] = True
 
     return raw.fetch_first("persons", params=params, client=client)
 
