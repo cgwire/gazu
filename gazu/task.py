@@ -472,6 +472,27 @@ def get_task_type_by_name(
 
 
 @cache
+def get_task_type_by_short_name(
+    task_type_short_name, for_entity=None, department=None, client=default
+):
+    """
+    Args:
+        task_type_short_name (str): Short name of claimed task type.
+        for_entity (str): The entity type for which the task type is created.
+        department (str): The department for which the task type is created.
+
+    Returns:
+        dict: Task type object for given name.
+    """
+    params = {"short_name": task_type_short_name}
+    if for_entity is not None:
+        params["for_entity"] = for_entity
+    if department is not None:
+        params["department_id"] = normalize_model_parameter(department)["id"]
+    return raw.fetch_first("task-types", params, client=client)
+
+
+@cache
 def get_task_by_path(project, file_path, entity_type="shot", client=default):
     """
     Args:
