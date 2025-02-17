@@ -180,16 +180,30 @@ class TaskTestCase(unittest.TestCase):
 
     def test_get_task_type_by_name(self):
         with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url("data/task-types"),
-                text=json.dumps(
-                    [
-                        {"name": "FX", "id": "task-type-fx"},
-                        {"name": "Modeling", "id": "task-type-modeling"},
-                    ]
-                ),
+            mock_route(
+                mock,
+                "GET",
+                "data/task-types",
+                text=[
+                    {"name": "FX", "id": "task-type-fx"},
+                    {"name": "Modeling", "id": "task-type-modeling"},
+                ],
             )
             task_type = gazu.task.get_task_type_by_name("FX")
+            self.assertEqual(task_type["name"], "FX")
+
+    def test_get_task_type_by_short_name(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/task-types",
+                text=[
+                    {"name": "FX", "id": "task-type-fx"},
+                    {"name": "Modeling", "id": "task-type-modeling"},
+                ],
+            )
+            task_type = gazu.task.get_task_type_by_short_name("FX")
             self.assertEqual(task_type["name"], "FX")
 
     def test_get_task_by_path(self):
