@@ -341,3 +341,17 @@ class PersonTestCase(unittest.TestCase):
                 gazu.person.change_password_for_person(person_id, "password"),
                 {"success": True},
             )
+
+    def test_invite_person(self):
+        with requests_mock.mock() as mock:
+            person_id = fakeid("person-1")
+            mock_route(
+                mock,
+                "GET",
+                "actions/persons/%s/invite" % person_id,
+                text={"success": True},
+            )
+            self.assertEqual(
+                gazu.person.invite_person(person_id),
+                {"success": True},
+            )

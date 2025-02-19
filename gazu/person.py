@@ -432,3 +432,17 @@ def change_password_for_person(person, password, client=default):
         {"password": password, "password_2": password},
         client=client,
     )
+
+
+def invite_person(person, client=default):
+    """
+    Sends an email to given person to invite him/her to connect to Kitsu.
+
+    Args:
+        person (dict): The person to invite.
+    """
+    person = normalize_model_parameter(person)
+    return raw.get(
+        "actions/persons/%s/invite" % (person["id"]),
+        client=client,
+    )
