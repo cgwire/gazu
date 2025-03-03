@@ -1281,12 +1281,42 @@ def upload_project_avatar(project, file_path, client=default):
     Upload given file as project avatar.
 
     Args:
-        project (str / dict): The project dict or the project ID.
+        project (str / dict): The project dict or ID.
         file_path (str): Path of the file to upload as avatar.
     """
     path = (
         "/pictures/thumbnails/projects/%s"
         % normalize_model_parameter(project)["id"]
+    )
+    return raw.upload(path, file_path, client=client)
+
+
+def download_organisation_avatar(organisation, file_path, client=default):
+    """
+    Download given organisation's avatar and save it at given location.
+    Args:
+        organisation (str / dict): The organisation dict or ID.
+        file_path (str): Location on hard drive where to save the file.
+    """
+    organisation = normalize_model_parameter(organisation)
+    return raw.download(
+        "pictures/thumbnails/organisations/%s.png" % (organisation["id"]),
+        file_path,
+        client=client,
+    )
+
+
+def upload_organisation_avatar(organisation, file_path, client=default):
+    """
+    Upload given file as organisation avatar.
+
+    Args:
+        organisation (str / dict): The organisation dict or ID.
+        file_path (str): Path of the file to upload as avatar.
+    """
+    path = (
+        "/pictures/thumbnails/organisations/%s"
+        % normalize_model_parameter(organisation)["id"]
     )
     return raw.upload(path, file_path, client=client)
 
