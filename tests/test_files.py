@@ -1230,3 +1230,41 @@ class FilesTestCase(unittest.TestCase):
                     ),
                     {"id": fakeid("project-1")},
                 )
+
+    def test_upload_organisation_avatar(self):
+        with open("./tests/fixtures/v1.png", "rb") as test_file:
+            with requests_mock.Mocker() as mock:
+                mock_route(
+                    mock,
+                    "POST",
+                    "pictures/thumbnails/organisations/%s"
+                    % fakeid("organisation-1"),
+                    text={"id": fakeid("organisation-1")},
+                )
+
+                add_verify_file_callback(mock, {"file": test_file.read()})
+
+                self.assertEqual(
+                    gazu.files.upload_organisation_avatar(
+                        fakeid("organisation-1"),
+                        "./tests/fixtures/v1.png",
+                    ),
+                    {"id": fakeid("organisation-1")},
+                )
+
+    def test_download_organisation_avatar(self):
+        with open("./tests/fixtures/v1.png", "rb") as thumbnail_file:
+            with requests_mock.mock() as mock:
+                path = "pictures/thumbnails/organisations/{}.png".format(
+                    fakeid("organisation-1")
+                )
+                mock.get(gazu.client.get_full_url(path), body=thumbnail_file)
+                gazu.files.download_organisation_avatar(
+                    fakeid("organisation-1"), "./test.png"
+                )
+                self.assertTrue(os.path.exists("./test.png"))
+                self.assertEqual(
+                    os.path.getsize("./test.png"),
+                    os.path.getsize("./tests/fixtures/v1.png"),
+                )
+                os.remove("./test.png")
