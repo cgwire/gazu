@@ -68,7 +68,7 @@ def all_shots_for_sequence(sequence, client=default):
 def all_sequences_for_project(project, client=default):
     """
     Args:
-        sequence (str / dict): The sequence dict or the sequence ID.
+        sequence (str / dict): The project dict or the project ID.
 
     Returns:
         list: Sequences from database for given project.
@@ -83,7 +83,7 @@ def all_sequences_for_project(project, client=default):
 def all_sequences_for_episode(episode, client=default):
     """
     Args:
-        sequence (str / dict): The sequence dict or the sequence ID.
+        sequence (str / dict): The episode dict or the episode ID.
 
     Returns:
         list: Sequences which are children of given episode.
