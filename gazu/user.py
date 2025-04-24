@@ -98,7 +98,7 @@ def all_tasks_for_scene(scene, client=default):
         list: Tasks assigned to current user for given scene.
     """
     scene = normalize_model_parameter(scene)
-    path = "user/scene/%s/tasks" % scene["id"]
+    path = "user/scenes/%s/tasks" % scene["id"]
     tasks = raw.fetch_all(path, client=client)
     return sort_by_name(tasks)
 
