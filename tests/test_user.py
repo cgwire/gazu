@@ -231,7 +231,7 @@ class ProjectTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/user/scene/%s/tasks" % fakeid("scene-1")
+                    "data/user/scenes/%s/tasks" % fakeid("scene-1")
                 ),
                 text=json.dumps(
                     [

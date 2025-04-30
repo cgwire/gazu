@@ -515,7 +515,7 @@ def update_episode_data(episode, data={}, client=default):
         dict: Updated episode.
     """
     episode = normalize_model_parameter(episode)
-    current_episode = get_sequence(episode["id"], client=client)
+    current_episode = get_episode(episode["id"], client=client)
     updated_episode = {
         "id": current_episode["id"],
         "data": current_episode["data"],
