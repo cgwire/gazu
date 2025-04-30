@@ -642,7 +642,7 @@ class ShotTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/sequences/%s" % fakeid("episode-1")
+                    "data/episodes/%s" % fakeid("episode-1")
                 ),
                 text=json.dumps({"id": fakeid("episode-1"), "data": {}}),
             )
