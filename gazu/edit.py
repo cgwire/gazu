@@ -111,10 +111,11 @@ def new_edit(
         Created edit.
     """
     project = normalize_model_parameter(project)
+    data = {"name": name, "data": data}
+
     if episode is not None:
         episode = normalize_model_parameter(episode)
-
-    data = {"name": name, "data": data, "parent_id": episode["id"]}
+        data["parent_id"] = episode["id"]
 
     if description is not None:
         data["description"] = description
