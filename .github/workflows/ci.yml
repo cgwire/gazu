@@ -21,7 +21,7 @@ jobs:
             container: python:3.7-bookworm
     container: ${{ matrix.container }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up Python
         if: ${{ !contains(fromJSON('["2.7", "3.6", "3.7"]'), matrix.version) }}
         uses: actions/setup-python@v5
