@@ -60,7 +60,7 @@ def init(
     params.update(kwargs)
     event_client = socketio.Client(**params)
     event_client.on("connect_error", connect_error)
-    event_client.register_namespace(EventsNamespace("/events"))
+    event_client.register_namespace(EventsNamespace("/"))
     event_client.connect(get_event_host(client), make_auth_header())
     return event_client
 
