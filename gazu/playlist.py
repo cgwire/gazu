@@ -253,3 +253,169 @@ def update_entity_preview(
     if persist:
         update_playlist(playlist, client=client)
     return playlist
+
+
+@cache
+def delete_playlist(playlist, client=default):
+    """
+    Delete a playlist.
+
+    Args:
+        playlist (dict / ID): The playlist dict or id.
+
+    Returns:
+        Response: Request response object.
+    """
+    playlist = normalize_model_parameter(playlist)
+    return raw.delete("data/playlists/%s" % playlist["id"], client=client)
+
+
+@cache
+def get_entity_previews(playlist, client=default):
+    """
+    Get entity previews for a playlist.
+
+    Args:
+        playlist (dict / ID): The playlist dict or id.
+
+    Returns:
+        list: Entity previews for the playlist.
+    """
+    playlist = normalize_model_parameter(playlist)
+    return raw.fetch_all(
+        "playlists/%s/entity-previews" % playlist["id"], client=client
+    )
+
+
+@cache
+def get_build_job(build_job, client=default):
+    """
+    Get a build job.
+
+    Args:
+        build_job (dict / ID): The build job dict or id.
+
+    Returns:
+        dict: Build job information.
+    """
+    build_job = normalize_model_parameter(build_job)
+    return raw.fetch_one("playlists/build-jobs", build_job["id"], client=client)
+
+
+def remove_build_job(build_job, client=default):
+    """
+    Delete a build job.
+
+    Args:
+        build_job (dict / ID): The build job dict or id.
+
+    Returns:
+        Response: Request response object.
+    """
+    build_job = normalize_model_parameter(build_job)
+    return raw.delete(
+        "data/playlists/build-jobs/%s" % build_job["id"], client=client
+    )
+
+
+@cache
+def all_build_jobs_for_project(project, client=default):
+    """
+    Get all build jobs for a project.
+
+    Args:
+        project (dict / ID): The project dict or id.
+
+    Returns:
+        list: All build jobs for the project.
+    """
+    project = normalize_model_parameter(project)
+    return raw.fetch_all(
+        "projects/%s/build-jobs" % project["id"], client=client
+    )
+
+
+def build_playlist_movie(playlist, client=default):
+    """
+    Build a movie for a playlist.
+
+    Args:
+        playlist (dict / ID): The playlist dict or id.
+
+    Returns:
+        dict: Build job information.
+    """
+    playlist = normalize_model_parameter(playlist)
+    return raw.post(
+        "data/playlists/%s/build-movie" % playlist["id"], {}, client=client
+    )
+
+
+def download_playlist_build(playlist, build_job, file_path, client=default):
+    """
+    Download a playlist build.
+
+    Args:
+        playlist (dict / ID): The playlist dict or id.
+        build_job (dict / ID): The build job dict or id.
+        file_path (str): The location to store the file on the hard drive.
+
+    Returns:
+        Response: Request response object.
+    """
+    playlist = normalize_model_parameter(playlist)
+    build_job = normalize_model_parameter(build_job)
+    path = "data/playlists/%s/build-jobs/%s/download" % (
+        playlist["id"],
+        build_job["id"],
+    )
+    return raw.download(path, file_path, client=client)
+
+
+def download_playlist_zip(playlist, file_path, client=default):
+    """
+    Download a playlist as a zip file.
+
+    Args:
+        playlist (dict / ID): The playlist dict or id.
+        file_path (str): The location to store the file on the hard drive.
+
+    Returns:
+        Response: Request response object.
+    """
+    playlist = normalize_model_parameter(playlist)
+    path = "data/playlists/%s/download/zip" % playlist["id"]
+    return raw.download(path, file_path, client=client)
+
+
+def generate_temp_playlist(project, data, client=default):
+    """
+    Generate a temporary playlist.
+
+    Args:
+        project (dict / ID): The project dict or id.
+        data (dict): Playlist generation data.
+
+    Returns:
+        dict: Generated temporary playlist.
+    """
+    project = normalize_model_parameter(project)
+    return raw.post(
+        "data/projects/%s/playlists/temp" % project["id"], data, client=client
+    )
+
+
+def notify_clients_playlist_ready(playlist, client=default):
+    """
+    Notify clients that a playlist is ready.
+
+    Args:
+        playlist (dict / ID): The playlist dict or id.
+
+    Returns:
+        dict: Notification response.
+    """
+    playlist = normalize_model_parameter(playlist)
+    return raw.post(
+        "data/playlists/%s/notify" % playlist["id"], {}, client=client
+    )
