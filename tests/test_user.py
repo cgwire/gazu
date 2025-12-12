@@ -311,3 +311,242 @@ class ProjectTestCase(unittest.TestCase):
                 status_code=401,
             )
             self.assertFalse(gazu.user.is_authenticated())
+
+    def test_get_context(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/user/context",
+                text={"user": {"id": fakeid("user-1")}},
+            )
+            context = gazu.user.get_context()
+            self.assertEqual(context["user"]["id"], fakeid("user-1"))
+
+    def test_all_project_assets(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/user/projects/%s/assets" % fakeid("project-1"),
+                text=[{"id": fakeid("asset-1")}, {"id": fakeid("asset-2")}],
+            )
+            assets = gazu.user.all_project_assets(fakeid("project-1"))
+            self.assertEqual(len(assets), 2)
+
+    def test_all_tasks_requiring_feedback(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/user/tasks-requiring-feedback",
+                text=[{"id": fakeid("task-1")}, {"id": fakeid("task-2")}],
+            )
+            tasks = gazu.user.all_tasks_requiring_feedback()
+            self.assertEqual(len(tasks), 2)
+
+    def test_filter_groups(self):
+        with requests_mock.mock() as mock:
+            # get all filter groups
+            mock_route(
+                mock,
+                "GET",
+                "data/user/filter-groups",
+                text=[{"id": fakeid("fg-1")}, {"id": fakeid("fg-2")}],
+            )
+            groups = gazu.user.all_filter_groups()
+            self.assertEqual(len(groups), 2)
+
+            # create filter group
+            mock_route(
+                mock,
+                "POST",
+                "data/user/filter-groups",
+                text={"id": fakeid("fg-3"), "name": "My Group"},
+            )
+            created = gazu.user.new_filter_group("My Group", {"id": fakeid("project-1")})
+            self.assertEqual(created["id"], fakeid("fg-3"))
+
+            # get filter group
+            mock_route(
+                mock,
+                "GET",
+                "data/user/filter-groups/%s" % fakeid("fg-3"),
+                text={"id": fakeid("fg-3"), "name": "My Group"},
+            )
+            group = gazu.user.get_filter_group(fakeid("fg-3"))
+            self.assertEqual(group["id"], fakeid("fg-3"))
+
+            # update filter group
+            mock_route(
+                mock,
+                "PUT",
+                "data/user/filter-groups/%s" % fakeid("fg-3"),
+                text={"id": fakeid("fg-3"), "name": "Updated Group"},
+            )
+            updated = gazu.user.update_filter_group(
+                {"id": fakeid("fg-3"), "name": "Updated Group"}
+            )
+            self.assertEqual(updated["name"], "Updated Group")
+
+            # remove filter group
+            mock_route(
+                mock,
+                "DELETE",
+                "data/user/filter-groups/%s" % fakeid("fg-3"),
+                status_code=204,
+            )
+            gazu.user.remove_filter_group(fakeid("fg-3"))
+
+    def test_all_desktop_login_logs(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/user/desktop-login-logs",
+                text=[{"id": fakeid("log-1")}, {"id": fakeid("log-2")}],
+            )
+            logs = gazu.user.all_desktop_login_logs()
+            self.assertEqual(len(logs), 2)
+
+    def test_get_time_spents_by_date(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/user/time-spents/by-date?date=2025-01-15",
+                text=[{"id": fakeid("ts-1")}, {"id": fakeid("ts-2")}],
+            )
+            time_spents = gazu.user.get_time_spents_by_date("2025-01-15")
+            self.assertEqual(len(time_spents), 2)
+
+    def test_get_task_time_spent(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/user/tasks/%s/time-spent" % fakeid("task-1"),
+                text={"id": fakeid("ts-1"), "duration": 3600},
+            )
+            time_spent = gazu.user.get_task_time_spent(fakeid("task-1"))
+            self.assertEqual(time_spent["duration"], 3600)
+
+    def test_get_day_off(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/user/day-off",
+                text={"days": 5},
+            )
+            day_off = gazu.user.get_day_off()
+            self.assertEqual(day_off["days"], 5)
+
+    def test_notifications(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/user/notifications",
+                text=[{"id": fakeid("notif-1")}, {"id": fakeid("notif-2")}],
+            )
+            notifications = gazu.user.all_notifications()
+            self.assertEqual(len(notifications), 2)
+
+            mock_route(
+                mock,
+                "GET",
+                "data/user/notifications/%s" % fakeid("notif-1"),
+                text={"id": fakeid("notif-1"), "read": False},
+            )
+            notif = gazu.user.get_notification(fakeid("notif-1"))
+            self.assertFalse(notif["read"])
+
+            mock_route(
+                mock,
+                "PUT",
+                "data/user/notifications/%s" % fakeid("notif-1"),
+                text={"id": fakeid("notif-1"), "read": True},
+            )
+            updated = gazu.user.update_notification(
+                {"id": fakeid("notif-1"), "read": True}
+            )
+            self.assertTrue(updated["read"])
+
+            mock_route(
+                mock,
+                "POST",
+                "data/user/notifications/read-all",
+                text={"status": "ok"},
+            )
+            result = gazu.user.mark_all_notifications_as_read()
+            self.assertEqual(result["status"], "ok")
+
+    def test_task_subscriptions(self):
+        with requests_mock.mock() as mock:
+
+            mock_route(
+                mock,
+                "GET",
+                "data/user/tasks/%s/subscription" % fakeid("task-1"),
+                text={"subscribed": True},
+            )
+            sub = gazu.user.check_task_subscription(fakeid("task-1"))
+            self.assertTrue(sub["subscribed"])
+
+            mock_route(
+                mock,
+                "POST",
+                "data/user/tasks/%s/subscribe" % fakeid("task-1"),
+                text={"subscribed": True},
+            )
+            result = gazu.user.subscribe_to_task(fakeid("task-1"))
+            self.assertTrue(result["subscribed"])
+
+            mock_route(
+                mock,
+                "DELETE",
+                "data/user/tasks/%s/unsubscribe" % fakeid("task-1"),
+                status_code=204,
+            )
+            gazu.user.unsubscribe_from_task(fakeid("task-1"))
+
+    def test_chats(self):
+        with requests_mock.mock() as mock:
+
+            mock_route(
+                mock,
+                "GET",
+                "data/user/chats",
+                text=[{"id": fakeid("chat-1")}, {"id": fakeid("chat-2")}],
+            )
+            chats = gazu.user.all_chats()
+            self.assertEqual(len(chats), 2)
+
+            mock_route(
+                mock,
+                "POST",
+                "data/user/chats/%s/join" % fakeid("chat-1"),
+                text={"id": fakeid("chat-1"), "joined": True},
+            )
+            chat = gazu.user.join_chat(fakeid("chat-1"))
+            self.assertTrue(chat["joined"])
+
+            mock_route(
+                mock,
+                "DELETE",
+                "data/user/chats/%s/leave" % fakeid("chat-1"),
+                status_code=204,
+            )
+            gazu.user.leave_chat(fakeid("chat-1"))
+
+    def test_clear_avatar(self):
+
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "DELETE",
+                "data/user/avatar",
+                status_code=204,
+            )
+            gazu.user.clear_avatar()

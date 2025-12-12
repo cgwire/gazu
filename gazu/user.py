@@ -352,3 +352,319 @@ def update_filter(filter, client=default):
     return raw.put(
         "data/user/filters/%s" % filter["id"], filter, client=client
     )
+
+
+@cache
+def get_context(client=default):
+    """
+    Get user context.
+
+    Returns:
+        dict: User context information.
+    """
+    return raw.get("data/user/context", client=client)
+
+
+@cache
+def all_project_assets(project, client=default):
+    """
+    Get assets for which user has tasks assigned for given project.
+
+    Args:
+        project (dict / ID): The project dict or id.
+
+    Returns:
+        list: Assets for the project.
+    """
+    project = normalize_model_parameter(project)
+    path = "user/projects/%s/assets" % project["id"]
+    return raw.fetch_all(path, client=client)
+
+
+@cache
+def all_tasks_requiring_feedback(client=default):
+    """
+    Get tasks requiring feedback from the current user.
+
+    Returns:
+        list: Tasks requiring feedback.
+    """
+    return raw.fetch_all("user/tasks-requiring-feedback", client=client)
+
+
+@cache
+def all_filter_groups(client=default):
+    """
+    Get all filter groups for current user.
+
+    Returns:
+        list: Filter groups.
+    """
+    return raw.fetch_all("user/filter-groups", client=client)
+
+
+def new_filter_group(name, project=None, client=default):
+    """
+    Create a new filter group for current user.
+
+    Args:
+        name (str): The filter group name.
+        project (dict / ID): The project dict or id.
+
+    Returns:
+        dict: Created filter group.
+    """
+    project_id = (
+        normalize_model_parameter(project)["id"]
+        if project is not None
+        else None
+    )
+    return raw.post(
+        "data/user/filter-groups",
+        {"name": name, "project_id": project_id},
+        client=client,
+    )
+
+
+@cache
+def get_filter_group(filter_group, client=default):
+    """
+    Get a filter group.
+
+    Args:
+        filter_group (dict / ID): The filter group dict or id.
+
+    Returns:
+        dict: Filter group.
+    """
+    filter_group = normalize_model_parameter(filter_group)
+    return raw.fetch_one(
+        "user/filter-groups", filter_group["id"], client=client
+    )
+
+
+def update_filter_group(filter_group, client=default):
+    """
+    Update a filter group.
+
+    Args:
+        filter_group (dict): Filter group to save.
+
+    Returns:
+        dict: Updated filter group.
+    """
+    return raw.put(
+        "data/user/filter-groups/%s" % filter_group["id"],
+        filter_group,
+        client=client,
+    )
+
+
+def remove_filter_group(filter_group, client=default):
+    """
+    Remove given filter group from database.
+
+    Args:
+        filter_group (dict / ID): The filter group dict or id.
+    """
+    filter_group = normalize_model_parameter(filter_group)
+    return raw.delete(
+        "data/user/filter-groups/%s" % filter_group["id"], client=client
+    )
+
+
+@cache
+def all_desktop_login_logs(client=default):
+    """
+    Get desktop login logs for current user.
+
+    Returns:
+        list: Desktop login logs.
+    """
+    return raw.fetch_all("user/desktop-login-logs", client=client)
+
+
+@cache
+def get_time_spents_by_date(date, client=default):
+    """
+    Get time spents for a specific date.
+
+    Args:
+        date (str): Date in YYYY-MM-DD format.
+
+    Returns:
+        list: Time spents for the date.
+    """
+    return raw.get("data/user/time-spents/by-date", params={"date": date}, client=client)
+
+
+@cache
+def get_task_time_spent(task, client=default):
+    """
+    Get time spent for a specific task.
+
+    Args:
+        task (dict / ID): The task dict or id.
+
+    Returns:
+        dict: Time spent information for the task.
+    """
+    task = normalize_model_parameter(task)
+    path = "data/user/tasks/%s/time-spent" % task["id"]
+    return raw.get(path, client=client)
+
+
+@cache
+def get_day_off(client=default):
+    """
+    Get day off information for current user.
+
+    Returns:
+        dict: Day off information.
+    """
+    return raw.get("data/user/day-off", client=client)
+
+
+@cache
+def all_notifications(client=default):
+    """
+    Get all notifications for current user.
+
+    Returns:
+        list: Notifications.
+    """
+    return raw.fetch_all("user/notifications", client=client)
+
+
+@cache
+def get_notification(notification, client=default):
+    """
+    Get a specific notification.
+
+    Args:
+        notification (dict / ID): The notification dict or id.
+
+    Returns:
+        dict: Notification.
+    """
+    notification = normalize_model_parameter(notification)
+    return raw.fetch_one(
+        "user/notifications", notification["id"], client=client
+    )
+
+
+def update_notification(notification, client=default):
+    """
+    Update a notification.
+
+    Args:
+        notification (dict): Notification to save.
+
+    Returns:
+        dict: Updated notification.
+    """
+    return raw.put(
+        "data/user/notifications/%s" % notification["id"],
+        notification,
+        client=client,
+    )
+
+
+@cache
+def check_task_subscription(task, client=default):
+    """
+    Check if user is subscribed to a task.
+
+    Args:
+        task (dict / ID): The task dict or id.
+
+    Returns:
+        dict: Subscription status.
+    """
+    task = normalize_model_parameter(task)
+    path = "data/user/tasks/%s/subscription" % task["id"]
+    return raw.get(path, client=client)
+
+
+def subscribe_to_task(task, client=default):
+    """
+    Subscribe to a task.
+
+    Args:
+        task (dict / ID): The task dict or id.
+
+    Returns:
+        dict: Subscription information.
+    """
+    task = normalize_model_parameter(task)
+    path = "data/user/tasks/%s/subscribe" % task["id"]
+    return raw.post(path, {}, client=client)
+
+
+def unsubscribe_from_task(task, client=default):
+    """
+    Unsubscribe from a task.
+
+    Args:
+        task (dict / ID): The task dict or id.
+    """
+    task = normalize_model_parameter(task)
+    path = "data/user/tasks/%s/unsubscribe" % task["id"]
+    return raw.delete(path, client=client)
+
+
+@cache
+def all_chats(client=default):
+    """
+    Get all chats for current user.
+
+    Returns:
+        list: Chats.
+    """
+    return raw.fetch_all("user/chats", client=client)
+
+
+def join_chat(chat, client=default):
+    """
+    Join a chat.
+
+    Args:
+        chat (dict / ID): The chat dict or id.
+
+    Returns:
+        dict: Chat information.
+    """
+    chat = normalize_model_parameter(chat)
+    path = "data/user/chats/%s/join" % chat["id"]
+    return raw.post(path, {}, client=client)
+
+
+def leave_chat(chat, client=default):
+    """
+    Leave a chat.
+
+    Args:
+        chat (dict / ID): The chat dict or id.
+    """
+    chat = normalize_model_parameter(chat)
+    path = "data/user/chats/%s/leave" % chat["id"]
+    return raw.delete(path, client=client)
+
+
+def clear_avatar(client=default):
+    """
+    Clear user avatar.
+
+    Returns:
+        Response: Request response object.
+    """
+    return raw.delete("data/user/avatar", client=client)
+
+def mark_all_notifications_as_read(client=default):
+    """
+    Mark all notifications as read for current user.
+
+    Returns:
+        dict: Response information.
+    """
+    return raw.post("data/user/notifications/read-all", {}, client=client)
