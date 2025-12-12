@@ -446,3 +446,408 @@ def remove_person_from_team(project, person, client=default):
         "data/projects/%s/team/%s" % (project["id"], person["id"]),
         client=client,
     )
+
+
+@cache
+def get_project_task_types(project, client=default):
+    """
+    Get task types configured for a project.
+
+    Args:
+        project (dict / ID): The project dict or id.
+
+    Returns:
+        list: The task types.
+    """
+    project = normalize_model_parameter(project)
+    return raw.fetch_all(
+        "projects/%s/settings/task-types" % project["id"], client=client
+    )
+
+
+@cache
+def get_project_task_statuses(project, client=default):
+    """
+    Get task statuses configured for a project.
+
+    Args:
+        project (dict / ID): The project dict or id.
+
+    Returns:
+        list: The task statuses.
+    """
+    project = normalize_model_parameter(project)
+    return raw.fetch_all(
+        "projects/%s/settings/task-status" % project["id"], client=client
+    )
+
+
+@cache
+def all_status_automations(project, client=default):
+    """
+    Get status automations configured for a project.
+
+    Args:
+        project (dict / ID): The project dict or id.
+
+    Returns:
+        list: The status automations.
+    """
+    project = normalize_model_parameter(project)
+    return raw.fetch_all(
+        "projects/%s/settings/status-automations" % project["id"],
+        client=client,
+    )
+
+
+def add_status_automation(project, automation, client=default):
+    """
+    Add a status automation to the project.
+
+    Args:
+        project (dict / ID): The project dict or id.
+        automation (dict): The automation payload (e.g. from/to status, task_type, rules).
+    """
+    project = normalize_model_parameter(project)
+    return raw.post(
+        "data/projects/%s/settings/status-automations" % project["id"],
+        automation,
+        client=client,
+    )
+
+
+def remove_status_automation(project, automation, client=default):
+    """
+    Remove a status automation from the project.
+
+    Args:
+        project (dict / ID): The project dict or id.
+        automation (dict / ID): The automation dict or id.
+    """
+    project = normalize_model_parameter(project)
+    automation = normalize_model_parameter(automation)
+    return raw.delete(
+        "data/projects/%s/settings/status-automations/%s"
+        % (project["id"], automation["id"]),
+        client=client,
+    )
+
+
+@cache
+def get_preview_background_files(project, client=default):
+    """
+    Get preview background files configured for a project.
+
+    Args:
+        project (dict / ID): The project dict or id.
+    """
+    project = normalize_model_parameter(project)
+    return raw.fetch_all(
+        "projects/%s/preview-background-files" % project["id"], client=client
+    )
+
+
+def add_preview_background_file(project, background_file, client=default):
+    """
+    Add a preview background file to a project.
+
+    Args:
+        project (dict / ID): The project dict or id.
+        background_file (dict): Payload describing the background file to add.
+    """
+    project = normalize_model_parameter(project)
+    return raw.post(
+        "data/projects/%s/preview-background-files" % project["id"],
+        background_file,
+        client=client,
+    )
+
+
+def remove_preview_background_file(project, background_file, client=default):
+    """
+    Remove a preview background file from a project.
+
+    Args:
+        project (dict / ID): The project dict or id.
+        background_file (dict / ID): The background file dict or id.
+    """
+    project = normalize_model_parameter(project)
+    background_file = normalize_model_parameter(background_file)
+    return raw.delete(
+        "data/projects/%s/preview-background-files/%s"
+        % (project["id"], background_file["id"]),
+        client=client,
+    )
+
+
+@cache
+def get_milestones(project, client=default):
+    """
+    Get production milestones for a project.
+
+    Args:
+        project (dict / ID): The project dict or id.
+    """
+    project = normalize_model_parameter(project)
+    return raw.fetch_all(
+        "projects/%s/milestones" % project["id"], client=client
+    )
+
+
+@cache
+def get_project_quotas(project, client=default):
+    """
+    Get quotas for a project.
+
+    Args:
+        project (dict / ID): The project dict or id.
+    """
+    project = normalize_model_parameter(project)
+    return raw.fetch_all(
+        "projects/%s/quotas" % project["id"], client=client
+    )
+
+
+@cache
+def get_project_person_quotas(project, person, client=default):
+    """
+    Get quotas for a person within a project.
+
+    Args:
+        project (dict / ID): The project dict or id.
+        person (dict / ID): The person dict or id.
+    """
+    project = normalize_model_parameter(project)
+    person = normalize_model_parameter(person)
+    return raw.fetch_all(
+        "projects/%s/person-quotas" % project["id"],
+        params={"person_id": person["id"]},
+        client=client,
+    )
+
+
+@cache
+def get_budgets(project, client=default):
+    """
+    Get budgets for a project.
+
+    Args:
+        project (dict / ID): The project dict or id.
+    """
+    project = normalize_model_parameter(project)
+    return raw.fetch_all("projects/%s/budgets" % project["id"], client=client)
+
+
+def create_budget(
+    project,
+    name,
+    description=None,
+    currency=None,
+    start_date=None,
+    end_date=None,
+    amount=None,
+    client=default,
+):
+    """
+    Create a budget for a project.
+
+    Args:
+        project (dict / ID): The project dict or id.
+        name (str): Budget name. Required.
+        description (str, optional): Human description.
+        currency (str, optional): Currency code (e.g. "USD", "EUR").
+        start_date (str, optional): Start date ISO format (YYYY-MM-DD).
+        end_date (str, optional): End date ISO format (YYYY-MM-DD).
+        amount (number, optional): Overall budget amount.
+    """
+    project = normalize_model_parameter(project)
+    data = {"name": name}
+    if description is not None:
+        data["description"] = description
+    if currency is not None:
+        data["currency"] = currency
+    if start_date is not None:
+        data["start_date"] = start_date
+    if end_date is not None:
+        data["end_date"] = end_date
+    if amount is not None:
+        data["amount"] = amount
+    return raw.post(
+        "data/projects/%s/budgets" % project["id"], data, client=client
+    )
+
+
+@cache
+def get_budget(project, budget, client=default):
+    """
+    Get a specific budget.
+
+    Args:
+        project (dict / ID): The project dict or id.
+        budget (dict / ID): The budget dict or id.
+    """
+    project = normalize_model_parameter(project)
+    budget = normalize_model_parameter(budget)
+    return raw.fetch_one(
+        "projects/%s/budgets" % project["id"], budget["id"], client=client
+    )
+
+
+def update_budget(project, budget, data, client=default):
+    """
+    Update a specific budget.
+
+    Args:
+        project (dict / ID): The project dict or id.
+        budget (dict / ID): The budget dict or id.
+        data (dict): The updated budget payload.
+    """
+    project = normalize_model_parameter(project)
+    budget = normalize_model_parameter(budget)
+    return raw.put(
+        "data/projects/%s/budgets/%s" % (project["id"], budget["id"]),
+        data,
+        client=client,
+    )
+
+
+def remove_budget(project, budget, client=default):
+    """
+    Delete a specific budget.
+
+    Args:
+        project (dict / ID): The project dict or id.
+        budget (dict / ID): The budget dict or id.
+    """
+    project = normalize_model_parameter(project)
+    budget = normalize_model_parameter(budget)
+    return raw.delete(
+        "data/projects/%s/budgets/%s" % (project["id"], budget["id"]),
+        client=client,
+    )
+
+
+@cache
+def get_budget_entries(project, budget, client=default):
+    """
+    Get entries for a specific budget.
+
+    Args:
+        project (dict / ID): The project dict or id.
+        budget (dict / ID): The budget dict or id.
+    """
+    project = normalize_model_parameter(project)
+    budget = normalize_model_parameter(budget)
+    return raw.fetch_all(
+        "projects/%s/budgets/%s/entries" % (project["id"], budget["id"]),
+        client=client,
+    )
+
+
+def create_budget_entry(
+    project,
+    budget,
+    name,
+    date=None,
+    amount=None,
+    quantity=None,
+    unit_price=None,
+    description=None,
+    category=None,
+    client=default,
+):
+    """
+    Create a budget entry for a specific budget.
+
+    Args:
+        project (dict / ID): The project dict or id.
+        budget (dict / ID): The budget dict or id.
+        name (str): Entry name. Required.
+        date (str, optional): Entry date in ISO format (YYYY-MM-DD).
+        amount (number, optional): Total amount for the entry.
+        quantity (number, optional): Quantity used to compute amount.
+        unit_price (number, optional): Unit price used with quantity.
+        description (str, optional): Human description for the entry.
+        category (str, optional): Category label for the entry.
+    """
+    project = normalize_model_parameter(project)
+    budget = normalize_model_parameter(budget)
+    data = {"name": name}
+    if date is not None:
+        data["date"] = date
+    if amount is not None:
+        data["amount"] = amount
+    if quantity is not None:
+        data["quantity"] = quantity
+    if unit_price is not None:
+        data["unit_price"] = unit_price
+    if description is not None:
+        data["description"] = description
+    if category is not None:
+        data["category"] = category
+    return raw.post(
+        "data/projects/%s/budgets/%s/entries"
+        % (project["id"], budget["id"]),
+        data,
+        client=client,
+    )
+
+
+@cache
+def get_budget_entry(project, budget, entry, client=default):
+    """
+    Get a specific budget entry.
+
+    Args:
+        project (dict / ID): The project dict or id.
+        budget (dict / ID): The budget dict or id.
+        entry (dict / ID): The budget entry dict or id.
+    """
+    project = normalize_model_parameter(project)
+    budget = normalize_model_parameter(budget)
+    entry = normalize_model_parameter(entry)
+    return raw.fetch_one(
+        "projects/%s/budgets/%s/entries" % (project["id"], budget["id"]),
+        entry["id"],
+        client=client,
+    )
+
+
+def update_budget_entry(project, budget, entry, data, client=default):
+    """
+    Update a specific budget entry.
+
+    Args:
+        project (dict / ID): The project dict or id.
+        budget (dict / ID): The budget dict or id.
+        entry (dict / ID): The budget entry dict or id.
+        data (dict): The updated budget entry payload.
+    """
+    project = normalize_model_parameter(project)
+    budget = normalize_model_parameter(budget)
+    entry = normalize_model_parameter(entry)
+    return raw.put(
+        "data/projects/%s/budgets/%s/entries/%s"
+        % (project["id"], budget["id"], entry["id"]),
+        data,
+        client=client,
+    )
+
+
+def remove_budget_entry(project, budget, entry, client=default):
+    """
+    Delete a specific budget entry.
+
+    Args:
+        project (dict / ID): The project dict or id.
+        budget (dict / ID): The budget dict or id.
+        entry (dict / ID): The budget entry dict or id.
+    """
+    project = normalize_model_parameter(project)
+    budget = normalize_model_parameter(budget)
+    entry = normalize_model_parameter(entry)
+    return raw.delete(
+        "data/projects/%s/budgets/%s/entries/%s"
+        % (project["id"], budget["id"], entry["id"]),
+        client=client,
+    )
