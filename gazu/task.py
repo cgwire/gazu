@@ -429,15 +429,6 @@ def get_task_by_entity(entity, task_type, name="main", client=default):
     )
 
 
-@deprecated(
-    version="0.9.17",
-    reason="You should use another function: gazu.task.get_task_by_entity, it will be removed in a future version of Gazu (0.10.0).",
-)
-@cache
-def get_task_by_name(entity, task_type, name="main", client=default):
-    return get_task_by_entity(entity, task_type, name=name, client=client)
-
-
 @cache
 def get_task_type(task_type_id, client=default):
     """
