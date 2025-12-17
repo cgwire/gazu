@@ -11,19 +11,15 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          ["2.7", "3.6", "3.7", "3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
+          ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
         include:
-          - version: "2.7"
-            container: python:2.7-buster
-          - version: "3.6"
-            container: python:3.6-bullseye
           - version: "3.7"
             container: python:3.7-bookworm
     container: ${{ matrix.container }}
     steps:
       - uses: actions/checkout@v5
       - name: Set up Python
-        if: ${{ !contains(fromJSON('["2.7", "3.6", "3.7"]'), matrix.version) }}
+        if: ${{ !contains(fromJSON('["3.7"]'), matrix.version) }}
         uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.version }}
