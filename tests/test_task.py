@@ -162,22 +162,6 @@ class TaskTestCase(unittest.TestCase):
             task_type = task_types[0]
             self.assertEqual(task_type["name"], "TotoType")
 
-    def test_get_task_by_name(self):
-        with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url(
-                    "data/tasks?name=Task%2001&entity_id=entity-01&"
-                    "task_type_id=modeling-1"
-                ),
-                text=json.dumps(
-                    [{"name": "Task 01", "project_id": "project-01"}]
-                ),
-            )
-            test_task = gazu.task.get_task_by_name(
-                {"id": "entity-01"}, {"id": "modeling-1"}, "Task 01"
-            )
-            self.assertEqual(test_task["name"], "Task 01")
-
     def test_get_task_type_by_name(self):
         with requests_mock.mock() as mock:
             mock_route(

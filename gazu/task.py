@@ -670,7 +670,7 @@ def new_task(
     if assigner is not None:
         data["assigner_id"] = normalize_model_parameter(assigner)["id"]
 
-    task = get_task_by_name(entity, task_type, name, client=client)
+    task = get_task_by_entity(entity, task_type, name, client=client)
     if task is None:
         task = raw.post("data/tasks", data, client=client)
     return task
