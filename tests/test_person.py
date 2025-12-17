@@ -355,3 +355,141 @@ class PersonTestCase(unittest.TestCase):
                 gazu.person.invite_person(person_id),
                 {"success": True},
             )
+
+    def test_get_time_spents_by_date(self):
+        with requests_mock.mock() as mock:
+            person_id = fakeid("person-1")
+            mock_route(
+                mock,
+                "GET",
+                "data/persons/%s/time-spents/by-date?date=2025-01-15"
+                % person_id,
+                text=[{"id": fakeid("ts-1")}, {"id": fakeid("ts-2")}],
+            )
+            time_spents = gazu.person.get_time_spents_by_date(
+                person_id, "2025-01-15"
+            )
+            self.assertEqual(len(time_spents), 2)
+
+    def test_get_week_time_spents(self):
+        with requests_mock.mock() as mock:
+            person_id = fakeid("person-1")
+            mock_route(
+                mock,
+                "GET",
+                "data/persons/%s/time-spents/week/2025/3" % person_id,
+                text=[{"id": fakeid("ts-1")}],
+            )
+            time_spents = gazu.person.get_week_time_spents(person_id, 2025, 3)
+            self.assertEqual(len(time_spents), 1)
+
+    def test_get_year_time_spents(self):
+        with requests_mock.mock() as mock:
+            person_id = fakeid("person-1")
+            mock_route(
+                mock,
+                "GET",
+                "data/persons/%s/time-spents/year/2025" % person_id,
+                text=[{"id": fakeid("ts-1")}, {"id": fakeid("ts-2")}],
+            )
+            time_spents = gazu.person.get_year_time_spents(person_id, 2025)
+            self.assertEqual(len(time_spents), 2)
+
+    def test_get_day_offs(self):
+        with requests_mock.mock() as mock:
+            person_id = fakeid("person-1")
+            mock_route(
+                mock,
+                "GET",
+                "data/persons/%s/day-offs" % person_id,
+                text=[{"id": fakeid("dayoff-1")}, {"id": fakeid("dayoff-2")}],
+            )
+            day_offs = gazu.person.get_day_offs(person_id)
+            self.assertEqual(len(day_offs), 2)
+
+    def test_get_week_day_offs(self):
+        with requests_mock.mock() as mock:
+            person_id = fakeid("person-1")
+            mock_route(
+                mock,
+                "GET",
+                "data/persons/%s/day-offs/week/2025/3" % person_id,
+                text=[{"id": fakeid("dayoff-1")}],
+            )
+            day_offs = gazu.person.get_week_day_offs(person_id, 2025, 3)
+            self.assertEqual(len(day_offs), 1)
+
+    def test_get_month_day_offs(self):
+        with requests_mock.mock() as mock:
+            person_id = fakeid("person-1")
+            mock_route(
+                mock,
+                "GET",
+                "data/persons/%s/day-offs/month/2025/01" % person_id,
+                text=[{"id": fakeid("dayoff-1")}],
+            )
+            day_offs = gazu.person.get_month_day_offs(person_id, 2025, 1)
+            self.assertEqual(len(day_offs), 1)
+
+    def test_get_year_day_offs(self):
+        with requests_mock.mock() as mock:
+            person_id = fakeid("person-1")
+            mock_route(
+                mock,
+                "GET",
+                "data/persons/%s/day-offs/year/2025" % person_id,
+                text=[{"id": fakeid("dayoff-1")}, {"id": fakeid("dayoff-2")}],
+            )
+            day_offs = gazu.person.get_year_day_offs(person_id, 2025)
+            self.assertEqual(len(day_offs), 2)
+
+    def test_add_person_to_department(self):
+        with requests_mock.mock() as mock:
+            person_id = fakeid("person-1")
+            dept_id = fakeid("department-1")
+            mock_route(
+                mock,
+                "POST",
+                "data/persons/%s/departments" % person_id,
+                text={"id": person_id, "departments": [dept_id]},
+            )
+            result = gazu.person.add_person_to_department(
+                person_id, {"id": dept_id}
+            )
+            self.assertEqual(result["id"], person_id)
+
+    def test_remove_person_from_department(self):
+        with requests_mock.mock() as mock:
+            person_id = fakeid("person-1")
+            dept_id = fakeid("department-1")
+            mock_route(
+                mock,
+                "DELETE",
+                "data/persons/%s/departments/%s" % (person_id, dept_id),
+                status_code=204,
+            )
+            gazu.person.remove_person_from_department(
+                person_id, {"id": dept_id}
+            )
+
+    def test_disable_two_factor_authentication(self):
+        with requests_mock.mock() as mock:
+            person_id = fakeid("person-1")
+            mock_route(
+                mock,
+                "DELETE",
+                "data/persons/%s/two-factor-authentication" % person_id,
+                status_code=204,
+            )
+            gazu.person.disable_two_factor_authentication(person_id)
+
+    def test_clear_person_avatar(self):
+        with requests_mock.mock() as mock:
+            person_id = fakeid("person-1")
+            mock_route(
+                mock,
+                "DELETE",
+                "data/persons/%s/avatar" % person_id,
+                status_code=204,
+            )
+            gazu.person.clear_person_avatar(person_id)

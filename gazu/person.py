@@ -446,3 +446,211 @@ def invite_person(person, client=default):
         "actions/persons/%s/invite" % (person["id"]),
         client=client,
     )
+
+
+@cache
+def get_time_spents_by_date(person, date, client=default):
+    """
+    Get time spents for a person on a specific date.
+
+    Args:
+        person (dict / ID): The person dict or id.
+        date (str): Date in YYYY-MM-DD format.
+
+    Returns:
+        list: Time spents for the date.
+    """
+    person = normalize_model_parameter(person)
+    return raw.get(
+        "data/persons/%s/time-spents/by-date" % person["id"],
+        params={"date": date},
+        client=client,
+    )
+
+
+@cache
+def get_week_time_spents(person, year, week, client=default):
+    """
+    Get time spents for a person for a specific week.
+
+    Args:
+        person (dict / ID): The person dict or id.
+        year (int): Year.
+        week (int): Week number.
+
+    Returns:
+        list: Time spents for the week.
+    """
+    person = normalize_model_parameter(person)
+    return raw.get(
+        "data/persons/%s/time-spents/week/%s/%s" % (person["id"], year, week),
+        client=client,
+    )
+
+
+@cache
+def get_year_time_spents(person, year, client=default):
+    """
+    Get time spents for a person for a specific year.
+
+    Args:
+        person (dict / ID): The person dict or id.
+        year (int): Year.
+
+    Returns:
+        list: Time spents for the year.
+    """
+    person = normalize_model_parameter(person)
+    return raw.get(
+        "data/persons/%s/time-spents/year/%s" % (person["id"], year),
+        client=client,
+    )
+
+
+@cache
+def get_day_offs(person, client=default):
+    """
+    Get day offs for a person.
+
+    Args:
+        person (dict / ID): The person dict or id.
+
+    Returns:
+        list: Day offs for the person.
+    """
+    person = normalize_model_parameter(person)
+    return raw.fetch_all(
+        "persons/%s/day-offs" % person["id"], client=client
+    )
+
+
+@cache
+def get_week_day_offs(person, year, week, client=default):
+    """
+    Get day offs for a person for a specific week.
+
+    Args:
+        person (dict / ID): The person dict or id.
+        year (int): Year.
+        week (int): Week number.
+
+    Returns:
+        list: Day offs for the week.
+    """
+    person = normalize_model_parameter(person)
+    return raw.get(
+        "data/persons/%s/day-offs/week/%s/%s" % (person["id"], year, week),
+        client=client,
+    )
+
+
+@cache
+def get_month_day_offs(person, year, month, client=default):
+    """
+    Get day offs for a person for a specific month.
+
+    Args:
+        person (dict / ID): The person dict or id.
+        year (int): Year.
+        month (int): Month number.
+
+    Returns:
+        list: Day offs for the month.
+    """
+    person = normalize_model_parameter(person)
+    return raw.get(
+        "data/persons/%s/day-offs/month/%s/%s"
+        % (person["id"], year, str(month).zfill(2)),
+        client=client,
+    )
+
+
+@cache
+def get_year_day_offs(person, year, client=default):
+    """
+    Get day offs for a person for a specific year.
+
+    Args:
+        person (dict / ID): The person dict or id.
+        year (int): Year.
+
+    Returns:
+        list: Day offs for the year.
+    """
+    person = normalize_model_parameter(person)
+    return raw.get(
+        "data/persons/%s/day-offs/year/%s" % (person["id"], year),
+        client=client,
+    )
+
+
+def add_person_to_department(person, department, client=default):
+    """
+    Add a person to a department.
+
+    Args:
+        person (dict / ID): The person dict or id.
+        department (dict / ID): The department dict or id.
+
+    Returns:
+        dict: Response information.
+    """
+    person = normalize_model_parameter(person)
+    department = normalize_model_parameter(department)
+    return raw.post(
+        "data/persons/%s/departments" % person["id"],
+        {"department_id": department["id"]},
+        client=client,
+    )
+
+
+def remove_person_from_department(person, department, client=default):
+    """
+    Remove a person from a department.
+
+    Args:
+        person (dict / ID): The person dict or id.
+        department (dict / ID): The department dict or id.
+
+    Returns:
+        Response: Request response object.
+    """
+    person = normalize_model_parameter(person)
+    department = normalize_model_parameter(department)
+    return raw.delete(
+        "data/persons/%s/departments/%s" % (person["id"], department["id"]),
+        client=client,
+    )
+
+
+def disable_two_factor_authentication(person, client=default):
+    """
+    Disable two factor authentication for a person.
+
+    Args:
+        person (dict / ID): The person dict or id.
+
+    Returns:
+        Response: Request response object.
+    """
+    person = normalize_model_parameter(person)
+    return raw.delete(
+        "data/persons/%s/two-factor-authentication" % person["id"],
+        client=client,
+    )
+
+
+def clear_person_avatar(person, client=default):
+    """
+    Clear avatar for a person.
+
+    Args:
+        person (dict / ID): The person dict or id.
+
+    Returns:
+        Response: Request response object.
+    """
+    person = normalize_model_parameter(person)
+    return raw.delete(
+        "data/persons/%s/avatar" % person["id"], client=client
+    )
