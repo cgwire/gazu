@@ -1345,3 +1345,406 @@ def update_comment(comment, client=default):
         dict: Updated comment.
     """
     return raw.put("data/comments/%s" % comment["id"], comment, client=client)
+
+
+@cache
+def all_open_tasks(client=default):
+    """
+    Get all open tasks.
+
+    Returns:
+        list: Open tasks.
+    """
+    return raw.fetch_all("tasks/open", client=client)
+
+
+@cache
+def get_open_tasks_stats(client=default):
+    """
+    Get statistics for open tasks.
+
+    Returns:
+        dict: Open tasks statistics.
+    """
+    return raw.get("data/tasks/open/stats", client=client)
+
+
+@cache
+def all_previews_for_task(task, client=default):
+    """
+    Get all previews for a task.
+
+    Args:
+        task (dict / ID): The task dict or id.
+
+    Returns:
+        list: Previews for the task.
+    """
+    task = normalize_model_parameter(task)
+    return raw.fetch_all("tasks/%s/previews" % task["id"], client=client)
+
+
+@cache
+def all_open_tasks_for_person(person, client=default):
+    """
+    Get all open tasks for a person.
+
+    Args:
+        person (dict / ID): The person dict or id.
+
+    Returns:
+        list: Open tasks for the person.
+    """
+    person = normalize_model_parameter(person)
+    return raw.fetch_all("persons/%s/tasks/open" % person["id"], client=client)
+
+
+@cache
+def all_tasks_for_person_and_type(person, task_type, client=default):
+    """
+    Get all tasks for a person and task type.
+
+    Args:
+        person (dict / ID): The person dict or id.
+        task_type (dict / ID): The task type dict or id.
+
+    Returns:
+        list: Tasks for the person and task type.
+    """
+    person = normalize_model_parameter(person)
+    task_type = normalize_model_parameter(task_type)
+    return raw.fetch_all(
+        "persons/%s/task-types/%s/tasks" % (person["id"], task_type["id"]),
+        client=client,
+    )
+
+
+@cache
+def all_comments_for_project(project, client=default):
+    """
+    Get all comments for a project.
+
+    Args:
+        project (dict / ID): The project dict or id.
+
+    Returns:
+        list: Comments for the project.
+    """
+    project = normalize_model_parameter(project)
+    return raw.fetch_all(
+        "projects/%s/comments" % project["id"], client=client
+    )
+
+
+@cache
+def all_notifications_for_project(project, client=default):
+    """
+    Get all notifications for a project.
+
+    Args:
+        project (dict / ID): The project dict or id.
+
+    Returns:
+        list: Notifications for the project.
+    """
+    project = normalize_model_parameter(project)
+    return raw.fetch_all(
+        "projects/%s/notifications" % project["id"], client=client
+    )
+
+
+@cache
+def all_preview_files_for_project(project, client=default):
+    """
+    Get all preview files for a project.
+
+    Args:
+        project (dict / ID): The project dict or id.
+
+    Returns:
+        list: Preview files for the project.
+    """
+    project = normalize_model_parameter(project)
+    return raw.fetch_all(
+        "projects/%s/preview-files" % project["id"], client=client
+    )
+
+
+@cache
+def all_subscriptions_for_project(project, client=default):
+    """
+    Get all subscriptions for a project.
+
+    Args:
+        project (dict / ID): The project dict or id.
+
+    Returns:
+        list: Subscriptions for the project.
+    """
+    project = normalize_model_parameter(project)
+    return raw.fetch_all(
+        "projects/%s/subscriptions" % project["id"], client=client
+    )
+
+
+@cache
+def get_persons_tasks_dates(project, client=default):
+    """
+    Get tasks dates for persons in a project.
+
+    Args:
+        project (dict / ID): The project dict or id.
+
+    Returns:
+        dict: Tasks dates for persons.
+    """
+    project = normalize_model_parameter(project)
+    return raw.get(
+        "data/projects/%s/persons/tasks/dates" % project["id"], client=client
+    )
+
+
+def remove_tasks_for_type(project, task_type, client=default):
+    """
+    Delete all tasks for a task type in a project.
+
+    Args:
+        project (dict / ID): The project dict or id.
+        task_type (dict / ID): The task type dict or id.
+
+    Returns:
+        Response: Request response object.
+    """
+    project = normalize_model_parameter(project)
+    task_type = normalize_model_parameter(task_type)
+    return raw.delete(
+        "data/projects/%s/task-types/%s/tasks"
+        % (project["id"], task_type["id"]),
+        client=client,
+    )
+
+
+def remove_tasks_batch(tasks, client=default):
+    """
+    Delete multiple tasks in batch.
+
+    Args:
+        tasks (list): List of task dicts or IDs to delete.
+
+    Returns:
+        Response: Request response object.
+    """
+    task_ids = [
+        normalize_model_parameter(task)["id"] for task in tasks
+    ]
+    return raw.post(
+        "data/tasks/delete-batch", {"task_ids": task_ids}, client=client
+    )
+
+
+def assign_tasks_to_person(tasks, person, client=default):
+    """
+    Assign multiple tasks to a person.
+
+    Args:
+        tasks (list): List of task dicts or IDs.
+        person (dict / ID): The person dict or id.
+
+    Returns:
+        dict: Response information.
+    """
+    person = normalize_model_parameter(person)
+    task_ids = [
+        normalize_model_parameter(task)["id"] for task in tasks
+    ]
+    return raw.put(
+        "data/tasks/assign",
+        {"person_id": person["id"], "task_ids": task_ids},
+        client=client,
+    )
+
+
+@cache
+def get_task_time_spent_for_date(task, date, client=default):
+    """
+    Get time spent for a task on a specific date.
+
+    Args:
+        task (dict / ID): The task dict or id.
+        date (str): Date in YYYY-MM-DD format.
+
+    Returns:
+        dict: Time spent information.
+    """
+    task = normalize_model_parameter(task)
+    return raw.get(
+        "data/tasks/%s/time-spent/for-date" % task["id"],
+        params={"date": date},
+        client=client,
+    )
+
+
+def remove_time_spent(time_spent, client=default):
+    """
+    Delete a time spent entry.
+
+    Args:
+        time_spent (dict / ID): The time spent dict or id.
+
+    Returns:
+        Response: Request response object.
+    """
+    time_spent = normalize_model_parameter(time_spent)
+    return raw.delete(
+        "data/time-spents/%s" % time_spent["id"], client=client
+    )
+
+
+def add_preview_to_comment(comment, preview_file, client=default):
+    """
+    Add a preview to a comment.
+
+    Args:
+        comment (dict / ID): The comment dict or id.
+        preview_file (dict / ID): The preview file dict or id.
+
+    Returns:
+        dict: Updated comment.
+    """
+    comment = normalize_model_parameter(comment)
+    preview_file = normalize_model_parameter(preview_file)
+    return raw.post(
+        "data/comments/%s/preview-files" % comment["id"],
+        {"preview_file_id": preview_file["id"]},
+        client=client,
+    )
+
+
+def remove_preview_from_comment(comment, preview_file, client=default):
+    """
+    Remove a preview from a comment.
+
+    Args:
+        comment (dict / ID): The comment dict or id.
+        preview_file (dict / ID): The preview file dict or id.
+
+    Returns:
+        Response: Request response object.
+    """
+    comment = normalize_model_parameter(comment)
+    preview_file = normalize_model_parameter(preview_file)
+    return raw.delete(
+        "data/comments/%s/preview-files/%s"
+        % (comment["id"], preview_file["id"]),
+        client=client,
+    )
+
+
+def create_shot_tasks(shot, task_types, client=default):
+    """
+    Create tasks for a shot.
+
+    Args:
+        shot (dict / ID): The shot dict or id.
+        task_types (list): List of task type dicts or IDs.
+
+    Returns:
+        list: Created tasks.
+    """
+    shot = normalize_model_parameter(shot)
+    task_type_ids = [
+        normalize_model_parameter(task_type)["id"] for task_type in task_types
+    ]
+    return raw.post(
+        "data/shots/%s/tasks" % shot["id"],
+        {"task_type_ids": task_type_ids},
+        client=client,
+    )
+
+
+def create_asset_tasks(asset, task_types, client=default):
+    """
+    Create tasks for an asset.
+
+    Args:
+        asset (dict / ID): The asset dict or id.
+        task_types (list): List of task type dicts or IDs.
+
+    Returns:
+        list: Created tasks.
+    """
+    asset = normalize_model_parameter(asset)
+    task_type_ids = [
+        normalize_model_parameter(task_type)["id"] for task_type in task_types
+    ]
+    return raw.post(
+        "data/assets/%s/tasks" % asset["id"],
+        {"task_type_ids": task_type_ids},
+        client=client,
+    )
+
+
+def create_edit_tasks(edit, task_types, client=default):
+    """
+    Create tasks for an edit.
+
+    Args:
+        edit (dict / ID): The edit dict or id.
+        task_types (list): List of task type dicts or IDs.
+
+    Returns:
+        list: Created tasks.
+    """
+    edit = normalize_model_parameter(edit)
+    task_type_ids = [
+        normalize_model_parameter(task_type)["id"] for task_type in task_types
+    ]
+    return raw.post(
+        "data/edits/%s/tasks" % edit["id"],
+        {"task_type_ids": task_type_ids},
+        client=client,
+    )
+
+
+def create_concept_tasks(concept, task_types, client=default):
+    """
+    Create tasks for a concept.
+
+    Args:
+        concept (dict / ID): The concept dict or id.
+        task_types (list): List of task type dicts or IDs.
+
+    Returns:
+        list: Created tasks.
+    """
+    concept = normalize_model_parameter(concept)
+    task_type_ids = [
+        normalize_model_parameter(task_type)["id"] for task_type in task_types
+    ]
+    return raw.post(
+        "data/concepts/%s/tasks" % concept["id"],
+        {"task_type_ids": task_type_ids},
+        client=client,
+    )
+
+
+def create_entity_tasks(entity, task_types, client=default):
+    """
+    Create tasks for an entity.
+
+    Args:
+        entity (dict / ID): The entity dict or id.
+        task_types (list): List of task type dicts or IDs.
+
+    Returns:
+        list: Created tasks.
+    """
+    entity = normalize_model_parameter(entity)
+    task_type_ids = [
+        normalize_model_parameter(task_type)["id"] for task_type in task_types
+    ]
+    return raw.post(
+        "data/entities/%s/tasks" % entity["id"],
+        {"task_type_ids": task_type_ids},
+        client=client,
+    )
