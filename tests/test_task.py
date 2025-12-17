@@ -1092,3 +1092,276 @@ class TaskTestCase(unittest.TestCase):
             )
             self.assertEqual(comment["id"], fakeid("comment-1"))
             self.assertEqual(comment["text"], "test-comment")
+
+    def test_all_open_tasks(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/tasks/open",
+                text=[{"id": fakeid("task-1")}, {"id": fakeid("task-2")}],
+            )
+            tasks = gazu.task.all_open_tasks()
+            self.assertEqual(len(tasks), 2)
+
+    def test_get_open_tasks_stats(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/tasks/open/stats",
+                text={"total": 10, "by_status": {}},
+            )
+            stats = gazu.task.get_open_tasks_stats()
+            self.assertEqual(stats["total"], 10)
+
+    def test_all_previews_for_task(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/tasks/%s/previews" % fakeid("task-1"),
+                text=[{"id": fakeid("preview-1")}, {"id": fakeid("preview-2")}],
+            )
+            previews = gazu.task.all_previews_for_task(fakeid("task-1"))
+            self.assertEqual(len(previews), 2)
+
+    def test_all_open_tasks_for_person(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/persons/%s/tasks/open" % fakeid("person-1"),
+                text=[{"id": fakeid("task-1")}],
+            )
+            tasks = gazu.task.all_open_tasks_for_person(fakeid("person-1"))
+            self.assertEqual(len(tasks), 1)
+
+    def test_all_tasks_for_person_and_type(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/persons/%s/task-types/%s/tasks"
+                % (fakeid("person-1"), fakeid("task-type-1")),
+                text=[{"id": fakeid("task-1")}],
+            )
+            tasks = gazu.task.all_tasks_for_person_and_type(
+                fakeid("person-1"), fakeid("task-type-1")
+            )
+            self.assertEqual(len(tasks), 1)
+
+    def test_all_comments_for_project(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/projects/%s/comments" % fakeid("project-1"),
+                text=[{"id": fakeid("comment-1")}, {"id": fakeid("comment-2")}],
+            )
+            comments = gazu.task.all_comments_for_project(fakeid("project-1"))
+            self.assertEqual(len(comments), 2)
+
+    def test_all_notifications_for_project(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/projects/%s/notifications" % fakeid("project-1"),
+                text=[{"id": fakeid("notif-1")}],
+            )
+            notifications = gazu.task.all_notifications_for_project(
+                fakeid("project-1")
+            )
+            self.assertEqual(len(notifications), 1)
+
+    def test_all_preview_files_for_project(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/projects/%s/preview-files" % fakeid("project-1"),
+                text=[{"id": fakeid("preview-1")}],
+            )
+            previews = gazu.task.all_preview_files_for_project(
+                fakeid("project-1")
+            )
+            self.assertEqual(len(previews), 1)
+
+    def test_all_subscriptions_for_project(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/projects/%s/subscriptions" % fakeid("project-1"),
+                text=[{"id": fakeid("sub-1")}],
+            )
+            subscriptions = gazu.task.all_subscriptions_for_project(
+                fakeid("project-1")
+            )
+            self.assertEqual(len(subscriptions), 1)
+
+    def test_get_persons_tasks_dates(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/projects/%s/persons/tasks/dates" % fakeid("project-1"),
+                text={"person-1": ["2025-01-15"]},
+            )
+            dates = gazu.task.get_persons_tasks_dates(fakeid("project-1"))
+            self.assertIn("person-1", dates)
+
+    def test_remove_tasks_for_type(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "DELETE",
+                "data/projects/%s/task-types/%s/tasks"
+                % (fakeid("project-1"), fakeid("task-type-1")),
+                status_code=204,
+            )
+            gazu.task.remove_tasks_for_type(
+                fakeid("project-1"), fakeid("task-type-1")
+            )
+
+    def test_remove_tasks_batch(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "POST",
+                "data/tasks/delete-batch",
+                text={"deleted": 2},
+            )
+            result = gazu.task.remove_tasks_batch(
+                [fakeid("task-1"), fakeid("task-2")]
+            )
+            self.assertEqual(result["deleted"], 2)
+
+    def test_assign_tasks_to_person(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "PUT",
+                "data/tasks/assign",
+                text={"assigned": 2},
+            )
+            result = gazu.task.assign_tasks_to_person(
+                [fakeid("task-1"), fakeid("task-2")], fakeid("person-1")
+            )
+            self.assertEqual(result["assigned"], 2)
+
+    def test_get_task_time_spent_for_date(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/tasks/%s/time-spent/for-date?date=2025-01-15"
+                % fakeid("task-1"),
+                text={"duration": 3600},
+            )
+            time_spent = gazu.task.get_task_time_spent_for_date(
+                fakeid("task-1"), "2025-01-15"
+            )
+            self.assertEqual(time_spent["duration"], 3600)
+
+    def test_remove_time_spent(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "DELETE",
+                "data/time-spents/%s" % fakeid("time-spent-1"),
+                status_code=204,
+            )
+            gazu.task.remove_time_spent(fakeid("time-spent-1"))
+
+    def test_add_preview_to_comment(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "POST",
+                "data/comments/%s/preview-files" % fakeid("comment-1"),
+                text={"id": fakeid("comment-1"), "preview_files": [fakeid("preview-1")]},
+            )
+            result = gazu.task.add_preview_to_comment(
+                fakeid("comment-1"), fakeid("preview-1")
+            )
+            self.assertEqual(result["id"], fakeid("comment-1"))
+
+    def test_remove_preview_from_comment(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "DELETE",
+                "data/comments/%s/preview-files/%s"
+                % (fakeid("comment-1"), fakeid("preview-1")),
+                status_code=204,
+            )
+            gazu.task.remove_preview_from_comment(
+                fakeid("comment-1"), fakeid("preview-1")
+            )
+
+    def test_create_shot_tasks(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "POST",
+                "data/shots/%s/tasks" % fakeid("shot-1"),
+                text=[{"id": fakeid("task-1")}, {"id": fakeid("task-2")}],
+            )
+            tasks = gazu.task.create_shot_tasks(
+                fakeid("shot-1"), [fakeid("task-type-1"), fakeid("task-type-2")]
+            )
+            self.assertEqual(len(tasks), 2)
+
+    def test_create_asset_tasks(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "POST",
+                "data/assets/%s/tasks" % fakeid("asset-1"),
+                text=[{"id": fakeid("task-1")}],
+            )
+            tasks = gazu.task.create_asset_tasks(
+                fakeid("asset-1"), [fakeid("task-type-1")]
+            )
+            self.assertEqual(len(tasks), 1)
+
+    def test_create_edit_tasks(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "POST",
+                "data/edits/%s/tasks" % fakeid("edit-1"),
+                text=[{"id": fakeid("task-1")}],
+            )
+            tasks = gazu.task.create_edit_tasks(
+                fakeid("edit-1"), [fakeid("task-type-1")]
+            )
+            self.assertEqual(len(tasks), 1)
+
+    def test_create_concept_tasks(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "POST",
+                "data/concepts/%s/tasks" % fakeid("concept-1"),
+                text=[{"id": fakeid("task-1")}],
+            )
+            tasks = gazu.task.create_concept_tasks(
+                fakeid("concept-1"), [fakeid("task-type-1")]
+            )
+            self.assertEqual(len(tasks), 1)
+
+    def test_create_entity_tasks(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "POST",
+                "data/entities/%s/tasks" % fakeid("entity-1"),
+                text=[{"id": fakeid("task-1")}],
+            )
+            tasks = gazu.task.create_entity_tasks(
+                fakeid("entity-1"), [fakeid("task-type-1")]
+            )
+            self.assertEqual(len(tasks), 1)

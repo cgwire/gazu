@@ -114,6 +114,18 @@ def new_entity_type(name, client=default):
     return raw.create("entity-types", data, client=client)
 
 
+def remove_entity_type(entity_type, client=default):
+    """
+    Remove given entity type from database.
+
+    Args:
+        entity_type (dict / str): Entity type to remove.
+    """
+    entity_type = normalize_model_parameter(entity_type)
+    path = "data/entity-types/%s" % entity_type["id"]
+    return raw.delete(path, client=client)
+
+
 def remove_entity(entity, force=False, client=default):
     """
     Remove given entity from database.
