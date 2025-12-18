@@ -1,18 +1,14 @@
-import sys
-
-if sys.version_info[0] == 2:
-    raise ImportError(
-        "The events part of Gazu is not available for Python 2.7"
-    )
-from .exception import AuthFailedException
-from .client import default_client, get_event_host
-from gazu.client import make_auth_header
-from engineio.base_client import signal_handler
 import socketio
 import os
 import inspect
 import signal
 import socketio
+
+from engineio.base_client import signal_handler
+from .exception import AuthFailedException
+
+from .client import default_client, get_event_host, make_auth_header
+
 
 if os.name == "nt":
     from win32api import SetConsoleCtrlHandler
