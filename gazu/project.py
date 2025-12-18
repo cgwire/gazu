@@ -543,7 +543,7 @@ def get_preview_background_files(project, client=default):
     """
     project = normalize_model_parameter(project)
     return raw.fetch_all(
-        "projects/%s/preview-background-files" % project["id"], client=client
+        "projects/%s/settings/preview-background-files" % project["id"], client=client
     )
 
 
@@ -553,11 +553,15 @@ def add_preview_background_file(project, background_file, client=default):
 
     Args:
         project (dict / ID): The project dict or id.
-        background_file (dict): Payload describing the background file to add.
+        background_file (dict): A dict with a key of "preview_background_file_id"
+            and value of the ID of the preview background to add.
+    
+    Returns:
+        (dict): The project dictionary.
     """
     project = normalize_model_parameter(project)
     return raw.post(
-        "data/projects/%s/preview-background-files" % project["id"],
+        "data/projects/%s/settings/preview-background-files" % project["id"],
         background_file,
         client=client,
     )
@@ -574,7 +578,7 @@ def remove_preview_background_file(project, background_file, client=default):
     project = normalize_model_parameter(project)
     background_file = normalize_model_parameter(background_file)
     return raw.delete(
-        "data/projects/%s/preview-background-files/%s"
+        "data/projects/%s/settings/preview-background-files/%s"
         % (project["id"], background_file["id"]),
         client=client,
     )
