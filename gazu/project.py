@@ -551,6 +551,9 @@ def add_preview_background_file(project, background_file, client=default):
     """
     Add a preview background file to a project.
 
+    The background_file payload must be a dict in the form:
+        {"preview_background_file_id": <background file id>}
+
     Args:
         project (dict / ID): The project dict or id.
         background_file (dict): A dict with a key of "preview_background_file_id"
