@@ -1,14 +1,17 @@
+from __future__ import annotations
+
 import copy
 import datetime
 import json
 
 from functools import wraps
+from typing import Any, Callable, Literal
 
 cache_settings = {"enabled": False}
 cached_functions = []
 
 
-def enable():
+def enable() -> Literal[True]:
     """
     Enable caching on all decorated functions.
     """
@@ -16,7 +19,7 @@ def enable():
     return cache_settings["enabled"]
 
 
-def disable():
+def disable() -> Literal[False]:
     """
     Disable caching on all decorated functions.
     """
@@ -24,7 +27,7 @@ def disable():
     return cache_settings["enabled"]
 
 
-def clear_all():
+def clear_all() -> None:
     """
     Clear all cached functions.
     """
@@ -32,7 +35,7 @@ def clear_all():
         function.clear_cache()
 
 
-def remove_oldest_entry(memo, maxsize):
+def remove_oldest_entry(memo: dict, maxsize: int) -> Any:
     """
     Remove the oldest cache entry if there is more value stored than allowed.
 
@@ -54,7 +57,7 @@ def remove_oldest_entry(memo, maxsize):
     return oldest_entry
 
 
-def get_cache_key(args, kwargs):
+def get_cache_key(args: Any, kwargs: Any) -> str:
     """
     Serialize arguments to get a cache key. It will be used to store function
     results.
@@ -75,7 +78,9 @@ def get_cache_key(args, kwargs):
         return json.dumps([args, kwargscopy])
 
 
-def insert_value(function, cache_store, args, kwargs):
+def insert_value(
+    function: Callable, cache_store: dict, args: Any, kwargs: Any
+) -> Any:
     """
     Serialize function call arguments and store function result in given cache
     store.
@@ -97,7 +102,7 @@ def insert_value(function, cache_store, args, kwargs):
     return get_value(cache_store, key)
 
 
-def get_value(cache_store, key):
+def get_value(cache_store: dict, key: str) -> Any:
     """
     It generates a deep copy of the requested value. It's needed because if a
     pointer is returned, the value can be changed. Which leads to a modified
@@ -110,7 +115,7 @@ def get_value(cache_store, key):
     return copy.deepcopy(value)
 
 
-def is_cache_enabled(state):
+def is_cache_enabled(state: dict) -> bool:
     """
     Args:
         state: The state describing the cache state.
@@ -121,7 +126,7 @@ def is_cache_enabled(state):
     return cache_settings["enabled"] and state["enabled"]
 
 
-def is_cache_expired(memo, state, key):
+def is_cache_expired(memo: dict, state: dict, key: str) -> bool:
     """
     Check if cache is expired (outdated) for given wrapper state and cache key.
 
@@ -140,7 +145,9 @@ def is_cache_expired(memo, state, key):
     return expire > 0 and date_to_check < datetime.datetime.now()
 
 
-def cache(function, maxsize=300, expire=120):
+def cache(
+    function: Callable, maxsize: int = 300, expire: int = 120
+) -> Callable:
     """
     Decorator that generate cache wrapper and that adds cache feature to
     target function. A max cache size and and expiration time (in seconds) can
@@ -156,10 +163,10 @@ def cache(function, maxsize=300, expire=120):
 
     statistics = {"hits": 0, "misses": 0, "expired_hits": 0}
 
-    def clear_cache():
+    def clear_cache() -> None:
         cache_store.clear()
 
-    def get_cache_infos():
+    def get_cache_infos() -> dict:
         size = {"current_size": len(cache_store)}
         infos = {}
         for d in [state, statistics, size]:
@@ -167,20 +174,20 @@ def cache(function, maxsize=300, expire=120):
 
         return infos
 
-    def set_expire(new_expire):
+    def set_expire(new_expire: int) -> None:
         state["expire"] = new_expire
 
-    def set_max_size(maxsize):
+    def set_max_size(maxsize: int) -> None:
         state["maxsize"] = maxsize
 
-    def enable_cache():
+    def enable_cache() -> None:
         state["enabled"] = True
 
-    def disable_cache():
+    def disable_cache() -> None:
         state["enabled"] = False
 
     @wraps(function)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
         if is_cache_enabled(state):
             key = get_cache_key(args, kwargs)
 
