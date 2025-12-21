@@ -1,16 +1,26 @@
+from __future__ import annotations
+
 from . import client as raw
+
+from .client import KitsuClient
 
 from .helpers import normalize_model_parameter
 
 default = raw.default_client
 
 
-def update_shot_casting(project, shot, casting, client=default):
+def update_shot_casting(
+    project: str | dict,
+    shot: str | dict,
+    casting: dict,
+    client: KitsuClient = default,
+) -> dict:
     """
     Change casting of given shot with given casting (list of asset ids displayed
     into the shot).
 
     Args:
+        project (str / dict): The project dictionary or ID.
         shot (str / dict): The shot dict or the shot ID.
         casting (dict): The casting description.
         Ex: `casting = [{"asset_id": "asset-1", "nb_occurences": 3}]`
@@ -24,12 +34,18 @@ def update_shot_casting(project, shot, casting, client=default):
     return raw.put(path, casting, client=client)
 
 
-def update_asset_casting(project, asset, casting, client=default):
+def update_asset_casting(
+    project: str | dict,
+    asset: str | dict,
+    casting: dict,
+    client: KitsuClient = default,
+) -> dict:
     """
     Change casting of given asset with given casting (list of asset ids
     displayed into the asset).
 
     Args:
+        project (str / dict): The project dict or asset ID.
         asset (str / dict): The asset dict or the asset ID.
         casting (dict): The casting description.
 
@@ -45,16 +61,21 @@ def update_asset_casting(project, asset, casting, client=default):
     return raw.put(path, casting, client=client)
 
 
-def update_episode_casting(project, episode, casting, client=default):
+def update_episode_casting(
+    project: str | dict,
+    episode: str | dict,
+    casting: dict,
+    client: KitsuClient = default,
+) -> dict:
     """
     Change casting of given episode with given casting (list of asset ids displayed
     into the episode).
 
     Args:
+        project (str / dict): The project dict or ID.
         episode (str / dict): The episode dict or the episode ID.
         casting (dict): The casting description.
-        Ex: `casting = [{"asset_id": "asset-1", "nb_occurences": 3}]`
-
+            e.g: `casting = [{"asset_id": "asset-1", "nb_occurences": 3}]`
     Returns:
         dict: Related episode.
     """
@@ -67,7 +88,9 @@ def update_episode_casting(project, episode, casting, client=default):
     return raw.put(path, casting, client=client)
 
 
-def get_asset_type_casting(project, asset_type, client=default):
+def get_asset_type_casting(
+    project: str | dict, asset_type: str | dict, client: KitsuClient = default
+) -> dict:
     """
     Return casting for given asset_type.
 
@@ -88,7 +111,9 @@ def get_asset_type_casting(project, asset_type, client=default):
     return raw.get(path, client=client)
 
 
-def get_sequence_casting(sequence, client=default):
+def get_sequence_casting(
+    sequence: dict, client: KitsuClient = default
+) -> dict:
     """
     Return casting for given sequence.
 
@@ -105,7 +130,7 @@ def get_sequence_casting(sequence, client=default):
     return raw.get(path, client=client)
 
 
-def get_shot_casting(shot, client=default):
+def get_shot_casting(shot: dict, client: KitsuClient = default) -> dict:
     """
     Return casting for given shot.
 
@@ -122,10 +147,11 @@ def get_shot_casting(shot, client=default):
     return raw.get(path, client=client)
 
 
-def get_asset_casting(asset, client=default):
+def get_asset_casting(asset: dict, client: KitsuClient = default) -> dict:
     """
     Return casting for given asset.
     `[{"asset_id": "asset-1", "nb_occurences": 3}]}`
+
     Args:
         asset (dict): The asset dict
 
@@ -139,10 +165,11 @@ def get_asset_casting(asset, client=default):
     return raw.get(path, client=client)
 
 
-def get_episode_casting(episode, client=default):
+def get_episode_casting(episode: dict, client: KitsuClient = default) -> dict:
     """
     Return casting for given episode.
     `[{"episode_id": "episode-1", "nb_occurences": 3}]}`
+
     Args:
         episode (dict): The episode dict
 
@@ -156,11 +183,14 @@ def get_episode_casting(episode, client=default):
     return raw.get(path, client=client)
 
 
-def get_asset_cast_in(asset, client=default):
+def get_asset_cast_in(
+    asset: str | dict, client: KitsuClient = default
+) -> dict:
     """
     Return entity list where given asset is casted.
+
     Args:
-        asset (dict): The asset dict
+        asset (dict): The asset dict or ID.
 
     Returns:
         dict: Entity list where given asset is casted.
@@ -171,11 +201,14 @@ def get_asset_cast_in(asset, client=default):
 
 
 def all_entity_links_for_project(
-    project, page=None, limit=None, client=default
-):
+    project: str | dict,
+    page: int | None = None,
+    limit: int | None = None,
+    client: KitsuClient = default,
+) -> dict:
     """
     Args:
-        project (dict): The project
+        project (dict | str): The project dict or ID.
 
     Returns:
         dict: Entity links for given project.
