@@ -1,4 +1,4 @@
-def sort_by_name(dicts):
+def sort_by_name(dicts: list[dict]) -> list[dict]:
     """
     Sorting of a list of dicts. The sorting is based on the name field.
 
