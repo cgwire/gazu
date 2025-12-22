@@ -548,7 +548,7 @@ class ProjectTestCase(unittest.TestCase):
     def test_preview_background_files(self):
         with requests_mock.mock() as mock:
             project_id = fakeid("project-1")
-            base_path = "data/projects/%s/preview-background-files" % project_id
+            base_path = "data/projects/%s/settings/preview-background-files" % project_id
 
             mock_route(
                 mock,
