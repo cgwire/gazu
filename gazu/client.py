@@ -1,8 +1,11 @@
+from __future__ import annotations
+
 import sys
 import functools
 import json
 import shutil
 import os
+from typing import Any, Callable, cast
 
 from .encoder import CustomJSONEncoder
 
@@ -33,15 +36,15 @@ DEBUG = os.getenv("GAZU_DEBUG", "false").lower() == "true"
 class KitsuClient(object):
     def __init__(
         self,
-        host,
-        ssl_verify=True,
-        cert=None,
-        use_refresh_token=True,
-        callback_not_authenticated=None,
-        tokens={"access_token": None, "refresh_token": None},
-        access_token=None,
-        refresh_token=None,
-    ):
+        host: str,
+        ssl_verify: bool = True,
+        cert: str | None = None,
+        use_refresh_token: bool = True,
+        callback_not_authenticated: Callable | None = None,
+        tokens: dict = {"access_token": None, "refresh_token": None},
+        access_token: str | None = None,
+        refresh_token: str | None = None,
+    ) -> None:
         self.tokens = tokens
         if access_token:
             self.access_token = access_token
@@ -57,22 +60,22 @@ class KitsuClient(object):
         self.event_host = host
 
     @property
-    def access_token(self):
+    def access_token(self) -> str | None:
         return self.tokens.get("access_token", None)
 
     @access_token.setter
-    def access_token(self, token):
+    def access_token(self, token: str) -> None:
         self.tokens["access_token"] = token
 
     @property
-    def refresh_token(self):
+    def refresh_token(self) -> str | None:
         return self.tokens.get("refresh_token", None)
 
     @refresh_token.setter
-    def refresh_token(self, token):
+    def refresh_token(self, token: str) -> None:
         self.tokens["refresh_token"] = token
 
-    def refresh_access_token(self):
+    def refresh_access_token(self) -> dict[str, str]:
         """
         Refresh access tokens for this client.
 
@@ -94,7 +97,7 @@ class KitsuClient(object):
 
         return tokens
 
-    def make_auth_header(self):
+    def make_auth_header(self) -> dict[str, str]:
         """
         Make headers required to authenticate.
 
@@ -110,13 +113,13 @@ class KitsuClient(object):
 
 
 def create_client(
-    host,
-    ssl_verify=True,
-    cert=None,
-    use_refresh_token=False,
-    callback_not_authenticated=None,
-    **kwargs
-):
+    host: str,
+    ssl_verify: bool = True,
+    cert: str | None = None,
+    use_refresh_token: bool = False,
+    callback_not_authenticated: Callable | None = None,
+    **kwargs: Any,
+) -> KitsuClient:
     """
     Create a client with given parameters.
 
@@ -136,11 +139,14 @@ def create_client(
         cert=cert,
         use_refresh_token=use_refresh_token,
         callback_not_authenticated=callback_not_authenticated,
-        **kwargs
+        **kwargs,
     )
 
 
+# For type-checking, assume that the default client has been created (we're not
+# in setup mode). We do this by using typing.cast() to spoof the type.
 default_client = None
+default_client = cast(KitsuClient, default_client)
 try:
     import requests
 
@@ -154,7 +160,7 @@ except Exception:
     print("Warning, running in setup mode!")
 
 
-def host_is_up(client=default_client):
+def host_is_up(client: KitsuClient = default_client) -> bool:
     """
     Check if the host is up.
 
@@ -171,7 +177,7 @@ def host_is_up(client=default_client):
     return response.status_code == 200
 
 
-def host_is_valid(client=default_client):
+def host_is_valid(client: KitsuClient = default_client) -> bool:
     """
     Check if the host is valid by simulating a fake login.
 
@@ -185,13 +191,15 @@ def host_is_valid(client=default_client):
         return False
     try:
         post("auth/login", {"email": ""})
+        return True
     except Exception as exc:
         return isinstance(exc, (NotAuthenticatedException, ParameterException))
 
 
-def get_host(client=default_client):
+def get_host(client: KitsuClient = default_client) -> str:
     """
-    Get client.host.
+    Get the API URL for the Kitsu host the given client is connected to, e.g
+        "http://kitsu.instance.com/api"
 
     Args:
         client (KitsuClient): The client to use for the request.
@@ -202,19 +210,24 @@ def get_host(client=default_client):
     return client.host
 
 
-def get_api_url_from_host(client=default_client):
+def get_api_url_from_host(client: KitsuClient = default_client) -> str:
     """
-    Get the API url from the host.
+    Get the base URL to the Kitsu instance the client is connected to, without
+    the `/api` suffix, e.g
+
+    This can be used to build URL paths to particular records in the Kitsu
+    web interface.
 
     Args:
         client (KitsuClient): The client to use for the request.
+
     Returns:
-        Zou url, retrieved from host.
+        str: The base Kitsu URL the client is connected to.
     """
     return client.host[:-4]
 
 
-def set_host(new_host, client=default_client):
+def set_host(new_host: str, client: KitsuClient = default_client) -> str:
     """
     Set the host for the client.
 
@@ -229,7 +242,7 @@ def set_host(new_host, client=default_client):
     return client.host
 
 
-def get_event_host(client=default_client):
+def get_event_host(client: KitsuClient = default_client) -> str:
     """
     Get the host on which listening for events.
 
@@ -242,7 +255,7 @@ def get_event_host(client=default_client):
     return client.event_host or client.host
 
 
-def set_event_host(new_host, client=default_client):
+def set_event_host(new_host: str, client: KitsuClient = default_client) -> str:
     """
     Set the host on which listening for events.
 
@@ -257,7 +270,9 @@ def set_event_host(new_host, client=default_client):
     return client.event_host
 
 
-def set_tokens(new_tokens, client=default_client):
+def set_tokens(
+    new_tokens: dict[str, str], client: KitsuClient = default_client
+) -> dict[str, str]:
     """
     Store authentication token to reuse them for all requests.
 
@@ -272,7 +287,7 @@ def set_tokens(new_tokens, client=default_client):
     return client.tokens
 
 
-def make_auth_header(client=default_client):
+def make_auth_header(client: KitsuClient = default_client) -> dict[str, str]:
     """
     Make headers required to authenticate.
 
@@ -285,7 +300,7 @@ def make_auth_header(client=default_client):
     return client.make_auth_header()
 
 
-def url_path_join(*items):
+def url_path_join(*items: str) -> str:
     """
     Make it easier to build url path by joining every arguments with a '/'
     character.
@@ -299,7 +314,7 @@ def url_path_join(*items):
     return "/".join([item.lstrip("/").rstrip("/") for item in items])
 
 
-def get_full_url(path, client=default_client):
+def get_full_url(path: str, client: KitsuClient = default_client) -> str:
     """
     Join host url with given path.
 
@@ -312,7 +327,7 @@ def get_full_url(path, client=default_client):
     return url_path_join(get_host(client), path)
 
 
-def build_path_with_params(path, params):
+def build_path_with_params(path: str, params: dict) -> str:
     """
     Add params to a path using urllib encoding.
 
@@ -321,7 +336,7 @@ def build_path_with_params(path, params):
         params (dict): The parameters to add as a dict
 
     Returns:
-        str: the builded path
+        str: the built path
     """
     if not params:
         return path
@@ -336,7 +351,12 @@ def build_path_with_params(path, params):
     return path
 
 
-def get(path, json_response=True, params=None, client=default_client):
+def get(
+    path: str,
+    json_response: bool = True,
+    params: dict | None = None,
+    client: KitsuClient = default_client,
+) -> Any:
     """
     Run a get request toward given path for configured host.
 
@@ -366,7 +386,7 @@ def get(path, json_response=True, params=None, client=default_client):
         return response.text
 
 
-def post(path, data, client=default_client):
+def post(path: str, data: dict, client: KitsuClient = default_client) -> Any:
     """
     Run a post request toward given path for configured host.
 
@@ -398,7 +418,7 @@ def post(path, data, client=default_client):
     return result
 
 
-def put(path, data, client=default_client):
+def put(path: str, data: dict, client: KitsuClient = default_client) -> Any:
     """
     Run a put request toward given path for configured host.
 
@@ -424,7 +444,9 @@ def put(path, data, client=default_client):
     return response.json()
 
 
-def delete(path, params=None, client=default_client):
+def delete(
+    path: str, params: dict | None = None, client: KitsuClient = default_client
+) -> str:
     """
     Run a delete request toward given path for configured host.
 
@@ -450,15 +472,16 @@ def delete(path, params=None, client=default_client):
 
 
 def get_message_from_response(
-    response, default_message="No additional information"
-):
+    response: requests.Response,
+    default_message: str = "No additional information",
+) -> str:
     """
     A utility function that handles Zou's inconsistent message keys.
     For a given request, checks if any error messages or regular messages were given and returns their value.
     If no messages are found, returns a default message.
 
     Args:
-        response: requests.Request - A response to check.
+        response: requests.Response - A response to check.
         default_message: str - An optional default value to revert to if no message is detected.
 
     Returns:
@@ -476,18 +499,21 @@ def get_message_from_response(
     return message
 
 
-def check_status(request, path, client=None):
+def check_status(
+    request: requests.Response, path: str, client: KitsuClient = None
+) -> tuple[int, bool]:
     """
     Raise an exception related to status code, if the status code does not
     match a success code. Print error message when it's relevant.
 
     Args:
-        request (Request): The request to validate.
+        request (requests.Response): The request to validate.
         path (str): The path of the request.
         client (KitsuClient): The client to use for the request.
 
     Returns:
-        int: Status code
+        tuple[int, bool]: The status code, and whether or not to retry the
+            request.
 
     Raises:
         ParameterException: when 400 response occurs
@@ -549,8 +575,12 @@ def check_status(request, path, client=None):
 
 
 def fetch_all(
-    path, params=None, client=default_client, paginated=False, limit=None
-):
+    path: str,
+    params: dict | None = None,
+    client: KitsuClient = default_client,
+    paginated: bool = False,
+    limit: int | None = None,
+) -> list[dict]:
     """
     Args:
         path (str): The path for which we want to retrieve all entries.
@@ -595,7 +625,9 @@ def fetch_all(
     return results
 
 
-def fetch_first(path, params=None, client=default_client):
+def fetch_first(
+    path: str, params: dict | None = None, client: KitsuClient = default_client
+) -> dict | None:
     """
     Args:
         path (str): The path for which we want to retrieve the first entry.
@@ -612,7 +644,12 @@ def fetch_first(path, params=None, client=default_client):
         return None
 
 
-def fetch_one(model_name, id, params=None, client=default_client):
+def fetch_one(
+    model_name: str,
+    id: str,
+    params: dict | None = None,
+    client: KitsuClient = default_client,
+) -> dict:
     """
     Function dedicated at targeting routes that returns a single model
     instance.
@@ -631,13 +668,15 @@ def fetch_one(model_name, id, params=None, client=default_client):
     )
 
 
-def create(model_name, data, client=default_client):
+def create(
+    model_name: str, data: dict, client: KitsuClient = default_client
+) -> dict:
     """
     Create an entry for given model and data.
 
     Args:
         model_name (str): The model type involved.
-        data (str): The data to use for creation.
+        data (dict): The data to use for creation.
         client (KitsuClient): The client to use for the request.
 
     Returns:
@@ -646,7 +685,12 @@ def create(model_name, data, client=default_client):
     return post(url_path_join("data", model_name), data, client=client)
 
 
-def update(model_name, model_id, data, client=default_client):
+def update(
+    model_name: str,
+    model_id: str,
+    data: dict,
+    client: KitsuClient = default_client,
+) -> dict:
     """
     Update an entry for given model, id and data.
 
@@ -665,13 +709,13 @@ def update(model_name, model_id, data, client=default_client):
 
 
 def upload(
-    path,
-    file_path=None,
-    data={},
-    extra_files=[],
-    files=None,
-    client=default_client,
-):
+    path: str,
+    file_path: str = None,
+    data: dict = {},
+    extra_files: list = [],
+    files: dict = None,
+    client: KitsuClient = default_client,
+) -> Any:
     """
     Upload file located at *file_path* to given url *path*.
 
@@ -711,7 +755,7 @@ def upload(
     return result
 
 
-def _build_file_dict(file_path, extra_files):
+def _build_file_dict(file_path: str, extra_files: list[str]) -> dict:
     """
     Build a dictionary of files to upload.
 
@@ -732,7 +776,12 @@ def _build_file_dict(file_path, extra_files):
     return files
 
 
-def download(path, file_path, params=None, client=default_client):
+def download(
+    path: str,
+    file_path: str,
+    params: dict | None = None,
+    client: KitsuClient = default_client,
+) -> requests.Response:
     """
     Download file located at *file_path* to given url *path*.
 
@@ -757,7 +806,9 @@ def download(path, file_path, params=None, client=default_client):
         return response
 
 
-def get_file_data_from_url(url, full=False, client=default_client):
+def get_file_data_from_url(
+    url: str, full: bool = False, client: KitsuClient = default_client
+) -> bytes:
     """
     Return data found at given url.
 
@@ -782,7 +833,9 @@ def get_file_data_from_url(url, full=False, client=default_client):
     return response.content
 
 
-def import_data(model_name, data, client=default_client):
+def import_data(
+    model_name: str, data: dict, client: KitsuClient = default_client
+) -> dict:
     """
     Import data for given model.
 
@@ -797,7 +850,7 @@ def import_data(model_name, data, client=default_client):
     return post("/import/kitsu/%s" % model_name, data, client=client)
 
 
-def get_api_version(client=default_client):
+def get_api_version(client: KitsuClient = default_client) -> str:
     """
     Get the current version of the API.
 
@@ -810,7 +863,7 @@ def get_api_version(client=default_client):
     return get("", client=client)["version"]
 
 
-def get_current_user(client=default_client):
+def get_current_user(client: KitsuClient = default_client) -> dict:
     """
     Get the current user.
 

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import sys
 import os
 import re
@@ -19,7 +21,9 @@ _UUID_RE = re.compile(
 )
 
 
-def normalize_model_parameter(model_parameter):
+def normalize_model_parameter(
+    model_parameter: str | dict | None,
+) -> dict | None:
     """
     Args:
         model_parameter (str / dict): The parameter to convert.
@@ -45,7 +49,9 @@ def normalize_model_parameter(model_parameter):
             raise ValueError("Wrong format: expected ID string or Data dict")
 
 
-def normalize_list_of_models_for_links(models=[]):
+def normalize_list_of_models_for_links(
+    models: list[str | dict] = [],
+) -> list[str]:
     """
     Args:
         models (list): The models to convert.
@@ -59,7 +65,7 @@ def normalize_list_of_models_for_links(models=[]):
     return [normalize_model_parameter(model)["id"] for model in models]
 
 
-def validate_date_format(date_text):
+def validate_date_format(date_text: str) -> str:
     try:
         datetime.datetime.strptime(date_text, "%Y-%m-%dT%H:%M:%S")
     except ValueError:
@@ -73,14 +79,16 @@ def validate_date_format(date_text):
     return date_text
 
 
-def sanitize_filename(filename):
+def sanitize_filename(filename: str) -> str:
     forbidden = "@|():%/,\\[]<>*?;`\n"
     return "".join(
         [c for c in filename.replace("..", "_") if c not in forbidden]
     ).strip()
 
 
-def download_file(url, file_path=None, headers={}):
+def download_file(
+    url: str, file_path: str | None = None, headers: dict = {}
+) -> str:
     """
     Download file located at *file_path* to given url *url*.
 

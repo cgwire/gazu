@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 from . import client as raw
 
 from .sorting import sort_by_name
 from .cache import cache
+from .client import KitsuClient
 from .helpers import (
     normalize_model_parameter,
     normalize_list_of_models_for_links,
@@ -11,7 +14,7 @@ default = raw.default_client
 
 
 @cache
-def all_concepts(client=default):
+def all_concepts(client: KitsuClient = default) -> list[dict]:
     """
     Returns:
         list: All concepts from database.
@@ -21,13 +24,15 @@ def all_concepts(client=default):
 
 
 @cache
-def all_concepts_for_project(project, client=default):
+def all_concepts_for_project(
+    project: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Args:
         project (str / dict): The project dict or the project ID.
 
     Returns:
-        list: Concepts from database or for given project.
+        list: Concepts from database for the given project.
     """
     project = normalize_model_parameter(project)
     concepts = raw.fetch_all(
@@ -37,7 +42,9 @@ def all_concepts_for_project(project, client=default):
 
 
 @cache
-def all_previews_for_concept(concept, client=default):
+def all_previews_for_concept(
+    concept: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Args:
         concept (str / dict): The concept dict or the concept ID.
@@ -51,12 +58,19 @@ def all_previews_for_concept(concept, client=default):
     )
 
 
-def remove_concept(concept, force=False, client=default):
+def remove_concept(
+    concept: str | dict, force: bool = False, client: KitsuClient = default
+) -> str:
     """
-    Remove given concept from database.
+    Remove the given Concept from the database.
+
+    If the Concept has tasks linked to it, this will by default mark the
+    Concept as canceled. Deletion can be forced regardless of task links
+    with the `force` parameter.
 
     Args:
         concept (dict / str): Concept to remove.
+        force (bool): Whether to force the deletion of the concept.
     """
     concept = normalize_model_parameter(concept)
     path = "data/concepts/%s" % concept["id"]
@@ -67,7 +81,7 @@ def remove_concept(concept, force=False, client=default):
 
 
 @cache
-def get_concept(concept_id, client=default):
+def get_concept(concept_id: str, client: KitsuClient = default) -> dict:
     """
     Args:
         concept_id (str): ID of claimed concept.
@@ -79,7 +93,9 @@ def get_concept(concept_id, client=default):
 
 
 @cache
-def get_concept_by_name(project, concept_name, client=default):
+def get_concept_by_name(
+    project: str | dict, concept_name: str, client: KitsuClient = default
+) -> dict | None:
     """
     Args:
         project (str / dict): The project dict or the project ID.
@@ -97,13 +113,13 @@ def get_concept_by_name(project, concept_name, client=default):
 
 
 def new_concept(
-    project,
-    name,
-    description=None,
-    data={},
-    entity_concept_links=[],
-    client=default,
-):
+    project: str | dict,
+    name: str,
+    description: str | None = None,
+    data: dict = {},
+    entity_concept_links: list[str | dict] = [],
+    client: KitsuClient = default,
+) -> dict:
     """
     Create a concept for given project. Allow to set metadata too.
 
@@ -111,7 +127,9 @@ def new_concept(
         project (str / dict): The project dict or the project ID.
         name (str): The name of the concept to create.
         data (dict): Free field to set metadata of any kind.
-        entity_concept_links (list): List of entities to tag.
+        entity_concept_links (list): List of entities to tag, as either
+            ID strings or model dicts.
+
     Returns:
         Created concept.
     """
@@ -135,7 +153,7 @@ def new_concept(
         return concept
 
 
-def update_concept(concept, client=default):
+def update_concept(concept: dict, client: KitsuClient = default) -> dict:
     """
     Save given concept data into the API. Metadata are fully replaced by the ones
     set on given concept.

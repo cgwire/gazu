@@ -1,4 +1,7 @@
-def sort_by_name(dicts):
+from __future__ import annotations
+
+
+def sort_by_name(dicts: list[dict]) -> list[dict]:
     """
     Sorting of a list of dicts. The sorting is based on the name field.
 
