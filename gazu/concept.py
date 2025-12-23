@@ -32,7 +32,7 @@ def all_concepts_for_project(
         project (str / dict): The project dict or the project ID.
 
     Returns:
-        list: Concepts from database or for given project.
+        list: Concepts from database for the given project.
     """
     project = normalize_model_parameter(project)
     concepts = raw.fetch_all(
@@ -62,10 +62,15 @@ def remove_concept(
     concept: str | dict, force: bool = False, client: KitsuClient = default
 ) -> str:
     """
-    Remove given concept from database.
+    Remove the given Concept from the database.
+
+    If the Concept has tasks linked to it, this will by default mark the
+    Concept as canceled. Deletion can be forced regardless of task links
+    with the `force` parameter.
 
     Args:
         concept (dict / str): Concept to remove.
+        force (bool): Whether to force the deletion of the concept.
     """
     concept = normalize_model_parameter(concept)
     path = "data/concepts/%s" % concept["id"]
@@ -112,7 +117,7 @@ def new_concept(
     name: str,
     description: str | None = None,
     data: dict = {},
-    entity_concept_links: list = [],
+    entity_concept_links: list[str | dict] = [],
     client: KitsuClient = default,
 ) -> dict:
     """
@@ -122,7 +127,9 @@ def new_concept(
         project (str / dict): The project dict or the project ID.
         name (str): The name of the concept to create.
         data (dict): Free field to set metadata of any kind.
-        entity_concept_links (list): List of entities to tag.
+        entity_concept_links (list): List of entities to tag, as either
+            ID strings or model dicts.
+
     Returns:
         Created concept.
     """

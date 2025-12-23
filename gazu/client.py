@@ -198,7 +198,8 @@ def host_is_valid(client: KitsuClient = default_client) -> bool:
 
 def get_host(client: KitsuClient = default_client) -> str:
     """
-    Get client.host.
+    Get the API URL for the Kitsu host the given client is connected to, e.g
+        "http://kitsu.instance.com/api"
 
     Args:
         client (KitsuClient): The client to use for the request.
@@ -211,12 +212,17 @@ def get_host(client: KitsuClient = default_client) -> str:
 
 def get_api_url_from_host(client: KitsuClient = default_client) -> str:
     """
-    Get the API url from the host.
+    Get the base URL to the Kitsu instance the client is connected to, without
+    the `/api` suffix, e.g
+
+    This can be used to build URL paths to particular records in the Kitsu
+    web interface.
 
     Args:
         client (KitsuClient): The client to use for the request.
+
     Returns:
-        Zou url, retrieved from host.
+        str: The base Kitsu URL the client is connected to.
     """
     return client.host[:-4]
 
