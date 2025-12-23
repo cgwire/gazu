@@ -5,7 +5,8 @@ import datetime
 import json
 
 from functools import wraps
-from typing import Any, Callable, Literal
+from typing import Any, Callable
+from typing_extensions import Literal  # Python 3.7 compatibility.
 
 cache_settings = {"enabled": False}
 cached_functions = []
