@@ -382,7 +382,7 @@ class TaskTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.post(
                 gazu.client.get_full_url(
-                    "data/playlists/%s/notify" % fakeid("playlist-1")
+                    "data/playlists/%s/notify-clients" % fakeid("playlist-1")
                 ),
                 text=json.dumps({"status": "notified"}),
             )
