@@ -1,7 +1,12 @@
+from __future__ import annotations
+
+from typing_extensions import Literal  # Python 3.7 compatibility.
+
 from . import client as raw
 
 from .sorting import sort_by_name
 from .cache import cache
+from .client import KitsuClient
 from .helpers import (
     normalize_model_parameter,
     normalize_list_of_models_for_links,
@@ -11,7 +16,7 @@ default = raw.default_client
 
 
 @cache
-def all_project_status(client=default):
+def all_project_status(client: KitsuClient = default) -> list[dict]:
     """
     Returns:
         list: Project status listed in database.
@@ -20,7 +25,9 @@ def all_project_status(client=default):
 
 
 @cache
-def get_project_status_by_name(project_status_name, client=default):
+def get_project_status_by_name(
+    project_status_name: str, client: KitsuClient = default
+) -> dict | None:
     """
     Args:
         project_status_name (str): Name of claimed project status.
@@ -34,7 +41,7 @@ def get_project_status_by_name(project_status_name, client=default):
 
 
 @cache
-def all_projects(client=default):
+def all_projects(client: KitsuClient = default) -> list[dict]:
     """
     Returns:
         list: Projects stored in the database.
@@ -43,7 +50,7 @@ def all_projects(client=default):
 
 
 @cache
-def all_open_projects(client=default):
+def all_open_projects(client: KitsuClient = default) -> list[dict]:
     """
     Returns:
         Open projects stored in the database.
@@ -52,7 +59,7 @@ def all_open_projects(client=default):
 
 
 @cache
-def get_project(project_id, client=default):
+def get_project(project_id: str, client: KitsuClient = default) -> dict:
     """
     Args:
         project_id (str): ID of claimed project.
@@ -64,7 +71,9 @@ def get_project(project_id, client=default):
 
 
 @cache
-def get_project_url(project, section="assets", client=default):
+def get_project_url(
+    project: str | dict, section: str = "assets", client: KitsuClient = default
+) -> str:
     """
     Args:
         project (str / dict): The project dict or the project ID.
@@ -83,7 +92,9 @@ def get_project_url(project, section="assets", client=default):
 
 
 @cache
-def get_project_by_name(project_name, client=default):
+def get_project_by_name(
+    project_name: str, client: KitsuClient = default
+) -> dict | None:
     """
     Args:
         project_name (str): Name of claimed project.
@@ -95,15 +106,15 @@ def get_project_by_name(project_name, client=default):
 
 
 def new_project(
-    name,
-    production_type="short",
-    team=[],
-    asset_types=[],
-    task_statuses=[],
-    task_types=[],
-    production_style="2d3d",
-    client=default,
-):
+    name: str,
+    production_type: str = "short",
+    team: list = [],
+    asset_types: list = [],
+    task_statuses: list = [],
+    task_types: list = [],
+    production_style: str = "2d3d",
+    client: KitsuClient = default,
+) -> dict:
     """
     Creates a new project.
 
@@ -139,7 +150,9 @@ def new_project(
     return project
 
 
-def remove_project(project, force=False, client=default):
+def remove_project(
+    project: str | dict, force: bool = False, client: KitsuClient = default
+) -> str:
     """
     Remove given project from database. (Prior to do that, make sure, there
     is no asset or shot left).
@@ -154,7 +167,7 @@ def remove_project(project, force=False, client=default):
     return raw.delete(path, client=client)
 
 
-def update_project(project, client=default):
+def update_project(project: dict, client: KitsuClient = default) -> dict:
     """
     Save given project data into the API. Metadata are fully replaced by the
     ones set on given project.
@@ -182,7 +195,9 @@ def update_project(project, client=default):
     return raw.put("data/projects/%s" % project["id"], project, client=client)
 
 
-def update_project_data(project, data={}, client=default):
+def update_project_data(
+    project: str | dict, data: dict = {}, client: KitsuClient = default
+) -> dict:
     """
     Update the metadata for the provided project. Keys that are not provided
     are not changed.
@@ -202,7 +217,7 @@ def update_project_data(project, data={}, client=default):
     return update_project(project, client=client)
 
 
-def close_project(project, client=default):
+def close_project(project: str | dict, client: KitsuClient = default) -> dict:
     """
     Closes the provided project.
 
@@ -223,7 +238,9 @@ def close_project(project, client=default):
     return project
 
 
-def add_asset_type(project, asset_type, client=default):
+def add_asset_type(
+    project: str | dict, asset_type: str | dict, client: KitsuClient = default
+) -> dict:
     project = normalize_model_parameter(project)
     asset_type = normalize_model_parameter(asset_type)
     data = {"asset_type_id": asset_type["id"]}
@@ -234,7 +251,12 @@ def add_asset_type(project, asset_type, client=default):
     )
 
 
-def add_task_type(project, task_type, priority, client=default):
+def add_task_type(
+    project: str | dict,
+    task_type: str | dict,
+    priority: int,
+    client: KitsuClient = default,
+) -> dict:
     project = normalize_model_parameter(project)
     task_type = normalize_model_parameter(task_type)
     data = {"task_type_id": task_type["id"], "priority": priority}
@@ -245,7 +267,9 @@ def add_task_type(project, task_type, priority, client=default):
     )
 
 
-def add_task_status(project, task_status, client=default):
+def add_task_status(
+    project: str | dict, task_status: str | dict, client: KitsuClient = default
+) -> dict:
     project = normalize_model_parameter(project)
     task_status = normalize_model_parameter(task_status)
     data = {"task_status_id": task_status["id"]}
@@ -257,15 +281,15 @@ def add_task_status(project, task_status, client=default):
 
 
 def add_metadata_descriptor(
-    project,
-    name,
-    entity_type,
-    data_type="string",
-    choices=[],
-    for_client=False,
-    departments=[],
-    client=default,
-):
+    project: str | dict,
+    name: str,
+    entity_type: str,
+    data_type: str = "string",
+    choices: list[str] = [],
+    for_client: bool = False,
+    departments: list[str | dict] = [],
+    client: KitsuClient = default,
+) -> dict:
     """
     Create a new metadata descriptor for a project.
 
@@ -296,7 +320,11 @@ def add_metadata_descriptor(
     )
 
 
-def get_metadata_descriptor(project, metadata_descriptor_id, client=default):
+def get_metadata_descriptor(
+    project: str | dict,
+    metadata_descriptor_id: str,
+    client: KitsuClient = default,
+) -> dict:
     """
     Retrieve a the metadata descriptor matching given ID.
 
@@ -316,13 +344,15 @@ def get_metadata_descriptor(project, metadata_descriptor_id, client=default):
     )
 
 
-def get_metadata_descriptor_by_field_name(project, field_name, client=default):
+def get_metadata_descriptor_by_field_name(
+    project: str | dict, field_name: str, client: KitsuClient = default
+) -> dict | None:
     """
-    Get a metadata descriptor matchind given project and name.
+    Get a metadata descriptor matching the given project and name.
 
     Args:
         project (dict / ID): The project dict or id.
-        metadata_descriptor_id (dict / ID): The metadata descriptor dict or id.
+        field_name (str): The name of the metadata field.
 
     Returns:
         dict: The metadata descriptor matchind the ID.
@@ -338,7 +368,9 @@ def get_metadata_descriptor_by_field_name(project, field_name, client=default):
     )
 
 
-def all_metadata_descriptors(project, client=default):
+def all_metadata_descriptors(
+    project: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Get all the metadata descriptors.
 
@@ -355,7 +387,11 @@ def all_metadata_descriptors(project, client=default):
     )
 
 
-def update_metadata_descriptor(project, metadata_descriptor, client=default):
+def update_metadata_descriptor(
+    project: str | dict,
+    metadata_descriptor: dict,
+    client: KitsuClient = default,
+) -> dict:
     """
     Update a metadata descriptor.
 
@@ -383,8 +419,11 @@ def update_metadata_descriptor(project, metadata_descriptor, client=default):
 
 
 def remove_metadata_descriptor(
-    project, metadata_descriptor_id, force=False, client=default
-):
+    project: str | dict,
+    metadata_descriptor_id: str | dict,
+    force: bool = False,
+    client: KitsuClient = default,
+) -> str:
     """
     Remove a metadata descriptor.
 
@@ -405,24 +444,32 @@ def remove_metadata_descriptor(
     )
 
 
-def get_team(project, client=default):
+def get_team(project: str | dict, client: KitsuClient = default) -> list[dict]:
     """
     Get team for project.
 
     Args:
         project (dict / ID): The project dict or id.
+
+    Returns:
+        list[dict]: The list of user dicts that are part of the project team.
     """
     project = normalize_model_parameter(project)
     return raw.fetch_all("projects/%s/team" % project["id"], client=client)
 
 
-def add_person_to_team(project, person, client=default):
+def add_person_to_team(
+    project: str | dict, person: str | dict, client: KitsuClient = default
+) -> dict:
     """
     Add a person to the team project.
 
     Args:
         project (dict / ID): The project dict or id.
         person (dict / ID): The person dict or id.
+
+    Returns:
+        dict: The project dictionary.
     """
     project = normalize_model_parameter(project)
     person = normalize_model_parameter(person)
@@ -432,7 +479,9 @@ def add_person_to_team(project, person, client=default):
     )
 
 
-def remove_person_from_team(project, person, client=default):
+def remove_person_from_team(
+    project: str | dict, person: str | dict, client: KitsuClient = default
+) -> str:
     """
     Remove a person from the team project.
 
@@ -449,7 +498,9 @@ def remove_person_from_team(project, person, client=default):
 
 
 @cache
-def get_project_task_types(project, client=default):
+def get_project_task_types(
+    project: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Get task types configured for a project.
 
@@ -466,7 +517,9 @@ def get_project_task_types(project, client=default):
 
 
 @cache
-def get_project_task_statuses(project, client=default):
+def get_project_task_statuses(
+    project: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Get task statuses configured for a project.
 
@@ -483,7 +536,9 @@ def get_project_task_statuses(project, client=default):
 
 
 @cache
-def all_status_automations(project, client=default):
+def all_status_automations(
+    project: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Get status automations configured for a project.
 
@@ -500,13 +555,21 @@ def all_status_automations(project, client=default):
     )
 
 
-def add_status_automation(project, automation, client=default):
+def add_status_automation(
+    project: str | dict,
+    automation: dict[Literal["status_automation_id"], str],
+    client: KitsuClient = default,
+) -> dict:
     """
     Add a status automation to the project.
 
     Args:
         project (dict / ID): The project dict or id.
-        automation (dict): The automation payload (e.g. from/to status, task_type, rules).
+        automation (dict): A dictionary with a key of "status_automation_id" and
+            value of the automation ID.
+
+    Returns:
+        dict: The project dictionary.
     """
     project = normalize_model_parameter(project)
     return raw.post(
@@ -516,7 +579,9 @@ def add_status_automation(project, automation, client=default):
     )
 
 
-def remove_status_automation(project, automation, client=default):
+def remove_status_automation(
+    project: str | dict, automation: str | dict, client: KitsuClient = default
+) -> str:
     """
     Remove a status automation from the project.
 
@@ -534,7 +599,9 @@ def remove_status_automation(project, automation, client=default):
 
 
 @cache
-def get_preview_background_files(project, client=default):
+def get_preview_background_files(
+    project: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Get preview background files configured for a project.
 
@@ -543,11 +610,16 @@ def get_preview_background_files(project, client=default):
     """
     project = normalize_model_parameter(project)
     return raw.fetch_all(
-        "projects/%s/settings/preview-background-files" % project["id"], client=client
+        "projects/%s/settings/preview-background-files" % project["id"],
+        client=client,
     )
 
 
-def add_preview_background_file(project, background_file, client=default):
+def add_preview_background_file(
+    project: str | dict,
+    background_file: dict[Literal["preview_background_file_id"], str],
+    client: KitsuClient = default,
+) -> dict:
     """
     Add a preview background file to a project.
 
@@ -558,7 +630,7 @@ def add_preview_background_file(project, background_file, client=default):
         project (dict / ID): The project dict or id.
         background_file (dict): A dict with a key of "preview_background_file_id"
             and value of the ID of the preview background to add.
-    
+
     Returns:
         (dict): The project dictionary.
     """
@@ -570,7 +642,11 @@ def add_preview_background_file(project, background_file, client=default):
     )
 
 
-def remove_preview_background_file(project, background_file, client=default):
+def remove_preview_background_file(
+    project: str | dict,
+    background_file: str | dict,
+    client: KitsuClient = default,
+) -> str:
     """
     Remove a preview background file from a project.
 
@@ -588,7 +664,9 @@ def remove_preview_background_file(project, background_file, client=default):
 
 
 @cache
-def get_milestones(project, client=default):
+def get_milestones(
+    project: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Get production milestones for a project.
 
@@ -602,7 +680,9 @@ def get_milestones(project, client=default):
 
 
 @cache
-def get_project_quotas(project, client=default):
+def get_project_quotas(
+    project: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Get quotas for a project.
 
@@ -610,13 +690,13 @@ def get_project_quotas(project, client=default):
         project (dict / ID): The project dict or id.
     """
     project = normalize_model_parameter(project)
-    return raw.fetch_all(
-        "projects/%s/quotas" % project["id"], client=client
-    )
+    return raw.fetch_all("projects/%s/quotas" % project["id"], client=client)
 
 
 @cache
-def get_project_person_quotas(project, person, client=default):
+def get_project_person_quotas(
+    project: str | dict, person: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Get quotas for a person within a project.
 
@@ -634,7 +714,9 @@ def get_project_person_quotas(project, person, client=default):
 
 
 @cache
-def get_budgets(project, client=default):
+def get_budgets(
+    project: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Get budgets for a project.
 
@@ -646,15 +728,15 @@ def get_budgets(project, client=default):
 
 
 def create_budget(
-    project,
-    name,
-    description=None,
-    currency=None,
-    start_date=None,
-    end_date=None,
-    amount=None,
-    client=default,
-):
+    project: str | dict,
+    name: str,
+    description: str | None = None,
+    currency: str | None = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
+    amount: int | float | None = None,
+    client: KitsuClient = default,
+) -> dict:
     """
     Create a budget for a project.
 
@@ -685,7 +767,9 @@ def create_budget(
 
 
 @cache
-def get_budget(project, budget, client=default):
+def get_budget(
+    project: str | dict, budget: str | dict, client: KitsuClient = default
+) -> dict:
     """
     Get a specific budget.
 
@@ -700,7 +784,12 @@ def get_budget(project, budget, client=default):
     )
 
 
-def update_budget(project, budget, data, client=default):
+def update_budget(
+    project: str | dict,
+    budget: str | dict,
+    data: dict,
+    client: KitsuClient = default,
+) -> dict:
     """
     Update a specific budget.
 
@@ -718,7 +807,9 @@ def update_budget(project, budget, data, client=default):
     )
 
 
-def remove_budget(project, budget, client=default):
+def remove_budget(
+    project: str | dict, budget: str | dict, client: KitsuClient = default
+) -> str:
     """
     Delete a specific budget.
 
@@ -735,7 +826,9 @@ def remove_budget(project, budget, client=default):
 
 
 @cache
-def get_budget_entries(project, budget, client=default):
+def get_budget_entries(
+    project: str | dict, budget: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Get entries for a specific budget.
 
@@ -752,17 +845,17 @@ def get_budget_entries(project, budget, client=default):
 
 
 def create_budget_entry(
-    project,
-    budget,
-    name,
-    date=None,
-    amount=None,
-    quantity=None,
-    unit_price=None,
-    description=None,
-    category=None,
-    client=default,
-):
+    project: str | dict,
+    budget: str | dict,
+    name: str,
+    date: str | None = None,
+    amount: int | float | None = None,
+    quantity: int | float | None = None,
+    unit_price: int | float | None = None,
+    description: str | None = None,
+    category: str | None = None,
+    client: KitsuClient = default,
+) -> dict:
     """
     Create a budget entry for a specific budget.
 
@@ -793,15 +886,19 @@ def create_budget_entry(
     if category is not None:
         data["category"] = category
     return raw.post(
-        "data/projects/%s/budgets/%s/entries"
-        % (project["id"], budget["id"]),
+        "data/projects/%s/budgets/%s/entries" % (project["id"], budget["id"]),
         data,
         client=client,
     )
 
 
 @cache
-def get_budget_entry(project, budget, entry, client=default):
+def get_budget_entry(
+    project: str | dict,
+    budget: str | dict,
+    entry: str | dict,
+    client: KitsuClient = default,
+) -> dict:
     """
     Get a specific budget entry.
 
@@ -820,7 +917,13 @@ def get_budget_entry(project, budget, entry, client=default):
     )
 
 
-def update_budget_entry(project, budget, entry, data, client=default):
+def update_budget_entry(
+    project: str | dict,
+    budget: str | dict,
+    entry: str | dict,
+    data: dict,
+    client: KitsuClient = default,
+) -> dict:
     """
     Update a specific budget entry.
 
@@ -841,7 +944,12 @@ def update_budget_entry(project, budget, entry, data, client=default):
     )
 
 
-def remove_budget_entry(project, budget, entry, client=default):
+def remove_budget_entry(
+    project: str | dict,
+    budget: str | dict,
+    entry: str | dict,
+    client: KitsuClient = default,
+) -> str:
     """
     Delete a specific budget entry.
 

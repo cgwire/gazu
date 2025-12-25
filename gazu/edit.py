@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 from . import client as raw
 
 from .cache import cache
+from .client import KitsuClient
 from .helpers import normalize_model_parameter
 from gazu.sorting import sort_by_name
 
@@ -8,7 +11,7 @@ default = raw.default_client
 
 
 @cache
-def get_edit(edit_id, client=default):
+def get_edit(edit_id: str, client: KitsuClient = default) -> dict:
     """
     Args:
         edit_id (str): ID of claimed edit.
@@ -20,7 +23,9 @@ def get_edit(edit_id, client=default):
 
 
 @cache
-def get_edit_by_name(project, edit_name, client=default):
+def get_edit_by_name(
+    project: str | dict, edit_name: str, client: KitsuClient = default
+) -> dict | None:
     """
     Args:
         project (str / dict): The project dict or the project ID.
@@ -38,7 +43,7 @@ def get_edit_by_name(project, edit_name, client=default):
 
 
 @cache
-def get_edit_url(edit, client=default):
+def get_edit_url(edit: str | dict, client: KitsuClient = default) -> str:
     """
     Args:
         edit (str / dict): The edit dict or the edit ID.
@@ -62,7 +67,9 @@ def get_edit_url(edit, client=default):
 
 
 @cache
-def all_edits_for_project(project, client=default):
+def all_edits_for_project(
+    project: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Args:
         project (str / dict): The project dict or the project ID.
@@ -76,7 +83,9 @@ def all_edits_for_project(project, client=default):
 
 
 @cache
-def all_previews_for_edit(edit, client=default):
+def all_previews_for_edit(
+    edit: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Args:
         edit (str / dict): The edit dict or the edit ID.
@@ -89,13 +98,13 @@ def all_previews_for_edit(edit, client=default):
 
 
 def new_edit(
-    project,
-    name,
-    description=None,
-    data={},
-    episode=None,
-    client=default,
-):
+    project: str | dict,
+    name: str,
+    description: str | None = None,
+    data: dict = {},
+    episode: str | dict | None = None,
+    client: KitsuClient = default,
+) -> dict:
     """
     Create an edit for given project (and episode if given).
     Allow to set metadata too.
@@ -128,12 +137,20 @@ def new_edit(
         return edit
 
 
-def remove_edit(edit, force=False, client=default):
+def remove_edit(
+    edit: str | dict, force: bool = False, client: KitsuClient = default
+) -> str:
     """
     Remove given edit from database.
 
+    If the Edit has tasks linked to it, this will by default mark the
+    Edit as canceled. Deletion can be forced regardless of task links
+    with the `force` parameter.
+
     Args:
-        edit (dict / str): Edit to remove.
+        edit (str / dict): Edit to remove.
+        force (bool): Whether to force deletion of the edit regardless of
+            whether it has links to tasks.
     """
     edit = normalize_model_parameter(edit)
     path = "data/edits/%s" % edit["id"]
@@ -143,7 +160,7 @@ def remove_edit(edit, force=False, client=default):
     return raw.delete(path, params, client=client)
 
 
-def update_edit(edit, client=default):
+def update_edit(edit: dict, client: KitsuClient = default) -> dict:
     """
     Save given edit data into the API. Metadata are fully replaced by the ones
     set on given edit.
@@ -157,13 +174,15 @@ def update_edit(edit, client=default):
     return raw.put("data/entities/%s" % edit["id"], edit, client=client)
 
 
-def update_edit_data(edit, data={}, client=default):
+def update_edit_data(
+    edit: str | dict, data: dict = {}, client: KitsuClient = default
+) -> dict:
     """
     Update the metadata for the provided edit. Keys that are not provided are
     not changed.
 
     Args:
-        edit (dict / ID): The edit dict or ID to save in database.
+        edit (str / dict): The edit dict or ID to save in database.
         data (dict): Free field to set metadata of any kind.
 
     Returns:
