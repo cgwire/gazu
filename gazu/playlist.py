@@ -417,5 +417,5 @@ def notify_clients_playlist_ready(playlist, client=default):
     """
     playlist = normalize_model_parameter(playlist)
     return raw.post(
-        "data/playlists/%s/notify" % playlist["id"], {}, client=client
+        "data/playlists/%s/notify-clients" % playlist["id"], {}, client=client
     )
