@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 from . import client as raw
 
 from .cache import cache
+from .client import KitsuClient
 from .sorting import sort_by_name
 from .helpers import normalize_model_parameter
 
@@ -8,7 +11,7 @@ default = raw.default_client
 
 
 @cache
-def all_entities(client=default):
+def all_entities(client: KitsuClient = default) -> list[dict]:
     """
     Returns:
         list: Retrieve all entities
@@ -17,7 +20,7 @@ def all_entities(client=default):
 
 
 @cache
-def all_entity_types(client=default):
+def all_entity_types(client: KitsuClient = default) -> list[dict]:
     """
     Returns:
         list: Entity types listed in database.
@@ -26,7 +29,7 @@ def all_entity_types(client=default):
 
 
 @cache
-def get_entity(entity_id, client=default):
+def get_entity(entity_id: str, client: KitsuClient = default) -> dict:
     """
     Args:
         entity_id (str): ID of claimed entity.
@@ -39,11 +42,15 @@ def get_entity(entity_id, client=default):
 
 
 @cache
-def get_entity_by_name(entity_name, project=None, client=default):
+def get_entity_by_name(
+    entity_name: str,
+    project: str | dict | None = None,
+    client: KitsuClient = default,
+) -> dict | None:
     """
     Args:
-        name (str): The name of the claimed entity.
-        project (str, dict): Project ID or dict.
+        entity_name (str): The name of the claimed entity.
+        project (str / dict): Project ID or dict.
 
     Returns:
         Retrieve entity matching given name (and project if given).
@@ -56,10 +63,13 @@ def get_entity_by_name(entity_name, project=None, client=default):
 
 
 @cache
-def get_entity_type(entity_type_id, client=default):
+def get_entity_type(
+    entity_type_id: str, client: KitsuClient = default
+) -> dict:
     """
     Args:
         entity_type_id (str): ID of claimed entity type.
+
     Returns:
         Retrieve entity type matching given ID (It can be an entity type of any
         kind).
@@ -68,7 +78,9 @@ def get_entity_type(entity_type_id, client=default):
 
 
 @cache
-def get_entity_type_by_name(entity_type_name, client=default):
+def get_entity_type_by_name(
+    entity_type_name: str, client: KitsuClient = default
+) -> dict | None:
     """
     Args:
         entity_type_name (str): The name of the claimed entity type
@@ -82,17 +94,17 @@ def get_entity_type_by_name(entity_type_name, client=default):
 
 
 @cache
-def guess_from_path(project_id, path, sep="/"):
+def guess_from_path(project_id: str, path: str, sep: str = "/") -> list[dict]:
     """
     Get list of possible project file tree templates matching a file path
     and data ids corresponding to template tokens.
 
     Args:
         project_id (str): Project id of given file
-        file_path (str): Path to a file
+        path (str): Path to a file
         sep (str): File path separator, defaults to "/"
     Returns:
-        list: dictionnaries with the corresponding entities and template name.
+        list: dictionaries with the corresponding entities and template name.
     """
     return raw.post(
         "/data/entities/guess_from_path",
@@ -100,38 +112,52 @@ def guess_from_path(project_id, path, sep="/"):
     )
 
 
-def new_entity_type(name, client=default):
+def new_entity_type(name: str, client: KitsuClient = default) -> dict:
     """
     Creates an entity type with the given name.
 
     Args:
-        name (str, client=default): The name of the entity type
+        name (str): The name of the entity type
 
     Returns:
         dict: The created entity type
+
+    Raises:
+        gazu.exception.ParameterException:
+            If an entity type with that name already exists.
     """
     data = {"name": name}
     return raw.create("entity-types", data, client=client)
 
 
-def remove_entity_type(entity_type, client=default):
+def remove_entity_type(
+    entity_type: str | dict, client: KitsuClient = default
+) -> str:
     """
     Remove given entity type from database.
 
     Args:
-        entity_type (dict / str): Entity type to remove.
+        entity_type (str / dict): Entity type to remove.
     """
     entity_type = normalize_model_parameter(entity_type)
     path = "data/entity-types/%s" % entity_type["id"]
     return raw.delete(path, client=client)
 
 
-def remove_entity(entity, force=False, client=default):
+def remove_entity(
+    entity: str | dict, force: bool = False, client: KitsuClient = default
+) -> str:
     """
     Remove given entity from database.
 
+    If the Entity has tasks linked to it, this will by default mark the
+    Entity as canceled. Deletion can be forced regardless of task links
+    with the `force` parameter.
+
     Args:
         entity (dict): Entity to remove.
+        force (bool): Whether to force deletion of the entity regardless of
+            whether it has links to tasks.
     """
     entity = normalize_model_parameter(entity)
     path = "data/entities/%s" % entity["id"]
@@ -141,10 +167,13 @@ def remove_entity(entity, force=False, client=default):
     return raw.delete(path, params, client=client)
 
 
-def all_entities_with_tasks_linked_to_entity(entity, client=default):
+def all_entities_with_tasks_linked_to_entity(
+    entity: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Args:
-        entity (dict): Entity to get linked entities.
+        entity (str / dict): Entity to get linked entities.
+
     Returns:
         list: Retrieve all entities linked to given entity.
     """

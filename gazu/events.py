@@ -4,10 +4,12 @@ import inspect
 import signal
 import socketio
 
+from typing import Any, Callable
+
 from engineio.base_client import signal_handler
 from .exception import AuthFailedException
 
-from .client import default_client, get_event_host, make_auth_header
+from .client import default_client, get_event_host, KitsuClient, make_auth_header
 
 
 if os.name == "nt":
@@ -25,23 +27,23 @@ if os.name == "nt":
 
 
 class EventsNamespace(socketio.ClientNamespace):
-    def on_connect(self):
+    def on_connect(self) -> None:
         pass
 
-    def on_disconnect(self):
+    def on_disconnect(self) -> None:
         pass
 
-    def on_error(self, data):
+    def on_error(self, data: str) -> str:
         return connect_error(data)
 
 
 def init(
-    client=default_client,
-    ssl_verify=False,
-    reconnection=True,
-    logger=False,
-    **kwargs
-):
+    client: KitsuClient = default_client,
+    ssl_verify: bool = False,
+    reconnection: bool = True,
+    logger: bool = False,
+    **kwargs: Any
+) -> socketio.Client:
     """
     Init configuration for SocketIO client.
 
@@ -61,13 +63,15 @@ def init(
     return event_client
 
 
-def connect_error(data):
+def connect_error(data: str) -> str:
     print("The connection failed!")
     print(data)
     return data
 
 
-def add_listener(event_client, event_name, event_handler):
+def add_listener(
+    event_client: socketio.Client, event_name: str, event_handler: Callable
+) -> socketio.Client:
     """
     Set a listener that reacts to a given event.
     """
@@ -75,7 +79,7 @@ def add_listener(event_client, event_name, event_handler):
     return event_client
 
 
-def run_client(event_client):
+def run_client(event_client: socketio.Client) -> socketio.Client:
     """
     Run event client (it blocks current thread). It listens to all events
     configured.

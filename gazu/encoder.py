@@ -1,6 +1,8 @@
 import json
 import datetime
 
+from typing import Any
+
 
 class CustomJSONEncoder(json.JSONEncoder):
     """
@@ -8,7 +10,7 @@ class CustomJSONEncoder(json.JSONEncoder):
     The standard does not want to assum how you handle dates.
     """
 
-    def default(self, obj):
+    def default(self, obj: Any) -> Any:
         if isinstance(obj, datetime.datetime):
             return obj.isoformat()
 

@@ -1,15 +1,22 @@
+from __future__ import annotations
+
+import requests
+
+from typing_extensions import Literal
+
 from . import client as raw
 
 from .helpers import normalize_model_parameter
 from .sorting import sort_by_name
 
 from .cache import cache
+from .client import KitsuClient
 
 default = raw.default_client
 
 
 @cache
-def all_playlists(client=default):
+def all_playlists(client: KitsuClient = default) -> list[dict]:
     """
     Returns:
         list: All playlists for all projects.
@@ -18,7 +25,9 @@ def all_playlists(client=default):
 
 
 @cache
-def all_shots_for_playlist(playlist, client=default):
+def all_shots_for_playlist(
+    playlist: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Args:
         playlist (str / dict): The playlist dict or the playlist ID.
@@ -32,10 +41,13 @@ def all_shots_for_playlist(playlist, client=default):
 
 
 @cache
-def all_playlists_for_project(project, client=default, page=1):
+def all_playlists_for_project(
+    project: str | dict, client: KitsuClient = default, page: int = 1
+) -> list[dict]:
     """
     Args:
         project (str / dict): The project dict or the project ID.
+        page (int): Page number for pagination
 
     Returns:
         list: All playlists for the given project
@@ -51,16 +63,16 @@ def all_playlists_for_project(project, client=default, page=1):
 
 
 @cache
-def all_playlists_for_episode(episode, client=default):
+def all_playlists_for_episode(
+    episode: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
-
     Args:
         episode (str / dict): The episode dict or the episode ID.
 
     Returns:
         list: All playlists for the given episode.
     """
-
     project = normalize_model_parameter(episode["project_id"])
     return sort_by_name(
         raw.fetch_all(
@@ -75,7 +87,7 @@ def all_playlists_for_episode(episode, client=default):
 
 
 @cache
-def get_playlist(playlist, client=default):
+def get_playlist(playlist: str | dict, client: KitsuClient = default) -> dict:
     """
     Args:
         playlist (str / dict): The playlist dict or the playlist ID.
@@ -83,13 +95,14 @@ def get_playlist(playlist, client=default):
     Returns:
         dict: playlist object for given id.
     """
-
     playlist = normalize_model_parameter(playlist)
     return raw.fetch_one("playlists", playlist["id"], client=client)
 
 
 @cache
-def get_playlist_by_name(project, name, client=default):
+def get_playlist_by_name(
+    project: str | dict, name: str, client: KitsuClient = default
+) -> dict | None:
     """
     Args:
         project (str / dict): The project dict or the project ID.
@@ -104,19 +117,22 @@ def get_playlist_by_name(project, name, client=default):
 
 
 def new_playlist(
-    project,
-    name,
-    episode=None,
-    for_entity="shot",
-    for_client=False,
-    client=default,
-):
+    project: str | dict,
+    name: str,
+    episode: str | dict | None = None,
+    for_entity: Literal["shot", "asset", "sequence"] = "shot",
+    for_client: bool = False,
+    client: KitsuClient = default,
+) -> dict:
     """
     Create a new playlist in the database for given project.
 
     Args:
         project (str / dict): The project dict or the project ID.
         name (str): Playlist name.
+        for_entity (str): The type of entity to include in the playlist, can
+            be one of "asset", "sequence" or "shot".
+        for_client (bool): Whether the playlist should be shared with clients.
 
     Returns:
         dict: Created playlist.
@@ -137,7 +153,7 @@ def new_playlist(
     return playlist
 
 
-def update_playlist(playlist, client=default):
+def update_playlist(playlist: dict, client: KitsuClient = default) -> dict:
     """
     Save given playlist data into the API. Metadata are fully replaced by
     the ones set on given playlist.
@@ -153,7 +169,9 @@ def update_playlist(playlist, client=default):
     )
 
 
-def get_entity_preview_files(entity, client=default):
+def get_entity_preview_files(
+    entity: str | dict, client: KitsuClient = default
+) -> dict[str, list[dict]]:
     """
     Get all preview files grouped by task type for a given entity.
 
@@ -171,8 +189,12 @@ def get_entity_preview_files(entity, client=default):
 
 
 def add_entity_to_playlist(
-    playlist, entity, preview_file=None, persist=True, client=default
-):
+    playlist: dict,
+    entity: str | dict,
+    preview_file: str | dict | None = None,
+    persist: bool = True,
+    client: KitsuClient = default,
+) -> dict:
     """
     Add an entity to the playlist, use the last uploaded preview as revision
     to review.
@@ -209,14 +231,18 @@ def add_entity_to_playlist(
 
 
 def remove_entity_from_playlist(
-    playlist, entity, persist=True, client=default
-):
+    playlist: dict,
+    entity: str | dict,
+    persist: bool = True,
+    client: KitsuClient = default,
+) -> dict:
     """
     Remove all occurences of a given entity from a playlist.
 
     Args:
         playlist (dict): Playlist object to modify
         entity (str / dict): the entity to remove or its ID
+        persist (bool): Set it to True to save the result to the API.
 
     Returns:
         dict: Updated playlist.
@@ -233,14 +259,20 @@ def remove_entity_from_playlist(
 
 
 def update_entity_preview(
-    playlist, entity, preview_file, persist=True, client=default
-):
+    playlist: dict,
+    entity: str | dict,
+    preview_file: str | dict,
+    persist: bool = True,
+    client: KitsuClient = default,
+) -> dict:
     """
-    Remove all occurences of a given entity from a playlist.
+    Update the preview file linked to a given entity in a playlist.
 
     Args:
-        playlist (dict): Playlist object to modify
-        entity (str / dict): the entity to add or its ID
+        playlist (dict): Playlist object to modify.
+        entity (str / dict): The entity to update the preview file for.
+        preview_file (str / dict): The new preview file to set for the entity.
+        persist (bool): Set it to True to save the result to the API.
 
     Returns:
         dict: Updated playlist.
@@ -256,12 +288,14 @@ def update_entity_preview(
 
 
 @cache
-def delete_playlist(playlist, client=default):
+def delete_playlist(
+    playlist: str | dict, client: KitsuClient = default
+) -> str:
     """
     Delete a playlist.
 
     Args:
-        playlist (dict / ID): The playlist dict or id.
+        playlist (str / dict): The playlist dict or id.
 
     Returns:
         Response: Request response object.
@@ -271,12 +305,14 @@ def delete_playlist(playlist, client=default):
 
 
 @cache
-def get_entity_previews(playlist, client=default):
+def get_entity_previews(
+    playlist: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Get entity previews for a playlist.
 
     Args:
-        playlist (dict / ID): The playlist dict or id.
+        playlist (str / dict): The playlist dict or id.
 
     Returns:
         list: Entity previews for the playlist.
@@ -288,29 +324,32 @@ def get_entity_previews(playlist, client=default):
 
 
 @cache
-def get_build_job(build_job, client=default):
+def get_build_job(
+    build_job: str | dict, client: KitsuClient = default
+) -> dict:
     """
     Get a build job.
 
     Args:
-        build_job (dict / ID): The build job dict or id.
+        build_job (str / dict): The build job dict or id.
 
     Returns:
         dict: Build job information.
     """
     build_job = normalize_model_parameter(build_job)
-    return raw.fetch_one("playlists/build-jobs", build_job["id"], client=client)
+    return raw.fetch_one(
+        "playlists/build-jobs", build_job["id"], client=client
+    )
 
 
-def remove_build_job(build_job, client=default):
+def remove_build_job(
+    build_job: str | dict, client: KitsuClient = default
+) -> str:
     """
     Delete a build job.
 
     Args:
-        build_job (dict / ID): The build job dict or id.
-
-    Returns:
-        Response: Request response object.
+        build_job (str / dict): The build job dict or id.
     """
     build_job = normalize_model_parameter(build_job)
     return raw.delete(
@@ -319,12 +358,14 @@ def remove_build_job(build_job, client=default):
 
 
 @cache
-def all_build_jobs_for_project(project, client=default):
+def all_build_jobs_for_project(
+    project: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Get all build jobs for a project.
 
     Args:
-        project (dict / ID): The project dict or id.
+        project (str / dict): The project dict or id.
 
     Returns:
         list: All build jobs for the project.
@@ -335,12 +376,14 @@ def all_build_jobs_for_project(project, client=default):
     )
 
 
-def build_playlist_movie(playlist, client=default):
+def build_playlist_movie(
+    playlist: str | dict, client: KitsuClient = default
+) -> dict:
     """
     Build a movie for a playlist.
 
     Args:
-        playlist (dict / ID): The playlist dict or id.
+        playlist (str / dict): The playlist dict or id.
 
     Returns:
         dict: Build job information.
@@ -351,13 +394,18 @@ def build_playlist_movie(playlist, client=default):
     )
 
 
-def download_playlist_build(playlist, build_job, file_path, client=default):
+def download_playlist_build(
+    playlist: str | dict,
+    build_job: str | dict,
+    file_path: str,
+    client: KitsuClient = default,
+) -> requests.Response:
     """
     Download a playlist build.
 
     Args:
-        playlist (dict / ID): The playlist dict or id.
-        build_job (dict / ID): The build job dict or id.
+        playlist (str / dict): The playlist dict or id.
+        build_job (str / dict): The build job dict or id.
         file_path (str): The location to store the file on the hard drive.
 
     Returns:
@@ -372,12 +420,14 @@ def download_playlist_build(playlist, build_job, file_path, client=default):
     return raw.download(path, file_path, client=client)
 
 
-def download_playlist_zip(playlist, file_path, client=default):
+def download_playlist_zip(
+    playlist: str | dict, file_path: str, client: KitsuClient = default
+) -> requests.Response:
     """
     Download a playlist as a zip file.
 
     Args:
-        playlist (dict / ID): The playlist dict or id.
+        playlist (str / dict): The playlist dict or id.
         file_path (str): The location to store the file on the hard drive.
 
     Returns:
@@ -388,12 +438,14 @@ def download_playlist_zip(playlist, file_path, client=default):
     return raw.download(path, file_path, client=client)
 
 
-def generate_temp_playlist(project, data, client=default):
+def generate_temp_playlist(
+    project: str | dict, data: dict, client: KitsuClient = default
+) -> dict:
     """
     Generate a temporary playlist.
 
     Args:
-        project (dict / ID): The project dict or id.
+        project (str / dict): The project dict or id.
         data (dict): Playlist generation data.
 
     Returns:
@@ -405,12 +457,14 @@ def generate_temp_playlist(project, data, client=default):
     )
 
 
-def notify_clients_playlist_ready(playlist, client=default):
+def notify_clients_playlist_ready(
+    playlist: str | dict, client: KitsuClient = default
+) -> dict:
     """
     Notify clients that a playlist is ready.
 
     Args:
-        playlist (dict / ID): The playlist dict or id.
+        playlist (str / dict): The playlist dict or id.
 
     Returns:
         dict: Notification response.

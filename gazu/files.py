@@ -1,13 +1,20 @@
+from __future__ import annotations
+
+from typing_extensions import Literal
+
+import requests
+
 from . import client as raw
 
 from .cache import cache
+from .client import KitsuClient
 from .helpers import normalize_model_parameter
 
 default = raw.default_client
 
 
 @cache
-def all_output_types(client=default):
+def all_output_types(client: KitsuClient = default) -> list[dict]:
     """
     Returns:
         list: Output types listed in database.
@@ -16,7 +23,9 @@ def all_output_types(client=default):
 
 
 @cache
-def all_output_types_for_entity(entity, client=default):
+def all_output_types_for_entity(
+    entity: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Args:
         entity (str / dict): The entity dict or the entity ID.
@@ -32,8 +41,8 @@ def all_output_types_for_entity(entity, client=default):
 
 @cache
 def all_output_types_for_asset_instance(
-    asset_instance, temporal_entity, client=default
-):
+    asset_instance: dict, temporal_entity: dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Returns:
         list: Output types for given asset instance and entity (shot or scene).
@@ -46,7 +55,9 @@ def all_output_types_for_asset_instance(
 
 
 @cache
-def get_output_type(output_type_id, client=default):
+def get_output_type(
+    output_type_id: str, client: KitsuClient = default
+) -> dict:
     """
     Args:
         output_type_id (str): ID of claimed output type.
@@ -58,7 +69,9 @@ def get_output_type(output_type_id, client=default):
 
 
 @cache
-def get_output_type_by_name(output_type_name, client=default):
+def get_output_type_by_name(
+    output_type_name: str, client: KitsuClient = default
+) -> dict | None:
     """
     Args:
         output_type_name (str): name of claimed output type.
@@ -71,7 +84,9 @@ def get_output_type_by_name(output_type_name, client=default):
     )
 
 
-def new_output_type(name, short_name, client=default):
+def new_output_type(
+    name: str, short_name: str, client: KitsuClient = default
+) -> dict:
     """
     Create a new output type in database.
 
@@ -91,7 +106,9 @@ def new_output_type(name, short_name, client=default):
 
 
 @cache
-def get_output_file(output_file_id, client=default):
+def get_output_file(
+    output_file_id: str, client: KitsuClient = default
+) -> dict:
     """
     Args:
         output_file_id (str): ID of claimed output file.
@@ -104,21 +121,26 @@ def get_output_file(output_file_id, client=default):
 
 
 @cache
-def get_output_file_by_path(path, client=default):
+def get_output_file_by_path(
+    path: str, client: KitsuClient = default
+) -> dict | None:
     """
     Args:
         path (str): Path of claimed output file.
 
     Returns:
-        dict: Output file matching given path.
+        dict: Output file matching given path, or None if there are no matches.
     """
     return raw.fetch_first("output-files", {"path": path}, client=client)
 
 
 @cache
 def get_all_working_files_for_entity(
-    entity, task=None, name=None, client=default
-):
+    entity: str | dict,
+    task: str | dict | None = None,
+    name: str | None = None,
+    client: KitsuClient = default,
+) -> list[dict]:
     """
     Retrieves all the working files of a given entity and specied parameters
     """
@@ -136,7 +158,9 @@ def get_all_working_files_for_entity(
 
 
 @cache
-def get_preview_file(preview_file_id, client=default):
+def get_preview_file(
+    preview_file_id: str, client: KitsuClient = default
+) -> dict:
     """
     Args:
         preview_file_id (str): ID of claimed preview file.
@@ -147,12 +171,23 @@ def get_preview_file(preview_file_id, client=default):
     return raw.fetch_one("preview-files", preview_file_id, client=client)
 
 
-def remove_preview_file(preview_file, force=False, client=default):
+def remove_preview_file(
+    preview_file: str | dict,
+    force: bool = False,
+    client: KitsuClient = default,
+) -> str:
     """
     Remove given preview file from database.
 
+    Depending on the configuration of the Kitsu server, the stored files linked
+    to the preview file may or may not be removed on deletion of a preview file.
+    The `force=True` parameter can be used to force deletion of the files
+    regardless of server config.
+
     Args:
         preview_file (str / dict): The preview_file dict or ID.
+        force (bool): Whether to force deletion of the files linked to the
+            preview file in storage.
     """
     preview_file = normalize_model_parameter(preview_file)
     params = {}
@@ -166,12 +201,14 @@ def remove_preview_file(preview_file, force=False, client=default):
 
 
 @cache
-def get_all_preview_files_for_task(task, client=default):
+def get_all_preview_files_for_task(
+    task: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Retrieves all the preview files for a given task.
 
     Args:
-        task (str, id): Target task
+        task (str / dict): Target task, as ID string or model dict.
     """
     task = normalize_model_parameter(task)
     return raw.fetch_all(
@@ -180,12 +217,14 @@ def get_all_preview_files_for_task(task, client=default):
 
 
 @cache
-def get_all_attachment_files_for_task(task, client=default):
+def get_all_attachment_files_for_task(
+    task: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Retrieves all the attachment files for a given task.
 
     Args:
-        task (str, id): Target task
+        task (str / dict): Target task, as ID string or model dict.
     """
     task = normalize_model_parameter(task)
     return raw.fetch_all(
@@ -194,14 +233,14 @@ def get_all_attachment_files_for_task(task, client=default):
 
 
 def all_output_files_for_entity(
-    entity,
-    output_type=None,
-    task_type=None,
-    name=None,
-    representation=None,
-    file_status=None,
-    client=default,
-):
+    entity: str | dict,
+    output_type: str | dict | None = None,
+    task_type: str | dict | None = None,
+    name: str | None = None,
+    representation: str | None = None,
+    file_status: str | dict | None = None,
+    client: KitsuClient = default,
+) -> list[dict]:
     """
     Args:
         entity (str / dict): The entity dict or ID.
@@ -239,15 +278,15 @@ def all_output_files_for_entity(
 
 @cache
 def all_output_files_for_asset_instance(
-    asset_instance,
-    temporal_entity=None,
-    task_type=None,
-    output_type=None,
-    name=None,
-    representation=None,
-    file_status=None,
-    client=default,
-):
+    asset_instance: str | dict,
+    temporal_entity: str | dict | None = None,
+    task_type: str | dict | None = None,
+    output_type: str | dict | None = None,
+    name: str | None = None,
+    representation: str | None = None,
+    file_status: str | dict | None = None,
+    client: KitsuClient = default,
+) -> list[dict]:
     """
     Args:
         asset_instance (str / dict): The instance dict or ID.
@@ -289,17 +328,17 @@ def all_output_files_for_asset_instance(
 
 
 def all_output_files_for_project(
-    project,
-    output_type=None,
-    task_type=None,
-    name=None,
-    representation=None,
-    file_status=None,
-    client=default,
-):
+    project: str | dict,
+    output_type: str | dict | None = None,
+    task_type: str | dict | None = None,
+    name: str | None = None,
+    representation: str | None = None,
+    file_status: str | dict | None = None,
+    client: KitsuClient = default,
+) -> list[dict]:
     """
     Args:
-        entity (str / dict): The entity dict or ID.
+        project (str / dict): The project dict or ID.
         output_type (str / dict): The output type dict or ID.
         task_type (str / dict): The task type dict or ID.
         name (str): The file name
@@ -335,16 +374,16 @@ def all_output_files_for_project(
 
 
 @cache
-def all_softwares(client=default):
+def all_softwares(client: KitsuClient = default) -> list[dict]:
     """
     Returns:
-        dict: Software versions listed in database.
+        list[dict]: Software versions listed in database.
     """
     return raw.fetch_all("softwares", client=client)
 
 
 @cache
-def get_software(software_id, client=default):
+def get_software(software_id: str, client: KitsuClient = default) -> dict:
     """
     Args:
         software_id (str): ID of claimed output type.
@@ -356,7 +395,9 @@ def get_software(software_id, client=default):
 
 
 @cache
-def get_software_by_name(software_name, client=default):
+def get_software_by_name(
+    software_name: str, client: KitsuClient = default
+) -> dict | None:
     """
     Args:
         software_name (str): Name of claimed output type.
@@ -367,7 +408,12 @@ def get_software_by_name(software_name, client=default):
     return raw.fetch_first("softwares", {"name": software_name}, client=client)
 
 
-def new_software(name, short_name, file_extension, client=default):
+def new_software(
+    name: str,
+    short_name: str,
+    file_extension: str,
+    client: KitsuClient = default,
+) -> dict:
     """
     Create a new software in datatabase.
 
@@ -393,23 +439,23 @@ def new_software(name, short_name, file_extension, client=default):
 
 @cache
 def build_working_file_path(
-    task,
-    name="main",
-    mode="working",
-    software=None,
-    revision=1,
-    sep="/",
-    client=default,
-):
+    task: str | dict,
+    name: str = "main",
+    mode: str = "working",
+    software: str | dict | None = None,
+    revision: int = 1,
+    sep: str = "/",
+    client: KitsuClient = default,
+) -> str:
     """
     From the file path template configured at the project level and arguments,
     it builds a file path location where to store related DCC file.
 
     Args:
-        task (str / id): Task related to working file.
+        task (str / dict): Task related to working file.
         name (str): Additional suffix for the working file name.
         mode (str): Allow to select a template inside the template.
-        software (str / id): Software at the origin of the file.
+        software (str / dict): Software at the origin of the file.
         revision (int): File revision.
         sep (str): OS separator.
 
@@ -433,30 +479,30 @@ def build_working_file_path(
 
 @cache
 def build_entity_output_file_path(
-    entity,
-    output_type,
-    task_type,
-    name="main",
-    mode="output",
-    representation="",
-    revision=0,
-    nb_elements=1,
-    sep="/",
-    client=default,
-):
+    entity: str | dict,
+    output_type: str | dict,
+    task_type: str | dict,
+    name: str = "main",
+    mode: str = "output",
+    representation: str = "",
+    revision: int = 0,
+    nb_elements: int = 1,
+    sep: str = "/",
+    client: KitsuClient = default,
+) -> str:
     """
     From the file path template configured at the project level and arguments,
     it builds a file path location where to store related DCC output file.
 
     Args:
-        entity (str / id): Entity for which an output file is needed.
-        output_type (str / id): Output type of the generated file.
-        task_type (str / id): Task type related to output file.
+        entity (str / dict): Entity for which an output file is needed.
+        output_type (str / dict): Output type of the generated file.
+        task_type (str / dict): Task type related to output file.
         name (str): Additional suffix for the working file name.
         mode (str): Allow to select a template inside the template.
         representation (str): Allow to select a template inside the template.
         revision (int): File revision.
-        nb_elements (str): To represent an image sequence, the amount of file is
+        nb_elements (int): To represent an image sequence, the amount of file is
                            needed.
         sep (str): OS separator.
 
@@ -489,32 +535,32 @@ def build_entity_output_file_path(
 
 @cache
 def build_asset_instance_output_file_path(
-    asset_instance,
-    temporal_entity,
-    output_type,
-    task_type,
-    name="main",
-    representation="",
-    mode="output",
-    revision=0,
-    nb_elements=1,
-    sep="/",
-    client=default,
-):
+    asset_instance: str | dict,
+    temporal_entity: str | dict,
+    output_type: str | dict,
+    task_type: str | dict,
+    name: str = "main",
+    representation: str = "",
+    mode: str = "output",
+    revision: int = 0,
+    nb_elements: int = 1,
+    sep: str = "/",
+    client: KitsuClient = default,
+) -> str:
     """
     From the file path template configured at the project level and arguments,
     it builds a file path location where to store related DCC output file.
 
     Args:
-        asset_instance_id entity (str / id): Asset instance for which a file
+        asset_instance_id entity (str / dict): Asset instance for which a file
         is required.
-        temporal entity (str / id): Temporal entity scene or shot in which
+        temporal entity (str / dict): Temporal entity scene or shot in which
         the asset instance appeared.
-        output_type (str / id): Output type of the generated file.
-        task_type (str / id): Task type related to output file.
+        output_type (str / dict): Output type of the generated file.
+        task_type (str / dict): Task type related to output file.
         name (str): Additional suffix for the working file name.
-        mode (str): Allow to select a template inside the template.
         representation (str): Allow to select a template inside the template.
+        mode (str): Allow to select a template inside the template.
         revision (int): File revision.
         nb_elements (str): To represent an image sequence, the amount of file is
                            needed.
@@ -551,28 +597,28 @@ def build_asset_instance_output_file_path(
 
 
 def new_working_file(
-    task,
-    name="main",
-    mode="working",
-    software=None,
-    comment="",
-    person=None,
-    revision=0,
-    sep="/",
-    client=default,
-):
+    task: str | dict,
+    name: str = "main",
+    mode: str = "working",
+    software: str | dict | None = None,
+    comment: str = "",
+    person: str | dict | None = None,
+    revision: int = 0,
+    sep: str = "/",
+    client: KitsuClient = default,
+) -> dict:
     """
     Create a new working_file for given task. It generates and store the
     expected path for given task and options. It sets a revision number
     (last revision + 1).
 
     Args:
-        task (str / id): Task related to working file.
+        task (str / dict): Task related to working file.
         name (str): Additional suffix for the working file name.
         mode (str): Allow to select a template inside the template.
-        software (str / id): Software at the origin of the file.
+        software (str / dict): Software at the origin of the file.
         comment (str): Comment related to created revision.
-        person (str / id): Author of the file.
+        person (str / dict): Author of the file.
         revision (int): File revision.
         sep (str): OS separator.
 
@@ -600,38 +646,38 @@ def new_working_file(
 
 
 def new_entity_output_file(
-    entity,
-    output_type,
-    task_type,
-    comment,
-    working_file=None,
-    person=None,
-    name="main",
-    mode="output",
-    revision=0,
-    nb_elements=1,
-    representation="",
-    sep="/",
-    file_status_id=None,
-    client=default,
-):
+    entity: str | dict,
+    output_type: str | dict,
+    task_type: str | dict,
+    comment: str,
+    working_file: str | dict | None = None,
+    person: str | dict | None = None,
+    name: str = "main",
+    mode: str = "output",
+    revision: int = 0,
+    nb_elements: int = 1,
+    representation: str = "",
+    sep: str = "/",
+    file_status_id: str | None = None,
+    client: KitsuClient = default,
+) -> dict:
     """
     Create a new output file for given entity, task type and output type.
     It generates and store the expected path and sets a revision number
     (last revision + 1).
 
     Args:
-        entity (str / id): Entity for which an output file is needed.
-        output_type (str / id): Output type of the generated file.
-        task_type (str / id): Task type related to output file.
+        entity (str / dict): Entity for which an output file is needed.
+        output_type (str / dict): Output type of the generated file.
+        task_type (str / dict): Task type related to output file.
         comment (str): Comment related to created revision.
-        working_file (str / id): Working file which is the source of the
+        working_file (str / dict): Working file which is the source of the
         generated file.
-        person (str / id): Author of the file.
+        person (str / dict): Author of the file.
         name (str): Additional suffix for the working file name.
         mode (str): Allow to select a template inside the template.
         revision (int): File revision.
-        nb_elements (str): To represent an image sequence, the amount of file is
+        nb_elements (int): To represent an image sequence, the amount of file is
                            needed.
         representation (str): Differientate file extensions. It can be useful
         to build folders based on extensions like abc, jpg, etc.
@@ -639,7 +685,7 @@ def new_entity_output_file(
         file_status_id (id): The id of the file status to set at creation
 
     Returns:
-        Created output file.
+        dict: Created output file.
     """
     entity = normalize_model_parameter(entity)
     output_type = normalize_model_parameter(output_type)
@@ -671,42 +717,45 @@ def new_entity_output_file(
 
 
 def new_asset_instance_output_file(
-    asset_instance,
-    temporal_entity,
-    output_type,
-    task_type,
-    comment,
-    name="master",
-    mode="output",
-    working_file=None,
-    person=None,
-    revision=0,
-    nb_elements=1,
-    representation="",
-    sep="/",
-    file_status_id=None,
-    client=default,
-):
+    asset_instance: str | dict,
+    temporal_entity: str | dict,
+    output_type: str | dict,
+    task_type: str | dict,
+    comment: str,
+    name: str = "master",
+    mode: str = "output",
+    working_file: str | dict | None = None,
+    person: str | dict | None = None,
+    revision: int = 0,
+    nb_elements: int = 1,
+    representation: str = "",
+    sep: str = "/",
+    file_status_id: str | dict | None = None,
+    client: KitsuClient = default,
+) -> dict:
     """
     Create a new output file for given asset instance, temporal entity, task
     type and output type.  It generates and store the expected path and sets a
     revision number (last revision + 1).
 
     Args:
-        entity (str / id): Entity for which an output file is needed.
-        output_type (str / id): Output type of the generated file.
-        task_type (str / id): Task type related to output file.
+        asset_instance (str / dict): Asset instance for which an output file
+            is needed.
+        temporal_entity (str / dict): Temporal entity for which an output file
+            is needed.
+        output_type (str / dict): Output type of the generated file.
+        task_type (str / dict): Task type related to output file.
         comment (str): Comment related to created revision.
-        working_file (str / id): Working file which is the source of the
-    generated file.
-        person (str / id): Author of the file.
+        working_file (str / dict): Working file which is the source of the
+            generated file.
+        person (str / dict): Author of the file.
         name (str): Additional suffix for the working file name.
         mode (str): Allow to select a template inside the template.
         revision (int): File revision.
-        nb_elements (str): To represent an image sequence, the amount of file
-    needed.
-        representation (str): Differientate file extensions. It can be useful
-    to build folders based on extensions like abc, jpg, cetc.
+        nb_elements (int): To represent an image sequence, the amount of file
+            needed.
+        representation (str): Differentiate file extensions. It can be useful
+            to build folders based on extensions like abc, jpg, cetc.
         sep (str): OS separator.
         file_status_id (id): The id of the file status to set at creation
 
@@ -747,19 +796,26 @@ def new_asset_instance_output_file(
 
 
 def get_next_entity_output_revision(
-    entity, output_type, task_type, name="main", client=default
-):
+    entity: str | dict,
+    output_type: str | dict,
+    task_type: str | dict,
+    name: str = "main",
+    client: KitsuClient = default,
+) -> int:
     """
     Args:
         entity (str / dict): The entity dict or ID.
         output_type (str / dict): The entity dict or ID.
         task_type (str / dict): The entity dict or ID.
+        name (str): Get version for output file with the given name.
 
     Returns:
-        int: Next revision of ouput files available for given entity, output
+        int: Next revision of output files available for given entity, output
         type and task type.
     """
     entity = normalize_model_parameter(entity)
+    output_type = normalize_model_parameter(output_type)
+    task_type = normalize_model_parameter(task_type)
     path = "data/entities/%s/output-files/next-revision" % entity["id"]
     data = {
         "name": name,
@@ -771,13 +827,13 @@ def get_next_entity_output_revision(
 
 
 def get_next_asset_instance_output_revision(
-    asset_instance,
-    temporal_entity,
-    output_type,
-    task_type,
-    name="master",
-    client=default,
-):
+    asset_instance: str | dict,
+    temporal_entity: str | dict,
+    output_type: str | dict,
+    task_type: str | dict,
+    name: str = "master",
+    client: KitsuClient = default,
+) -> int:
     """
     Args:
         asset_instance (str / dict): The asset instance dict or ID.
@@ -806,14 +862,18 @@ def get_next_asset_instance_output_revision(
 
 
 def get_last_entity_output_revision(
-    entity, output_type, task_type, name="master", client=default
-):
+    entity: str | dict,
+    output_type: str | dict,
+    task_type: str | dict,
+    name: str = "master",
+    client: KitsuClient = default,
+) -> int:
     """
     Args:
-        entity (str / dict, client=default): The entity dict or ID.
-        output_type (str / dict, client=default): The entity dict or ID.
-        task_type (str / dict, client=default): The entity dict or ID.
-        name (str, client=default): The output name
+        entity (str / dict): The entity dict or ID.
+        output_type (str / dict): The entity dict or ID.
+        task_type (str / dict): The entity dict or ID.
+        name (str): The output name
 
     Returns:
         int: Last revision of ouput files for given entity, output type and task
@@ -831,13 +891,13 @@ def get_last_entity_output_revision(
 
 
 def get_last_asset_instance_output_revision(
-    asset_instance,
-    temporal_entity,
-    output_type,
-    task_type,
-    name="master",
-    client=default,
-):
+    asset_instance: str | dict,
+    temporal_entity: str | dict,
+    output_type: str | dict,
+    task_type: str | dict,
+    name: str = "master",
+    client: KitsuClient = default,
+) -> int:
     """
     Generate last output revision for given asset instance.
     """
@@ -860,14 +920,14 @@ def get_last_asset_instance_output_revision(
 
 @cache
 def get_last_output_files_for_entity(
-    entity,
-    output_type=None,
-    task_type=None,
-    name=None,
-    representation=None,
-    file_status=None,
-    client=default,
-):
+    entity: str | dict,
+    output_type: str | dict | None = None,
+    task_type: str | dict | None = None,
+    name: str | None = None,
+    representation: str | None = None,
+    file_status: str | dict | None = None,
+    client: KitsuClient = default,
+) -> list[dict]:
     """
     Args:
         entity (str / dict): The entity dict or ID.
@@ -907,15 +967,15 @@ def get_last_output_files_for_entity(
 
 @cache
 def get_last_output_files_for_asset_instance(
-    asset_instance,
-    temporal_entity,
-    task_type=None,
-    output_type=None,
-    name=None,
-    representation=None,
-    file_status=None,
-    client=default,
-):
+    asset_instance: str | dict,
+    temporal_entity: str | dict,
+    task_type: str | dict | None = None,
+    output_type: str | dict | None = None,
+    name: str | None = None,
+    representation: str | None = None,
+    file_status: str | dict | None = None,
+    client: KitsuClient = default,
+) -> list[dict]:
     """
     Args:
         asset_instance (str / dict): The asset instance dict or ID.
@@ -959,7 +1019,9 @@ def get_last_output_files_for_asset_instance(
 
 
 @cache
-def get_working_files_for_task(task, client=default):
+def get_working_files_for_task(
+    task: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Args:
         task (str / dict): The task dict or the task ID.
@@ -973,7 +1035,9 @@ def get_working_files_for_task(task, client=default):
 
 
 @cache
-def get_last_working_files(task, client=default):
+def get_last_working_files(
+    task: str | dict, client: KitsuClient = default
+) -> dict:
     """
     Args:
         task (str / dict): The task dict or the task ID.
@@ -988,7 +1052,9 @@ def get_last_working_files(task, client=default):
 
 
 @cache
-def get_last_working_file_revision(task, name="main", client=default):
+def get_last_working_file_revision(
+    task: str | dict, name: str = "main", client: KitsuClient = default
+) -> dict:
     """
     Args:
         task (str / dict): The task dict or the task ID.
@@ -996,7 +1062,7 @@ def get_last_working_file_revision(task, name="main", client=default):
 
     Returns:
         dict: Last revisions stored in the API for given task and given file
-        name suffx.
+        name suffix.
     """
     task = normalize_model_parameter(task)
     path = "data/tasks/%s/working-files/last-revisions" % task["id"]
@@ -1005,7 +1071,9 @@ def get_last_working_file_revision(task, name="main", client=default):
 
 
 @cache
-def get_working_file(working_file_id, client=default):
+def get_working_file(
+    working_file_id: str, client: KitsuClient = default
+) -> dict:
     """
     Args:
         working_file_id (str): ID of claimed working file.
@@ -1016,7 +1084,9 @@ def get_working_file(working_file_id, client=default):
     return raw.fetch_one("working-files", working_file_id, client=client)
 
 
-def update_comment(working_file, comment, client=default):
+def update_comment(
+    working_file: str | dict, comment: str, client: KitsuClient = default
+) -> dict:
     """
     Update the file comment in database for given working file.
 
@@ -1034,7 +1104,9 @@ def update_comment(working_file, comment, client=default):
     )
 
 
-def update_modification_date(working_file, client=default):
+def update_modification_date(
+    working_file: str | dict, client: KitsuClient = default
+) -> dict:
     """
     Update modification date of given working file with current time (now).
 
@@ -1051,12 +1123,15 @@ def update_modification_date(working_file, client=default):
     )
 
 
-def update_output_file(output_file, data, client=default):
+def update_output_file(
+    output_file: str | dict, data: dict, client: KitsuClient = default
+) -> dict:
     """
     Update the data of given output file.
 
     Args:
         output_file (str / dict): The output file dict or ID.
+        data (dict): Data to update on the output file.
 
     Returns:
         dict: Modified output file
@@ -1066,7 +1141,9 @@ def update_output_file(output_file, data, client=default):
     return raw.put(path, data, client=client)
 
 
-def set_project_file_tree(project, file_tree_name, client=default):
+def set_project_file_tree(
+    project: str | dict, file_tree_name: str, client: KitsuClient = default
+) -> dict:
     """
     (Deprecated) Set given file tree template on given project. This template
     will be used to generate file paths. The template is selected from sources.
@@ -1085,7 +1162,9 @@ def set_project_file_tree(project, file_tree_name, client=default):
     return raw.post(path, data, client=client)
 
 
-def update_project_file_tree(project, file_tree, client=default):
+def update_project_file_tree(
+    project: str | dict, file_tree: dict, client: KitsuClient = default
+) -> dict:
     """
     Set given dict as file tree template on given project. This template
     will be used to generate file paths.
@@ -1103,20 +1182,29 @@ def update_project_file_tree(project, file_tree, client=default):
     return raw.put(path, data, client=client)
 
 
-def upload_working_file(working_file, file_path, client=default):
+def upload_working_file(
+    working_file: str | dict, file_path: str, client: KitsuClient = default
+) -> dict:
     """
     Save given file in working file storage.
 
     Args:
         working_file (str / dict): The working file dict or ID.
         file_path (str): Location on hard drive where to save the file.
+
+    Returns:
+        (dict): the working file model dictionary.
     """
     working_file = normalize_model_parameter(working_file)
     url_path = "/data/working-files/%s/file" % working_file["id"]
     return raw.upload(url_path, file_path, client=client)
 
 
-def download_working_file(working_file, file_path=None, client=default):
+def download_working_file(
+    working_file: str | dict,
+    file_path: str | None = None,
+    client: KitsuClient = default,
+) -> requests.Response:
     """
     Download given working file and save it at given location.
 
@@ -1137,7 +1225,9 @@ def download_working_file(working_file, file_path=None, client=default):
     )
 
 
-def download_preview_file(preview_file, file_path, client=default):
+def download_preview_file(
+    preview_file: str | dict, file_path: str, client: KitsuClient = default
+) -> requests.Response:
     """
     Download given preview file and save it at given location.
 
@@ -1152,7 +1242,9 @@ def download_preview_file(preview_file, file_path, client=default):
     )
 
 
-def get_preview_file_url(preview_file, client=default):
+def get_preview_file_url(
+    preview_file: str | dict, client: KitsuClient = default
+) -> str:
     """
     Return given preview file URL
 
@@ -1171,7 +1263,9 @@ def get_preview_file_url(preview_file, client=default):
     )
 
 
-def get_attachment_file(attachment_file_id, client=default):
+def get_attachment_file(
+    attachment_file_id: str, client: KitsuClient = default
+) -> dict:
     """
     Return attachment file object corresponding to given ID.
 
@@ -1181,7 +1275,9 @@ def get_attachment_file(attachment_file_id, client=default):
     return raw.fetch_one("attachment-files", attachment_file_id, client=client)
 
 
-def download_attachment_file(attachment_file, file_path, client=default):
+def download_attachment_file(
+    attachment_file: str | dict, file_path: str, client: KitsuClient = default
+) -> requests.Response:
     """
     Download given attachment file and save it at given location.
 
@@ -1199,7 +1295,9 @@ def download_attachment_file(attachment_file, file_path, client=default):
     )
 
 
-def download_preview_file_thumbnail(preview_file, file_path, client=default):
+def download_preview_file_thumbnail(
+    preview_file: str | dict, file_path: str, client: KitsuClient = default
+) -> requests.Response:
     """
     Download given preview file thumbnail and save it at given location.
 
@@ -1216,7 +1314,9 @@ def download_preview_file_thumbnail(preview_file, file_path, client=default):
     )
 
 
-def download_preview_file_cover(preview_file, file_path, client=default):
+def download_preview_file_cover(
+    preview_file: str | dict, file_path: str, client: KitsuClient = default
+) -> requests.Response:
     """
     Download given preview file cover and save it at given location.
     Args:
@@ -1231,9 +1331,12 @@ def download_preview_file_cover(preview_file, file_path, client=default):
     )
 
 
-def download_person_avatar(person, file_path, client=default):
+def download_person_avatar(
+    person: str | dict, file_path: str, client: KitsuClient = default
+) -> requests.Response:
     """
     Download given person's avatar and save it at given location.
+
     Args:
         person (str / dict): The person dict or ID.
         file_path (str): Location on hard drive where to save the file.
@@ -1246,13 +1349,19 @@ def download_person_avatar(person, file_path, client=default):
     )
 
 
-def upload_person_avatar(person, file_path, client=default):
+def upload_person_avatar(
+    person: str | dict, file_path: str, client: KitsuClient = default
+) -> dict[Literal["thumbnail_path"], str]:
     """
     Upload given file as person avatar.
 
     Args:
         person (str / dict): The person dict or the person ID.
         file_path (str): Path of the file to upload as avatar.
+
+    Returns:
+        dict: Dictionary with a key of 'thumbnail_path' and a value of the
+            path to the static image file, relative to the host url.
     """
     path = (
         "/pictures/thumbnails/persons/%s"
@@ -1261,9 +1370,12 @@ def upload_person_avatar(person, file_path, client=default):
     return raw.upload(path, file_path, client=client)
 
 
-def download_project_avatar(project, file_path, client=default):
+def download_project_avatar(
+    project: str | dict, file_path: str, client: KitsuClient = default
+) -> requests.Response:
     """
     Download given project's avatar and save it at given location.
+
     Args:
         project (str / dict): The project dict or ID.
         file_path (str): Location on hard drive where to save the file.
@@ -1276,13 +1388,19 @@ def download_project_avatar(project, file_path, client=default):
     )
 
 
-def upload_project_avatar(project, file_path, client=default):
+def upload_project_avatar(
+    project: str | dict, file_path: str, client: KitsuClient = default
+) -> dict[Literal["thumbnail_path"], str]:
     """
     Upload given file as project avatar.
 
     Args:
         project (str / dict): The project dict or ID.
         file_path (str): Path of the file to upload as avatar.
+
+    Returns:
+        dict: Dictionary with a key of 'thumbnail_path' and a value of the
+            path to the static image file, relative to the host url.
     """
     path = (
         "/pictures/thumbnails/projects/%s"
@@ -1291,9 +1409,12 @@ def upload_project_avatar(project, file_path, client=default):
     return raw.upload(path, file_path, client=client)
 
 
-def download_organisation_avatar(organisation, file_path, client=default):
+def download_organisation_avatar(
+    organisation: str | dict, file_path: str, client: KitsuClient = default
+) -> requests.Response:
     """
     Download given organisation's avatar and save it at given location.
+
     Args:
         organisation (str / dict): The organisation dict or ID.
         file_path (str): Location on hard drive where to save the file.
@@ -1306,13 +1427,19 @@ def download_organisation_avatar(organisation, file_path, client=default):
     )
 
 
-def upload_organisation_avatar(organisation, file_path, client=default):
+def upload_organisation_avatar(
+    organisation: str | dict, file_path: str, client: KitsuClient = default
+) -> dict[Literal["thumbnail_path"], str]:
     """
     Upload given file as organisation avatar.
 
     Args:
         organisation (str / dict): The organisation dict or ID.
         file_path (str): Path of the file to upload as avatar.
+
+    Returns:
+        dict: Dictionary with a key of 'thumbnail_path' and a value of the
+            path to the static image file, relative to the host url.
     """
     path = (
         "/pictures/thumbnails/organisations/%s"
@@ -1321,12 +1448,15 @@ def upload_organisation_avatar(organisation, file_path, client=default):
     return raw.upload(path, file_path, client=client)
 
 
-def update_preview(preview_file, data, client=default):
+def update_preview(
+    preview_file: str | dict, data: dict, client: KitsuClient = default
+) -> dict:
     """
     Update the data of given preview file.
 
     Args:
         preview_file (str / dict): The preview file dict or ID.
+        data (dict): Data to update on the prevew file.
 
     Returns:
         dict: Modified preview file
@@ -1336,9 +1466,17 @@ def update_preview(preview_file, data, client=default):
     return raw.put(path, data, client=client)
 
 
-def new_file_status(name, color, client=default):
+def new_file_status(
+    name: str, color: str, client: KitsuClient = default
+) -> dict:
     """
     Create a new file status if not existing yet.
+
+    If the file status already exists, the existing record will be returned.
+
+    Args:
+        name (str): the name of the status to create.
+        color (str): The color for the status as a Hex string, e.g "#00FF00".
     """
     data = {"name": name, "color": color}
     status = get_file_status_by_name(name, client=client)
@@ -1349,7 +1487,7 @@ def new_file_status(name, color, client=default):
 
 
 @cache
-def get_file_status(status_id, client=default):
+def get_file_status(status_id: str, client: KitsuClient = default) -> dict:
     """
     Return file status object corresponding to given ID.
 
@@ -1360,7 +1498,9 @@ def get_file_status(status_id, client=default):
 
 
 @cache
-def get_file_status_by_name(name, client=default):
+def get_file_status_by_name(
+    name: str, client: KitsuClient = default
+) -> dict | None:
     """
     Return file status object corresponding to given name
 
