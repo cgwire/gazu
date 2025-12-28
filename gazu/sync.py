@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 
 from .helpers import normalize_model_parameter
@@ -11,32 +13,33 @@ from . import files as files_module
 from . import shot as shot_module
 from . import task as task_module
 
+from .client import KitsuClient
 from .helpers import normalize_model_parameter, validate_date_format
 
 default = raw.default_client
 
 
 def get_last_events(
-    limit=20000,
-    project=None,
-    after=None,
-    before=None,
-    only_files=False,
-    name=None,
-    client=default,
-):
+    limit: int = 20000,
+    project: str | dict | None = None,
+    after: str | None = None,
+    before: str | None = None,
+    only_files: bool = False,
+    name: str | None = None,
+    client: KitsuClient = default,
+) -> list[dict]:
     """
     Get last events that occured on the machine.
 
     Args:
         limit (int): Number of events to retrieve.
-        project (dict/id): Get only events related to this project.
-        after (dict/id): Get only events occuring after given date.
-        before (dict/id): Get only events occuring before given date.
+        project (str / dict): Get only events related to this project.
+        after (str): Get only events occuring after given date.
+        before (str): Get only events occuring before given date.
         only_files (bool): Get only events related to files.
 
     Returns:
-        dict: Last events matching criterions.
+        list[dict]: Last events matching criterions.
     """
     path = "/data/events/last"
     params = {"limit": limit, "only_files": only_files}
@@ -52,7 +55,9 @@ def get_last_events(
     return raw.get(path, params=params, client=client)
 
 
-def import_entities(entities, client=default):
+def import_entities(
+    entities: list[dict], client: KitsuClient = default
+) -> list[dict]:
     """
     Import entities from another instance to target instance (keep id and audit
     dates).
@@ -61,12 +66,14 @@ def import_entities(entities, client=default):
         entities (list): Entities to import.
 
     Returns:
-        dict: Entities created.
+        list[dict]: Entities created.
     """
     return raw.post("import/kitsu/entities", entities, client=client)
 
 
-def import_tasks(tasks, client=default):
+def import_tasks(
+    tasks: list[dict], client: KitsuClient = default
+) -> list[dict]:
     """
     Import tasks from another instance to target instance (keep id and audit
     dates).
@@ -75,12 +82,14 @@ def import_tasks(tasks, client=default):
         tasks (list): Tasks to import.
 
     Returns:
-        dict: Tasks created.
+        list[dict]: Tasks created.
     """
     return raw.post("import/kitsu/tasks", tasks, client=client)
 
 
-def import_entity_links(links, client=default):
+def import_entity_links(
+    links: list[dict], client: KitsuClient = default
+) -> list[dict]:
     """
     Import enitity links from another instance to target instance (keep id and
     audit dates).
@@ -94,11 +103,14 @@ def import_entity_links(links, client=default):
     return raw.post("import/kitsu/entity-links", links, client=client)
 
 
-def get_model_list_diff(source_list, target_list, id_field="id"):
+def get_model_list_diff(
+    source_list: list[dict], target_list: list[dict], id_field: str = "id"
+) -> tuple[list[dict], list[dict]]:
     """
     Args:
         source_list (list): List of models to compare.
         target_list (list): List of models for which we want a diff.
+        id_field (str): the model field to use as an ID for comparison.
 
     Returns:
         tuple: Two lists, one containing the missing models in the target list
@@ -120,7 +132,9 @@ def get_model_list_diff(source_list, target_list, id_field="id"):
     return (missing, unexpected)
 
 
-def get_link_list_diff(source_list, target_list):
+def get_link_list_diff(
+    source_list: list[dict], target_list: list[dict]
+) -> tuple[list[dict], list[dict]]:
     """
     Args:
         source_list (list): List of links to compare.
@@ -132,7 +146,7 @@ def get_link_list_diff(source_list, target_list):
         Links are identified by their in ID and their out ID.
     """
 
-    def get_link_key(l):
+    def get_link_key(l: dict) -> str:
         return l["entity_in_id"] + "-" + l["entity_out_id"]
 
     missing = []
@@ -148,7 +162,9 @@ def get_link_list_diff(source_list, target_list):
     return (missing, unexpected)
 
 
-def get_id_map_by_name(source_list, target_list):
+def get_id_map_by_name(
+    source_list: list[dict], target_list: list[dict]
+) -> dict:
     """
     Args:
         source_list (list): List of links to compare.
@@ -170,7 +186,9 @@ def get_id_map_by_name(source_list, target_list):
     return link_map
 
 
-def get_id_map_by_id(source_list, target_list, field="name"):
+def get_id_map_by_id(
+    source_list: list[dict], target_list: list[dict], field: str = "name"
+) -> dict:
     """
     Args:
         source_list (list): List of links to compare.
@@ -192,7 +210,7 @@ def get_id_map_by_id(source_list, target_list, field="name"):
     return link_map
 
 
-def is_changed(source_model, target_model):
+def is_changed(source_model: dict, target_model: dict) -> bool:
     """
     Args:
         source_model (dict): Model from the source API.
@@ -207,7 +225,9 @@ def is_changed(source_model, target_model):
     return source_date > target_date
 
 
-def get_sync_department_id_map(source_client, target_client):
+def get_sync_department_id_map(
+    source_client: KitsuClient, target_client: KitsuClient
+) -> dict:
     """
     Args:
         source_client (KitsuClient): client to get data from source API
@@ -221,7 +241,9 @@ def get_sync_department_id_map(source_client, target_client):
     return get_id_map_by_id(departments_source, departments_target)
 
 
-def get_sync_asset_type_id_map(source_client, target_client):
+def get_sync_asset_type_id_map(
+    source_client: KitsuClient, target_client: KitsuClient
+) -> dict:
     """
     Args:
         source_client (KitsuClient): client to get data from source API
@@ -235,7 +257,9 @@ def get_sync_asset_type_id_map(source_client, target_client):
     return get_id_map_by_id(asset_types_source, asset_types_target)
 
 
-def get_sync_project_id_map(source_client, target_client):
+def get_sync_project_id_map(
+    source_client: KitsuClient, target_client: KitsuClient
+) -> dict:
     """
     Args:
         source_client (KitsuClient): client to get data from source API
@@ -249,7 +273,9 @@ def get_sync_project_id_map(source_client, target_client):
     return get_id_map_by_id(projects_source, projects_target)
 
 
-def get_sync_task_type_id_map(source_client, target_client):
+def get_sync_task_type_id_map(
+    source_client: KitsuClient, target_client: KitsuClient
+) -> dict:
     """
     Args:
         source_client (KitsuClient): client to get data from source API
@@ -263,7 +289,9 @@ def get_sync_task_type_id_map(source_client, target_client):
     return get_id_map_by_id(task_types_source, task_types_target)
 
 
-def get_sync_task_status_id_map(source_client, target_client):
+def get_sync_task_status_id_map(
+    source_client: KitsuClient, target_client: KitsuClient
+) -> dict:
     """
     Args:
         source_client (KitsuClient): client to get data from source API
@@ -278,7 +306,9 @@ def get_sync_task_status_id_map(source_client, target_client):
     return get_id_map_by_id(task_statuses_source, task_statuses_target)
 
 
-def get_sync_person_id_map(source_client, target_client):
+def get_sync_person_id_map(
+    source_client: KitsuClient, target_client: KitsuClient
+) -> dict:
     """
     Args:
         source_client (KitsuClient): client to get data from source API
@@ -292,7 +322,12 @@ def get_sync_person_id_map(source_client, target_client):
     return get_id_map_by_id(persons_source, persons_target, field="email")
 
 
-def push_assets(project_source, project_target, client_source, client_target):
+def push_assets(
+    project_source: dict,
+    project_target: dict,
+    client_source: KitsuClient,
+    client_target: KitsuClient,
+) -> list[dict]:
     """
     Copy assets from source to target and preserve audit fields (`id`,
     `created_at`, and `updated_at`).
@@ -300,8 +335,8 @@ def push_assets(project_source, project_target, client_source, client_target):
     Args:
         project_source (dict): The project to get assets from
         project_target (dict): The project to push assets to
-        source_client (KitsuClient): client to get data from source API
-        target_client (KitsuClient): client to push data to target API
+        client_source (KitsuClient): client to get data from source API
+        client_target (KitsuClient): client to push data to target API
 
     Returns:
         list: Pushed assets
@@ -320,8 +355,11 @@ def push_assets(project_source, project_target, client_source, client_target):
 
 
 def push_episodes(
-    project_source, project_target, client_source, client_target
-):
+    project_source: dict,
+    project_target: dict,
+    client_source: KitsuClient,
+    client_target: KitsuClient,
+) -> list[dict]:
     """
     Copy episodes from source to target and preserve audit fields (`id`,
     `created_at`, and `updated_at`)
@@ -329,8 +367,8 @@ def push_episodes(
     Args:
         project_source (dict): The project to get episodes from
         project_target (dict): The project to push episodes to
-        source_client (KitsuClient): client to get data from source API
-        target_client (KitsuClient): client to push data to target API
+        client_source (KitsuClient): client to get data from source API
+        client_target (KitsuClient): client to push data to target API
 
     Returns:
         list: Pushed episodes
@@ -344,8 +382,11 @@ def push_episodes(
 
 
 def push_sequences(
-    project_source, project_target, client_source, client_target
-):
+    project_source: dict,
+    project_target: dict,
+    client_source: KitsuClient,
+    client_target: KitsuClient,
+) -> list[dict]:
     """
     Copy sequences from source to target and preserve audit fields (`id`,
     `created_at`, and `updated_at`)
@@ -353,8 +394,8 @@ def push_sequences(
     Args:
         project_source (dict): The project to get sequences from
         project_target (dict): The project to push sequences to
-        source_client (KitsuClient): client to get data from source API
-        target_client (KitsuClient): client to push data to target API
+        client_source (KitsuClient): client to get data from source API
+        client_target (KitsuClient): client to push data to target API
 
     Returns:
         list: Pushed sequences
@@ -367,7 +408,12 @@ def push_sequences(
     return import_entities(sequences, client=client_target)
 
 
-def push_shots(project_source, project_target, client_source, client_target):
+def push_shots(
+    project_source: dict,
+    project_target: dict,
+    client_source: KitsuClient,
+    client_target: KitsuClient,
+) -> list[dict]:
     """
     Copy shots from source to target and preserve audit fields (`id`,
     `created_at`, and `updated_at`).
@@ -375,8 +421,8 @@ def push_shots(project_source, project_target, client_source, client_target):
     Args:
         project_source (dict): The project to get shots from
         project_target (dict): The project to push shots to
-        source_client (KitsuClient): client to get data from source API
-        target_client (KitsuClient): client to push data to target API
+        client_source (KitsuClient): client to get data from source API
+        client_target (KitsuClient): client to push data to target API
 
     Returns:
         list: Pushed shots
@@ -390,8 +436,11 @@ def push_shots(project_source, project_target, client_source, client_target):
 
 
 def push_entity_links(
-    project_source, project_target, client_source, client_target
-):
+    project_source: dict,
+    project_target: dict,
+    client_source: KitsuClient,
+    client_target: KitsuClient,
+) -> list[dict]:
     """
     Copy entity links (breakdown, concepts) from source to target and preserve
     audit fields (`id`, `created_at`, and `updated_at`).
@@ -399,8 +448,8 @@ def push_entity_links(
     Args:
         project_source (dict): The project to get assets from
         project_target (dict): The project to push assets to
-        source_client (KitsuClient): client to get data from source API
-        target_client (KitsuClient): client to push data to target API
+        client_source (KitsuClient): client to get data from source API
+        client_target (KitsuClient): client to push data to target API
 
     Returns:
         list: Pushed entity links
@@ -412,8 +461,11 @@ def push_entity_links(
 
 
 def push_project_entities(
-    project_source, project_target, client_source, client_target
-):
+    project_source: dict,
+    project_target: dict,
+    client_source: KitsuClient,
+    client_target: KitsuClient,
+) -> dict:
     """
     Copy assets, episodes, sequences, shots and entity links from source to
     target and preserve audit fields (`id`, `created_at`, and `updated_at`).
@@ -421,8 +473,8 @@ def push_project_entities(
     Args:
         project_source (dict): The project to get assets from
         project_target (dict): The project to push assets to
-        source_client (KitsuClient): client to get data from source API
-        target_client (KitsuClient): client to push data to target API
+        client_source (KitsuClient): client to get data from source API
+        client_target (KitsuClient): client to push data to target API
 
     Returns:
         dict: Pushed data
@@ -444,12 +496,12 @@ def push_project_entities(
 
 
 def push_tasks(
-    project_source,
-    project_target,
-    default_status,
-    client_source,
-    client_target,
-):
+    project_source: dict,
+    project_target: dict,
+    default_status: str | dict,
+    client_source: KitsuClient,
+    client_target: KitsuClient,
+) -> list[dict]:
     """
     Copy tasks from source to target and preserve audit fields (`id`,
     `created_at`, and `updated_at`)
@@ -458,13 +510,13 @@ def push_tasks(
     Args:
         project_source (dict): The project to get assets from
         project_target (dict): The project to push assets to
-        source_client (KitsuClient): client to get data from source API
-        target_client (KitsuClient): client to push data to target API
+        default_status (str / dict): The default status for the pushed tasks
+        client_source (KitsuClient): client to get data from source API
+        client_target (KitsuClient): client to push data to target API
 
     Returns:
         list: Pushed entity links
     """
-
     default_status_id = normalize_model_parameter(default_status)["id"]
     task_type_map = get_sync_task_type_id_map(client_source, client_target)
     person_map = get_sync_person_id_map(client_source, client_target)
@@ -484,7 +536,11 @@ def push_tasks(
     return import_tasks(tasks, client=client_target)
 
 
-def push_tasks_comments(project_source, client_source, client_target):
+def push_tasks_comments(
+    project_source: dict,
+    client_source: KitsuClient,
+    client_target: KitsuClient,
+) -> list[dict]:
     """
     Create a new comment into target api for each comment in source project
     but preserve only `created_at` field.
@@ -492,14 +548,12 @@ def push_tasks_comments(project_source, client_source, client_target):
 
     Args:
         project_source (dict): The project to get assets from
-        project_target (dict): The project to push assets to
-        source_client (KitsuClient): client to get data from source API
-        target_client (KitsuClient): client to push data to target API
+        client_source (KitsuClient): client to get data from source API
+        client_target (KitsuClient): client to push data to target API
 
     Returns:
         list: Created comments
     """
-
     task_status_map = get_sync_task_status_id_map(client_source, client_target)
     person_map = get_sync_person_id_map(client_source, client_target)
     tasks = task_module.all_tasks_for_project(
@@ -513,18 +567,23 @@ def push_tasks_comments(project_source, client_source, client_target):
 
 
 def push_task_comments(
-    task_status_map, person_map, task, client_source, client_target
-):
+    task_status_map: dict,
+    person_map: dict,
+    task: str | dict,
+    client_source: KitsuClient,
+    client_target: KitsuClient,
+) -> list[dict]:
     """
     Create a new comment into target api for each comment in source task
     but preserve only `created_at` field.
     Attachments and previews are created too.
 
     Args:
-        project_source (dict): The project to get assets from
-        project_target (dict): The project to push assets to
-        source_client (KitsuClient): client to get data from source API
-        target_client (KitsuClient): client to push data to target API
+        task_status_map (dict): A mapping of source TaskStatus IDs to target IDs.
+        person_map (dict): A mapping of source Person IDs to target IDs.
+        task (str / dict): The task to push comments for
+        client_source (KitsuClient): client to get data from source API
+        client_target (KitsuClient): client to push data to target API
 
     Returns:
         list: Created comments
@@ -546,28 +605,33 @@ def push_task_comments(
 
 
 def push_task_comment(
-    task_status_map,
-    person_map,
-    task,
-    comment,
-    client_source,
-    client_target,
-    author_id=None,
-    tmp_path="/tmp/zou/sync/",
-):
+    task_status_map: dict,
+    person_map: dict,
+    task: str | dict,
+    comment: dict,
+    client_source: KitsuClient,
+    client_target: KitsuClient,
+    author_id: str | None = None,
+    tmp_path: str = "/tmp/zou/sync/",
+) -> dict:
     """
     Create a new comment into target api for each comment in source task
     but preserve only `created_at` field.
     Attachments and previews are created too.
 
     Args:
-        project_source (dict): The project to get assets from
-        project_target (dict): The project to push assets to
-        source_client (KitsuClient): client to get data from source API
-        target_client (KitsuClient): client to push data to target API
+        task_status_map (dict): A mapping of source TaskStatus IDs to target IDs.
+        person_map (dict): A mapping of source Person IDs to target IDs.
+        task (str / dict): The task to push the comment for.
+        comment (dict): The comment to push.
+        client_source (KitsuClient): client to get data from source API
+        client_target (KitsuClient): client to push data to target API
+        author_id (str): The ID of the Person to set as the comment author.
+        tmp_path (str): The local path on disk to download the attachment files
+            for syncing.
 
     Returns:
-        list: Created comments
+        dict: The source comment.
     """
     attachments = []
     for attachment_id in comment["attachment_files"]:
@@ -652,11 +716,11 @@ def push_task_comment(
     return comment
 
 
-def convert_id_list(ids, model_map):
+def convert_id_list(ids: list[str], model_map: dict) -> list:
     """
     Args:
         ids (list): Ids to convert.
-        model_map (dict): Map matching ids to another value.c
+        model_map (dict): Map matching ids to another value.
 
     Returns:
         list: Ids converted through given model map.
