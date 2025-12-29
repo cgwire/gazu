@@ -1,17 +1,25 @@
+from __future__ import annotations
+
 from . import client as raw
 
+from .client import KitsuClient
 from .helpers import normalize_model_parameter
 
 default = raw.default_client
 
 
-def search_entities(query, project=None, entity_types=None, client=default):
+def search_entities(
+    query: str,
+    project: str | dict | None = None,
+    entity_types: list[str | dict] | None = None,
+    client: KitsuClient = default,
+) -> dict[str, list]:
     """
     Search for entities matching the given query.
 
     Args:
         query (str): Search query string.
-        project (dict / ID): Optional project to limit search to.
+        project (str / dict): Optional project to limit search to.
         entity_types (list): Optional list of entity type dicts or IDs to filter by.
 
     Returns:
@@ -32,4 +40,3 @@ def search_entities(query, project=None, entity_types=None, client=default):
         data["entity_types"] = entity_type_ids
 
     return raw.post("data/search", data, client=client)
-

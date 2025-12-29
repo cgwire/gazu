@@ -1,14 +1,22 @@
+from __future__ import annotations
+
 from . import client as raw
 
 from .sorting import sort_by_name
 from .cache import cache
+from .client import KitsuClient
 from .helpers import normalize_model_parameter
 from .shot import get_sequence
 
 default = raw.default_client
 
 
-def new_scene(project, sequence, name, client=default):
+def new_scene(
+    project: str | dict,
+    sequence: str | dict,
+    name: str,
+    client: KitsuClient = default,
+) -> dict:
     """
     Create a scene for given sequence.
     """
@@ -21,7 +29,9 @@ def new_scene(project, sequence, name, client=default):
 
 
 @cache
-def all_scenes(project=None, client=default):
+def all_scenes(
+    project: str | dict | None = None, client: KitsuClient = default
+) -> list[dict]:
     """
     Retrieve all scenes.
     """
@@ -36,7 +46,9 @@ def all_scenes(project=None, client=default):
 
 
 @cache
-def all_scenes_for_project(project, client=default):
+def all_scenes_for_project(
+    project: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Retrieve all scenes for given project.
     """
@@ -46,7 +58,9 @@ def all_scenes_for_project(project, client=default):
 
 
 @cache
-def all_scenes_for_sequence(sequence, client=default):
+def all_scenes_for_sequence(
+    sequence: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Retrieve all scenes which are children from given sequence.
     """
@@ -57,7 +71,7 @@ def all_scenes_for_sequence(sequence, client=default):
 
 
 @cache
-def get_scene(scene_id, client=default):
+def get_scene(scene_id: str, client: KitsuClient = default) -> dict:
     """
     Return scene corresponding to given scene ID.
     """
@@ -65,7 +79,9 @@ def get_scene(scene_id, client=default):
 
 
 @cache
-def get_scene_by_name(sequence, scene_name, client=default):
+def get_scene_by_name(
+    sequence: str | dict, scene_name: str, client: KitsuClient = default
+) -> dict | None:
     """
     Returns scene corresponding to given sequence and name.
     """
@@ -78,14 +94,19 @@ def get_scene_by_name(sequence, scene_name, client=default):
     return next(iter(result or []), None)
 
 
-def update_scene(scene, client=default):
+def update_scene(scene: dict, client: KitsuClient = default) -> dict:
     """
     Save given scene data into the API.
     """
     return raw.put("data/entities/%s" % scene["id"], scene, client=client)
 
 
-def new_scene_asset_instance(scene, asset, description=None, client=default):
+def new_scene_asset_instance(
+    scene: str | dict,
+    asset: str | dict,
+    description: str | None = None,
+    client: KitsuClient = default,
+) -> dict:
     """
     Creates a new asset instance on given scene. The instance number is
     automatically generated (increment highest number).
@@ -103,7 +124,9 @@ def new_scene_asset_instance(scene, asset, description=None, client=default):
 
 
 @cache
-def all_asset_instances_for_scene(scene, client=default):
+def all_asset_instances_for_scene(
+    scene: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Return the list of asset instances listed in a scene.
     """
@@ -114,10 +137,13 @@ def all_asset_instances_for_scene(scene, client=default):
 
 
 @cache
-def get_asset_instance_by_name(scene, name, client=default):
+def get_asset_instance_by_name(
+    scene: str | dict, name: str, client: KitsuClient = default
+) -> dict | None:
     """
     Returns the asset instance of the scene that has the given name.
     """
+    scene = normalize_model_parameter(scene)
     return raw.fetch_first(
         "asset-instances",
         {"name": name, "scene_id": scene["id"]},
@@ -126,7 +152,9 @@ def get_asset_instance_by_name(scene, name, client=default):
 
 
 @cache
-def all_camera_instances_for_scene(scene, client=default):
+def all_camera_instances_for_scene(
+    scene: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Return the list of camera instances listed in a scene.
     """
@@ -137,7 +165,9 @@ def all_camera_instances_for_scene(scene, client=default):
 
 
 @cache
-def all_shots_for_scene(scene, client=default):
+def all_shots_for_scene(
+    scene: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Return the list of shots issued from given scene.
     """
@@ -145,7 +175,9 @@ def all_shots_for_scene(scene, client=default):
     return raw.get("data/scenes/%s/shots" % scene["id"], client=client)
 
 
-def add_shot_to_scene(scene, shot, client=default):
+def add_shot_to_scene(
+    scene: str | dict, shot: str | dict, client: KitsuClient = default
+) -> dict:
     """
     Link a shot to a scene to mark the fact it was generated out from that
     scene.
@@ -156,7 +188,9 @@ def add_shot_to_scene(scene, shot, client=default):
     return raw.post("data/scenes/%s/shots" % scene["id"], data, client=client)
 
 
-def remove_shot_from_scene(scene, shot, client=default):
+def remove_shot_from_scene(
+    scene: str | dict, shot: str | dict, client: KitsuClient = default
+) -> str:
     """
     Remove link between a shot and a scene.
     """
@@ -167,7 +201,9 @@ def remove_shot_from_scene(scene, shot, client=default):
     )
 
 
-def update_asset_instance_name(asset_instance, name, client=default):
+def update_asset_instance_name(
+    asset_instance: dict, name: str, client: KitsuClient = default
+) -> dict:
     """
     Update the name of given asset instance.
     """
@@ -175,7 +211,9 @@ def update_asset_instance_name(asset_instance, name, client=default):
     return raw.put(path, {"name": name}, client=client)
 
 
-def update_asset_instance_data(asset_instance, data, client=default):
+def update_asset_instance_data(
+    asset_instance: str | dict, data: dict, client: KitsuClient = default
+) -> dict:
     """
     Update the extra data of given asset instance.
     """
@@ -185,7 +223,9 @@ def update_asset_instance_data(asset_instance, data, client=default):
 
 
 @cache
-def get_sequence_from_scene(scene, client=default):
+def get_sequence_from_scene(
+    scene: str | dict, client: KitsuClient = default
+) -> dict:
     """
     Return sequence which is parent of given shot.
     """

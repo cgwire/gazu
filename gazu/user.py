@@ -1,7 +1,12 @@
+from __future__ import annotations
+
+from typing_extensions import Literal
+
 import datetime
 from gazu.exception import NotAuthenticatedException
 
 from . import client as raw
+from .client import KitsuClient
 from .sorting import sort_by_name
 from .helpers import normalize_model_parameter
 
@@ -11,7 +16,7 @@ default = raw.default_client
 
 
 @cache
-def all_open_projects(client=default):
+def all_open_projects(client: KitsuClient = default) -> list[dict]:
     """
     Returns:
         list: Projects for which the user is part of the team. Admins see all
@@ -22,7 +27,9 @@ def all_open_projects(client=default):
 
 
 @cache
-def all_asset_types_for_project(project, client=default):
+def all_asset_types_for_project(
+    project: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Args:
         project (str / dict): The project dict or the project ID.
@@ -38,7 +45,9 @@ def all_asset_types_for_project(project, client=default):
 
 
 @cache
-def all_assets_for_asset_type_and_project(project, asset_type, client=default):
+def all_assets_for_asset_type_and_project(
+    project: str | dict, asset_type: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Args:
         project (str / dict): The project dict or the project ID.
@@ -59,7 +68,9 @@ def all_assets_for_asset_type_and_project(project, asset_type, client=default):
 
 
 @cache
-def all_tasks_for_asset(asset, client=default):
+def all_tasks_for_asset(
+    asset: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Args:
         asset (str / dict): The asset dict or the asset ID.
@@ -74,7 +85,9 @@ def all_tasks_for_asset(asset, client=default):
 
 
 @cache
-def all_tasks_for_shot(shot, client=default):
+def all_tasks_for_shot(
+    shot: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Args:
         shot (str / dict): The shot dict or the shot ID.
@@ -89,7 +102,9 @@ def all_tasks_for_shot(shot, client=default):
 
 
 @cache
-def all_tasks_for_scene(scene, client=default):
+def all_tasks_for_scene(
+    scene: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Args:
         scene (str / dict): The scene dict or the scene ID.
@@ -104,7 +119,9 @@ def all_tasks_for_scene(scene, client=default):
 
 
 @cache
-def all_tasks_for_sequence(sequence, client=default):
+def all_tasks_for_sequence(
+    sequence: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Return the list of tasks for given asset and current user.
     """
@@ -115,7 +132,9 @@ def all_tasks_for_sequence(sequence, client=default):
 
 
 @cache
-def all_task_types_for_asset(asset, client=default):
+def all_task_types_for_asset(
+    asset: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Args:
         asset (str / dict): The asset dict or the asset ID.
@@ -130,7 +149,9 @@ def all_task_types_for_asset(asset, client=default):
 
 
 @cache
-def all_task_types_for_shot(shot, client=default):
+def all_task_types_for_shot(
+    shot: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Args:
         shot (str / dict): The shot dict or the shot ID.
@@ -145,7 +166,9 @@ def all_task_types_for_shot(shot, client=default):
 
 
 @cache
-def all_task_types_for_scene(scene, client=default):
+def all_task_types_for_scene(
+    scene: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Args:
         scene (str / dict): The scene dict or the scene ID.
@@ -160,7 +183,9 @@ def all_task_types_for_scene(scene, client=default):
 
 
 @cache
-def all_task_types_for_sequence(sequence, client=default):
+def all_task_types_for_sequence(
+    sequence: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Returns:
         list: Task types for given asset and current user.
@@ -172,7 +197,9 @@ def all_task_types_for_sequence(sequence, client=default):
 
 
 @cache
-def all_sequences_for_project(project, client=default):
+def all_sequences_for_project(
+    project: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Args:
         project (str / dict): The project dict or the project ID.
@@ -187,7 +214,9 @@ def all_sequences_for_project(project, client=default):
 
 
 @cache
-def all_episodes_for_project(project, client=default):
+def all_episodes_for_project(
+    project: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Args:
         project (str / dict): The project dict or the project ID.
@@ -201,7 +230,9 @@ def all_episodes_for_project(project, client=default):
 
 
 @cache
-def all_shots_for_sequence(sequence, client=default):
+def all_shots_for_sequence(
+    sequence: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Args:
         sequence (str / dict): The sequence dict or the sequence ID.
@@ -216,7 +247,9 @@ def all_shots_for_sequence(sequence, client=default):
 
 
 @cache
-def all_scenes_for_sequence(sequence, client=default):
+def all_scenes_for_sequence(
+    sequence: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Args:
         sequence (str / dict): The sequence dict or the sequence ID.
@@ -231,7 +264,7 @@ def all_scenes_for_sequence(sequence, client=default):
 
 
 @cache
-def all_tasks_to_do(client=default):
+def all_tasks_to_do(client: KitsuClient = default) -> list[dict]:
     """
     Returns:
         list: Tasks assigned to current user which are not complete.
@@ -240,7 +273,7 @@ def all_tasks_to_do(client=default):
 
 
 @cache
-def all_done_tasks(client=default):
+def all_done_tasks(client: KitsuClient = default) -> list[dict]:
     """
     Returns:
         list: Tasks assigned to current user which are done.
@@ -249,7 +282,9 @@ def all_done_tasks(client=default):
 
 
 @cache
-def get_timespents_range(start_date, end_date, client=default):
+def get_timespents_range(
+    start_date: str, end_date: str, client: KitsuClient = default
+) -> list[dict]:
     """
     Gets the timespents of the current user for the given date range.
 
@@ -258,6 +293,7 @@ def get_timespents_range(start_date, end_date, client=default):
                           the following format: YYYY-MM-DD
         end_date (str): The last day of the date range as a date string with
                         the following format: YYYY-MM-DD
+
     Returns:
         list: All of the person's time spents
     """
@@ -268,7 +304,7 @@ def get_timespents_range(start_date, end_date, client=default):
     return raw.get("/data/user/time-spents", params=date_range, client=client)
 
 
-def log_desktop_session_log_in(client=default):
+def log_desktop_session_log_in(client: KitsuClient = default) -> dict:
     """
     Add a log entry to mention that the user logged in his computer.
 
@@ -280,7 +316,7 @@ def log_desktop_session_log_in(client=default):
     return raw.post(path, data, client=client)
 
 
-def is_authenticated(client=default):
+def is_authenticated(client: KitsuClient = default) -> bool:
     """
     Returns:
         bool: Current user authenticated or not
@@ -291,7 +327,7 @@ def is_authenticated(client=default):
         return False
 
 
-def all_filters(client=default):
+def all_filters(client: KitsuClient = default) -> list[dict]:
     """
     Return:
         list: all filters for current user.
@@ -300,8 +336,13 @@ def all_filters(client=default):
 
 
 def new_filter(
-    name, query, list_type, project=None, entity_type=None, client=default
-):
+    name: str,
+    query: str,
+    list_type: str,
+    project: str | dict | None = None,
+    entity_type: str | None = None,
+    client: KitsuClient = default,
+) -> dict:
     """
     Create a new filter for current user.
 
@@ -332,17 +373,18 @@ def new_filter(
     )
 
 
-def remove_filter(filter, client=default):
+def remove_filter(filter: str | dict, client: KitsuClient = default) -> str:
     """
     Remove given filter from database.
 
     Args:
         filter (str / dict): The filter dict or the filter ID.
     """
+    filter = normalize_model_parameter(filter)
     return raw.delete("data/user/filters/%s" % filter["id"], client=client)
 
 
-def update_filter(filter, client=default):
+def update_filter(filter: dict, client: KitsuClient = default) -> dict:
     """
     Save given filter data into the API.
 
@@ -355,7 +397,7 @@ def update_filter(filter, client=default):
 
 
 @cache
-def get_context(client=default):
+def get_context(client: KitsuClient = default) -> dict:
     """
     Get user context.
 
@@ -366,12 +408,14 @@ def get_context(client=default):
 
 
 @cache
-def all_project_assets(project, client=default):
+def all_project_assets(
+    project: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Get assets for which user has tasks assigned for given project.
 
     Args:
-        project (dict / ID): The project dict or id.
+        project (str / dict): The project dict or id.
 
     Returns:
         list: Assets for the project.
@@ -382,7 +426,7 @@ def all_project_assets(project, client=default):
 
 
 @cache
-def all_tasks_requiring_feedback(client=default):
+def all_tasks_requiring_feedback(client: KitsuClient = default) -> list[dict]:
     """
     Get tasks requiring feedback from the current user.
 
@@ -393,7 +437,7 @@ def all_tasks_requiring_feedback(client=default):
 
 
 @cache
-def all_filter_groups(client=default):
+def all_filter_groups(client: KitsuClient = default) -> list[dict]:
     """
     Get all filter groups for current user.
 
@@ -403,13 +447,15 @@ def all_filter_groups(client=default):
     return raw.fetch_all("user/filter-groups", client=client)
 
 
-def new_filter_group(name, project=None, client=default):
+def new_filter_group(
+    name: str, project: str | dict | None = None, client: KitsuClient = default
+) -> dict:
     """
     Create a new filter group for current user.
 
     Args:
         name (str): The filter group name.
-        project (dict / ID): The project dict or id.
+        project (str / dict): The project dict or id.
 
     Returns:
         dict: Created filter group.
@@ -427,12 +473,14 @@ def new_filter_group(name, project=None, client=default):
 
 
 @cache
-def get_filter_group(filter_group, client=default):
+def get_filter_group(
+    filter_group: str | dict, client: KitsuClient = default
+) -> dict:
     """
     Get a filter group.
 
     Args:
-        filter_group (dict / ID): The filter group dict or id.
+        filter_group (str / dict): The filter group dict or id.
 
     Returns:
         dict: Filter group.
@@ -443,7 +491,9 @@ def get_filter_group(filter_group, client=default):
     )
 
 
-def update_filter_group(filter_group, client=default):
+def update_filter_group(
+    filter_group: dict, client: KitsuClient = default
+) -> dict:
     """
     Update a filter group.
 
@@ -460,12 +510,14 @@ def update_filter_group(filter_group, client=default):
     )
 
 
-def remove_filter_group(filter_group, client=default):
+def remove_filter_group(
+    filter_group: str | dict, client: KitsuClient = default
+) -> str:
     """
     Remove given filter group from database.
 
     Args:
-        filter_group (dict / ID): The filter group dict or id.
+        filter_group (str / dict): The filter group dict or id.
     """
     filter_group = normalize_model_parameter(filter_group)
     return raw.delete(
@@ -474,7 +526,7 @@ def remove_filter_group(filter_group, client=default):
 
 
 @cache
-def all_desktop_login_logs(client=default):
+def all_desktop_login_logs(client: KitsuClient = default) -> list:
     """
     Get desktop login logs for current user.
 
@@ -485,7 +537,7 @@ def all_desktop_login_logs(client=default):
 
 
 @cache
-def get_time_spents_by_date(date, client=default):
+def get_time_spents_by_date(date: str, client: KitsuClient = default) -> list:
     """
     Get time spents for a specific date.
 
@@ -495,16 +547,20 @@ def get_time_spents_by_date(date, client=default):
     Returns:
         list: Time spents for the date.
     """
-    return raw.get("data/user/time-spents/by-date", params={"date": date}, client=client)
+    return raw.get(
+        "data/user/time-spents/by-date", params={"date": date}, client=client
+    )
 
 
 @cache
-def get_task_time_spent(task, client=default):
+def get_task_time_spent(
+    task: str | dict, client: KitsuClient = default
+) -> dict:
     """
     Get time spent for a specific task.
 
     Args:
-        task (dict / ID): The task dict or id.
+        task (str / dict): The task dict or id.
 
     Returns:
         dict: Time spent information for the task.
@@ -515,7 +571,7 @@ def get_task_time_spent(task, client=default):
 
 
 @cache
-def get_day_off(client=default):
+def get_day_off(client: KitsuClient = default) -> dict:
     """
     Get day off information for current user.
 
@@ -526,7 +582,7 @@ def get_day_off(client=default):
 
 
 @cache
-def all_notifications(client=default):
+def all_notifications(client: KitsuClient = default) -> list[dict]:
     """
     Get all notifications for current user.
 
@@ -537,12 +593,14 @@ def all_notifications(client=default):
 
 
 @cache
-def get_notification(notification, client=default):
+def get_notification(
+    notification: str | dict, client: KitsuClient = default
+) -> dict:
     """
     Get a specific notification.
 
     Args:
-        notification (dict / ID): The notification dict or id.
+        notification (str / dict): The notification dict or id.
 
     Returns:
         dict: Notification.
@@ -553,7 +611,9 @@ def get_notification(notification, client=default):
     )
 
 
-def update_notification(notification, client=default):
+def update_notification(
+    notification: dict, client: KitsuClient = default
+) -> dict:
     """
     Update a notification.
 
@@ -571,12 +631,14 @@ def update_notification(notification, client=default):
 
 
 @cache
-def check_task_subscription(task, client=default):
+def check_task_subscription(
+    task: str | dict, client: KitsuClient = default
+) -> dict:
     """
     Check if user is subscribed to a task.
 
     Args:
-        task (dict / ID): The task dict or id.
+        task (str / dict): The task dict or id.
 
     Returns:
         dict: Subscription status.
@@ -586,12 +648,12 @@ def check_task_subscription(task, client=default):
     return raw.get(path, client=client)
 
 
-def subscribe_to_task(task, client=default):
+def subscribe_to_task(task: str | dict, client: KitsuClient = default) -> dict:
     """
     Subscribe to a task.
 
     Args:
-        task (dict / ID): The task dict or id.
+        task (str / dict): The task dict or id.
 
     Returns:
         dict: Subscription information.
@@ -601,12 +663,14 @@ def subscribe_to_task(task, client=default):
     return raw.post(path, {}, client=client)
 
 
-def unsubscribe_from_task(task, client=default):
+def unsubscribe_from_task(
+    task: str | dict, client: KitsuClient = default
+) -> str:
     """
     Unsubscribe from a task.
 
     Args:
-        task (dict / ID): The task dict or id.
+        task (str / dict): The task dict or id.
     """
     task = normalize_model_parameter(task)
     path = "data/user/tasks/%s/unsubscribe" % task["id"]
@@ -614,7 +678,7 @@ def unsubscribe_from_task(task, client=default):
 
 
 @cache
-def all_chats(client=default):
+def all_chats(client: KitsuClient = default) -> list[dict]:
     """
     Get all chats for current user.
 
@@ -624,12 +688,12 @@ def all_chats(client=default):
     return raw.fetch_all("user/chats", client=client)
 
 
-def join_chat(chat, client=default):
+def join_chat(chat: str | dict, client: KitsuClient = default) -> dict:
     """
     Join a chat.
 
     Args:
-        chat (dict / ID): The chat dict or id.
+        chat (str / dict): The chat dict or id.
 
     Returns:
         dict: Chat information.
@@ -639,28 +703,28 @@ def join_chat(chat, client=default):
     return raw.post(path, {}, client=client)
 
 
-def leave_chat(chat, client=default):
+def leave_chat(chat: str | dict, client: KitsuClient = default) -> str:
     """
     Leave a chat.
 
     Args:
-        chat (dict / ID): The chat dict or id.
+        chat (str / dict): The chat dict or id.
     """
     chat = normalize_model_parameter(chat)
     path = "data/user/chats/%s/leave" % chat["id"]
     return raw.delete(path, client=client)
 
 
-def clear_avatar(client=default):
+def clear_avatar(client: KitsuClient = default) -> str:
     """
     Clear user avatar.
-
-    Returns:
-        Response: Request response object.
     """
     return raw.delete("data/user/avatar", client=client)
 
-def mark_all_notifications_as_read(client=default):
+
+def mark_all_notifications_as_read(
+    client: KitsuClient = default,
+) -> dict[Literal["success"], bool]:
     """
     Mark all notifications as read for current user.
 

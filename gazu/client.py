@@ -386,13 +386,13 @@ def get(
         return response.text
 
 
-def post(path: str, data: dict, client: KitsuClient = default_client) -> Any:
+def post(path: str, data: Any, client: KitsuClient = default_client) -> Any:
     """
     Run a post request toward given path for configured host.
 
     Args:
         path (str): The path to query.
-        data (dict): The data to post.
+        data (Any): The data to post.
         client (KitsuClient): The client to use for the request.
 
     Returns:
@@ -728,7 +728,7 @@ def upload(
         client (KitsuClient): The client to use for the request.
 
     Returns:
-        Response: Request response object.
+        Any: Response from the API.
     """
     url = get_full_url(path, client)
     if not files:

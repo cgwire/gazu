@@ -1,8 +1,9 @@
-import string
+from __future__ import annotations
 
 import json
+import string
 
-from deprecated import deprecated
+import requests
 
 from gazu.exception import (
     TaskStatusNotFoundException,
@@ -10,6 +11,7 @@ from gazu.exception import (
 )
 
 from . import client as raw
+from .client import KitsuClient
 from .sorting import sort_by_name
 from .helpers import (
     download_file,
@@ -23,7 +25,7 @@ default = raw.default_client
 
 
 @cache
-def all_task_statuses(client=default):
+def all_task_statuses(client: KitsuClient = default) -> list[dict]:
     """
     Returns:
         list: Task statuses stored in database.
@@ -33,7 +35,7 @@ def all_task_statuses(client=default):
 
 
 @cache
-def all_task_types(client=default):
+def all_task_types(client: KitsuClient = default) -> list[dict]:
     """
     Returns:
         list: Task types stored in database.
@@ -43,7 +45,9 @@ def all_task_types(client=default):
 
 
 @cache
-def all_task_types_for_project(project, client=default):
+def all_task_types_for_project(
+    project: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Returns:
         list: Task types stored in database.
@@ -56,7 +60,9 @@ def all_task_types_for_project(project, client=default):
 
 
 @cache
-def all_task_statuses_for_project(project, client=default):
+def all_task_statuses_for_project(
+    project: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Returns:
         list: Task status stored in database.
@@ -69,7 +75,9 @@ def all_task_statuses_for_project(project, client=default):
 
 
 @cache
-def all_tasks_for_shot(shot, relations=False, client=default):
+def all_tasks_for_shot(
+    shot: str | dict, relations: bool = False, client: KitsuClient = default
+) -> list[dict]:
     """
     Args:
         shot (str / dict): The shot dict or the shot ID.
@@ -86,7 +94,9 @@ def all_tasks_for_shot(shot, relations=False, client=default):
 
 
 @cache
-def all_tasks_for_concept(concept, relations=False, client=default):
+def all_tasks_for_concept(
+    concept: str | dict, relations: bool = False, client: KitsuClient = default
+) -> list[dict]:
     """
     Args:
         concept (str / dict): The concept dict or the concept ID.
@@ -105,7 +115,9 @@ def all_tasks_for_concept(concept, relations=False, client=default):
 
 
 @cache
-def all_tasks_for_edit(edit, relations=False, client=default):
+def all_tasks_for_edit(
+    edit: str | dict, relations: bool = False, client: KitsuClient = default
+) -> list[dict]:
     """
     Args:
         edit (str / dict): The edit dict or the edit ID.
@@ -122,7 +134,11 @@ def all_tasks_for_edit(edit, relations=False, client=default):
 
 
 @cache
-def all_tasks_for_sequence(sequence, relations=False, client=default):
+def all_tasks_for_sequence(
+    sequence: str | dict,
+    relations: bool = False,
+    client: KitsuClient = default,
+) -> list[dict]:
     """
     Args:
         sequence (str / dict): The sequence dict or the sequence ID.
@@ -140,7 +156,9 @@ def all_tasks_for_sequence(sequence, relations=False, client=default):
 
 
 @cache
-def all_tasks_for_scene(scene, relations=False, client=default):
+def all_tasks_for_scene(
+    scene: str | dict, relations: bool = False, client: KitsuClient = default
+) -> list[dict]:
     """
     Args:
         sequence (str / dict): The scene dict or the scene ID.
@@ -158,7 +176,9 @@ def all_tasks_for_scene(scene, relations=False, client=default):
 
 
 @cache
-def all_tasks_for_asset(asset, relations=False, client=default):
+def all_tasks_for_asset(
+    asset: str | dict, relations: bool = False, client: KitsuClient = default
+) -> list[dict]:
     """
     Args:
         asset (str / dict): The asset dict or the asset ID.
@@ -176,7 +196,9 @@ def all_tasks_for_asset(asset, relations=False, client=default):
 
 
 @cache
-def all_tasks_for_episode(episode, relations=False, client=default):
+def all_tasks_for_episode(
+    episode: str | dict, relations: bool = False, client: KitsuClient = default
+) -> list[dict]:
     """
     Retrieve all tasks directly linked to given episode.
     """
@@ -190,7 +212,11 @@ def all_tasks_for_episode(episode, relations=False, client=default):
 
 
 @cache
-def all_shot_tasks_for_sequence(sequence, relations=False, client=default):
+def all_shot_tasks_for_sequence(
+    sequence: str | dict,
+    relations: bool = False,
+    client: KitsuClient = default,
+) -> list[dict]:
     """
     Retrieve all tasks directly linked to all shots of given sequence.
     """
@@ -204,7 +230,9 @@ def all_shot_tasks_for_sequence(sequence, relations=False, client=default):
 
 
 @cache
-def all_shot_tasks_for_episode(episode, relations=False, client=default):
+def all_shot_tasks_for_episode(
+    episode: str | dict, relations: bool = False, client: KitsuClient = default
+) -> list[dict]:
     """
     Retrieve all tasks directly linked to all shots of given episode.
     """
@@ -218,7 +246,9 @@ def all_shot_tasks_for_episode(episode, relations=False, client=default):
 
 
 @cache
-def all_assets_tasks_for_episode(episode, relations=False, client=default):
+def all_assets_tasks_for_episode(
+    episode: str | dict, relations: bool = False, client: KitsuClient = default
+) -> list[dict]:
     """
     Retrieve all tasks directly linked to all assets of given episode.
     """
@@ -232,7 +262,12 @@ def all_assets_tasks_for_episode(episode, relations=False, client=default):
 
 
 @cache
-def all_tasks_for_task_status(project, task_type, task_status, client=default):
+def all_tasks_for_task_status(
+    project: str | dict,
+    task_type: str | dict,
+    task_status: str | dict,
+    client: KitsuClient = default,
+) -> list[dict]:
     """
     Args:
         project (str / dict): The project dict or the project ID.
@@ -257,7 +292,12 @@ def all_tasks_for_task_status(project, task_type, task_status, client=default):
 
 
 @cache
-def all_tasks_for_task_type(project, task_type, episode=None, client=default):
+def all_tasks_for_task_type(
+    project: str | dict,
+    task_type: str | dict,
+    episode: str | dict | None = None,
+    client: KitsuClient = default,
+) -> list[dict]:
     """
     Args:
         project (str / dict): The project dict or the project ID.
@@ -280,7 +320,9 @@ def all_tasks_for_task_type(project, task_type, episode=None, client=default):
 
 
 @cache
-def all_task_types_for_shot(shot, client=default):
+def all_task_types_for_shot(
+    shot: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Args:
         shot (str / dict): The shot dict or the shot ID.
@@ -295,7 +337,9 @@ def all_task_types_for_shot(shot, client=default):
 
 
 @cache
-def all_task_types_for_concept(concept, client=default):
+def all_task_types_for_concept(
+    concept: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Args:
         concept (str / dict): The concept dict or the concept ID.
@@ -310,7 +354,9 @@ def all_task_types_for_concept(concept, client=default):
 
 
 @cache
-def all_task_types_for_asset(asset, client=default):
+def all_task_types_for_asset(
+    asset: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Args:
         asset (str / dict): The asset dict or the asset ID.
@@ -326,7 +372,9 @@ def all_task_types_for_asset(asset, client=default):
 
 
 @cache
-def all_task_types_for_scene(scene, client=default):
+def all_task_types_for_scene(
+    scene: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Args:
         scene (str / dict): The scene dict or the scene ID.
@@ -341,7 +389,9 @@ def all_task_types_for_scene(scene, client=default):
 
 
 @cache
-def all_task_types_for_sequence(sequence, client=default):
+def all_task_types_for_sequence(
+    sequence: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Args:
         sequence (str / dict): The sequence dict or the sequence ID.
@@ -356,7 +406,9 @@ def all_task_types_for_sequence(sequence, client=default):
 
 
 @cache
-def all_task_types_for_episode(episode, client=default):
+def all_task_types_for_episode(
+    episode: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Returns:
         list: Task types of tasks linked directly to given episode.
@@ -368,7 +420,9 @@ def all_task_types_for_episode(episode, client=default):
 
 
 @cache
-def all_tasks_for_entity_and_task_type(entity, task_type, client=default):
+def all_tasks_for_entity_and_task_type(
+    entity: str | dict, task_type: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Args:
         entity (str / dict): The entity dict or the entity ID.
@@ -386,7 +440,9 @@ def all_tasks_for_entity_and_task_type(entity, task_type, client=default):
 
 
 @cache
-def all_tasks_for_person(person, client=default):
+def all_tasks_for_person(
+    person: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Returns:
         list: Tasks that are not done for given person (only for open projects).
@@ -396,7 +452,9 @@ def all_tasks_for_person(person, client=default):
 
 
 @cache
-def all_done_tasks_for_person(person, client=default):
+def all_done_tasks_for_person(
+    person: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Returns:
         list: Tasks that are done for given person (only for open projects).
@@ -406,7 +464,12 @@ def all_done_tasks_for_person(person, client=default):
 
 
 @cache
-def get_task_by_entity(entity, task_type, name="main", client=default):
+def get_task_by_entity(
+    entity: str | dict,
+    task_type: str | dict,
+    name: str = "main",
+    client: KitsuClient = default,
+) -> dict | None:
     """
     Args:
         entity (str / dict): The entity dict or the entity ID.
@@ -430,7 +493,7 @@ def get_task_by_entity(entity, task_type, name="main", client=default):
 
 
 @cache
-def get_task_type(task_type_id, client=default):
+def get_task_type(task_type_id: str, client: KitsuClient = default) -> dict:
     """
     Args:
         task_type_id (str): ID of claimed task type.
@@ -443,16 +506,19 @@ def get_task_type(task_type_id, client=default):
 
 @cache
 def get_task_type_by_name(
-    task_type_name, for_entity=None, department=None, client=default
-):
+    task_type_name: str,
+    for_entity: str | None = None,
+    department: str | dict | None = None,
+    client: KitsuClient = default,
+) -> dict | None:
     """
     Args:
         task_type_name (str): Name of claimed task type.
         for_entity (str): The entity type for which the task type is created.
-        department (str): The department for which the task type is created.
+        department (str / dict): The department for which the task type is created.
 
     Returns:
-        dict: Task type object for given name.
+        dict: Task type object for given name, or None if none found.
     """
     params = {"name": task_type_name}
     if for_entity is not None:
@@ -464,16 +530,19 @@ def get_task_type_by_name(
 
 @cache
 def get_task_type_by_short_name(
-    task_type_short_name, for_entity=None, department=None, client=default
-):
+    task_type_short_name: str,
+    for_entity: str | None = None,
+    department: str | dict | None = None,
+    client: KitsuClient = default,
+) -> dict | None:
     """
     Args:
         task_type_short_name (str): Short name of claimed task type.
         for_entity (str): The entity type for which the task type is created.
-        department (str): The department for which the task type is created.
+        department (str /dict): The department for which the task type is created.
 
     Returns:
-        dict: Task type object for given name.
+        dict: Task type object for given name, or None if none found.
     """
     params = {"short_name": task_type_short_name}
     if for_entity is not None:
@@ -484,7 +553,12 @@ def get_task_type_by_short_name(
 
 
 @cache
-def get_task_by_path(project, file_path, entity_type="shot", client=default):
+def get_task_by_path(
+    project: str | dict,
+    file_path: str,
+    entity_type: str = "shot",
+    client: KitsuClient = default,
+) -> dict:
     """
     Args:
         project (str / dict): The project dict or the project ID.
@@ -505,7 +579,7 @@ def get_task_by_path(project, file_path, entity_type="shot", client=default):
 
 
 @cache
-def get_default_task_status(client=default):
+def get_default_task_status(client: KitsuClient = default) -> dict:
     """
     Returns:
         dict: The unique task status flagged with `is_default`.
@@ -516,7 +590,9 @@ def get_default_task_status(client=default):
 
 
 @cache
-def get_task_status(task_status_id, client=default):
+def get_task_status(
+    task_status_id: str, client: KitsuClient = default
+) -> dict:
     """
     Args:
         task_status_id (str): ID of claimed task status.
@@ -528,7 +604,9 @@ def get_task_status(task_status_id, client=default):
 
 
 @cache
-def get_task_status_by_name(name, client=default):
+def get_task_status_by_name(
+    name: str, client: KitsuClient = default
+) -> dict | None:
     """
     Args:
         name (str / dict): The name of claimed task status.
@@ -540,7 +618,9 @@ def get_task_status_by_name(name, client=default):
 
 
 @cache
-def get_task_status_by_short_name(task_status_short_name, client=default):
+def get_task_status_by_short_name(
+    task_status_short_name: str, client: KitsuClient = default
+) -> dict | None:
     """
     Args:
         short_name (str / dict): The short name of claimed task status.
@@ -553,7 +633,9 @@ def get_task_status_by_short_name(task_status_short_name, client=default):
     )
 
 
-def remove_task_type(task_type, client=default):
+def remove_task_type(
+    task_type: str | dict, client: KitsuClient = default
+) -> str:
     """
     Remove given task type from database.
 
@@ -568,7 +650,9 @@ def remove_task_type(task_type, client=default):
     )
 
 
-def remove_task_status(task_status, client=default):
+def remove_task_status(
+    task_status: str | dict, client: KitsuClient = default
+) -> str:
     """
     Remove given task status from database.
 
@@ -583,7 +667,7 @@ def remove_task_status(task_status, client=default):
     )
 
 
-def update_task_type(task_type, client=default):
+def update_task_type(task_type: dict, client: KitsuClient = default) -> dict:
     """
     Update given task type into the API.
 
@@ -600,7 +684,9 @@ def update_task_type(task_type, client=default):
     )
 
 
-def update_task_status(task_status, client=default):
+def update_task_status(
+    task_status: dict, client: KitsuClient = default
+) -> dict:
     """
     Update given task status into the API.
 
@@ -618,7 +704,7 @@ def update_task_status(task_status, client=default):
 
 
 @cache
-def get_task(task_id, client=default):
+def get_task(task_id: str | dict, client: KitsuClient = default) -> dict:
     """
     Args:
         task_id (str): ID of claimed task.
@@ -631,14 +717,14 @@ def get_task(task_id, client=default):
 
 
 def new_task(
-    entity,
-    task_type,
-    name="main",
-    task_status=None,
-    assigner=None,
-    assignees=[],
-    client=default,
-):
+    entity: str | dict,
+    task_type: str | dict,
+    name: str = "main",
+    task_status: dict | None = None,
+    assigner: str | dict | None = None,
+    assignees: list[str | dict] = [],
+    client: KitsuClient = default,
+) -> dict:
     """
     Create a new task for given entity and task type.
 
@@ -676,7 +762,7 @@ def new_task(
     return task
 
 
-def remove_task(task, client=default):
+def remove_task(task: str | dict, client: KitsuClient = default) -> str:
     """
     Remove given task from database.
 
@@ -687,7 +773,12 @@ def remove_task(task, client=default):
     raw.delete("data/tasks/%s" % task["id"], {"force": True}, client=client)
 
 
-def start_task(task, started_task_status=None, person=None, client=default):
+def start_task(
+    task: str | dict,
+    started_task_status: str | dict | None = None,
+    person: str | dict | None = None,
+    client: KitsuClient = default,
+) -> dict:
     """
     Create a comment to change task status to started_task_status
     (by default WIP) and set its real start date to now.
@@ -718,8 +809,13 @@ def start_task(task, started_task_status=None, person=None, client=default):
 
 
 def task_to_review(
-    task, person, comment, revision=1, change_status=True, client=default
-):
+    task: str | dict,
+    person: str | dict,
+    comment: str,
+    revision: int = 1,
+    change_status: bool = True,
+    client: KitsuClient = default,
+) -> dict:
     """
     Deprecated.
     Mark given task as pending, waiting for approval. Author is given through
@@ -749,7 +845,9 @@ def task_to_review(
 
 
 @cache
-def get_time_spent(task, date=None, client=default):
+def get_time_spent(
+    task: str | dict, date: str | None = None, client: KitsuClient = default
+) -> dict:
     """
     Get the time spent by CG artists on a task at a given date if given. A field contains
     the total time spent.  Durations are given in minutes. Date format is
@@ -769,7 +867,13 @@ def get_time_spent(task, date=None, client=default):
     return raw.get(path, client=client)
 
 
-def set_time_spent(task, person, date, duration, client=default):
+def set_time_spent(
+    task: str | dict,
+    person: str | dict,
+    date: str,
+    duration: int,
+    client: KitsuClient = default,
+) -> dict:
     """
     Set the time spent by a CG artist on a given task at a given date.
 
@@ -792,7 +896,13 @@ def set_time_spent(task, person, date, duration, client=default):
     return raw.post(path, {"duration": duration}, client=client)
 
 
-def add_time_spent(task, person, date, duration, client=default):
+def add_time_spent(
+    task: str | dict,
+    person: str | dict,
+    date: str,
+    duration: int,
+    client: KitsuClient = default,
+) -> dict:
     """
     Add given duration to the already logged duration for given task and person
     at a given date.
@@ -817,16 +927,16 @@ def add_time_spent(task, person, date, duration, client=default):
 
 
 def add_comment(
-    task,
-    task_status,
-    comment="",
-    person=None,
-    checklist=[],
-    attachments=[],
-    created_at=None,
-    links=[],
-    client=default,
-):
+    task: str | dict,
+    task_status: str | dict,
+    comment: str = "",
+    person: str | dict | None = None,
+    checklist: list[dict] = [],
+    attachments: list[str] = [],
+    created_at: str | None = None,
+    links: list[str] = [],
+    client: KitsuClient = default,
+) -> dict:
     """
     Add comment to given task. Each comment requires a task_status. Since the
     addition of comment triggers a task status change. Comment text can be
@@ -837,10 +947,10 @@ def add_comment(
         task_status (str / dict): The task status dict or ID.
         comment (str): Comment text
         person (str / dict): Comment author
-        checklist (list): Comment checklist
+        checklist (list): Comment checklist, e.g [{"text": "Item 1", "checked": false}]
         attachments (list[file_path]): Attachments file paths
         created_at (str): Comment date
-        links (list): List of links to add to the comment
+        links (list): List of URL links to add to the comment
 
     Returns:
         dict: Created comment.
@@ -878,14 +988,17 @@ def add_comment(
 
 
 def add_attachment_files_to_comment(
-    task, comment, attachments=[], client=default
-):
+    task: str | dict,
+    comment: str | dict,
+    attachments: str | list[str] = [],
+    client: KitsuClient = default,
+) -> dict:
     """
     Add attachments files to a given comment.
 
     Args:
-        task (dict / ID): The task dict or the task ID.
-        comment (dict / ID): The comment dict or the comment ID.
+        task (str / dict): The task dict or the task ID.
+        comment (str / dict): The comment dict or the comment ID.
         attachments (list / str) : A list of path for attachments or directly the path.
 
     Returns:
@@ -907,7 +1020,7 @@ def add_attachment_files_to_comment(
     )
 
 
-def get_comment(comment_id, client=default):
+def get_comment(comment_id: str, client: KitsuClient = default) -> dict:
     """
     Get comment instance
 
@@ -920,7 +1033,7 @@ def get_comment(comment_id, client=default):
     return raw.fetch_one("comments", comment_id, client=client)
 
 
-def remove_comment(comment, client=default):
+def remove_comment(comment: str | dict, client: KitsuClient = default) -> str:
     """
     Remove given comment and related (previews, news, notifications) from
     database.
@@ -932,7 +1045,12 @@ def remove_comment(comment, client=default):
     return raw.delete("data/comments/%s" % (comment["id"]), client=client)
 
 
-def create_preview(task, comment, revision=None, client=default):
+def create_preview(
+    task: str | dict,
+    comment: str | dict,
+    revision: int | None = None,
+    client: KitsuClient = default,
+) -> dict:
     """
     Create a preview into given comment.
 
@@ -957,8 +1075,11 @@ def create_preview(task, comment, revision=None, client=default):
 
 
 def upload_preview_file(
-    preview_file, file_path, normalize_movie=True, client=default
-):
+    preview_file: str | dict,
+    file_path: str,
+    normalize_movie: bool = True,
+    client: KitsuClient = default,
+) -> dict:
     """
     Create a preview into given comment.
 
@@ -976,14 +1097,14 @@ def upload_preview_file(
 
 
 def add_preview(
-    task,
-    comment,
-    preview_file_path=None,
-    preview_file_url=None,
-    normalize_movie=True,
-    revision=None,
-    client=default,
-):
+    task: str | dict,
+    comment: str | dict,
+    preview_file_path: str | None = None,
+    preview_file_url: str | None = None,
+    normalize_movie: bool = True,
+    revision: int | None = None,
+    client: KitsuClient = default,
+) -> dict:
     """
     Add a preview to given comment.
 
@@ -995,6 +1116,7 @@ def add_preview(
         given.
         normalize_movie (bool): Normalize the movie or not.
         revision (int): Revision number.
+
     Returns:
         dict: Created preview file model.
     """
@@ -1015,21 +1137,21 @@ def add_preview(
 
 
 def publish_preview(
-    task,
-    task_status,
-    comment="",
-    person=None,
-    checklist=[],
-    attachments=[],
-    created_at=None,
-    preview_file_path=None,
-    preview_file_url=None,
-    normalize_movie=True,
-    revision=None,
-    set_thumbnail=False,
-    links=[],
-    client=default,
-):
+    task: str | dict,
+    task_status: str | dict,
+    comment: str = "",
+    person: str | dict | None = None,
+    checklist: list[dict] = [],
+    attachments: list[str] = [],
+    created_at: str | None = None,
+    preview_file_path: str | None = None,
+    preview_file_url: str | None = None,
+    normalize_movie: bool = True,
+    revision: int | None = None,
+    set_thumbnail: bool = False,
+    links: list[str] = [],
+    client: KitsuClient = default,
+) -> tuple[dict, dict]:
     """
     Publish a comment and include given preview for given task and set given
     task status.
@@ -1050,6 +1172,7 @@ def publish_preview(
         revision (int): Revision number.
         set_thumbnail (bool): Set the preview as thumbnail of the entity.
         links (list): List of links to add to the comment
+
     Returns:
         tuple(dict, dict): Created comment model and created preview file
         model.
@@ -1079,7 +1202,11 @@ def publish_preview(
     return new_comment, preview_file
 
 
-def batch_comments(comments=[], task=None, client=default):
+def batch_comments(
+    comments: list[dict] = [],
+    task: str | dict | None = None,
+    client: KitsuClient = default,
+) -> list[dict]:
     """
     Publish a list of comments (with attachments and previews) for given task.
     Each dict comments may contain a list of attachment files path and preview
@@ -1114,7 +1241,11 @@ def batch_comments(comments=[], task=None, client=default):
     )
 
 
-def set_main_preview(preview_file, frame_number=None, client=default):
+def set_main_preview(
+    preview_file: str | dict,
+    frame_number: int | None = None,
+    client: KitsuClient = default,
+) -> dict:
     """
     Set given preview as thumbnail of given entity.
 
@@ -1134,7 +1265,9 @@ def set_main_preview(preview_file, frame_number=None, client=default):
 
 
 @cache
-def all_comments_for_task(task, client=default):
+def all_comments_for_task(
+    task: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Args:
         task (str / dict): The task dict or the task ID.
@@ -1147,7 +1280,9 @@ def all_comments_for_task(task, client=default):
 
 
 @cache
-def get_last_comment_for_task(task, client=default):
+def get_last_comment_for_task(
+    task: str | dict, client: KitsuClient = default
+) -> dict | None:
     """
     Args:
         task (str / dict): The task dict or the task ID.
@@ -1160,7 +1295,9 @@ def get_last_comment_for_task(task, client=default):
 
 
 @cache
-def assign_task(task, person, client=default):
+def assign_task(
+    task: str | dict, person: str | dict, client: KitsuClient = default
+) -> dict:
     """
     Assign one Person to a Task.
     Args:
@@ -1176,16 +1313,21 @@ def assign_task(task, person, client=default):
     return raw.put(path, {"task_ids": task["id"]}, client=client)
 
 
-def clear_assignations(tasks, person=None, client=default):
+def clear_assignations(
+    tasks: str | dict | list[str | dict],
+    person: str | dict | None = None,
+    client: KitsuClient = default,
+) -> list[str]:
     """
     Clear assignations for a single or multiple tasks.
     If no person is given, all assignations are cleared.
+
     Args:
         tasks (list / str / dict): Task dict or the task ID, single or list.
         person (str / dict): The person dict or the person ID.
 
     Returns:
-        (dict) List of affected Task IDs
+        (list[str]) List of affected Task IDs
     """
     if not isinstance(tasks, list):
         tasks = [tasks]
@@ -1201,9 +1343,17 @@ def clear_assignations(tasks, person=None, client=default):
     )
 
 
-def new_task_type(name, color="#000000", for_entity="Asset", client=default):
+def new_task_type(
+    name: str,
+    color: str = "#000000",
+    for_entity: str = "Asset",
+    client: KitsuClient = default,
+) -> dict:
     """
     Create a new task type with the given name.
+
+    If a Task Type with the given name already exists within Kitsu, it will
+    be returned.
 
     Args:
         name (str): The name of the task type
@@ -1221,7 +1371,9 @@ def new_task_type(name, color="#000000", for_entity="Asset", client=default):
     return task_type
 
 
-def new_task_status(name, short_name, color, client=default):
+def new_task_status(
+    name: str, short_name: str, color: str, client: KitsuClient = default
+) -> dict:
     """
     Create a new task status with the given name, short name and color.
 
@@ -1241,7 +1393,7 @@ def new_task_status(name, short_name, color, client=default):
     return raw.post("data/task-status", data, client=client)
 
 
-def update_task(task, client=default):
+def update_task(task: dict, client: KitsuClient = default) -> dict:
     """
     Update given task into the API. Metadata are fully replaced by the ones
     set on given task.
@@ -1259,13 +1411,15 @@ def update_task(task, client=default):
     return raw.put("data/tasks/%s" % task["id"], task, client=client)
 
 
-def update_task_data(task, data={}, client=default):
+def update_task_data(
+    task: str | dict, data: dict = {}, client: KitsuClient = default
+) -> dict:
     """
     Update the metadata for the provided task. Keys that are not provided are
     not changed.
 
     Args:
-        task (dict / ID): The task dict or ID to save in database.
+        task (str / dict): The task dict or ID to save in database.
         data (dict): Free field to set metadata of any kind.
 
     Returns:
@@ -1282,7 +1436,7 @@ def update_task_data(task, data={}, client=default):
 
 
 @cache
-def get_task_url(task, client=default):
+def get_task_url(task: dict, client: KitsuClient = default) -> str:
     """
     Args:
         task (dict): The task dict.
@@ -1301,8 +1455,11 @@ def get_task_url(task, client=default):
 
 
 def all_tasks_for_project(
-    project, task_type=None, episode=None, client=default
-):
+    project: str | dict,
+    task_type: str | dict | None = None,
+    episode: str | dict | None = None,
+    client: KitsuClient = default,
+) -> list[dict]:
     """
     Args:
         project (str / dict): The project (or its ID) to get tasks from.
@@ -1310,7 +1467,7 @@ def all_tasks_for_project(
         episode (str / dict): The episode (or its ID) to filter tasks.
 
     Returns:
-        dict: Tasks related to given project.
+        list[dict]: Tasks related to given project.
     """
     project = normalize_model_parameter(project)
     path = "/data/projects/%s/tasks" % project["id"]
@@ -1324,7 +1481,7 @@ def all_tasks_for_project(
     return raw.get(path, params=params, client=client)
 
 
-def update_comment(comment, client=default):
+def update_comment(comment: dict, client: KitsuClient = default) -> dict:
     """
     Save given comment data into the API. Metadata are fully replaced by the ones
     set on given comment.
@@ -1339,7 +1496,7 @@ def update_comment(comment, client=default):
 
 
 @cache
-def all_open_tasks(client=default):
+def all_open_tasks(client: KitsuClient = default) -> list[dict]:
     """
     Get all open tasks.
 
@@ -1350,7 +1507,7 @@ def all_open_tasks(client=default):
 
 
 @cache
-def get_open_tasks_stats(client=default):
+def get_open_tasks_stats(client: KitsuClient = default) -> dict:
     """
     Get statistics for open tasks.
 
@@ -1361,12 +1518,14 @@ def get_open_tasks_stats(client=default):
 
 
 @cache
-def all_previews_for_task(task, client=default):
+def all_previews_for_task(
+    task: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Get all previews for a task.
 
     Args:
-        task (dict / ID): The task dict or id.
+        task (str / dict): The task dict or id.
 
     Returns:
         list: Previews for the task.
@@ -1376,12 +1535,14 @@ def all_previews_for_task(task, client=default):
 
 
 @cache
-def all_open_tasks_for_person(person, client=default):
+def all_open_tasks_for_person(
+    person: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Get all open tasks for a person.
 
     Args:
-        person (dict / ID): The person dict or id.
+        person (str / dict): The person dict or id.
 
     Returns:
         list: Open tasks for the person.
@@ -1391,13 +1552,15 @@ def all_open_tasks_for_person(person, client=default):
 
 
 @cache
-def all_tasks_for_person_and_type(person, task_type, client=default):
+def all_tasks_for_person_and_type(
+    person: str | dict, task_type: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Get all tasks for a person and task type.
 
     Args:
-        person (dict / ID): The person dict or id.
-        task_type (dict / ID): The task type dict or id.
+        person (str / dict): The person dict or id.
+        task_type (str / dict): The task type dict or id.
 
     Returns:
         list: Tasks for the person and task type.
@@ -1411,29 +1574,31 @@ def all_tasks_for_person_and_type(person, task_type, client=default):
 
 
 @cache
-def all_comments_for_project(project, client=default):
+def all_comments_for_project(
+    project: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Get all comments for a project.
 
     Args:
-        project (dict / ID): The project dict or id.
+        project (str / dict): The project dict or id.
 
     Returns:
         list: Comments for the project.
     """
     project = normalize_model_parameter(project)
-    return raw.fetch_all(
-        "projects/%s/comments" % project["id"], client=client
-    )
+    return raw.fetch_all("projects/%s/comments" % project["id"], client=client)
 
 
 @cache
-def all_notifications_for_project(project, client=default):
+def all_notifications_for_project(
+    project: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Get all notifications for a project.
 
     Args:
-        project (dict / ID): The project dict or id.
+        project (str / dict): The project dict or id.
 
     Returns:
         list: Notifications for the project.
@@ -1445,12 +1610,14 @@ def all_notifications_for_project(project, client=default):
 
 
 @cache
-def all_preview_files_for_project(project, client=default):
+def all_preview_files_for_project(
+    project: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Get all preview files for a project.
 
     Args:
-        project (dict / ID): The project dict or id.
+        project (str / dict): The project dict or id.
 
     Returns:
         list: Preview files for the project.
@@ -1462,12 +1629,14 @@ def all_preview_files_for_project(project, client=default):
 
 
 @cache
-def all_subscriptions_for_project(project, client=default):
+def all_subscriptions_for_project(
+    project: str | dict, client: KitsuClient = default
+) -> list[dict]:
     """
     Get all subscriptions for a project.
 
     Args:
-        project (dict / ID): The project dict or id.
+        project (str / dict): The project dict or id.
 
     Returns:
         list: Subscriptions for the project.
@@ -1479,12 +1648,14 @@ def all_subscriptions_for_project(project, client=default):
 
 
 @cache
-def get_persons_tasks_dates(project, client=default):
+def get_persons_tasks_dates(
+    project: str | dict, client: KitsuClient = default
+) -> dict:
     """
     Get tasks dates for persons in a project.
 
     Args:
-        project (dict / ID): The project dict or id.
+        project (str / dict): The project dict or id.
 
     Returns:
         dict: Tasks dates for persons.
@@ -1495,16 +1666,15 @@ def get_persons_tasks_dates(project, client=default):
     )
 
 
-def remove_tasks_for_type(project, task_type, client=default):
+def remove_tasks_for_type(
+    project: str | dict, task_type: str | dict, client: KitsuClient = default
+) -> str:
     """
     Delete all tasks for a task type in a project.
 
     Args:
-        project (dict / ID): The project dict or id.
-        task_type (dict / ID): The task type dict or id.
-
-    Returns:
-        Response: Request response object.
+        project (str / dict): The project dict or id.
+        task_type (str / dict): The task type dict or id.
     """
     project = normalize_model_parameter(project)
     task_type = normalize_model_parameter(task_type)
@@ -1515,7 +1685,9 @@ def remove_tasks_for_type(project, task_type, client=default):
     )
 
 
-def remove_tasks_batch(tasks, client=default):
+def remove_tasks_batch(
+    tasks: list[str | dict], client: KitsuClient = default
+) -> requests.Response:
     """
     Delete multiple tasks in batch.
 
@@ -1525,29 +1697,27 @@ def remove_tasks_batch(tasks, client=default):
     Returns:
         Response: Request response object.
     """
-    task_ids = [
-        normalize_model_parameter(task)["id"] for task in tasks
-    ]
+    task_ids = [normalize_model_parameter(task)["id"] for task in tasks]
     return raw.post(
         "data/tasks/delete-batch", {"task_ids": task_ids}, client=client
     )
 
 
-def assign_tasks_to_person(tasks, person, client=default):
+def assign_tasks_to_person(
+    tasks: list[str | dict], person: str | dict, client: KitsuClient = default
+) -> dict:
     """
     Assign multiple tasks to a person.
 
     Args:
         tasks (list): List of task dicts or IDs.
-        person (dict / ID): The person dict or id.
+        person (str / dict): The person dict or id.
 
     Returns:
         dict: Response information.
     """
     person = normalize_model_parameter(person)
-    task_ids = [
-        normalize_model_parameter(task)["id"] for task in tasks
-    ]
+    task_ids = [normalize_model_parameter(task)["id"] for task in tasks]
     return raw.put(
         "data/tasks/assign",
         {"person_id": person["id"], "task_ids": task_ids},
@@ -1556,12 +1726,14 @@ def assign_tasks_to_person(tasks, person, client=default):
 
 
 @cache
-def get_task_time_spent_for_date(task, date, client=default):
+def get_task_time_spent_for_date(
+    task: str | dict, date: str, client: KitsuClient = default
+) -> dict:
     """
     Get time spent for a task on a specific date.
 
     Args:
-        task (dict / ID): The task dict or id.
+        task (str / dict): The task dict or id.
         date (str): Date in YYYY-MM-DD format.
 
     Returns:
@@ -1575,29 +1747,33 @@ def get_task_time_spent_for_date(task, date, client=default):
     )
 
 
-def remove_time_spent(time_spent, client=default):
+def remove_time_spent(
+    time_spent: str | dict, client: KitsuClient = default
+) -> str:
     """
     Delete a time spent entry.
 
     Args:
-        time_spent (dict / ID): The time spent dict or id.
+        time_spent (str / dict): The time spent dict or id.
 
     Returns:
         Response: Request response object.
     """
     time_spent = normalize_model_parameter(time_spent)
-    return raw.delete(
-        "data/time-spents/%s" % time_spent["id"], client=client
-    )
+    return raw.delete("data/time-spents/%s" % time_spent["id"], client=client)
 
 
-def add_preview_to_comment(comment, preview_file, client=default):
+def add_preview_to_comment(
+    comment: str | dict,
+    preview_file: str | dict,
+    client: KitsuClient = default,
+) -> dict:
     """
     Add a preview to a comment.
 
     Args:
-        comment (dict / ID): The comment dict or id.
-        preview_file (dict / ID): The preview file dict or id.
+        comment (str / dict): The comment dict or id.
+        preview_file (str / dict): The preview file dict or id.
 
     Returns:
         dict: Updated comment.
@@ -1611,16 +1787,17 @@ def add_preview_to_comment(comment, preview_file, client=default):
     )
 
 
-def remove_preview_from_comment(comment, preview_file, client=default):
+def remove_preview_from_comment(
+    comment: str | dict,
+    preview_file: str | dict,
+    client: KitsuClient = default,
+) -> str:
     """
     Remove a preview from a comment.
 
     Args:
-        comment (dict / ID): The comment dict or id.
-        preview_file (dict / ID): The preview file dict or id.
-
-    Returns:
-        Response: Request response object.
+        comment (str / dict): The comment dict or id.
+        preview_file (str / dict): The preview file dict or id.
     """
     comment = normalize_model_parameter(comment)
     preview_file = normalize_model_parameter(preview_file)
@@ -1631,12 +1808,16 @@ def remove_preview_from_comment(comment, preview_file, client=default):
     )
 
 
-def create_shot_tasks(shot, task_types, client=default):
+def create_shot_tasks(
+    shot: str | dict,
+    task_types: list[str | dict],
+    client: KitsuClient = default,
+) -> list[dict]:
     """
     Create tasks for a shot.
 
     Args:
-        shot (dict / ID): The shot dict or id.
+        shot (str / dict): The shot dict or id.
         task_types (list): List of task type dicts or IDs.
 
     Returns:
@@ -1653,12 +1834,16 @@ def create_shot_tasks(shot, task_types, client=default):
     )
 
 
-def create_asset_tasks(asset, task_types, client=default):
+def create_asset_tasks(
+    asset: str | dict,
+    task_types: list[str | dict],
+    client: KitsuClient = default,
+) -> list[dict]:
     """
     Create tasks for an asset.
 
     Args:
-        asset (dict / ID): The asset dict or id.
+        asset (str / dict): The asset dict or id.
         task_types (list): List of task type dicts or IDs.
 
     Returns:
@@ -1675,12 +1860,16 @@ def create_asset_tasks(asset, task_types, client=default):
     )
 
 
-def create_edit_tasks(edit, task_types, client=default):
+def create_edit_tasks(
+    edit: str | dict,
+    task_types: list[str | dict],
+    client: KitsuClient = default,
+) -> list[dict]:
     """
     Create tasks for an edit.
 
     Args:
-        edit (dict / ID): The edit dict or id.
+        edit (str / dict): The edit dict or id.
         task_types (list): List of task type dicts or IDs.
 
     Returns:
@@ -1697,12 +1886,16 @@ def create_edit_tasks(edit, task_types, client=default):
     )
 
 
-def create_concept_tasks(concept, task_types, client=default):
+def create_concept_tasks(
+    concept: str | dict,
+    task_types: list[str | dict],
+    client: KitsuClient = default,
+) -> list[dict]:
     """
     Create tasks for a concept.
 
     Args:
-        concept (dict / ID): The concept dict or id.
+        concept (str / dict): The concept dict or id.
         task_types (list): List of task type dicts or IDs.
 
     Returns:
@@ -1719,12 +1912,16 @@ def create_concept_tasks(concept, task_types, client=default):
     )
 
 
-def create_entity_tasks(entity, task_types, client=default):
+def create_entity_tasks(
+    entity: str | dict,
+    task_types: list[str | dict],
+    client: KitsuClient = default,
+) -> list[dict]:
     """
     Create tasks for an entity.
 
     Args:
-        entity (dict / ID): The entity dict or id.
+        entity (str / dict): The entity dict or id.
         task_types (list): List of task type dicts or IDs.
 
     Returns:
