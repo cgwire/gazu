@@ -234,8 +234,7 @@ class TaskTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/playlists/%s/entity-previews"
-                    % fakeid("playlist-1")
+                    "data/playlists/%s/entity-previews" % fakeid("playlist-1")
                 ),
                 text=json.dumps(
                     [
@@ -244,9 +243,7 @@ class TaskTestCase(unittest.TestCase):
                     ]
                 ),
             )
-            previews = gazu.playlist.get_entity_previews(
-                fakeid("playlist-1")
-            )
+            previews = gazu.playlist.get_entity_previews(fakeid("playlist-1"))
             self.assertEqual(len(previews), 2)
             self.assertEqual(previews[0]["name"], "preview-1")
 

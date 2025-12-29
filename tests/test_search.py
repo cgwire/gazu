@@ -105,4 +105,3 @@ class SearchTestCase(unittest.TestCase):
             self.assertIn("shots", results)
             self.assertEqual(len(results["assets"]), 1)
             self.assertEqual(len(results["shots"]), 1)
-

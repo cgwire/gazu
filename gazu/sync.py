@@ -2,8 +2,6 @@ from __future__ import annotations
 
 import os
 
-from .helpers import normalize_model_parameter
-
 from . import client as raw
 from . import asset as asset_module
 from . import casting as casting_module
@@ -479,13 +477,23 @@ def push_project_entities(
     Returns:
         dict: Pushed data
     """
-    assets = push_assets(project_source, project_target)
+    assets = push_assets(
+        project_source, project_target, client_source, client_target
+    )
     episodes = []
     if project_source["production_type"] == "tvshow":
-        episodes = push_episodes(project_source, project_target)
-    sequences = push_sequences(project_source, project_target)
-    shots = push_shots(project_source, project_target)
-    entity_links = push_entity_links(project_source, project_target)
+        episodes = push_episodes(
+            project_source, project_target, client_source, client_target
+        )
+    sequences = push_sequences(
+        project_source, project_target, client_source, client_target
+    )
+    shots = push_shots(
+        project_source, project_target, client_source, client_target
+    )
+    entity_links = push_entity_links(
+        project_source, project_target, client_source, client_target
+    )
     return {
         "assets": assets,
         "episodes": episodes,
@@ -676,9 +684,7 @@ def push_task_comment(
             )
 
     task_status = {"id": task_status_map[comment["task_status_id"]]}
-    if author_id is not None:
-        author_id = author_id
-    else:
+    if author_id is None:
         author_id = person_map[comment["person_id"]]
     person = {"id": author_id}
 
