@@ -1241,6 +1241,67 @@ def batch_comments(
     )
 
 
+def create_multiple_comments(
+    project: str | dict,
+    comments: list[dict] = [],
+    client: KitsuClient = default,
+) -> list[dict]:
+    """
+    Create multiple comments at once for a specific project.
+    Each comment updates the respective task status.
+    Each dict comments may contain a list of attachment files path and preview
+    files path in the keys "attachment_files" and "preview_files".
+
+    Args:
+        project (str / dict): The project dict or the project ID.
+        comments (list): List of comments to publish. Each comment must have
+            a task_id key.
+
+    Returns:
+        list: List of created comments.
+    """
+    project = normalize_model_parameter(project)
+
+    files = {}
+    for x, comment in enumerate(comments):
+        if comment.get("attachment_files"):
+            for y, file_path in enumerate(comment["attachment_files"]):
+                files["attachment_file-%i-%i" % (x, y)] = open(file_path, "rb")
+        if comment.get("preview_files"):
+            for y, file_path in enumerate(comment["preview_files"]):
+                files["preview_file-%i-%i" % (x, y)] = open(file_path, "rb")
+
+    files["comments"] = (None, json.dumps(comments), "application/json")
+    return raw.upload(
+        "actions/projects/%s/tasks/comment-many" % project["id"],
+        file_path=None,
+        files=files,
+        client=client,
+    )
+
+
+def add_tasks_batch_comments(
+    tasks: list[str | dict],
+    comments_data: dict,
+    client: KitsuClient = default,
+) -> list[dict]:
+    """
+    Add comments to multiple tasks in a batch operation.
+
+    Args:
+        tasks (list): List of task dicts or IDs.
+        comments_data (dict): Comment data to apply to all tasks. Should contain
+            task_status_id, comment text, and optionally person_id, checklist,
+            attachments, etc.
+
+    Returns:
+        list: List of created comments.
+    """
+    task_ids = [normalize_model_parameter(task)["id"] for task in tasks]
+    data = {"task_ids": task_ids, **comments_data}
+    return raw.post("actions/tasks/batch-comment", data, client=client)
+
+
 def set_main_preview(
     preview_file: str | dict,
     frame_number: int | None = None,
@@ -1804,6 +1865,106 @@ def remove_preview_from_comment(
     return raw.delete(
         "data/comments/%s/preview-files/%s"
         % (comment["id"], preview_file["id"]),
+        client=client,
+    )
+
+
+def acknowledge_comment(
+    task: str | dict,
+    comment: str | dict,
+    client: KitsuClient = default,
+) -> dict:
+    """
+    Acknowledge a comment or remove the acknowledgment if it's already acknowledged.
+
+    Args:
+        task (str / dict): The task dict or id.
+        comment (str / dict): The comment dict or id.
+
+    Returns:
+        dict: Updated comment.
+    """
+    task = normalize_model_parameter(task)
+    comment = normalize_model_parameter(comment)
+    return raw.post(
+        "data/tasks/%s/comments/%s/ack" % (task["id"], comment["id"]),
+        {},
+        client=client,
+    )
+
+
+def reply_to_comment(
+    comment: str | dict,
+    text: str,
+    person: str | dict | None = None,
+    client: KitsuClient = default,
+) -> dict:
+    """
+    Reply to an existing comment.
+
+    Args:
+        comment (str / dict): The comment dict or id to reply to.
+        text (str): The reply text.
+        person (str / dict): The person dict or id making the reply.
+
+    Returns:
+        dict: Created reply comment.
+    """
+    comment = normalize_model_parameter(comment)
+    data = {"text": text}
+    if person is not None:
+        person = normalize_model_parameter(person)
+        data["person_id"] = person["id"]
+    return raw.post(
+        "data/comments/%s/replies" % comment["id"],
+        data,
+        client=client,
+    )
+
+
+def delete_comment_attachment(
+    comment: str | dict,
+    attachment_file: str | dict,
+    client: KitsuClient = default,
+) -> str:
+    """
+    Delete an attachment from a comment.
+
+    Args:
+        comment (str / dict): The comment dict or id.
+        attachment_file (str / dict): The attachment file dict or id.
+
+    Returns:
+        str: Request response object.
+    """
+    comment = normalize_model_parameter(comment)
+    attachment_file = normalize_model_parameter(attachment_file)
+    return raw.delete(
+        "data/comments/%s/attachment-files/%s"
+        % (comment["id"], attachment_file["id"]),
+        client=client,
+    )
+
+
+def delete_comment_reply(
+    comment: str | dict,
+    reply: str | dict,
+    client: KitsuClient = default,
+) -> str:
+    """
+    Delete a reply to a comment.
+
+    Args:
+        comment (str / dict): The comment dict or id.
+        reply (str / dict): The reply comment dict or id.
+
+    Returns:
+        str: Request response object.
+    """
+    comment = normalize_model_parameter(comment)
+    reply = normalize_model_parameter(reply)
+    return raw.delete(
+        "data/comments/%s/replies/%s" % (comment["id"], reply["id"]),
         client=client,
     )
 

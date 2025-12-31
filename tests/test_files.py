@@ -1143,6 +1143,29 @@ class FilesTestCase(unittest.TestCase):
             )
             self.assertEqual(attachment_files, text)
 
+    def test_get_all_attachment_files_for_project(self):
+        with requests_mock.mock() as mock:
+            text = [
+                {
+                    "id": fakeid("attachment-file-1"),
+                    "name": "attachment-file-1",
+                },
+                {
+                    "id": fakeid("attachment-file-2"),
+                    "name": "attachment-file-2",
+                },
+            ]
+            mock_route(
+                mock,
+                "GET",
+                "data/projects/%s/attachment-files" % fakeid("project-1"),
+                text=text,
+            )
+            attachment_files = gazu.files.get_all_attachment_files_for_project(
+                fakeid("project-1")
+            )
+            self.assertEqual(attachment_files, text)
+
     def test_update_output_file(self):
         with requests_mock.mock() as mock:
             path = "/data/output-files/%s" % fakeid("output-file-1")

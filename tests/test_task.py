@@ -1105,7 +1105,10 @@ class TaskTestCase(unittest.TestCase):
                 mock,
                 "GET",
                 "data/tasks/%s/previews" % fakeid("task-1"),
-                text=[{"id": fakeid("preview-1")}, {"id": fakeid("preview-2")}],
+                text=[
+                    {"id": fakeid("preview-1")},
+                    {"id": fakeid("preview-2")},
+                ],
             )
             previews = gazu.task.all_previews_for_task(fakeid("task-1"))
             self.assertEqual(len(previews), 2)
@@ -1141,7 +1144,10 @@ class TaskTestCase(unittest.TestCase):
                 mock,
                 "GET",
                 "data/projects/%s/comments" % fakeid("project-1"),
-                text=[{"id": fakeid("comment-1")}, {"id": fakeid("comment-2")}],
+                text=[
+                    {"id": fakeid("comment-1")},
+                    {"id": fakeid("comment-2")},
+                ],
             )
             comments = gazu.task.all_comments_for_project(fakeid("project-1"))
             self.assertEqual(len(comments), 2)
@@ -1265,7 +1271,10 @@ class TaskTestCase(unittest.TestCase):
                 mock,
                 "POST",
                 "data/comments/%s/preview-files" % fakeid("comment-1"),
-                text={"id": fakeid("comment-1"), "preview_files": [fakeid("preview-1")]},
+                text={
+                    "id": fakeid("comment-1"),
+                    "preview_files": [fakeid("preview-1")],
+                },
             )
             result = gazu.task.add_preview_to_comment(
                 fakeid("comment-1"), fakeid("preview-1")
@@ -1294,7 +1303,8 @@ class TaskTestCase(unittest.TestCase):
                 text=[{"id": fakeid("task-1")}, {"id": fakeid("task-2")}],
             )
             tasks = gazu.task.create_shot_tasks(
-                fakeid("shot-1"), [fakeid("task-type-1"), fakeid("task-type-2")]
+                fakeid("shot-1"),
+                [fakeid("task-type-1"), fakeid("task-type-2")],
             )
             self.assertEqual(len(tasks), 2)
 
@@ -1349,3 +1359,140 @@ class TaskTestCase(unittest.TestCase):
                 fakeid("entity-1"), [fakeid("task-type-1")]
             )
             self.assertEqual(len(tasks), 1)
+
+    def test_acknowledge_comment(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "POST",
+                "data/tasks/%s/comments/%s/ack"
+                % (fakeid("task-1"), fakeid("comment-1")),
+                text={"id": fakeid("comment-1"), "acknowledged": True},
+            )
+            result = gazu.task.acknowledge_comment(
+                fakeid("task-1"), fakeid("comment-1")
+            )
+            self.assertEqual(result["id"], fakeid("comment-1"))
+            self.assertTrue(result["acknowledged"])
+
+    def test_reply_to_comment(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "POST",
+                "data/comments/%s/replies" % fakeid("comment-1"),
+                text={"id": fakeid("reply-1"), "text": "This is a reply"},
+            )
+            result = gazu.task.reply_to_comment(
+                fakeid("comment-1"), "This is a reply"
+            )
+            self.assertEqual(result["id"], fakeid("reply-1"))
+            self.assertEqual(result["text"], "This is a reply")
+
+    def test_reply_to_comment_with_person(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "POST",
+                "data/comments/%s/replies" % fakeid("comment-1"),
+                text={
+                    "id": fakeid("reply-1"),
+                    "text": "This is a reply",
+                    "person_id": fakeid("person-1"),
+                },
+            )
+            result = gazu.task.reply_to_comment(
+                fakeid("comment-1"),
+                "This is a reply",
+                person=fakeid("person-1"),
+            )
+            self.assertEqual(result["id"], fakeid("reply-1"))
+            self.assertEqual(result["person_id"], fakeid("person-1"))
+
+    def test_delete_comment_attachment(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "DELETE",
+                "data/comments/%s/attachment-files/%s"
+                % (fakeid("comment-1"), fakeid("attachment-1")),
+                status_code=204,
+            )
+            gazu.task.delete_comment_attachment(
+                fakeid("comment-1"), fakeid("attachment-1")
+            )
+
+    def test_delete_comment_reply(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "DELETE",
+                "data/comments/%s/replies/%s"
+                % (fakeid("comment-1"), fakeid("reply-1")),
+                status_code=204,
+            )
+            gazu.task.delete_comment_reply(
+                fakeid("comment-1"), fakeid("reply-1")
+            )
+
+    def test_create_multiple_comments(self):
+        with open("./tests/fixtures/v1.png", "rb") as test_file:
+            file_content = test_file.read()
+            with requests_mock.Mocker() as mock:
+                text = [
+                    {"id": fakeid("comment-1")},
+                    {"id": fakeid("comment-2")},
+                ]
+                mock_route(
+                    mock,
+                    "POST",
+                    "actions/projects/%s/tasks/comment-many"
+                    % fakeid("project-1"),
+                    text=text,
+                )
+
+                # Verify that the attachment file is sent with the correct key
+                # The second comment (index 1) has the attachment, so key is "attachment_file-1-0"
+                add_verify_file_callback(
+                    mock,
+                    {"attachment_file-1-0": file_content},
+                    "actions/projects/%s/tasks/comment-many"
+                    % fakeid("project-1"),
+                )
+
+                comments = [
+                    {
+                        "task_id": fakeid("task-1"),
+                        "task_status_id": fakeid("status-1"),
+                        "comment": "Comment 1",
+                    },
+                    {
+                        "task_id": fakeid("task-2"),
+                        "task_status_id": fakeid("status-1"),
+                        "comment": "Comment 2",
+                        "attachment_files": ["./tests/fixtures/v1.png"],
+                    },
+                ]
+                result = gazu.task.create_multiple_comments(
+                    fakeid("project-1"), comments
+                )
+                self.assertEqual(len(result), 2)
+
+    def test_add_tasks_batch_comments(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "POST",
+                "actions/tasks/batch-comment",
+                text=[
+                    {"id": fakeid("comment-1")},
+                    {"id": fakeid("comment-2")},
+                ],
+            )
+            tasks = [fakeid("task-1"), fakeid("task-2")]
+            comments_data = {
+                "task_status_id": fakeid("status-1"),
+                "comment": "Batch comment",
+            }
+            result = gazu.task.add_tasks_batch_comments(tasks, comments_data)
+            self.assertEqual(len(result), 2)

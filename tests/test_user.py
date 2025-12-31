@@ -364,7 +364,9 @@ class ProjectTestCase(unittest.TestCase):
                 "data/user/filter-groups",
                 text={"id": fakeid("fg-3"), "name": "My Group"},
             )
-            created = gazu.user.new_filter_group("My Group", {"id": fakeid("project-1")})
+            created = gazu.user.new_filter_group(
+                "My Group", {"id": fakeid("project-1")}
+            )
             self.assertEqual(created["id"], fakeid("fg-3"))
 
             # get filter group

@@ -26,7 +26,7 @@ def update_shot_casting(
         Ex: `casting = [{"asset_id": "asset-1", "nb_occurences": 3}]`
 
     Returns:
-        dict: Related shot.
+        dict: The updated shot dictionary with the new casting information applied.
     """
     shot = normalize_model_parameter(shot)
     project = normalize_model_parameter(project)
@@ -50,7 +50,7 @@ def update_asset_casting(
         casting (dict): The casting description.
 
     Returns:
-        dict: Related asset.
+        dict: The updated asset dictionary with the new casting information applied.
     """
     asset = normalize_model_parameter(asset)
     project = normalize_model_parameter(project)
@@ -77,7 +77,7 @@ def update_episode_casting(
         casting (dict): The casting description.
             e.g: `casting = [{"asset_id": "asset-1", "nb_occurences": 3}]`
     Returns:
-        dict: Related episode.
+        dict: The updated episode dictionary with the new casting information applied.
     """
     episode = normalize_model_parameter(episode)
     project = normalize_model_parameter(project)
@@ -99,7 +99,9 @@ def get_asset_type_casting(
         asset_type (str / dict): The asset_type dict or the asset_type ID.
 
     Returns:
-        dict: Casting of the given asset_type.
+        dict: A dictionary mapping asset IDs to their casting lists. Each casting
+            list contains dictionaries with "asset_id" and "nb_occurences" keys
+            representing which assets are cast in each asset of this type.
     """
 
     project = normalize_model_parameter(project)
@@ -121,7 +123,9 @@ def get_sequence_casting(
         sequence (dict): The sequence dict
 
     Returns:
-        dict: Casting of the given sequence.
+        dict: A dictionary mapping shot IDs to their casting lists. Each casting
+            list contains dictionaries with "asset_id" and "nb_occurences" keys
+            representing which assets are cast in each shot of the sequence.
     """
     path = "/data/projects/%s/sequences/%s/casting" % (
         sequence["project_id"],
@@ -138,7 +142,9 @@ def get_shot_casting(shot: dict, client: KitsuClient = default) -> dict:
         shot (dict): The shot dict
 
     Returns:
-        dict: Casting of the given shot.
+        list[dict]: A list of casting dictionaries, each containing "asset_id"
+            and "nb_occurences" keys representing which assets are cast in the shot
+            and how many times they appear.
     """
     path = "/data/projects/%s/entities/%s/casting" % (
         shot["project_id"],
@@ -156,7 +162,9 @@ def get_asset_casting(asset: dict, client: KitsuClient = default) -> dict:
         asset (dict): The asset dict
 
     Returns:
-        dict: Casting for given asset.
+        list[dict]: A list of casting dictionaries, each containing "asset_id"
+            and "nb_occurences" keys representing which assets are cast in the
+            given asset and how many times they appear.
     """
     path = "/data/projects/%s/entities/%s/casting" % (
         asset["project_id"],
@@ -174,7 +182,9 @@ def get_episode_casting(episode: dict, client: KitsuClient = default) -> dict:
         episode (dict): The episode dict
 
     Returns:
-        dict: Casting for given episode.
+        list[dict]: A list of casting dictionaries, each containing "asset_id"
+            and "nb_occurences" keys representing which assets are cast in the
+            episode and how many times they appear.
     """
     path = "/data/projects/%s/entities/%s/casting" % (
         episode["project_id"],
@@ -193,7 +203,9 @@ def get_asset_cast_in(
         asset (dict): The asset dict or ID.
 
     Returns:
-        dict: Entity list where given asset is casted.
+        list[dict]: A list of entity dictionaries (shots, scenes, etc.) where
+            the given asset is cast. Each entity dict contains standard entity
+            fields like "id", "name", "project_id", etc.
     """
     asset = normalize_model_parameter(asset)
     path = "/data/assets/%s/cast-in" % asset["id"]
@@ -211,7 +223,11 @@ def all_entity_links_for_project(
         project (dict | str): The project dict or ID.
 
     Returns:
-        dict: Entity links for given project.
+        dict: A dictionary containing entity links for the project. If pagination
+            is used, contains "data" (list of entity link dicts) and pagination
+            metadata. Otherwise, returns a list of entity link dictionaries directly.
+            Each entity link dict contains "entity_in_id", "entity_out_id", and
+            other link-related fields.
     """
     project = normalize_model_parameter(project)
     path = "/data/projects/%s/entity-links" % project["id"]
@@ -221,3 +237,107 @@ def all_entity_links_for_project(
         if limit is not None:
             params["limit"] = limit
     return raw.get(path, params=params, client=client)
+
+
+def get_episodes_casting(
+    project: str | dict, client: KitsuClient = default
+) -> dict:
+    """
+    Return casting for all episodes in given project.
+
+    Args:
+        project (str / dict): The project dict or the project ID.
+
+    Returns:
+        dict: A dictionary mapping episode IDs to their casting lists. Each
+            casting list contains dictionaries with "asset_id" and "nb_occurences"
+            keys representing which assets are cast in each episode.
+    """
+    project = normalize_model_parameter(project)
+    path = "/data/projects/%s/episodes/casting" % project["id"]
+    return raw.get(path, client=client)
+
+
+def get_sequence_shots_casting(
+    project: str | dict, sequence: str | dict, client: KitsuClient = default
+) -> dict:
+    """
+    Return casting for all shots in given sequence.
+
+    Args:
+        project (str / dict): The project dict or the project ID.
+        sequence (str / dict): The sequence dict or the sequence ID.
+
+    Returns:
+        dict: A dictionary mapping shot IDs to their casting lists. Each casting
+            list contains dictionaries with "asset_id" and "nb_occurences" keys
+            representing which assets are cast in each shot of the sequence.
+    """
+    project = normalize_model_parameter(project)
+    sequence = normalize_model_parameter(sequence)
+    path = "/data/projects/%s/sequences/%s/shots/casting" % (
+        project["id"],
+        sequence["id"],
+    )
+    return raw.get(path, client=client)
+
+
+def get_episode_shots_casting(
+    project: str | dict, episode: str | dict, client: KitsuClient = default
+) -> dict:
+    """
+    Return casting for all shots in given episode.
+
+    Args:
+        project (str / dict): The project dict or the project ID.
+        episode (str / dict): The episode dict or the episode ID.
+
+    Returns:
+        dict: A dictionary mapping shot IDs to their casting lists. Each casting
+            list contains dictionaries with "asset_id" and "nb_occurences" keys
+            representing which assets are cast in each shot of the episode.
+    """
+    project = normalize_model_parameter(project)
+    episode = normalize_model_parameter(episode)
+    path = "/data/projects/%s/episodes/%s/shots/casting" % (
+        project["id"],
+        episode["id"],
+    )
+    return raw.get(path, client=client)
+
+
+def get_project_shots_casting(
+    project: str | dict, client: KitsuClient = default
+) -> dict:
+    """
+    Return casting for all shots in given project.
+
+    Args:
+        project (str / dict): The project dict or the project ID.
+
+    Returns:
+        dict: A dictionary mapping shot IDs to their casting lists. Each casting
+            list contains dictionaries with "asset_id" and "nb_occurences" keys
+            representing which assets are cast in each shot of the project.
+    """
+    project = normalize_model_parameter(project)
+    path = "/data/projects/%s/shots/casting" % project["id"]
+    return raw.get(path, client=client)
+
+
+def delete_entity_link(
+    entity_link: str | dict, client: KitsuClient = default
+) -> dict:
+    """
+    Delete an entity link.
+
+    Args:
+        entity_link (str / dict): The entity link dict or the entity link ID.
+
+    Returns:
+        dict: The deleted entity link.
+    """
+    entity_link = normalize_model_parameter(entity_link)
+    path = "/data/entity-links/%s" % entity_link["id"]
+    raw.delete(path, client=client)
+    return entity_link

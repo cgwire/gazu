@@ -516,7 +516,9 @@ class ProjectTestCase(unittest.TestCase):
     def test_status_automations(self):
         with requests_mock.mock() as mock:
             project_id = fakeid("project-1")
-            get_path = "data/projects/%s/settings/status-automations" % project_id
+            get_path = (
+                "data/projects/%s/settings/status-automations" % project_id
+            )
             mock_route(
                 mock,
                 "GET",
@@ -526,14 +528,19 @@ class ProjectTestCase(unittest.TestCase):
             items = gazu.project.all_status_automations(project_id)
             self.assertEqual(len(items), 2)
 
-            post_payload = {"from_status_id": fakeid("task-status-1"), "to_status_id": fakeid("task-status-2")}
+            post_payload = {
+                "from_status_id": fakeid("task-status-1"),
+                "to_status_id": fakeid("task-status-2"),
+            }
             mock_route(
                 mock,
                 "POST",
                 get_path,
                 text={"id": fakeid("auto-3"), **post_payload},
             )
-            created = gazu.project.add_status_automation(project_id, post_payload)
+            created = gazu.project.add_status_automation(
+                project_id, post_payload
+            )
             self.assertEqual(created["id"], fakeid("auto-3"))
 
             del_path = "data/projects/%s/settings/status-automations/%s" % (
@@ -548,7 +555,10 @@ class ProjectTestCase(unittest.TestCase):
     def test_preview_background_files(self):
         with requests_mock.mock() as mock:
             project_id = fakeid("project-1")
-            base_path = "data/projects/%s/settings/preview-background-files" % project_id
+            base_path = (
+                "data/projects/%s/settings/preview-background-files"
+                % project_id
+            )
 
             mock_route(
                 mock,
@@ -584,7 +594,10 @@ class ProjectTestCase(unittest.TestCase):
                 mock,
                 "GET",
                 path,
-                text=[{"id": fakeid("milestone-1")}, {"id": fakeid("milestone-2")}],
+                text=[
+                    {"id": fakeid("milestone-1")},
+                    {"id": fakeid("milestone-2")},
+                ],
             )
             milestones = gazu.project.get_milestones(project_id)
             self.assertEqual(len(milestones), 2)
@@ -603,9 +616,9 @@ class ProjectTestCase(unittest.TestCase):
             self.assertEqual(len(quotas), 2)
 
             person_id = fakeid("person-1")
-            person_path = (
-                "data/projects/%s/person-quotas?person_id=%s"
-                % (project_id, person_id)
+            person_path = "data/projects/%s/person-quotas?person_id=%s" % (
+                project_id,
+                person_id,
             )
             mock_route(
                 mock,
@@ -623,9 +636,7 @@ class ProjectTestCase(unittest.TestCase):
             project_id = fakeid("project-1")
 
             path = "data/projects/%s/budgets" % project_id
-            mock_route(
-                mock, "GET", path, text=[{"id": fakeid("budget-1")}]
-            )
+            mock_route(mock, "GET", path, text=[{"id": fakeid("budget-1")}])
             budgets = gazu.project.get_budgets(project_id)
             self.assertEqual(len(budgets), 1)
 
@@ -653,7 +664,9 @@ class ProjectTestCase(unittest.TestCase):
                 get_one_path,
                 text={"id": fakeid("budget-2"), "name": "Budget 2"},
             )
-            budget = gazu.project.get_budget(project_id, {"id": fakeid("budget-2")})
+            budget = gazu.project.get_budget(
+                project_id, {"id": fakeid("budget-2")}
+            )
             self.assertEqual(budget["id"], fakeid("budget-2"))
 
             mock_route(
@@ -663,7 +676,9 @@ class ProjectTestCase(unittest.TestCase):
                 text={"id": fakeid("budget-2"), "name": "Budget 2 Updated"},
             )
             updated = gazu.project.update_budget(
-                project_id, {"id": fakeid("budget-2")}, {"name": "Budget 2 Updated"}
+                project_id,
+                {"id": fakeid("budget-2")},
+                {"name": "Budget 2 Updated"},
             )
             self.assertEqual(updated["name"], "Budget 2 Updated")
 
@@ -683,7 +698,9 @@ class ProjectTestCase(unittest.TestCase):
                 list_path,
                 text=[{"id": fakeid("entry-1")}, {"id": fakeid("entry-2")}],
             )
-            entries = gazu.project.get_budget_entries(project_id, {"id": budget_id})
+            entries = gazu.project.get_budget_entries(
+                project_id, {"id": budget_id}
+            )
             self.assertEqual(len(entries), 2)
 
             mock_route(

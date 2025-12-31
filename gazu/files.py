@@ -232,6 +232,24 @@ def get_all_attachment_files_for_task(
     )
 
 
+def get_all_attachment_files_for_project(
+    project: str | dict, client: KitsuClient = default
+) -> list[dict]:
+    """
+    Retrieves all the attachment files for a given project.
+
+    Args:
+        project (str / dict): Target project, as ID string or model dict.
+
+    Returns:
+        list: Attachment files for the project.
+    """
+    project = normalize_model_parameter(project)
+    return raw.fetch_all(
+        "projects/%s/attachment-files" % project["id"], client=client
+    )
+
+
 def all_output_files_for_entity(
     entity: str | dict,
     output_type: str | dict | None = None,

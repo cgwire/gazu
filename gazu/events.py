@@ -9,7 +9,12 @@ from typing import Any, Callable
 from engineio.base_client import signal_handler
 from .exception import AuthFailedException
 
-from .client import default_client, get_event_host, KitsuClient, make_auth_header
+from .client import (
+    default_client,
+    get_event_host,
+    KitsuClient,
+    make_auth_header,
+)
 
 
 if os.name == "nt":

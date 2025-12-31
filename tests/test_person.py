@@ -86,6 +86,46 @@ class PersonTestCase(unittest.TestCase):
                 gazu.person.new_department("department-1"), result
             )
 
+    def test_update_department(self):
+        result = {
+            "id": fakeid("department-1"),
+            "name": "department-1",
+            "color": "#FF0000",
+            "archived": False,
+        }
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "PUT",
+                "data/departments/%s" % fakeid("department-1"),
+                text=result,
+            )
+            department = {
+                "id": fakeid("department-1"),
+                "name": "department-1",
+                "color": "#FF0000",
+            }
+            self.assertEqual(gazu.person.update_department(department), result)
+
+    def test_remove_department(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "DELETE",
+                "data/departments/%s" % fakeid("department-1"),
+                status_code=204,
+            )
+            department = {"id": fakeid("department-1"), "name": "department-1"}
+            gazu.person.remove_department(department)
+            mock_route(
+                mock,
+                "DELETE",
+                "data/departments/%s?force=True" % fakeid("department-1"),
+                status_code=204,
+            )
+            department = {"id": fakeid("department-1"), "name": "department-1"}
+            gazu.person.remove_department(department, True)
+
     def test_get_person_by_desktop_login(self):
         with requests_mock.mock() as mock:
             mock.get(

@@ -264,6 +264,40 @@ def new_department(
     return department
 
 
+def update_department(department, client=default):
+    """
+    Update a department.
+
+    Args:
+        department (dict): The department dict that needs to be updated.
+
+    Returns:
+        dict: The updated department.
+    """
+    department = normalize_model_parameter(department)
+    return raw.put(
+        "data/departments/%s" % (department["id"]),
+        department,
+        client=client,
+    )
+
+
+def remove_department(department, force=False, client=default):
+    """
+    Remove given department from database.
+
+    Args:
+        department (dict / ID): Department to remove.
+        force (bool): Whether to force deletion of the department.
+    """
+    department = normalize_model_parameter(department)
+    path = "data/departments/%s" % department["id"]
+    params = {}
+    if force:
+        params = {"force": True}
+    return raw.delete(path, params, client=client)
+
+
 def new_person(
     first_name: str,
     last_name: str,
