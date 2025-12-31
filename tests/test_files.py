@@ -1304,9 +1304,7 @@ class FilesTestCase(unittest.TestCase):
                 os.remove("./test.mp4")
 
     def test_get_attachment_thumbnail_url(self):
-        url = gazu.files.get_attachment_thumbnail_url(
-            fakeid("attachment-1")
-        )
+        url = gazu.files.get_attachment_thumbnail_url(fakeid("attachment-1"))
         expected = "pictures/thumbnails/attachment-files/%s.png" % fakeid(
             "attachment-1"
         )
@@ -1332,9 +1330,8 @@ class FilesTestCase(unittest.TestCase):
     def test_extract_frame_from_preview(self):
         with open("./tests/fixtures/v1.png", "rb") as frame_file:
             with requests_mock.mock() as mock:
-                path = (
-                    "pictures/preview-files/%s/extract-frame/100"
-                    % fakeid("preview-1")
+                path = "pictures/preview-files/%s/extract-frame/100" % fakeid(
+                    "preview-1"
                 )
                 mock.get(gazu.client.get_full_url(path), body=frame_file)
                 gazu.files.extract_frame_from_preview(
@@ -1366,7 +1363,10 @@ class FilesTestCase(unittest.TestCase):
             updates = [{"id": fakeid("annotation-1"), "x": 150, "y": 250}]
             deletions = [fakeid("annotation-2")]
             result = {
-                "id": fakeid("annotation-1"), "x": 150, "y": 250, "type": "drawing"
+                "id": fakeid("annotation-1"),
+                "x": 150,
+                "y": 250,
+                "type": "drawing",
             }
             mock_route(mock, "PUT", path, text=result)
             updated = gazu.files.update_preview_annotations(

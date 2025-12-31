@@ -1590,7 +1590,9 @@ def get_attachment_thumbnail_url(
         str: URL to the attachment thumbnail.
     """
     attachment_file = normalize_model_parameter(attachment_file)
-    return "pictures/thumbnails/attachment-files/%s.png" % attachment_file["id"]
+    return (
+        "pictures/thumbnails/attachment-files/%s.png" % attachment_file["id"]
+    )
 
 
 def download_attachment_thumbnail(
@@ -1716,9 +1718,7 @@ def extract_tile_from_preview(
         requests.Response: Response object containing the extracted tile.
     """
     preview_file = normalize_model_parameter(preview_file)
-    url = "pictures/preview-files/%s/extract-tile" % (
-        preview_file["id"]
-    )
+    url = "pictures/preview-files/%s/extract-tile" % (preview_file["id"])
     return raw.download(url, file_path, client=client)
 
 
