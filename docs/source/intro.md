@@ -33,9 +33,16 @@ gazu.client.set_host("https://zou-server-url/api")
 
 ## Authentication
 
-Authenticate your library with the following function call:
+Authenticate gazu with a Kitsu user via the following function call:
 
 ```python
 gazu.log_in("user@mail.com", "userpassword")
 ```
 
+## Bot Authentication
+
+Authenticate gazu with a Bot token with the following function call:
+
+```python
+gazu.set_token("verylongtoken")
+```
