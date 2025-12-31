@@ -79,6 +79,12 @@ gazu.concept
 .. automodule:: gazu.concept
     :members:
 
+gazu.context
+------------
+
+.. automodule:: gazu.context
+    :members:
+
 gazu.edit
 ---------------
 
@@ -91,6 +97,14 @@ gazu.entity
 
 .. automodule:: gazu.entity
     :members:
+
+
+gazu.events
+-----------
+
+.. automodule:: gazu.events
+    :members:
+
 
 gazu.exceptions
 ---------------
@@ -123,6 +137,13 @@ gazu.project
 
 .. automodule:: gazu.project
     :members:
+
+gazu.search
+-----------
+
+.. automodule:: gazu.search
+    :members:
+
 
 gazu.scene
 -----------
