@@ -1204,6 +1204,192 @@ class FilesTestCase(unittest.TestCase):
             self.assertEqual(preview_file["id"], fakeid("preview-file-1"))
             self.assertEqual(preview_file["name"], "test-name")
 
+    def test_get_running_preview_files(self):
+        with requests_mock.mock() as mock:
+            result = [
+                {"id": fakeid("preview-1"), "status": "running"},
+                {"id": fakeid("preview-2"), "status": "running"},
+            ]
+            mock_route(mock, "GET", "data/preview-files/running", text=result)
+            self.assertEqual(gazu.files.get_running_preview_files(), result)
+
+    def test_get_preview_movie_url(self):
+        with requests_mock.mock() as mock:
+            preview_data = {
+                "id": fakeid("preview-1"),
+                "extension": "mp4",
+            }
+            mock_route(
+                mock,
+                "GET",
+                "data/preview-files/%s" % fakeid("preview-1"),
+                text=preview_data,
+            )
+            url = gazu.files.get_preview_movie_url(fakeid("preview-1"))
+            expected = "movies/originals/preview-files/%s.mp4" % fakeid(
+                "preview-1"
+            )
+            self.assertEqual(url, expected)
+
+            url_lowdef = gazu.files.get_preview_movie_url(
+                fakeid("preview-1"), lowdef=True
+            )
+            expected_lowdef = "movies/lowdef/preview-files/%s.mp4" % fakeid(
+                "preview-1"
+            )
+            self.assertEqual(url_lowdef, expected_lowdef)
+
+    def test_download_preview_movie(self):
+        with open("./tests/fixtures/v1.png", "rb") as movie_file:
+            with requests_mock.mock() as mock:
+                preview_data = {
+                    "id": fakeid("preview-1"),
+                    "extension": "mp4",
+                }
+                mock_route(
+                    mock,
+                    "GET",
+                    "data/preview-files/%s" % fakeid("preview-1"),
+                    text=preview_data,
+                )
+                path = "movies/originals/preview-files/%s.mp4" % fakeid(
+                    "preview-1"
+                )
+                mock.get(gazu.client.get_full_url(path), body=movie_file)
+                gazu.files.download_preview_movie(
+                    fakeid("preview-1"), "./test.mp4"
+                )
+                self.assertTrue(os.path.exists("./test.mp4"))
+                os.remove("./test.mp4")
+
+    def test_get_preview_lowdef_movie_url(self):
+        with requests_mock.mock() as mock:
+            preview_data = {
+                "id": fakeid("preview-1"),
+                "extension": "mp4",
+            }
+            mock_route(
+                mock,
+                "GET",
+                "data/preview-files/%s" % fakeid("preview-1"),
+                text=preview_data,
+            )
+            url = gazu.files.get_preview_lowdef_movie_url(fakeid("preview-1"))
+            expected = "movies/lowdef/preview-files/%s.mp4" % fakeid(
+                "preview-1"
+            )
+            self.assertEqual(url, expected)
+
+    def test_download_preview_lowdef_movie(self):
+        with open("./tests/fixtures/v1.png", "rb") as movie_file:
+            with requests_mock.mock() as mock:
+                preview_data = {
+                    "id": fakeid("preview-1"),
+                    "extension": "mp4",
+                }
+                mock_route(
+                    mock,
+                    "GET",
+                    "data/preview-files/%s" % fakeid("preview-1"),
+                    text=preview_data,
+                )
+                path = "movies/lowdef/preview-files/%s.mp4" % fakeid(
+                    "preview-1"
+                )
+                mock.get(gazu.client.get_full_url(path), body=movie_file)
+                gazu.files.download_preview_lowdef_movie(
+                    fakeid("preview-1"), "./test.mp4"
+                )
+                self.assertTrue(os.path.exists("./test.mp4"))
+                os.remove("./test.mp4")
+
+    def test_get_attachment_thumbnail_url(self):
+        url = gazu.files.get_attachment_thumbnail_url(
+            fakeid("attachment-1")
+        )
+        expected = "pictures/thumbnails/attachment-files/%s.png" % fakeid(
+            "attachment-1"
+        )
+        self.assertEqual(url, expected)
+
+    def test_download_attachment_thumbnail(self):
+        with open("./tests/fixtures/v1.png", "rb") as thumbnail_file:
+            with requests_mock.mock() as mock:
+                path = "pictures/thumbnails/attachment-files/%s.png" % fakeid(
+                    "attachment-1"
+                )
+                mock.get(gazu.client.get_full_url(path), body=thumbnail_file)
+                gazu.files.download_attachment_thumbnail(
+                    fakeid("attachment-1"), "./test.png"
+                )
+                self.assertTrue(os.path.exists("./test.png"))
+                self.assertEqual(
+                    os.path.getsize("./test.png"),
+                    os.path.getsize("./tests/fixtures/v1.png"),
+                )
+                os.remove("./test.png")
+
+    def test_extract_frame_from_preview(self):
+        with open("./tests/fixtures/v1.png", "rb") as frame_file:
+            with requests_mock.mock() as mock:
+                path = (
+                    "pictures/preview-files/%s/extract-frame/100"
+                    % fakeid("preview-1")
+                )
+                mock.get(gazu.client.get_full_url(path), body=frame_file)
+                gazu.files.extract_frame_from_preview(
+                    fakeid("preview-1"), 100, "./test.png"
+                )
+                self.assertTrue(os.path.exists("./test.png"))
+                os.remove("./test.png")
+
+    def test_update_preview_position(self):
+        with requests_mock.mock() as mock:
+            path = "data/preview-files/%s/position" % fakeid("preview-1")
+            result = {
+                "id": fakeid("preview-1"),
+                "position": 5,
+            }
+            mock_route(mock, "PUT", path, text=result)
+            updated = gazu.files.update_preview_position(
+                fakeid("preview-1"), 5
+            )
+            self.assertEqual(updated["id"], fakeid("preview-1"))
+            self.assertEqual(updated["position"], 5)
+
+    def test_update_preview_annotations(self):
+        with requests_mock.mock() as mock:
+            path = "actions/preview-files/%s/update-annotations" % fakeid(
+                "preview-1"
+            )
+            additions = [{"x": 100, "y": 200, "type": "drawing"}]
+            updates = [{"id": fakeid("annotation-1"), "x": 150, "y": 250}]
+            deletions = [fakeid("annotation-2")]
+            result = {
+                "id": fakeid("annotation-1"), "x": 150, "y": 250, "type": "drawing"
+            }
+            mock_route(mock, "PUT", path, text=result)
+            updated = gazu.files.update_preview_annotations(
+                fakeid("preview-1"),
+                additions=additions,
+                updates=updates,
+                deletions=deletions,
+            )
+            self.assertEqual(result["id"], fakeid("annotation-1"))
+
+    def test_extract_tile_from_preview(self):
+        with open("./tests/fixtures/v1.png", "rb") as tile_file:
+            with requests_mock.mock() as mock:
+                path = "pictures/preview-files/%s/extract-tile" % fakeid(
+                    "preview-1"
+                )
+                mock.get(gazu.client.get_full_url(path), body=tile_file)
+                gazu.files.extract_tile_from_preview(
+                    fakeid("preview-1"), "./test.png"
+                )
+                self.assertTrue(os.path.exists("./test.png"))
+                os.remove("./test.png")
+
     def test_get_output_file_by_path(self):
         with requests_mock.mock() as mock:
             text = [{"id": fakeid("output-file-1"), "path": "testpath"}]

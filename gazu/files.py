@@ -1484,6 +1484,244 @@ def update_preview(
     return raw.put(path, data, client=client)
 
 
+@cache
+def get_running_preview_files(client: KitsuClient = default) -> list[dict]:
+    """
+    Get all preview files currently being processed.
+
+    Returns:
+        list: Preview files that are currently running/processing.
+    """
+    return raw.fetch_all("preview-files/running", client=client)
+
+
+def get_preview_movie_url(
+    preview_file: str | dict,
+    lowdef: bool = False,
+    client: KitsuClient = default,
+) -> str:
+    """
+    Get the URL for the preview movie file.
+
+    Args:
+        preview_file (str / dict): The preview file dict or ID.
+        lowdef (bool): If True, returns the low-definition version URL.
+                       If False, returns the original/high-definition version URL.
+
+    Returns:
+        str: URL to the preview movie file.
+    """
+    preview_file = normalize_model_parameter(preview_file)
+    preview_file = raw.fetch_one(
+        "preview-files", preview_file["id"], client=client
+    )
+    if lowdef:
+        path_prefix = "movies/lowdef"
+    else:
+        path_prefix = "movies/originals"
+    return "%s/preview-files/%s.%s" % (
+        path_prefix,
+        preview_file["id"],
+        preview_file["extension"],
+    )
+
+
+def download_preview_movie(
+    preview_file: str | dict, file_path: str, client: KitsuClient = default
+) -> requests.Response:
+    """
+    Download the preview movie file.
+
+    Args:
+        preview_file (str / dict): The preview file dict or ID.
+        file_path (str): Location on hard drive where to save the file.
+
+    Returns:
+        requests.Response: Response object from the download request.
+    """
+    preview_file = normalize_model_parameter(preview_file)
+    url = get_preview_movie_url(preview_file, lowdef=False, client=client)
+    return raw.download(url, file_path, client=client)
+
+
+def get_preview_lowdef_movie_url(
+    preview_file: str | dict, client: KitsuClient = default
+) -> str:
+    """
+    Get the URL for the low-definition preview movie file.
+
+    Args:
+        preview_file (str / dict): The preview file dict or ID.
+
+    Returns:
+        str: URL to the low-definition preview movie file.
+    """
+    return get_preview_movie_url(preview_file, lowdef=True, client=client)
+
+
+def download_preview_lowdef_movie(
+    preview_file: str | dict, file_path: str, client: KitsuClient = default
+) -> requests.Response:
+    """
+    Download the low-definition preview movie file.
+
+    Args:
+        preview_file (str / dict): The preview file dict or ID.
+        file_path (str): Location on hard drive where to save the file.
+
+    Returns:
+        requests.Response: Response object from the download request.
+    """
+    preview_file = normalize_model_parameter(preview_file)
+    url = get_preview_movie_url(preview_file, lowdef=True, client=client)
+    return raw.download(url, file_path, client=client)
+
+
+def get_attachment_thumbnail_url(
+    attachment_file: str | dict, client: KitsuClient = default
+) -> str:
+    """
+    Get the URL for the attachment file thumbnail.
+
+    Args:
+        attachment_file (str / dict): The attachment file dict or ID.
+
+    Returns:
+        str: URL to the attachment thumbnail.
+    """
+    attachment_file = normalize_model_parameter(attachment_file)
+    return "pictures/thumbnails/attachment-files/%s.png" % attachment_file["id"]
+
+
+def download_attachment_thumbnail(
+    attachment_file: str | dict, file_path: str, client: KitsuClient = default
+) -> requests.Response:
+    """
+    Download the attachment file thumbnail.
+
+    Args:
+        attachment_file (str / dict): The attachment file dict or ID.
+        file_path (str): Location on hard drive where to save the file.
+
+    Returns:
+        requests.Response: Response object from the download request.
+    """
+    attachment_file = normalize_model_parameter(attachment_file)
+    url = get_attachment_thumbnail_url(attachment_file, client=client)
+    return raw.download(url, file_path, client=client)
+
+
+def extract_frame_from_preview(
+    preview_file: str | dict,
+    frame_number: int,
+    file_path: str | None = None,
+    client: KitsuClient = default,
+) -> requests.Response:
+    """
+    Extract a specific frame from a preview file.
+
+    Args:
+        preview_file (str / dict): The preview file dict or ID.
+        frame_number (int): The frame number to extract.
+        file_path (str): Optional location on hard drive where to save the frame.
+                        If not provided, returns the response without saving.
+
+    Returns:
+        requests.Response: Response object containing the extracted frame.
+    """
+    preview_file = normalize_model_parameter(preview_file)
+    url = "pictures/preview-files/%s/extract-frame/%s" % (
+        preview_file["id"],
+        frame_number,
+    )
+    return raw.download(url, file_path, client=client)
+
+
+def update_preview_position(
+    preview_file: str | dict,
+    position: float,
+    client: KitsuClient = default,
+) -> dict:
+    """
+    Update the position of a preview file (the displayed order for a single
+    revision).
+
+    Args:
+        preview_file (str / dict): The preview file dict or ID.
+        position (float): The new position value.
+
+    Returns:
+        dict: Updated preview file.
+    """
+    preview_file = normalize_model_parameter(preview_file)
+    path = "data/preview-files/%s/position" % preview_file["id"]
+    return raw.put(path, {"position": position}, client=client)
+
+
+def update_preview_annotations(
+    preview_file: str | dict,
+    additions: list[dict] | None = None,
+    updates: list[dict] | None = None,
+    deletions: list[str] | None = None,
+    client: KitsuClient = default,
+) -> dict:
+    """
+    Update annotations on a preview file.
+
+    Allow to modify the annotations stored at the preview level. Modifications
+    are applied via three fields: additions to give all the annotations that
+    need to be added, updates that list annotations that need to be modified,
+    and deletions to list the IDs of annotations that need to be removed.
+
+    Args:
+        preview_file (str / dict): The preview file dict or ID.
+        additions (list[dict]): Annotations to add. Each annotation should be
+            a dict with properties like 'x', 'y', 'type', etc.
+            Example: [{"x": 100, "y": 200, "type": "drawing"}]
+        updates (list[dict]): Annotations to update. Each annotation should
+            include an 'id' field along with the fields to update.
+            Example: [{"id": "uuid", "x": 150, "y": 250}]
+        deletions (list[str]): Annotation IDs to remove.
+            Example: ["a24a6ea4-ce75-4665-a070-57453082c25"]
+
+    Returns:
+        dict: Updated preview file with the updated annotations array.
+    """
+    preview_file = normalize_model_parameter(preview_file)
+    path = "actions/preview-files/%s/update-annotations" % preview_file["id"]
+    data = {}
+    if additions is not None:
+        data["additions"] = additions
+    if updates is not None:
+        data["updates"] = updates
+    if deletions is not None:
+        data["deletions"] = deletions
+    return raw.put(path, data, client=client)
+
+
+def extract_tile_from_preview(
+    preview_file: str | dict,
+    file_path: str | None = None,
+    client: KitsuClient = default,
+) -> requests.Response:
+    """
+    Extract a tile from a preview file.
+
+    Args:
+        preview_file (str / dict): The preview file dict or ID.
+        file_path (str): Optional location on hard drive where to save the tile.
+                        If not provided, returns the response without saving.
+
+    Returns:
+        requests.Response: Response object containing the extracted tile.
+    """
+    preview_file = normalize_model_parameter(preview_file)
+    url = "pictures/preview-files/%s/extract-tile" % (
+        preview_file["id"]
+    )
+    return raw.download(url, file_path, client=client)
+
+
 def new_file_status(
     name: str, color: str, client: KitsuClient = default
 ) -> dict:
