@@ -10,14 +10,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version:
-          ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
+        version: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
         include:
           - version: "3.7"
             container: python:3.7-bookworm
     container: ${{ matrix.container }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Set up Python
         if: ${{ !contains(fromJSON('["3.7"]'), matrix.version) }}
         uses: actions/setup-python@v6
