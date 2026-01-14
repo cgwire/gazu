@@ -1425,7 +1425,7 @@ def new_task_type(
     Returns:
         dict: The created task type
     """
-    task_type = get_task_type_by_name(name, for_entity)
+    task_type = get_task_type_by_name(name, for_entity, client=client)
     if task_type is None:
         data = {"name": name, "color": color, "for_entity": for_entity}
         task_type = raw.post("data/task-types", data, client=client)
