@@ -888,7 +888,9 @@ def set_time_spent(
     """
     task = normalize_model_parameter(task)
     person = normalize_model_parameter(person)
-    path = f"actions/tasks/{task['id']}/time-spents/{date}/persons/{person['id']}"
+    path = (
+        f"actions/tasks/{task['id']}/time-spents/{date}/persons/{person['id']}"
+    )
     return raw.post(path, {"duration": duration}, client=client)
 
 

@@ -151,9 +151,18 @@ class CacheTestCase(unittest.TestCase):
         import datetime
 
         memo = {
-            "key1": {"date_accessed": datetime.datetime(2020, 1, 1), "value": 1},
-            "key2": {"date_accessed": datetime.datetime(2020, 1, 2), "value": 2},
-            "key3": {"date_accessed": datetime.datetime(2020, 1, 3), "value": 3},
+            "key1": {
+                "date_accessed": datetime.datetime(2020, 1, 1),
+                "value": 1,
+            },
+            "key2": {
+                "date_accessed": datetime.datetime(2020, 1, 2),
+                "value": 2,
+            },
+            "key3": {
+                "date_accessed": datetime.datetime(2020, 1, 3),
+                "value": 3,
+            },
         }
         gazu.cache.remove_oldest_entry(memo, 2)
         self.assertNotIn("key1", memo)
@@ -177,7 +186,9 @@ class CacheTestCase(unittest.TestCase):
         state = {"expire": 3600}
         self.assertFalse(gazu.cache.is_cache_expired(memo, state, "key1"))
 
-        memo["key1"]["date_accessed"] = datetime.datetime.now() - datetime.timedelta(seconds=7200)
+        memo["key1"][
+            "date_accessed"
+        ] = datetime.datetime.now() - datetime.timedelta(seconds=7200)
         self.assertTrue(gazu.cache.is_cache_expired(memo, state, "key1"))
 
         state["expire"] = 0

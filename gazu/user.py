@@ -59,7 +59,9 @@ def all_assets_for_asset_type_and_project(
     """
     project = normalize_model_parameter(project)
     asset_type = normalize_model_parameter(asset_type)
-    path = f"user/projects/{project['id']}/asset-types/{asset_type['id']}/assets"
+    path = (
+        f"user/projects/{project['id']}/asset-types/{asset_type['id']}/assets"
+    )
     assets = raw.fetch_all(path, client=client)
     return sort_by_name(assets)
 
@@ -388,9 +390,7 @@ def update_filter(filter: dict, client: KitsuClient = default) -> dict:
     Args:
         filter (dict): Filter to save.
     """
-    return raw.put(
-        f"data/user/filters/{filter['id']}", filter, client=client
-    )
+    return raw.put(f"data/user/filters/{filter['id']}", filter, client=client)
 
 
 @cache

@@ -160,9 +160,7 @@ def update_playlist(playlist: dict, client: KitsuClient = default) -> dict:
     Returns:
         dict: Updated playlist.
     """
-    return raw.put(
-        f"data/playlists/{playlist['id']}", playlist, client=client
-    )
+    return raw.put(f"data/playlists/{playlist['id']}", playlist, client=client)
 
 
 def get_entity_preview_files(
@@ -367,9 +365,7 @@ def all_build_jobs_for_project(
         list: All build jobs for the project.
     """
     project = normalize_model_parameter(project)
-    return raw.fetch_all(
-        f"projects/{project['id']}/build-jobs", client=client
-    )
+    return raw.fetch_all(f"projects/{project['id']}/build-jobs", client=client)
 
 
 def build_playlist_movie(

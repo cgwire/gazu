@@ -225,7 +225,9 @@ class SyncestCase(unittest.TestCase):
             [{"id": fakeid("src-1"), "name": "WIP"}],
             [{"id": fakeid("tgt-1"), "name": "WIP"}],
         ]
-        result = gazu.sync.get_sync_task_status_id_map(MagicMock(), MagicMock())
+        result = gazu.sync.get_sync_task_status_id_map(
+            MagicMock(), MagicMock()
+        )
         self.assertEqual(result[fakeid("src-1")], fakeid("tgt-1"))
 
     @patch("gazu.person.all_persons")
@@ -271,7 +273,10 @@ class SyncestCase(unittest.TestCase):
         mock_import.return_value = [{"id": fakeid("ep-1")}]
 
         gazu.sync.push_episodes(
-            {"id": fakeid("src")}, {"id": fakeid("tgt")}, MagicMock(), MagicMock()
+            {"id": fakeid("src")},
+            {"id": fakeid("tgt")},
+            MagicMock(),
+            MagicMock(),
         )
         mock_import.assert_called_once()
 
@@ -282,7 +287,10 @@ class SyncestCase(unittest.TestCase):
         mock_import.return_value = [{"id": fakeid("seq-1")}]
 
         gazu.sync.push_sequences(
-            {"id": fakeid("src")}, {"id": fakeid("tgt")}, MagicMock(), MagicMock()
+            {"id": fakeid("src")},
+            {"id": fakeid("tgt")},
+            MagicMock(),
+            MagicMock(),
         )
         mock_import.assert_called_once()
 
@@ -293,7 +301,10 @@ class SyncestCase(unittest.TestCase):
         mock_import.return_value = [{"id": fakeid("shot-1")}]
 
         gazu.sync.push_shots(
-            {"id": fakeid("src")}, {"id": fakeid("tgt")}, MagicMock(), MagicMock()
+            {"id": fakeid("src")},
+            {"id": fakeid("tgt")},
+            MagicMock(),
+            MagicMock(),
         )
         mock_import.assert_called_once()
 
@@ -304,7 +315,10 @@ class SyncestCase(unittest.TestCase):
         mock_import.return_value = [{"id": fakeid("link-1")}]
 
         gazu.sync.push_entity_links(
-            {"id": fakeid("src")}, {"id": fakeid("tgt")}, MagicMock(), MagicMock()
+            {"id": fakeid("src")},
+            {"id": fakeid("tgt")},
+            MagicMock(),
+            MagicMock(),
         )
         mock_import.assert_called_once()
 
@@ -314,7 +328,12 @@ class SyncestCase(unittest.TestCase):
     @patch("gazu.sync.push_episodes")
     @patch("gazu.sync.push_assets")
     def test_push_project_entities(
-        self, mock_assets, mock_episodes, mock_sequences, mock_shots, mock_links
+        self,
+        mock_assets,
+        mock_episodes,
+        mock_sequences,
+        mock_shots,
+        mock_links,
     ):
         mock_assets.return_value = []
         mock_episodes.return_value = []
@@ -381,10 +400,15 @@ class SyncestCase(unittest.TestCase):
     @patch("gazu.sync.push_task_comment")
     @patch("gazu.task.all_comments_for_task")
     def test_push_task_comments(self, mock_all_comments, mock_push):
-        mock_all_comments.return_value = [{"id": fakeid("c1")}, {"id": fakeid("c2")}]
+        mock_all_comments.return_value = [
+            {"id": fakeid("c1")},
+            {"id": fakeid("c2")},
+        ]
         mock_push.return_value = {}
 
-        gazu.sync.push_task_comments({}, {}, {"id": fakeid("task")}, MagicMock(), MagicMock())
+        gazu.sync.push_task_comments(
+            {}, {}, {"id": fakeid("task")}, MagicMock(), MagicMock()
+        )
         self.assertEqual(mock_push.call_count, 2)
 
     @patch("gazu.task.add_comment")

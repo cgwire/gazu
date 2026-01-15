@@ -151,7 +151,9 @@ def get_asset_casting(asset: dict, client: KitsuClient = default) -> dict:
             and "nb_occurences" keys representing which assets are cast in the
             given asset and how many times they appear.
     """
-    path = f"/data/projects/{asset['project_id']}/entities/{asset['id']}/casting"
+    path = (
+        f"/data/projects/{asset['project_id']}/entities/{asset['id']}/casting"
+    )
     return raw.get(path, client=client)
 
 

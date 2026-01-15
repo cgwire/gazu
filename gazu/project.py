@@ -469,9 +469,7 @@ def add_person_to_team(
     project = normalize_model_parameter(project)
     person = normalize_model_parameter(person)
     data = {"person_id": person["id"]}
-    return raw.post(
-        f"data/projects/{project['id']}/team", data, client=client
-    )
+    return raw.post(f"data/projects/{project['id']}/team", data, client=client)
 
 
 def remove_person_from_team(
@@ -667,9 +665,7 @@ def get_milestones(
         project (dict / ID): The project dict or id.
     """
     project = normalize_model_parameter(project)
-    return raw.fetch_all(
-        f"projects/{project['id']}/milestones", client=client
-    )
+    return raw.fetch_all(f"projects/{project['id']}/milestones", client=client)
 
 
 @cache

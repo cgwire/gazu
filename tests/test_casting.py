@@ -200,7 +200,9 @@ class CastingTestCase(unittest.TestCase):
         path = "data/projects/%s/shots/casting" % fakeid("project-01")
         with requests_mock.mock() as mock:
             mock.get(gazu.client.get_full_url(path), text=json.dumps(casting))
-            result = gazu.casting.get_project_shots_casting(fakeid("project-01"))
+            result = gazu.casting.get_project_shots_casting(
+                fakeid("project-01")
+            )
             self.assertEqual(
                 result[fakeid("shot-1")][0]["asset_id"], fakeid("asset-1")
             )

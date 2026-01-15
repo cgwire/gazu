@@ -131,9 +131,7 @@ def all_asset_instances_for_scene(
     Return the list of asset instances listed in a scene.
     """
     scene = normalize_model_parameter(scene)
-    return raw.get(
-        f"data/scenes/{scene['id']}/asset-instances", client=client
-    )
+    return raw.get(f"data/scenes/{scene['id']}/asset-instances", client=client)
 
 
 @cache

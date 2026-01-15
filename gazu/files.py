@@ -226,9 +226,7 @@ def get_all_attachment_files_for_task(
         task (str / dict): Target task, as ID string or model dict.
     """
     task = normalize_model_parameter(task)
-    return raw.fetch_all(
-        f"tasks/{task['id']}/attachment-files", client=client
-    )
+    return raw.fetch_all(f"tasks/{task['id']}/attachment-files", client=client)
 
 
 def get_all_attachment_files_for_project(

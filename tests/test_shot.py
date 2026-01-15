@@ -139,7 +139,8 @@ class ShotTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/episodes?project_id=%s&name=Episode 01" % fakeid("project-1"),
+                "data/episodes?project_id=%s&name=Episode 01"
+                % fakeid("project-1"),
                 text=[{"name": "Episode 01", "id": fakeid("episode-1")}],
             )
             episode = gazu.shot.get_episode_by_name(
