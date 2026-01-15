@@ -6,7 +6,7 @@ import os
 import gazu.asset
 import gazu.client
 
-from utils import fakeid, mock_route
+from utils import fakeid, mock_route, add_verify_file_callback
 
 
 class CastingTestCase(unittest.TestCase):
@@ -588,3 +588,24 @@ class CastingTestCase(unittest.TestCase):
                 ),
                 result,
             )
+
+    def test_import_assets_with_csv(self):
+        with open("./tests/fixtures/test.csv", "rb") as test_file:
+            with requests_mock.Mocker() as mock:
+                mock_route(
+                    mock,
+                    "POST",
+                    "import/csv/projects/%s/assets" % fakeid("project-1"),
+                    text={"success": True},
+                )
+                add_verify_file_callback(
+                    mock,
+                    {"file": test_file.read()},
+                    "import/csv/projects/%s/assets" % fakeid("project-1"),
+                )
+                self.assertEqual(
+                    gazu.asset.import_assets_with_csv(
+                        fakeid("project-1"), "./tests/fixtures/test.csv"
+                    ),
+                    {"success": True},
+                )

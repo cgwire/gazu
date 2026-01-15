@@ -543,7 +543,6 @@ class ProjectTestCase(unittest.TestCase):
             gazu.user.leave_chat(fakeid("chat-1"))
 
     def test_clear_avatar(self):
-
         with requests_mock.mock() as mock:
             mock_route(
                 mock,
@@ -552,3 +551,73 @@ class ProjectTestCase(unittest.TestCase):
                 status_code=204,
             )
             gazu.user.clear_avatar()
+
+    def test_get_timespents_range(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/user/time-spents?start_date=2025-01-01&end_date=2025-01-31",
+                text=[
+                    {"id": fakeid("ts-1"), "duration": 3600},
+                    {"id": fakeid("ts-2"), "duration": 7200},
+                ],
+            )
+            time_spents = gazu.user.get_timespents_range(
+                "2025-01-01", "2025-01-31"
+            )
+            self.assertEqual(len(time_spents), 2)
+            self.assertEqual(time_spents[0]["duration"], 3600)
+
+    def test_filters(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/user/filters",
+                text=[{"id": fakeid("filter-1")}, {"id": fakeid("filter-2")}],
+            )
+            filters = gazu.user.all_filters()
+            self.assertEqual(len(filters), 2)
+
+            mock_route(
+                mock,
+                "POST",
+                "data/user/filters",
+                text={
+                    "id": fakeid("filter-3"),
+                    "name": "My Filter",
+                    "query": "status=wip",
+                },
+            )
+            created = gazu.user.new_filter(
+                "My Filter",
+                "status=wip",
+                "asset",
+                project={"id": fakeid("project-1")},
+                entity_type="Asset",
+            )
+            self.assertEqual(created["id"], fakeid("filter-3"))
+
+            mock_route(
+                mock,
+                "PUT",
+                "data/user/filters/%s" % fakeid("filter-3"),
+                text={
+                    "id": fakeid("filter-3"),
+                    "name": "Updated Filter",
+                    "query": "status=done",
+                },
+            )
+            updated = gazu.user.update_filter(
+                {"id": fakeid("filter-3"), "name": "Updated Filter"}
+            )
+            self.assertEqual(updated["name"], "Updated Filter")
+
+            mock_route(
+                mock,
+                "DELETE",
+                "data/user/filters/%s" % fakeid("filter-3"),
+                status_code=204,
+            )
+            gazu.user.remove_filter(fakeid("filter-3"))

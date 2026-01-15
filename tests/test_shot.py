@@ -134,6 +134,19 @@ class ShotTestCase(unittest.TestCase):
                 gazu.shot.get_episode(fakeid("episode-1")), result
             )
 
+    def test_get_episode_by_name(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/episodes?project_id=%s&name=Episode 01" % fakeid("project-1"),
+                text=[{"name": "Episode 01", "id": fakeid("episode-1")}],
+            )
+            episode = gazu.shot.get_episode_by_name(
+                fakeid("project-1"), "Episode 01"
+            )
+            self.assertEqual(episode["name"], "Episode 01")
+
     def test_get_episode_from_sequence(self):
         self.assertEqual(
             gazu.shot.get_episode_from_sequence({"parent_id": None}), None
