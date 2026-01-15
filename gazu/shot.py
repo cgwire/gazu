@@ -26,7 +26,7 @@ def all_previews_for_shot(
         list: Previews from database for given shot.
     """
     shot = normalize_model_parameter(shot)
-    return raw.fetch_all("shots/%s/preview-files" % shot["id"], client=client)
+    return raw.fetch_all(f"shots/{shot['id']}/preview-files", client=client)
 
 
 @cache
@@ -41,7 +41,7 @@ def all_shots_for_project(
         list: Shots from database or for given project.
     """
     project = normalize_model_parameter(project)
-    shots = raw.fetch_all("projects/%s/shots" % project["id"], client=client)
+    shots = raw.fetch_all(f"projects/{project['id']}/shots", client=client)
     return sort_by_name(shots)
 
 
@@ -58,7 +58,7 @@ def all_shots_for_episode(
     """
     episode = normalize_model_parameter(episode)
     return sort_by_name(
-        raw.fetch_all("episodes/%s/shots" % episode["id"], client=client)
+        raw.fetch_all(f"episodes/{episode['id']}/shots", client=client)
     )
 
 
@@ -75,7 +75,7 @@ def all_shots_for_sequence(
     """
     sequence = normalize_model_parameter(sequence)
     return sort_by_name(
-        raw.fetch_all("sequences/%s/shots" % sequence["id"], client=client)
+        raw.fetch_all(f"sequences/{sequence['id']}/shots", client=client)
     )
 
 
@@ -91,7 +91,7 @@ def all_sequences_for_project(
         list: Sequences from database for given project.
     """
     project = normalize_model_parameter(project)
-    path = "projects/%s/sequences" % project["id"]
+    path = f"projects/{project['id']}/sequences"
     sequences = raw.fetch_all(path, client=client)
     return sort_by_name(sequences)
 
@@ -108,7 +108,7 @@ def all_sequences_for_episode(
         list: Sequences which are children of given episode.
     """
     episode = normalize_model_parameter(episode)
-    path = "episodes/%s/sequences" % episode["id"]
+    path = f"episodes/{episode['id']}/sequences"
     sequences = raw.fetch_all(path, client=client)
     return sort_by_name(sequences)
 
@@ -125,7 +125,7 @@ def all_episodes_for_project(
         list: Episodes from database for given project.
     """
     project = normalize_model_parameter(project)
-    path = "projects/%s/episodes" % project["id"]
+    path = f"projects/{project['id']}/episodes"
     episodes = raw.fetch_all(path, client=client)
     return sort_by_name(episodes)
 
@@ -273,12 +273,10 @@ def get_episode_url(episode: str | dict, client: KitsuClient = default) -> str:
     """
     episode = normalize_model_parameter(episode)
     episode = get_episode(episode["id"])
-    path = "{host}/productions/{project_id}/episodes/{episode_id}/shots"
-    return path.format(
-        host=raw.get_api_url_from_host(client=client),
-        project_id=episode["project_id"],
-        episode_id=episode["id"],
-    )
+    host = raw.get_api_url_from_host(client=client)
+    project_id = episode["project_id"]
+    episode_id = episode["id"]
+    return f"{host}/productions/{project_id}/episodes/{episode_id}/shots"
 
 
 @cache
@@ -292,17 +290,14 @@ def get_shot_url(shot: str | dict, client: KitsuClient = default) -> str:
     """
     shot = normalize_model_parameter(shot)
     shot = get_shot(shot["id"])
-    path = "{host}/productions/{project_id}/"
+    host = raw.get_api_url_from_host(client=client)
+    project_id = shot["project_id"]
+    shot_id = shot["id"]
     if shot["episode_id"] is None:
-        path += "shots/{shot_id}/"
+        return f"{host}/productions/{project_id}/shots/{shot_id}/"
     else:
-        path += "episodes/{episode_id}/shots/{shot_id}/"
-    return path.format(
-        host=raw.get_api_url_from_host(client=client),
-        project_id=shot["project_id"],
-        shot_id=shot["id"],
-        episode_id=shot["episode_id"],
-    )
+        episode_id = shot["episode_id"]
+        return f"{host}/productions/{project_id}/episodes/{episode_id}/shots/{shot_id}/"
 
 
 def new_sequence(
@@ -333,7 +328,7 @@ def new_sequence(
         project, name, episode=episode, client=client
     )
     if sequence is None:
-        path = "data/projects/%s/sequences" % project["id"]
+        path = f"data/projects/{project['id']}/sequences"
         return raw.post(path, data, client=client)
     else:
         return sequence
@@ -382,7 +377,7 @@ def new_shot(
 
     shot = get_shot_by_name(sequence, name, client=client)
     if shot is None:
-        path = "data/projects/%s/shots" % project["id"]
+        path = f"data/projects/{project['id']}/shots"
         return raw.post(path, data, client=client)
     else:
         return shot
@@ -399,7 +394,7 @@ def update_shot(shot: dict, client: KitsuClient = default) -> dict:
     Returns:
         dict: Updated shot.
     """
-    return raw.put("data/entities/%s" % shot["id"], shot, client=client)
+    return raw.put(f"data/entities/{shot['id']}", shot, client=client)
 
 
 def update_sequence(sequence: dict, client: KitsuClient = default) -> dict:
@@ -413,9 +408,7 @@ def update_sequence(sequence: dict, client: KitsuClient = default) -> dict:
     Returns:
         dict: Updated sequence.
     """
-    return raw.put(
-        "data/entities/%s" % sequence["id"], sequence, client=client
-    )
+    return raw.put(f"data/entities/{sequence['id']}", sequence, client=client)
 
 
 @cache
@@ -426,7 +419,7 @@ def get_asset_instances_for_shot(
     Return the list of asset instances linked to given shot.
     """
     shot = normalize_model_parameter(shot)
-    return raw.get("data/shots/%s/asset-instances" % shot["id"], client=client)
+    return raw.get(f"data/shots/{shot['id']}/asset-instances", client=client)
 
 
 def update_shot_data(
@@ -497,7 +490,7 @@ def remove_shot(
             whether it has links to tasks.
     """
     shot = normalize_model_parameter(shot)
-    path = "data/shots/%s" % shot["id"]
+    path = f"data/shots/{shot['id']}"
     params = {}
     if force:
         params = {"force": True}
@@ -512,7 +505,7 @@ def restore_shot(shot: str | dict, client: KitsuClient = default) -> dict:
         shot (str / dict): Shot to restore.
     """
     shot = normalize_model_parameter(shot)
-    path = "data/shots/%s" % shot["id"]
+    path = f"data/shots/{shot['id']}"
     data = {"canceled": False}
     return raw.put(path, data, client=client)
 
@@ -535,7 +528,7 @@ def new_episode(
     episode = get_episode_by_name(project, name, client=client)
     if episode is None:
         return raw.post(
-            "data/projects/%s/episodes" % project["id"], data, client=client
+            f"data/projects/{project['id']}/episodes", data, client=client
         )
     else:
         return episode
@@ -552,7 +545,7 @@ def update_episode(episode: dict, client: KitsuClient = default) -> dict:
     Returns:
         dict: Updated episode.
     """
-    return raw.put("data/entities/%s" % episode["id"], episode, client=client)
+    return raw.put(f"data/entities/{episode['id']}", episode, client=client)
 
 
 def update_episode_data(
@@ -602,7 +595,7 @@ def remove_episode(
             has not been provided.
     """
     episode = normalize_model_parameter(episode)
-    path = "data/episodes/%s" % episode["id"]
+    path = f"data/episodes/{episode['id']}"
     params = {}
     if force:
         params = {"force": True}
@@ -631,7 +624,7 @@ def remove_sequence(
             has not been provided.
     """
     sequence = normalize_model_parameter(sequence)
-    path = "data/sequences/%s" % sequence["id"]
+    path = f"data/sequences/{sequence['id']}"
     params = {}
     if force:
         params = {"force": True}
@@ -650,7 +643,7 @@ def all_asset_instances_for_shot(
         list: Asset instances linked to given shot.
     """
     shot = normalize_model_parameter(shot)
-    return raw.get("data/shots/%s/asset-instances" % shot["id"], client=client)
+    return raw.get(f"data/shots/{shot['id']}/asset-instances", client=client)
 
 
 def add_asset_instance_to_shot(
@@ -669,7 +662,7 @@ def add_asset_instance_to_shot(
     shot = normalize_model_parameter(shot)
     asset_instance = normalize_model_parameter(asset_instance)
     data = {"asset_instance_id": asset_instance["id"]}
-    path = "data/shots/%s/asset-instances" % shot["id"]
+    path = f"data/shots/{shot['id']}/asset-instances"
     return raw.post(path, data, client=client)
 
 
@@ -685,10 +678,7 @@ def remove_asset_instance_from_shot(
     """
     shot = normalize_model_parameter(shot)
     asset_instance = normalize_model_parameter(asset_instance)
-    path = "data/shots/%s/asset-instances/%s" % (
-        shot["id"],
-        asset_instance["id"],
-    )
+    path = f"data/shots/{shot['id']}/asset-instances/{asset_instance['id']}"
     return raw.delete(path, client=client)
 
 
@@ -709,7 +699,7 @@ def import_shots_with_csv(
     """
     project = normalize_model_parameter(project)
     return raw.upload(
-        "import/csv/projects/%s/shots" % project["id"],
+        f"import/csv/projects/{project['id']}/shots",
         csv_file_path,
         client=client,
     )
@@ -746,10 +736,10 @@ def import_otio(
         else:
             naming_convention = "${project_name}_${sequence_name}-${shot_name}"
     project = normalize_model_parameter(project)
-    path = "/import/otio/projects/%s" % project["id"]
+    path = f"/import/otio/projects/{project['id']}"
     if episode is not None:
         episode = normalize_model_parameter(episode)
-        path += "/episodes/%s" % episode["id"]
+        path += f"/episodes/{episode['id']}"
     return raw.upload(
         path,
         otio_file_path,
@@ -798,7 +788,7 @@ def export_shots_with_csv(
     if assigned_to:
         params["assigned_to"] = assigned_to["id"]
     return raw.download(
-        "export/csv/projects/%s/shots.csv" % project["id"],
+        f"export/csv/projects/{project['id']}/shots.csv",
         csv_file_path,
         params=params,
         client=client,

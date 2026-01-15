@@ -73,8 +73,7 @@ def validate_date_format(date_text: str) -> str:
             datetime.datetime.strptime(date_text, "%Y-%m-%d")
         except ValueError:
             raise ValueError(
-                "Incorrect date format for %s, should be YYYY-mm-dd or YYYY-mm-ddTHH:MM:SS"
-                % date_text
+                f"Incorrect date format for {date_text}, should be YYYY-mm-dd or YYYY-mm-ddTHH:MM:SS"
             )
     return date_text
 
@@ -143,6 +142,5 @@ def download_file(
             return file_path
         else:
             raise DownloadFileException(
-                "File (%s) can't be downloaded (%i %s)."
-                % (url, response.status_code, response.reason)
+                f"File ({url}) can't be downloaded ({response.status_code} {response.reason})."
             )

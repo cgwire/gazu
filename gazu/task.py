@@ -54,7 +54,7 @@ def all_task_types_for_project(
     """
     project = normalize_model_parameter(project)
     task_types = raw.fetch_all(
-        "projects/%s/task-types" % project["id"], client=client
+        f"projects/{project['id']}/task-types", client=client
     )
     return sort_by_name(task_types)
 
@@ -69,7 +69,7 @@ def all_task_statuses_for_project(
     """
     project = normalize_model_parameter(project)
     task_statuses = raw.fetch_all(
-        "projects/%s/settings/task-status" % project["id"], client=client
+        f"projects/{project['id']}/settings/task-status", client=client
     )
     return sort_by_name(task_statuses)
 
@@ -89,7 +89,7 @@ def all_tasks_for_shot(
     params = {}
     if relations:
         params = {"relations": True}
-    tasks = raw.fetch_all("shots/%s/tasks" % shot["id"], params, client=client)
+    tasks = raw.fetch_all(f"shots/{shot['id']}/tasks", params, client=client)
     return sort_by_name(tasks)
 
 
@@ -109,7 +109,7 @@ def all_tasks_for_concept(
     if relations:
         params = {"relations": True}
     tasks = raw.fetch_all(
-        "concepts/%s/tasks" % concept["id"], params, client=client
+        f"concepts/{concept['id']}/tasks", params, client=client
     )
     return sort_by_name(tasks)
 
@@ -129,7 +129,7 @@ def all_tasks_for_edit(
     params = {}
     if relations:
         params = {"relations": True}
-    tasks = raw.fetch_all("edits/%s/tasks" % edit["id"], params, client=client)
+    tasks = raw.fetch_all(f"edits/{edit['id']}/tasks", params, client=client)
     return sort_by_name(tasks)
 
 
@@ -150,7 +150,7 @@ def all_tasks_for_sequence(
     params = {}
     if relations:
         params = {"relations": True}
-    path = "sequences/%s/tasks" % sequence["id"]
+    path = f"sequences/{sequence['id']}/tasks"
     tasks = raw.fetch_all(path, params, client=client)
     return sort_by_name(tasks)
 
@@ -170,7 +170,7 @@ def all_tasks_for_scene(
     params = {}
     if relations:
         params = {"relations": True}
-    path = "scenes/%s/tasks" % scene["id"]
+    path = f"scenes/{scene['id']}/tasks"
     tasks = raw.fetch_all(path, params, client=client)
     return sort_by_name(tasks)
 
@@ -190,7 +190,7 @@ def all_tasks_for_asset(
     params = {}
     if relations:
         params = {"relations": True}
-    path = "assets/%s/tasks" % asset["id"]
+    path = f"assets/{asset['id']}/tasks"
     tasks = raw.fetch_all(path, params, client=client)
     return sort_by_name(tasks)
 
@@ -206,7 +206,7 @@ def all_tasks_for_episode(
     params = {}
     if relations:
         params = {"relations": True}
-    path = "episodes/%s/tasks" % episode["id"]
+    path = f"episodes/{episode['id']}/tasks"
     tasks = raw.fetch_all(path, params, client=client)
     return sort_by_name(tasks)
 
@@ -224,7 +224,7 @@ def all_shot_tasks_for_sequence(
     params = {}
     if relations:
         params = {"relations": True}
-    path = "sequences/%s/shot-tasks" % sequence["id"]
+    path = f"sequences/{sequence['id']}/shot-tasks"
     tasks = raw.fetch_all(path, params, client=client)
     return sort_by_name(tasks)
 
@@ -240,7 +240,7 @@ def all_shot_tasks_for_episode(
     params = {}
     if relations:
         params = {"relations": True}
-    path = "episodes/%s/shot-tasks" % episode["id"]
+    path = f"episodes/{episode['id']}/shot-tasks"
     tasks = raw.fetch_all(path, params, client=client)
     return sort_by_name(tasks)
 
@@ -256,7 +256,7 @@ def all_assets_tasks_for_episode(
     params = {}
     if relations:
         params = {"relations": True}
-    path = "episodes/%s/asset-tasks" % episode["id"]
+    path = f"episodes/{episode['id']}/asset-tasks"
     tasks = raw.fetch_all(path, params, client=client)
     return sort_by_name(tasks)
 
@@ -331,7 +331,7 @@ def all_task_types_for_shot(
         list: Task types of task linked to given shot.
     """
     shot = normalize_model_parameter(shot)
-    path = "shots/%s/task-types" % shot["id"]
+    path = f"shots/{shot['id']}/task-types"
     task_types = raw.fetch_all(path, client=client)
     return sort_by_name(task_types)
 
@@ -348,7 +348,7 @@ def all_task_types_for_concept(
         list: Task types of task linked to given concept.
     """
     concept = normalize_model_parameter(concept)
-    path = "concepts/%s/task-types" % concept["id"]
+    path = f"concepts/{concept['id']}/task-types"
     task_types = raw.fetch_all(path, client=client)
     return sort_by_name(task_types)
 
@@ -366,7 +366,7 @@ def all_task_types_for_asset(
     """
     asset = normalize_model_parameter(asset)
     task_types = raw.fetch_all(
-        "assets/%s/task-types" % asset["id"], client=client
+        f"assets/{asset['id']}/task-types", client=client
     )
     return sort_by_name(task_types)
 
@@ -383,7 +383,7 @@ def all_task_types_for_scene(
         list: Task types of tasks linked to given scene.
     """
     scene = normalize_model_parameter(scene)
-    path = "scenes/%s/task-types" % scene["id"]
+    path = f"scenes/{scene['id']}/task-types"
     task_types = raw.fetch_all(path, client=client)
     return sort_by_name(task_types)
 
@@ -400,7 +400,7 @@ def all_task_types_for_sequence(
         list: Task types of tasks linked directly to given sequence.
     """
     sequence = normalize_model_parameter(sequence)
-    path = "sequences/%s/task-types" % sequence["id"]
+    path = f"sequences/{sequence['id']}/task-types"
     task_types = raw.fetch_all(path, client=client)
     return sort_by_name(task_types)
 
@@ -414,7 +414,7 @@ def all_task_types_for_episode(
         list: Task types of tasks linked directly to given episode.
     """
     episode = normalize_model_parameter(episode)
-    path = "episodes/%s/task-types" % episode["id"]
+    path = f"episodes/{episode['id']}/task-types"
     task_types = raw.fetch_all(path, client=client)
     return sort_by_name(task_types)
 
@@ -435,7 +435,7 @@ def all_tasks_for_entity_and_task_type(
     task_type = normalize_model_parameter(task_type)
     task_type_id = task_type["id"]
     entity_id = entity["id"]
-    path = "entities/%s/task-types/%s/tasks" % (entity_id, task_type_id)
+    path = f"entities/{entity_id}/task-types/{task_type_id}/tasks"
     return raw.fetch_all(path, client=client)
 
 
@@ -448,7 +448,7 @@ def all_tasks_for_person(
         list: Tasks that are not done for given person (only for open projects).
     """
     person = normalize_model_parameter(person)
-    return raw.fetch_all("persons/%s/tasks" % person["id"], client=client)
+    return raw.fetch_all(f"persons/{person['id']}/tasks", client=client)
 
 
 @cache
@@ -460,7 +460,7 @@ def all_done_tasks_for_person(
         list: Tasks that are done for given person (only for open projects).
     """
     person = normalize_model_parameter(person)
-    return raw.fetch_all("persons/%s/done-tasks" % person["id"], client=client)
+    return raw.fetch_all(f"persons/{person['id']}/done-tasks", client=client)
 
 
 @cache
@@ -644,7 +644,7 @@ def remove_task_type(
     """
     task_type = normalize_model_parameter(task_type)
     return raw.delete(
-        "data/task-types/%s" % task_type["id"],
+        f"data/task-types/{task_type['id']}",
         {"force": True},
         client=client,
     )
@@ -661,7 +661,7 @@ def remove_task_status(
     """
     task_status = normalize_model_parameter(task_status)
     return raw.delete(
-        "data/task-status/%s" % task_status["id"],
+        f"data/task-status/{task_status['id']}",
         {"force": True},
         client=client,
     )
@@ -678,7 +678,7 @@ def update_task_type(task_type: dict, client: KitsuClient = default) -> dict:
         dict: Updated task type.
     """
     return raw.put(
-        "data/task-types/%s" % task_type["id"],
+        f"data/task-types/{task_type['id']}",
         task_type,
         client=client,
     )
@@ -697,7 +697,7 @@ def update_task_status(
         dict: Updated task status.
     """
     return raw.put(
-        "data/task-status/%s" % task_status["id"],
+        f"data/task-status/{task_status['id']}",
         task_status,
         client=client,
     )
@@ -713,7 +713,7 @@ def get_task(task_id: str | dict, client: KitsuClient = default) -> dict:
         dict: Task matching given ID.
     """
     task_id = normalize_model_parameter(task_id)
-    return raw.get("data/tasks/%s/full" % task_id["id"], client=client)
+    return raw.get(f"data/tasks/{task_id['id']}/full", client=client)
 
 
 def new_task(
@@ -770,7 +770,7 @@ def remove_task(task: str | dict, client: KitsuClient = default) -> str:
         task (str / dict): The task dict or the task ID.
     """
     task = normalize_model_parameter(task)
-    raw.delete("data/tasks/%s" % task["id"], {"force": True}, client=client)
+    raw.delete(f"data/tasks/{task['id']}", {"force": True}, client=client)
 
 
 def start_task(
@@ -833,7 +833,7 @@ def task_to_review(
     """
     task = normalize_model_parameter(task)
     person = normalize_model_parameter(person)
-    path = "actions/tasks/%s/to-review" % task["id"]
+    path = f"actions/tasks/{task['id']}/to-review"
     data = {
         "person_id": person["id"],
         "comment": comment,
@@ -861,9 +861,9 @@ def get_time_spent(
         dict: A dict with person ID as key and time spent object as value.
     """
     task = normalize_model_parameter(task)
-    path = "actions/tasks/%s/time-spents" % (task["id"])
+    path = f"actions/tasks/{task['id']}/time-spents"
     if date is not None:
-        path += "/%s" % (date)
+        path += f"/{date}"
     return raw.get(path, client=client)
 
 
@@ -888,11 +888,7 @@ def set_time_spent(
     """
     task = normalize_model_parameter(task)
     person = normalize_model_parameter(person)
-    path = "actions/tasks/%s/time-spents/%s/persons/%s" % (
-        task["id"],
-        date,
-        person["id"],
-    )
+    path = f"actions/tasks/{task['id']}/time-spents/{date}/persons/{person['id']}"
     return raw.post(path, {"duration": duration}, client=client)
 
 
@@ -918,11 +914,7 @@ def add_time_spent(
     """
     task = normalize_model_parameter(task)
     person = normalize_model_parameter(person)
-    path = "actions/tasks/%s/time-spents/%s/persons/%s/add" % (
-        task["id"],
-        date,
-        person["id"],
-    )
+    path = f"actions/tasks/{task['id']}/time-spents/{date}/persons/{person['id']}/add"
     return raw.post(path, {"duration": duration}, client=client)
 
 
@@ -973,13 +965,13 @@ def add_comment(
 
     if len(attachments) == 0:
         return raw.post(
-            "actions/tasks/%s/comment" % task["id"], data, client=client
+            f"actions/tasks/{task['id']}/comment", data, client=client
         )
     else:
         attachment = attachments.pop()
         data["checklist"] = json.dumps(checklist)
         return raw.upload(
-            "actions/tasks/%s/comment" % task["id"],
+            f"actions/tasks/{task['id']}/comment",
             attachment,
             data=data,
             extra_files=attachments,
@@ -1012,8 +1004,7 @@ def add_attachment_files_to_comment(
     comment = normalize_model_parameter(comment)
     attachment = attachments.pop()
     return raw.upload(
-        "actions/tasks/%s/comments/%s/add-attachment"
-        % (task["id"], comment["id"]),
+        f"actions/tasks/{task['id']}/comments/{comment['id']}/add-attachment",
         attachment,
         extra_files=attachments,
         client=client,
@@ -1042,7 +1033,7 @@ def remove_comment(comment: str | dict, client: KitsuClient = default) -> str:
         comment (str / dict): The comment dict or the comment ID.
     """
     comment = normalize_model_parameter(comment)
-    return raw.delete("data/comments/%s" % (comment["id"]), client=client)
+    return raw.delete(f"data/comments/{comment['id']}", client=client)
 
 
 def create_preview(
@@ -1064,10 +1055,7 @@ def create_preview(
     """
     task = normalize_model_parameter(task)
     comment = normalize_model_parameter(comment)
-    path = "actions/tasks/%s/comments/%s/add-preview" % (
-        task["id"],
-        comment["id"],
-    )
+    path = f"actions/tasks/{task['id']}/comments/{comment['id']}/add-preview"
     data = {}
     if revision is not None:
         data["revision"] = revision
@@ -1087,10 +1075,7 @@ def upload_preview_file(
         preview_file (str / dict): The preview_file dict or the preview_file ID.
         file_path (str): Path of the file to upload as preview.
     """
-    path = (
-        "pictures/preview-files/%s"
-        % normalize_model_parameter(preview_file)["id"]
-    )
+    path = f"pictures/preview-files/{normalize_model_parameter(preview_file)['id']}"
     if not normalize_movie:
         path += "?normalize=false"
     return raw.upload(path, file_path, client=client)
@@ -1227,14 +1212,14 @@ def batch_comments(
     for x, comment in enumerate(comments):
         if comment.get("attachment_files"):
             for y, file_path in enumerate(comment["attachment_files"]):
-                files["attachment_file-%i-%i" % (x, y)] = open(file_path, "rb")
+                files[f"attachment_file-{x}-{y}"] = open(file_path, "rb")
         if comment.get("preview_files"):
             for y, file_path in enumerate(comment["preview_files"]):
-                files["preview_file-%i-%i" % (x, y)] = open(file_path, "rb")
+                files[f"preview_file-{x}-{y}"] = open(file_path, "rb")
 
     files["comments"] = (None, json.dumps(comments), "application/json")
     return raw.upload(
-        "actions/tasks/%sbatch-comment" % ("%s/" % task["id"] if task else ""),
+        f"actions/tasks/{task['id'] + '/' if task else ''}batch-comment",
         file_path=None,
         files=files,
         client=client,
@@ -1266,14 +1251,14 @@ def create_multiple_comments(
     for x, comment in enumerate(comments):
         if comment.get("attachment_files"):
             for y, file_path in enumerate(comment["attachment_files"]):
-                files["attachment_file-%i-%i" % (x, y)] = open(file_path, "rb")
+                files[f"attachment_file-{x}-{y}"] = open(file_path, "rb")
         if comment.get("preview_files"):
             for y, file_path in enumerate(comment["preview_files"]):
-                files["preview_file-%i-%i" % (x, y)] = open(file_path, "rb")
+                files[f"preview_file-{x}-{y}"] = open(file_path, "rb")
 
     files["comments"] = (None, json.dumps(comments), "application/json")
     return raw.upload(
-        "actions/projects/%s/tasks/comment-many" % project["id"],
+        f"actions/projects/{project['id']}/tasks/comment-many",
         file_path=None,
         files=files,
         client=client,
@@ -1321,7 +1306,7 @@ def set_main_preview(
     if frame_number is not None:
         data["frame_number"] = frame_number
     preview_file = normalize_model_parameter(preview_file)
-    path = "actions/preview-files/%s/set-main-preview" % preview_file["id"]
+    path = f"actions/preview-files/{preview_file['id']}/set-main-preview"
     return raw.put(path, data, client=client)
 
 
@@ -1337,7 +1322,7 @@ def all_comments_for_task(
         Comments linked to the given task.
     """
     task = normalize_model_parameter(task)
-    return raw.fetch_all("tasks/%s/comments" % task["id"], client=client)
+    return raw.fetch_all(f"tasks/{task['id']}/comments", client=client)
 
 
 @cache
@@ -1352,7 +1337,7 @@ def get_last_comment_for_task(
         Last comment posted for given task.
     """
     task = normalize_model_parameter(task)
-    return raw.fetch_first("tasks/%s/comments" % task["id"], client=client)
+    return raw.fetch_first(f"tasks/{task['id']}/comments", client=client)
 
 
 @cache
@@ -1370,7 +1355,7 @@ def assign_task(
     """
     person = normalize_model_parameter(person)
     task = normalize_model_parameter(task)
-    path = "/actions/persons/%s/assign" % person["id"]
+    path = f"/actions/persons/{person['id']}/assign"
     return raw.put(path, {"task_ids": task["id"]}, client=client)
 
 
@@ -1469,7 +1454,7 @@ def update_task(task: dict, client: KitsuClient = default) -> dict:
         task["assignees"] = normalize_list_of_models_for_links(
             task["assignees"]
         )
-    return raw.put("data/tasks/%s" % task["id"], task, client=client)
+    return raw.put(f"data/tasks/{task['id']}", task, client=client)
 
 
 def update_task_data(
@@ -1507,12 +1492,8 @@ def get_task_url(task: dict, client: KitsuClient = default) -> str:
     """
     if not isinstance(task, dict):
         raise TaskMustBeADictException
-    path = "{host}/productions/{project_id}/shots/tasks/{task_id}/"
-    return path.format(
-        host=raw.get_api_url_from_host(client=client),
-        project_id=task["project_id"],
-        task_id=task["id"],
-    )
+    host = raw.get_api_url_from_host(client=client)
+    return f"{host}/productions/{task['project_id']}/shots/tasks/{task['id']}/"
 
 
 def all_tasks_for_project(
@@ -1531,7 +1512,7 @@ def all_tasks_for_project(
         list[dict]: Tasks related to given project.
     """
     project = normalize_model_parameter(project)
-    path = "/data/projects/%s/tasks" % project["id"]
+    path = f"/data/projects/{project['id']}/tasks"
     params = {}
     if task_type is not None:
         task_type = normalize_model_parameter(task_type)
@@ -1553,7 +1534,7 @@ def update_comment(comment: dict, client: KitsuClient = default) -> dict:
     Returns:
         dict: Updated comment.
     """
-    return raw.put("data/comments/%s" % comment["id"], comment, client=client)
+    return raw.put(f"data/comments/{comment['id']}", comment, client=client)
 
 
 @cache
@@ -1592,7 +1573,7 @@ def all_previews_for_task(
         list: Previews for the task.
     """
     task = normalize_model_parameter(task)
-    return raw.fetch_all("tasks/%s/previews" % task["id"], client=client)
+    return raw.fetch_all(f"tasks/{task['id']}/previews", client=client)
 
 
 @cache
@@ -1609,7 +1590,7 @@ def all_open_tasks_for_person(
         list: Open tasks for the person.
     """
     person = normalize_model_parameter(person)
-    return raw.fetch_all("persons/%s/tasks/open" % person["id"], client=client)
+    return raw.fetch_all(f"persons/{person['id']}/tasks/open", client=client)
 
 
 @cache
@@ -1629,7 +1610,7 @@ def all_tasks_for_person_and_type(
     person = normalize_model_parameter(person)
     task_type = normalize_model_parameter(task_type)
     return raw.fetch_all(
-        "persons/%s/task-types/%s/tasks" % (person["id"], task_type["id"]),
+        f"persons/{person['id']}/task-types/{task_type['id']}/tasks",
         client=client,
     )
 
@@ -1648,7 +1629,7 @@ def all_comments_for_project(
         list: Comments for the project.
     """
     project = normalize_model_parameter(project)
-    return raw.fetch_all("projects/%s/comments" % project["id"], client=client)
+    return raw.fetch_all(f"projects/{project['id']}/comments", client=client)
 
 
 @cache
@@ -1666,7 +1647,7 @@ def all_notifications_for_project(
     """
     project = normalize_model_parameter(project)
     return raw.fetch_all(
-        "projects/%s/notifications" % project["id"], client=client
+        f"projects/{project['id']}/notifications", client=client
     )
 
 
@@ -1685,7 +1666,7 @@ def all_preview_files_for_project(
     """
     project = normalize_model_parameter(project)
     return raw.fetch_all(
-        "projects/%s/preview-files" % project["id"], client=client
+        f"projects/{project['id']}/preview-files", client=client
     )
 
 
@@ -1704,7 +1685,7 @@ def all_subscriptions_for_project(
     """
     project = normalize_model_parameter(project)
     return raw.fetch_all(
-        "projects/%s/subscriptions" % project["id"], client=client
+        f"projects/{project['id']}/subscriptions", client=client
     )
 
 
@@ -1723,7 +1704,7 @@ def get_persons_tasks_dates(
     """
     project = normalize_model_parameter(project)
     return raw.get(
-        "data/projects/%s/persons/tasks/dates" % project["id"], client=client
+        f"data/projects/{project['id']}/persons/tasks/dates", client=client
     )
 
 
@@ -1740,8 +1721,7 @@ def remove_tasks_for_type(
     project = normalize_model_parameter(project)
     task_type = normalize_model_parameter(task_type)
     return raw.delete(
-        "data/projects/%s/task-types/%s/tasks"
-        % (project["id"], task_type["id"]),
+        f"data/projects/{project['id']}/task-types/{task_type['id']}/tasks",
         client=client,
     )
 
@@ -1802,7 +1782,7 @@ def get_task_time_spent_for_date(
     """
     task = normalize_model_parameter(task)
     return raw.get(
-        "data/tasks/%s/time-spent/for-date" % task["id"],
+        f"data/tasks/{task['id']}/time-spent/for-date",
         params={"date": date},
         client=client,
     )
@@ -1821,7 +1801,7 @@ def remove_time_spent(
         Response: Request response object.
     """
     time_spent = normalize_model_parameter(time_spent)
-    return raw.delete("data/time-spents/%s" % time_spent["id"], client=client)
+    return raw.delete(f"data/time-spents/{time_spent['id']}", client=client)
 
 
 def add_preview_to_comment(
@@ -1842,7 +1822,7 @@ def add_preview_to_comment(
     comment = normalize_model_parameter(comment)
     preview_file = normalize_model_parameter(preview_file)
     return raw.post(
-        "data/comments/%s/preview-files" % comment["id"],
+        f"data/comments/{comment['id']}/preview-files",
         {"preview_file_id": preview_file["id"]},
         client=client,
     )
@@ -1863,8 +1843,7 @@ def remove_preview_from_comment(
     comment = normalize_model_parameter(comment)
     preview_file = normalize_model_parameter(preview_file)
     return raw.delete(
-        "data/comments/%s/preview-files/%s"
-        % (comment["id"], preview_file["id"]),
+        f"data/comments/{comment['id']}/preview-files/{preview_file['id']}",
         client=client,
     )
 
@@ -1887,7 +1866,7 @@ def acknowledge_comment(
     task = normalize_model_parameter(task)
     comment = normalize_model_parameter(comment)
     return raw.post(
-        "data/tasks/%s/comments/%s/ack" % (task["id"], comment["id"]),
+        f"data/tasks/{task['id']}/comments/{comment['id']}/ack",
         {},
         client=client,
     )
@@ -1916,7 +1895,7 @@ def reply_to_comment(
         person = normalize_model_parameter(person)
         data["person_id"] = person["id"]
     return raw.post(
-        "data/comments/%s/replies" % comment["id"],
+        f"data/comments/{comment['id']}/replies",
         data,
         client=client,
     )
@@ -1940,8 +1919,7 @@ def delete_comment_attachment(
     comment = normalize_model_parameter(comment)
     attachment_file = normalize_model_parameter(attachment_file)
     return raw.delete(
-        "data/comments/%s/attachment-files/%s"
-        % (comment["id"], attachment_file["id"]),
+        f"data/comments/{comment['id']}/attachment-files/{attachment_file['id']}",
         client=client,
     )
 
@@ -1964,7 +1942,7 @@ def delete_comment_reply(
     comment = normalize_model_parameter(comment)
     reply = normalize_model_parameter(reply)
     return raw.delete(
-        "data/comments/%s/replies/%s" % (comment["id"], reply["id"]),
+        f"data/comments/{comment['id']}/replies/{reply['id']}",
         client=client,
     )
 
@@ -1989,7 +1967,7 @@ def create_shot_tasks(
         normalize_model_parameter(task_type)["id"] for task_type in task_types
     ]
     return raw.post(
-        "data/shots/%s/tasks" % shot["id"],
+        f"data/shots/{shot['id']}/tasks",
         {"task_type_ids": task_type_ids},
         client=client,
     )
@@ -2015,7 +1993,7 @@ def create_asset_tasks(
         normalize_model_parameter(task_type)["id"] for task_type in task_types
     ]
     return raw.post(
-        "data/assets/%s/tasks" % asset["id"],
+        f"data/assets/{asset['id']}/tasks",
         {"task_type_ids": task_type_ids},
         client=client,
     )
@@ -2041,7 +2019,7 @@ def create_edit_tasks(
         normalize_model_parameter(task_type)["id"] for task_type in task_types
     ]
     return raw.post(
-        "data/edits/%s/tasks" % edit["id"],
+        f"data/edits/{edit['id']}/tasks",
         {"task_type_ids": task_type_ids},
         client=client,
     )
@@ -2067,7 +2045,7 @@ def create_concept_tasks(
         normalize_model_parameter(task_type)["id"] for task_type in task_types
     ]
     return raw.post(
-        "data/concepts/%s/tasks" % concept["id"],
+        f"data/concepts/{concept['id']}/tasks",
         {"task_type_ids": task_type_ids},
         client=client,
     )
@@ -2093,7 +2071,7 @@ def create_entity_tasks(
         normalize_model_parameter(task_type)["id"] for task_type in task_types
     ]
     return raw.post(
-        "data/entities/%s/tasks" % entity["id"],
+        f"data/entities/{entity['id']}/tasks",
         {"task_type_ids": task_type_ids},
         client=client,
     )

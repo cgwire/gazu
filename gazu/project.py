@@ -83,12 +83,9 @@ def get_project_url(
         url (str): Web url associated to the given project
     """
     project = normalize_model_parameter(project)
-    path = "{host}/productions/{project_id}/{section}/"
-    return path.format(
-        host=raw.get_api_url_from_host(client=client),
-        project_id=project["id"],
-        section=section,
-    )
+    host = raw.get_api_url_from_host(client=client)
+    project_id = project["id"]
+    return f"{host}/productions/{project_id}/{section}/"
 
 
 @cache
@@ -161,7 +158,7 @@ def remove_project(
         project (dict / str): Project to remove.
     """
     project = normalize_model_parameter(project)
-    path = "data/projects/%s" % project["id"]
+    path = f"data/projects/{project['id']}"
     if force:
         path += "?force=true"
     return raw.delete(path, client=client)
@@ -192,7 +189,7 @@ def update_project(project: dict, client: KitsuClient = default) -> dict:
         project["task_types"] = normalize_list_of_models_for_links(
             project["task_types"]
         )
-    return raw.put("data/projects/%s" % project["id"], project, client=client)
+    return raw.put(f"data/projects/{project['id']}", project, client=client)
 
 
 def update_project_data(
@@ -245,7 +242,7 @@ def add_asset_type(
     asset_type = normalize_model_parameter(asset_type)
     data = {"asset_type_id": asset_type["id"]}
     return raw.post(
-        "data/projects/%s/settings/asset-types" % project["id"],
+        f"data/projects/{project['id']}/settings/asset-types",
         data,
         client=client,
     )
@@ -261,7 +258,7 @@ def add_task_type(
     task_type = normalize_model_parameter(task_type)
     data = {"task_type_id": task_type["id"], "priority": priority}
     return raw.post(
-        "data/projects/%s/settings/task-types" % project["id"],
+        f"data/projects/{project['id']}/settings/task-types",
         data,
         client=client,
     )
@@ -274,7 +271,7 @@ def add_task_status(
     task_status = normalize_model_parameter(task_status)
     data = {"task_status_id": task_status["id"]}
     return raw.post(
-        "data/projects/%s/settings/task-status" % project["id"],
+        f"data/projects/{project['id']}/settings/task-status",
         data,
         client=client,
     )
@@ -314,7 +311,7 @@ def add_metadata_descriptor(
         "departments": normalize_list_of_models_for_links(departments),
     }
     return raw.post(
-        "data/projects/%s/metadata-descriptors" % project["id"],
+        f"data/projects/{project['id']}/metadata-descriptors",
         data,
         client=client,
     )
@@ -338,7 +335,7 @@ def get_metadata_descriptor(
     project = normalize_model_parameter(project)
     metadata_descriptor = normalize_model_parameter(metadata_descriptor_id)
     return raw.fetch_one(
-        "projects/%s/metadata-descriptors" % project["id"],
+        f"projects/{project['id']}/metadata-descriptors",
         metadata_descriptor["id"],
         client=client,
     )
@@ -382,7 +379,7 @@ def all_metadata_descriptors(
     """
     project = normalize_model_parameter(project)
     return raw.fetch_all(
-        "projects/%s/metadata-descriptors" % project["id"],
+        f"projects/{project['id']}/metadata-descriptors",
         client=client,
     )
 
@@ -411,8 +408,7 @@ def update_metadata_descriptor(
 
     project = normalize_model_parameter(project)
     return raw.put(
-        "data/projects/%s/metadata-descriptors/%s"
-        % (project["id"], metadata_descriptor["id"]),
+        f"data/projects/{project['id']}/metadata-descriptors/{metadata_descriptor['id']}",
         metadata_descriptor,
         client=client,
     )
@@ -437,8 +433,7 @@ def remove_metadata_descriptor(
     if force:
         params = {"force": True}
     return raw.delete(
-        "data/projects/%s/metadata-descriptors/%s"
-        % (project["id"], metadata_descriptor["id"]),
+        f"data/projects/{project['id']}/metadata-descriptors/{metadata_descriptor['id']}",
         params,
         client=client,
     )
@@ -455,7 +450,7 @@ def get_team(project: str | dict, client: KitsuClient = default) -> list[dict]:
         list[dict]: The list of user dicts that are part of the project team.
     """
     project = normalize_model_parameter(project)
-    return raw.fetch_all("projects/%s/team" % project["id"], client=client)
+    return raw.fetch_all(f"projects/{project['id']}/team", client=client)
 
 
 def add_person_to_team(
@@ -475,7 +470,7 @@ def add_person_to_team(
     person = normalize_model_parameter(person)
     data = {"person_id": person["id"]}
     return raw.post(
-        "data/projects/%s/team" % project["id"], data, client=client
+        f"data/projects/{project['id']}/team", data, client=client
     )
 
 
@@ -492,7 +487,7 @@ def remove_person_from_team(
     project = normalize_model_parameter(project)
     person = normalize_model_parameter(person)
     return raw.delete(
-        "data/projects/%s/team/%s" % (project["id"], person["id"]),
+        f"data/projects/{project['id']}/team/{person['id']}",
         client=client,
     )
 
@@ -512,7 +507,7 @@ def get_project_task_types(
     """
     project = normalize_model_parameter(project)
     return raw.fetch_all(
-        "projects/%s/settings/task-types" % project["id"], client=client
+        f"projects/{project['id']}/settings/task-types", client=client
     )
 
 
@@ -531,7 +526,7 @@ def get_project_task_statuses(
     """
     project = normalize_model_parameter(project)
     return raw.fetch_all(
-        "projects/%s/settings/task-status" % project["id"], client=client
+        f"projects/{project['id']}/settings/task-status", client=client
     )
 
 
@@ -550,7 +545,7 @@ def all_status_automations(
     """
     project = normalize_model_parameter(project)
     return raw.fetch_all(
-        "projects/%s/settings/status-automations" % project["id"],
+        f"projects/{project['id']}/settings/status-automations",
         client=client,
     )
 
@@ -573,7 +568,7 @@ def add_status_automation(
     """
     project = normalize_model_parameter(project)
     return raw.post(
-        "data/projects/%s/settings/status-automations" % project["id"],
+        f"data/projects/{project['id']}/settings/status-automations",
         automation,
         client=client,
     )
@@ -592,8 +587,7 @@ def remove_status_automation(
     project = normalize_model_parameter(project)
     automation = normalize_model_parameter(automation)
     return raw.delete(
-        "data/projects/%s/settings/status-automations/%s"
-        % (project["id"], automation["id"]),
+        f"data/projects/{project['id']}/settings/status-automations/{automation['id']}",
         client=client,
     )
 
@@ -610,7 +604,7 @@ def get_preview_background_files(
     """
     project = normalize_model_parameter(project)
     return raw.fetch_all(
-        "projects/%s/settings/preview-background-files" % project["id"],
+        f"projects/{project['id']}/settings/preview-background-files",
         client=client,
     )
 
@@ -636,7 +630,7 @@ def add_preview_background_file(
     """
     project = normalize_model_parameter(project)
     return raw.post(
-        "data/projects/%s/settings/preview-background-files" % project["id"],
+        f"data/projects/{project['id']}/settings/preview-background-files",
         background_file,
         client=client,
     )
@@ -657,8 +651,7 @@ def remove_preview_background_file(
     project = normalize_model_parameter(project)
     background_file = normalize_model_parameter(background_file)
     return raw.delete(
-        "data/projects/%s/settings/preview-background-files/%s"
-        % (project["id"], background_file["id"]),
+        f"data/projects/{project['id']}/settings/preview-background-files/{background_file['id']}",
         client=client,
     )
 
@@ -675,7 +668,7 @@ def get_milestones(
     """
     project = normalize_model_parameter(project)
     return raw.fetch_all(
-        "projects/%s/milestones" % project["id"], client=client
+        f"projects/{project['id']}/milestones", client=client
     )
 
 
@@ -690,7 +683,7 @@ def get_project_quotas(
         project (dict / ID): The project dict or id.
     """
     project = normalize_model_parameter(project)
-    return raw.fetch_all("projects/%s/quotas" % project["id"], client=client)
+    return raw.fetch_all(f"projects/{project['id']}/quotas", client=client)
 
 
 @cache
@@ -707,7 +700,7 @@ def get_project_person_quotas(
     project = normalize_model_parameter(project)
     person = normalize_model_parameter(person)
     return raw.fetch_all(
-        "projects/%s/person-quotas" % project["id"],
+        f"projects/{project['id']}/person-quotas",
         params={"person_id": person["id"]},
         client=client,
     )
@@ -724,7 +717,7 @@ def get_budgets(
         project (dict / ID): The project dict or id.
     """
     project = normalize_model_parameter(project)
-    return raw.fetch_all("projects/%s/budgets" % project["id"], client=client)
+    return raw.fetch_all(f"projects/{project['id']}/budgets", client=client)
 
 
 def create_budget(
@@ -762,7 +755,7 @@ def create_budget(
     if amount is not None:
         data["amount"] = amount
     return raw.post(
-        "data/projects/%s/budgets" % project["id"], data, client=client
+        f"data/projects/{project['id']}/budgets", data, client=client
     )
 
 
@@ -780,7 +773,7 @@ def get_budget(
     project = normalize_model_parameter(project)
     budget = normalize_model_parameter(budget)
     return raw.fetch_one(
-        "projects/%s/budgets" % project["id"], budget["id"], client=client
+        f"projects/{project['id']}/budgets", budget["id"], client=client
     )
 
 
@@ -801,7 +794,7 @@ def update_budget(
     project = normalize_model_parameter(project)
     budget = normalize_model_parameter(budget)
     return raw.put(
-        "data/projects/%s/budgets/%s" % (project["id"], budget["id"]),
+        f"data/projects/{project['id']}/budgets/{budget['id']}",
         data,
         client=client,
     )
@@ -820,7 +813,7 @@ def remove_budget(
     project = normalize_model_parameter(project)
     budget = normalize_model_parameter(budget)
     return raw.delete(
-        "data/projects/%s/budgets/%s" % (project["id"], budget["id"]),
+        f"data/projects/{project['id']}/budgets/{budget['id']}",
         client=client,
     )
 
@@ -839,7 +832,7 @@ def get_budget_entries(
     project = normalize_model_parameter(project)
     budget = normalize_model_parameter(budget)
     return raw.fetch_all(
-        "projects/%s/budgets/%s/entries" % (project["id"], budget["id"]),
+        f"projects/{project['id']}/budgets/{budget['id']}/entries",
         client=client,
     )
 
@@ -886,7 +879,7 @@ def create_budget_entry(
     if category is not None:
         data["category"] = category
     return raw.post(
-        "data/projects/%s/budgets/%s/entries" % (project["id"], budget["id"]),
+        f"data/projects/{project['id']}/budgets/{budget['id']}/entries",
         data,
         client=client,
     )
@@ -911,7 +904,7 @@ def get_budget_entry(
     budget = normalize_model_parameter(budget)
     entry = normalize_model_parameter(entry)
     return raw.fetch_one(
-        "projects/%s/budgets/%s/entries" % (project["id"], budget["id"]),
+        f"projects/{project['id']}/budgets/{budget['id']}/entries",
         entry["id"],
         client=client,
     )
@@ -937,8 +930,7 @@ def update_budget_entry(
     budget = normalize_model_parameter(budget)
     entry = normalize_model_parameter(entry)
     return raw.put(
-        "data/projects/%s/budgets/%s/entries/%s"
-        % (project["id"], budget["id"], entry["id"]),
+        f"data/projects/{project['id']}/budgets/{budget['id']}/entries/{entry['id']}",
         data,
         client=client,
     )
@@ -962,7 +954,6 @@ def remove_budget_entry(
     budget = normalize_model_parameter(budget)
     entry = normalize_model_parameter(entry)
     return raw.delete(
-        "data/projects/%s/budgets/%s/entries/%s"
-        % (project["id"], budget["id"], entry["id"]),
+        f"data/projects/{project['id']}/budgets/{budget['id']}/entries/{entry['id']}",
         client=client,
     )

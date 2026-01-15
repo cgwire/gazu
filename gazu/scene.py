@@ -24,7 +24,7 @@ def new_scene(
     sequence = normalize_model_parameter(sequence)
     scene = {"name": name, "sequence_id": sequence["id"]}
     return raw.post(
-        "data/projects/%s/scenes" % project["id"], scene, client=client
+        f"data/projects/{project['id']}/scenes", scene, client=client
     )
 
 
@@ -38,7 +38,7 @@ def all_scenes(
     project = normalize_model_parameter(project)
     if project is not None:
         scenes = raw.fetch_all(
-            "projects/%s/scenes" % project["id"], client=client
+            f"projects/{project['id']}/scenes", client=client
         )
     else:
         scenes = raw.fetch_all("scenes", client=client)
@@ -53,7 +53,7 @@ def all_scenes_for_project(
     Retrieve all scenes for given project.
     """
     project = normalize_model_parameter(project)
-    scenes = raw.fetch_all("projects/%s/scenes" % project["id"], client=client)
+    scenes = raw.fetch_all(f"projects/{project['id']}/scenes", client=client)
     return sort_by_name(scenes)
 
 
@@ -66,7 +66,7 @@ def all_scenes_for_sequence(
     """
     sequence = normalize_model_parameter(sequence)
     return sort_by_name(
-        raw.fetch_all("sequences/%s/scenes" % sequence["id"], client=client),
+        raw.fetch_all(f"sequences/{sequence['id']}/scenes", client=client),
     )
 
 
@@ -98,7 +98,7 @@ def update_scene(scene: dict, client: KitsuClient = default) -> dict:
     """
     Save given scene data into the API.
     """
-    return raw.put("data/entities/%s" % scene["id"], scene, client=client)
+    return raw.put(f"data/entities/{scene['id']}", scene, client=client)
 
 
 def new_scene_asset_instance(
@@ -119,7 +119,7 @@ def new_scene_asset_instance(
         data["description"] = description
 
     return raw.post(
-        "data/scenes/%s/asset-instances" % scene["id"], data, client=client
+        f"data/scenes/{scene['id']}/asset-instances", data, client=client
     )
 
 
@@ -132,7 +132,7 @@ def all_asset_instances_for_scene(
     """
     scene = normalize_model_parameter(scene)
     return raw.get(
-        "data/scenes/%s/asset-instances" % scene["id"], client=client
+        f"data/scenes/{scene['id']}/asset-instances", client=client
     )
 
 
@@ -160,7 +160,7 @@ def all_camera_instances_for_scene(
     """
     scene = normalize_model_parameter(scene)
     return raw.get(
-        "data/scenes/%s/camera-instances" % scene["id"], client=client
+        f"data/scenes/{scene['id']}/camera-instances", client=client
     )
 
 
@@ -172,7 +172,7 @@ def all_shots_for_scene(
     Return the list of shots issued from given scene.
     """
     scene = normalize_model_parameter(scene)
-    return raw.get("data/scenes/%s/shots" % scene["id"], client=client)
+    return raw.get(f"data/scenes/{scene['id']}/shots", client=client)
 
 
 def add_shot_to_scene(
@@ -185,7 +185,7 @@ def add_shot_to_scene(
     scene = normalize_model_parameter(scene)
     shot = normalize_model_parameter(shot)
     data = {"shot_id": shot["id"]}
-    return raw.post("data/scenes/%s/shots" % scene["id"], data, client=client)
+    return raw.post(f"data/scenes/{scene['id']}/shots", data, client=client)
 
 
 def remove_shot_from_scene(
@@ -197,7 +197,7 @@ def remove_shot_from_scene(
     scene = normalize_model_parameter(scene)
     shot = normalize_model_parameter(shot)
     return raw.delete(
-        "data/scenes/%s/shots/%s" % (scene["id"], shot["id"]), client=client
+        f"data/scenes/{scene['id']}/shots/{shot['id']}", client=client
     )
 
 
@@ -207,7 +207,7 @@ def update_asset_instance_name(
     """
     Update the name of given asset instance.
     """
-    path = "/data/asset-instances/%s" % asset_instance["id"]
+    path = f"/data/asset-instances/{asset_instance['id']}"
     return raw.put(path, {"name": name}, client=client)
 
 
@@ -218,7 +218,7 @@ def update_asset_instance_data(
     Update the extra data of given asset instance.
     """
     asset_instance = normalize_model_parameter(asset_instance)
-    path = "/data/asset-instances/%s" % asset_instance["id"]
+    path = f"/data/asset-instances/{asset_instance['id']}"
     return raw.put(path, {"data": data}, client=client)
 
 

@@ -69,7 +69,7 @@ def get_time_spents_range(
         "end_date": end_date,
     }
     return raw.get(
-        "/data/persons/{}/time-spents".format(person_id),
+        f"/data/persons/{person_id}/time-spents",
         params=date_range,
         client=client,
     )
@@ -88,7 +88,7 @@ def get_all_month_time_spents(
     """
     date = date.strftime("%Y/%m")
     return raw.get(
-        "data/persons/{}/time-spents/month/all/{}".format(id, date),
+        f"data/persons/{id}/time-spents/month/all/{date}",
         client=client,
     )
 
@@ -221,11 +221,9 @@ def get_person_url(person: str | dict, client: KitsuClient = default) -> str:
         url (str): Web url associated to the given person
     """
     person = normalize_model_parameter(person)
-    path = "{host}/people/{person_id}/"
-    return path.format(
-        host=raw.get_api_url_from_host(client=client),
-        person_id=person["id"],
-    )
+    host = raw.get_api_url_from_host(client=client)
+    person_id = person["id"]
+    return f"{host}/people/{person_id}/"
 
 
 @cache
@@ -276,7 +274,7 @@ def update_department(department, client=default):
     """
     department = normalize_model_parameter(department)
     return raw.put(
-        "data/departments/%s" % (department["id"]),
+        f"data/departments/{department['id']}",
         department,
         client=client,
     )
@@ -291,7 +289,7 @@ def remove_department(department, force=False, client=default):
         force (bool): Whether to force deletion of the department.
     """
     department = normalize_model_parameter(department)
-    path = "data/departments/%s" % department["id"]
+    path = f"data/departments/{department['id']}"
     params = {}
     if force:
         params = {"force": True}
@@ -369,7 +367,7 @@ def update_person(person: dict, client: KitsuClient = default) -> dict:
 
     person = normalize_model_parameter(person)
     return raw.put(
-        "data/persons/%s" % (person["id"]),
+        f"data/persons/{person['id']}",
         person,
         client=client,
     )
@@ -385,7 +383,7 @@ def remove_person(
         person (dict): Person to remove.
     """
     person = normalize_model_parameter(person)
-    path = "data/persons/%s" % person["id"]
+    path = f"data/persons/{person['id']}"
     params = {}
     if force:
         params = {"force": True}
@@ -476,7 +474,7 @@ def set_avatar(
     """
     person = normalize_model_parameter(person)
     return raw.upload(
-        "/pictures/thumbnails/persons/%s" % person["id"],
+        f"/pictures/thumbnails/persons/{person['id']}",
         file_path,
         client=client,
     )
@@ -494,7 +492,7 @@ def get_presence_log(
     Returns:
         str: The presence log table (in CSV) for given month and year.
     """
-    path = "data/persons/presence-logs/%s-%s" % (year, str(month).zfill(2))
+    path = f"data/persons/presence-logs/{year}-{str(month).zfill(2)}"
     return raw.get(path, json_response=False, client=client)
 
 
@@ -513,7 +511,7 @@ def change_password_for_person(
     """
     person = normalize_model_parameter(person)
     return raw.post(
-        "actions/persons/%s/change-password" % (person["id"]),
+        f"actions/persons/{person['id']}/change-password",
         {"password": password, "password_2": password},
         client=client,
     )
@@ -533,7 +531,7 @@ def invite_person(
     """
     person = normalize_model_parameter(person)
     return raw.get(
-        "actions/persons/%s/invite" % (person["id"]),
+        f"actions/persons/{person['id']}/invite",
         client=client,
     )
 
@@ -554,7 +552,7 @@ def get_time_spents_by_date(
     """
     person = normalize_model_parameter(person)
     return raw.get(
-        "data/persons/%s/time-spents/by-date" % person["id"],
+        f"data/persons/{person['id']}/time-spents/by-date",
         params={"date": date},
         client=client,
     )
@@ -577,7 +575,7 @@ def get_week_time_spents(
     """
     person = normalize_model_parameter(person)
     return raw.get(
-        "data/persons/%s/time-spents/week/%s/%s" % (person["id"], year, week),
+        f"data/persons/{person['id']}/time-spents/week/{year}/{week}",
         client=client,
     )
 
@@ -598,7 +596,7 @@ def get_year_time_spents(
     """
     person = normalize_model_parameter(person)
     return raw.get(
-        "data/persons/%s/time-spents/year/%s" % (person["id"], year),
+        f"data/persons/{person['id']}/time-spents/year/{year}",
         client=client,
     )
 
@@ -617,7 +615,7 @@ def get_day_offs(
         list: Day offs for the person.
     """
     person = normalize_model_parameter(person)
-    return raw.fetch_all("persons/%s/day-offs" % person["id"], client=client)
+    return raw.fetch_all(f"persons/{person['id']}/day-offs", client=client)
 
 
 @cache
@@ -637,7 +635,7 @@ def get_week_day_offs(
     """
     person = normalize_model_parameter(person)
     return raw.get(
-        "data/persons/%s/day-offs/week/%s/%s" % (person["id"], year, week),
+        f"data/persons/{person['id']}/day-offs/week/{year}/{week}",
         client=client,
     )
 
@@ -659,8 +657,7 @@ def get_month_day_offs(
     """
     person = normalize_model_parameter(person)
     return raw.get(
-        "data/persons/%s/day-offs/month/%s/%s"
-        % (person["id"], year, str(month).zfill(2)),
+        f"data/persons/{person['id']}/day-offs/month/{year}/{str(month).zfill(2)}",
         client=client,
     )
 
@@ -681,7 +678,7 @@ def get_year_day_offs(
     """
     person = normalize_model_parameter(person)
     return raw.get(
-        "data/persons/%s/day-offs/year/%s" % (person["id"], year),
+        f"data/persons/{person['id']}/day-offs/year/{year}",
         client=client,
     )
 
@@ -702,7 +699,7 @@ def add_person_to_department(
     person = normalize_model_parameter(person)
     department = normalize_model_parameter(department)
     return raw.post(
-        "data/persons/%s/departments" % person["id"],
+        f"data/persons/{person['id']}/departments",
         {"department_id": department["id"]},
         client=client,
     )
@@ -724,7 +721,7 @@ def remove_person_from_department(
     person = normalize_model_parameter(person)
     department = normalize_model_parameter(department)
     return raw.delete(
-        "data/persons/%s/departments/%s" % (person["id"], department["id"]),
+        f"data/persons/{person['id']}/departments/{department['id']}",
         client=client,
     )
 
@@ -743,7 +740,7 @@ def disable_two_factor_authentication(
     """
     person = normalize_model_parameter(person)
     return raw.delete(
-        "data/persons/%s/two-factor-authentication" % person["id"],
+        f"data/persons/{person['id']}/two-factor-authentication",
         client=client,
     )
 
@@ -761,4 +758,4 @@ def clear_person_avatar(
         Response: Request response object.
     """
     person = normalize_model_parameter(person)
-    return raw.delete("data/persons/%s/avatar" % person["id"], client=client)
+    return raw.delete(f"data/persons/{person['id']}/avatar", client=client)

@@ -53,17 +53,14 @@ def get_edit_url(edit: str | dict, client: KitsuClient = default) -> str:
     """
     edit = normalize_model_parameter(edit)
     edit = get_edit(edit["id"])
-    path = "{host}/productions/{project_id}/"
+    host = raw.get_api_url_from_host(client=client)
+    project_id = edit["project_id"]
+    edit_id = edit["id"]
     if edit["episode_id"] is None:
-        path += "edits/{edit_id}/"
+        return f"{host}/productions/{project_id}/edits/{edit_id}/"
     else:
-        path += "episodes/{episode_id}/edits/{edit_id}/"
-    return path.format(
-        host=raw.get_api_url_from_host(client=client),
-        project_id=edit["project_id"],
-        edit_id=edit["id"],
-        episode_id=edit["episode_id"],
-    )
+        episode_id = edit["episode_id"]
+        return f"{host}/productions/{project_id}/episodes/{episode_id}/edits/{edit_id}/"
 
 
 @cache
@@ -78,7 +75,7 @@ def all_edits_for_project(
         list: Edits from database or for given project.
     """
     project = normalize_model_parameter(project)
-    edits = raw.fetch_all("projects/%s/edits" % project["id"], client=client)
+    edits = raw.fetch_all(f"projects/{project['id']}/edits", client=client)
     return sort_by_name(edits)
 
 
@@ -94,7 +91,7 @@ def all_previews_for_edit(
         list: Previews from database for given edit.
     """
     edit = normalize_model_parameter(edit)
-    return raw.fetch_all("edits/%s/preview-files" % edit["id"], client=client)
+    return raw.fetch_all(f"edits/{edit['id']}/preview-files", client=client)
 
 
 def new_edit(
@@ -131,7 +128,7 @@ def new_edit(
 
     edit = get_edit_by_name(project, name, client=client)
     if edit is None:
-        path = "data/projects/%s/edits" % project["id"]
+        path = f"data/projects/{project['id']}/edits"
         return raw.post(path, data, client=client)
     else:
         return edit
@@ -153,7 +150,7 @@ def remove_edit(
             whether it has links to tasks.
     """
     edit = normalize_model_parameter(edit)
-    path = "data/edits/%s" % edit["id"]
+    path = f"data/edits/{edit['id']}"
     params = {}
     if force:
         params = {"force": True}
@@ -171,7 +168,7 @@ def update_edit(edit: dict, client: KitsuClient = default) -> dict:
     Returns:
         dict: Updated edit.
     """
-    return raw.put("data/entities/%s" % edit["id"], edit, client=client)
+    return raw.put(f"data/entities/{edit['id']}", edit, client=client)
 
 
 def update_edit_data(

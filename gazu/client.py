@@ -535,8 +535,8 @@ def check_status(
         raise MethodNotAllowedException(path)
     elif status_code == 413:
         raise TooBigFileException(
-            "%s: You send a too big file. "
-            "Change your proxy configuration to allow bigger files." % path
+            f"{path}: You send a too big file. "
+            "Change your proxy configuration to allow bigger files."
         )
     elif status_code in [401, 422]:
         try:
@@ -562,12 +562,12 @@ def check_status(
             stacktrace = request.json().get(
                 "stacktrace", "No stacktrace sent by the server"
             )
-            print("Server stacktrace:\n%s" % stacktrace)
+            print(f"Server stacktrace:\n{stacktrace}")
             message = get_message_from_response(
                 response=request,
                 default_message="No message sent by the server",
             )
-            print("Error message:\n%s\n" % message)
+            print(f"Error message:\n{message}\n")
         except Exception:
             print(request.text)
         raise ServerErrorException(path)
@@ -771,7 +771,7 @@ def _build_file_dict(file_path: str, extra_files: list[str]) -> dict:
     i = 0
     for file_path in extra_files:
         i += 1
-        files["file-%s" % i] = open(file_path, "rb")
+        files[f"file-{i}"] = open(file_path, "rb")
 
     return files
 
@@ -847,7 +847,7 @@ def import_data(
     Returns:
         dict: The imported data.
     """
-    return post("/import/kitsu/%s" % model_name, data, client=client)
+    return post(f"/import/kitsu/{model_name}", data, client=client)
 
 
 def get_api_version(client: KitsuClient = default_client) -> str:

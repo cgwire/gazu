@@ -55,7 +55,7 @@ def all_playlists_for_project(
     project = normalize_model_parameter(project)
     return sort_by_name(
         raw.fetch_all(
-            "projects/%s/playlists" % project["id"],
+            f"projects/{project['id']}/playlists",
             params={"page": page},
             client=client,
         )
@@ -76,11 +76,7 @@ def all_playlists_for_episode(
     project = normalize_model_parameter(episode["project_id"])
     return sort_by_name(
         raw.fetch_all(
-            "projects/%s/episodes/%s/playlists"
-            % (
-                project["id"],
-                episode["id"],
-            ),
+            f"projects/{project['id']}/episodes/{episode['id']}/playlists",
             client=client,
         )
     )
@@ -165,7 +161,7 @@ def update_playlist(playlist: dict, client: KitsuClient = default) -> dict:
         dict: Updated playlist.
     """
     return raw.put(
-        "data/playlists/%s" % playlist["id"], playlist, client=client
+        f"data/playlists/{playlist['id']}", playlist, client=client
     )
 
 
@@ -183,7 +179,7 @@ def get_entity_preview_files(
     """
     entity = normalize_model_parameter(entity)
     return raw.get(
-        "data/playlists/entities/%s/preview-files" % entity["id"],
+        f"data/playlists/entities/{entity['id']}/preview-files",
         client=client,
     )
 
@@ -301,7 +297,7 @@ def delete_playlist(
         Response: Request response object.
     """
     playlist = normalize_model_parameter(playlist)
-    return raw.delete("data/playlists/%s" % playlist["id"], client=client)
+    return raw.delete(f"data/playlists/{playlist['id']}", client=client)
 
 
 @cache
@@ -319,7 +315,7 @@ def get_entity_previews(
     """
     playlist = normalize_model_parameter(playlist)
     return raw.fetch_all(
-        "playlists/%s/entity-previews" % playlist["id"], client=client
+        f"playlists/{playlist['id']}/entity-previews", client=client
     )
 
 
@@ -353,7 +349,7 @@ def remove_build_job(
     """
     build_job = normalize_model_parameter(build_job)
     return raw.delete(
-        "data/playlists/build-jobs/%s" % build_job["id"], client=client
+        f"data/playlists/build-jobs/{build_job['id']}", client=client
     )
 
 
@@ -372,7 +368,7 @@ def all_build_jobs_for_project(
     """
     project = normalize_model_parameter(project)
     return raw.fetch_all(
-        "projects/%s/build-jobs" % project["id"], client=client
+        f"projects/{project['id']}/build-jobs", client=client
     )
 
 
@@ -390,7 +386,7 @@ def build_playlist_movie(
     """
     playlist = normalize_model_parameter(playlist)
     return raw.post(
-        "data/playlists/%s/build-movie" % playlist["id"], {}, client=client
+        f"data/playlists/{playlist['id']}/build-movie", {}, client=client
     )
 
 
@@ -413,10 +409,7 @@ def download_playlist_build(
     """
     playlist = normalize_model_parameter(playlist)
     build_job = normalize_model_parameter(build_job)
-    path = "data/playlists/%s/build-jobs/%s/download" % (
-        playlist["id"],
-        build_job["id"],
-    )
+    path = f"data/playlists/{playlist['id']}/build-jobs/{build_job['id']}/download"
     return raw.download(path, file_path, client=client)
 
 
@@ -434,7 +427,7 @@ def download_playlist_zip(
         Response: Request response object.
     """
     playlist = normalize_model_parameter(playlist)
-    path = "data/playlists/%s/download/zip" % playlist["id"]
+    path = f"data/playlists/{playlist['id']}/download/zip"
     return raw.download(path, file_path, client=client)
 
 
@@ -453,7 +446,7 @@ def generate_temp_playlist(
     """
     project = normalize_model_parameter(project)
     return raw.post(
-        "data/projects/%s/playlists/temp" % project["id"], data, client=client
+        f"data/projects/{project['id']}/playlists/temp", data, client=client
     )
 
 
@@ -471,5 +464,5 @@ def notify_clients_playlist_ready(
     """
     playlist = normalize_model_parameter(playlist)
     return raw.post(
-        "data/playlists/%s/notify-clients" % playlist["id"], {}, client=client
+        f"data/playlists/{playlist['id']}/notify-clients", {}, client=client
     )

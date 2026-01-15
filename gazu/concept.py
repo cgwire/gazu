@@ -36,7 +36,7 @@ def all_concepts_for_project(
     """
     project = normalize_model_parameter(project)
     concepts = raw.fetch_all(
-        "projects/%s/concepts" % project["id"], client=client
+        f"projects/{project['id']}/concepts", client=client
     )
     return sort_by_name(concepts)
 
@@ -54,7 +54,7 @@ def all_previews_for_concept(
     """
     concept = normalize_model_parameter(concept)
     return raw.fetch_all(
-        "concepts/%s/preview-files" % concept["id"], client=client
+        f"concepts/{concept['id']}/preview-files", client=client
     )
 
 
@@ -73,7 +73,7 @@ def remove_concept(
         force (bool): Whether to force the deletion of the concept.
     """
     concept = normalize_model_parameter(concept)
-    path = "data/concepts/%s" % concept["id"]
+    path = f"data/concepts/{concept['id']}"
     params = {}
     if force:
         params = {"force": True}
@@ -147,7 +147,7 @@ def new_concept(
 
     concept = get_concept_by_name(project, name, client=client)
     if concept is None:
-        path = "data/projects/%s/concepts" % project["id"]
+        path = f"data/projects/{project['id']}/concepts"
         return raw.post(path, data, client=client)
     else:
         return concept
@@ -164,4 +164,4 @@ def update_concept(concept: dict, client: KitsuClient = default) -> dict:
     Returns:
         dict: Updated concept.
     """
-    return raw.put("data/entities/%s" % concept["id"], concept, client=client)
+    return raw.put(f"data/entities/{concept['id']}", concept, client=client)

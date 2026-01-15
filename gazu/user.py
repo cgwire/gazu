@@ -39,7 +39,7 @@ def all_asset_types_for_project(
         project.
     """
     project = normalize_model_parameter(project)
-    path = "user/projects/%s/asset-types" % project["id"]
+    path = f"user/projects/{project['id']}/asset-types"
     asset_types = raw.fetch_all(path, client=client)
     return sort_by_name(asset_types)
 
@@ -59,10 +59,7 @@ def all_assets_for_asset_type_and_project(
     """
     project = normalize_model_parameter(project)
     asset_type = normalize_model_parameter(asset_type)
-    path = "user/projects/%s/asset-types/%s/assets" % (
-        project["id"],
-        asset_type["id"],
-    )
+    path = f"user/projects/{project['id']}/asset-types/{asset_type['id']}/assets"
     assets = raw.fetch_all(path, client=client)
     return sort_by_name(assets)
 
@@ -79,7 +76,7 @@ def all_tasks_for_asset(
         list: Tasks for given asset and current user.
     """
     asset = normalize_model_parameter(asset)
-    path = "user/assets/%s/tasks" % asset["id"]
+    path = f"user/assets/{asset['id']}/tasks"
     tasks = raw.fetch_all(path, client=client)
     return sort_by_name(tasks)
 
@@ -96,7 +93,7 @@ def all_tasks_for_shot(
         list: Tasks assigned to current user for given shot.
     """
     shot = normalize_model_parameter(shot)
-    path = "user/shots/%s/tasks" % shot["id"]
+    path = f"user/shots/{shot['id']}/tasks"
     tasks = raw.fetch_all(path, client=client)
     return sort_by_name(tasks)
 
@@ -113,7 +110,7 @@ def all_tasks_for_scene(
         list: Tasks assigned to current user for given scene.
     """
     scene = normalize_model_parameter(scene)
-    path = "user/scenes/%s/tasks" % scene["id"]
+    path = f"user/scenes/{scene['id']}/tasks"
     tasks = raw.fetch_all(path, client=client)
     return sort_by_name(tasks)
 
@@ -126,7 +123,7 @@ def all_tasks_for_sequence(
     Return the list of tasks for given asset and current user.
     """
     sequence = normalize_model_parameter(sequence)
-    path = "user/sequences/%s/tasks" % sequence["id"]
+    path = f"user/sequences/{sequence['id']}/tasks"
     tasks = raw.fetch_all(path, client=client)
     return sort_by_name(tasks)
 
@@ -143,7 +140,7 @@ def all_task_types_for_asset(
         list: Task Types of tasks assigned to current user for given asset.
     """
     asset = normalize_model_parameter(asset)
-    path = "user/assets/%s/task-types" % asset["id"]
+    path = f"user/assets/{asset['id']}/task-types"
     tasks = raw.fetch_all(path, client=client)
     return sort_by_name(tasks)
 
@@ -160,7 +157,7 @@ def all_task_types_for_shot(
         list: Task Types of tasks assigned to current user for given shot.
     """
     shot = normalize_model_parameter(shot)
-    path = "user/shots/%s/task-types" % shot["id"]
+    path = f"user/shots/{shot['id']}/task-types"
     task_types = raw.fetch_all(path, client=client)
     return sort_by_name(task_types)
 
@@ -177,7 +174,7 @@ def all_task_types_for_scene(
         list: Task types of tasks assigned to current user for given scene.
     """
     scene = normalize_model_parameter(scene)
-    path = "user/scenes/%s/task-types" % scene["id"]
+    path = f"user/scenes/{scene['id']}/task-types"
     task_types = raw.fetch_all(path, client=client)
     return sort_by_name(task_types)
 
@@ -191,7 +188,7 @@ def all_task_types_for_sequence(
         list: Task types for given asset and current user.
     """
     sequence = normalize_model_parameter(sequence)
-    path = "user/sequences/%s/task-types" % sequence["id"]
+    path = f"user/sequences/{sequence['id']}/task-types"
     task_types = raw.fetch_all(path, client=client)
     return sort_by_name(task_types)
 
@@ -208,7 +205,7 @@ def all_sequences_for_project(
         list: Sequences for which user has tasks assigned for given project.
     """
     project = normalize_model_parameter(project)
-    path = "user/projects/%s/sequences" % project["id"]
+    path = f"user/projects/{project['id']}/sequences"
     sequences = raw.fetch_all(path, client=client)
     return sort_by_name(sequences)
 
@@ -224,7 +221,7 @@ def all_episodes_for_project(
     Returns:
         list: Episodes for which user has tasks assigned for given project.
     """
-    path = "user/projects/%s/episodes" % project["id"]
+    path = f"user/projects/{project['id']}/episodes"
     asset_types = raw.fetch_all(path, client=client)
     return sort_by_name(asset_types)
 
@@ -241,7 +238,7 @@ def all_shots_for_sequence(
         list: Shots for which user has tasks assigned for given sequence.
     """
     sequence = normalize_model_parameter(sequence)
-    path = "user/sequences/%s/shots" % sequence["id"]
+    path = f"user/sequences/{sequence['id']}/shots"
     shots = raw.fetch_all(path, client=client)
     return sort_by_name(shots)
 
@@ -258,7 +255,7 @@ def all_scenes_for_sequence(
         list: Scenes for which user has tasks assigned for given sequence.
     """
     sequence = normalize_model_parameter(sequence)
-    path = "user/sequences/%s/scenes" % sequence["id"]
+    path = f"user/sequences/{sequence['id']}/scenes"
     scenes = raw.fetch_all(path, client=client)
     return sort_by_name(scenes)
 
@@ -381,7 +378,7 @@ def remove_filter(filter: str | dict, client: KitsuClient = default) -> str:
         filter (str / dict): The filter dict or the filter ID.
     """
     filter = normalize_model_parameter(filter)
-    return raw.delete("data/user/filters/%s" % filter["id"], client=client)
+    return raw.delete(f"data/user/filters/{filter['id']}", client=client)
 
 
 def update_filter(filter: dict, client: KitsuClient = default) -> dict:
@@ -392,7 +389,7 @@ def update_filter(filter: dict, client: KitsuClient = default) -> dict:
         filter (dict): Filter to save.
     """
     return raw.put(
-        "data/user/filters/%s" % filter["id"], filter, client=client
+        f"data/user/filters/{filter['id']}", filter, client=client
     )
 
 
@@ -421,7 +418,7 @@ def all_project_assets(
         list: Assets for the project.
     """
     project = normalize_model_parameter(project)
-    path = "user/projects/%s/assets" % project["id"]
+    path = f"user/projects/{project['id']}/assets"
     return raw.fetch_all(path, client=client)
 
 
@@ -504,7 +501,7 @@ def update_filter_group(
         dict: Updated filter group.
     """
     return raw.put(
-        "data/user/filter-groups/%s" % filter_group["id"],
+        f"data/user/filter-groups/{filter_group['id']}",
         filter_group,
         client=client,
     )
@@ -521,7 +518,7 @@ def remove_filter_group(
     """
     filter_group = normalize_model_parameter(filter_group)
     return raw.delete(
-        "data/user/filter-groups/%s" % filter_group["id"], client=client
+        f"data/user/filter-groups/{filter_group['id']}", client=client
     )
 
 
@@ -566,7 +563,7 @@ def get_task_time_spent(
         dict: Time spent information for the task.
     """
     task = normalize_model_parameter(task)
-    path = "data/user/tasks/%s/time-spent" % task["id"]
+    path = f"data/user/tasks/{task['id']}/time-spent"
     return raw.get(path, client=client)
 
 
@@ -624,7 +621,7 @@ def update_notification(
         dict: Updated notification.
     """
     return raw.put(
-        "data/user/notifications/%s" % notification["id"],
+        f"data/user/notifications/{notification['id']}",
         notification,
         client=client,
     )
@@ -644,7 +641,7 @@ def check_task_subscription(
         dict: Subscription status.
     """
     task = normalize_model_parameter(task)
-    path = "data/user/tasks/%s/subscription" % task["id"]
+    path = f"data/user/tasks/{task['id']}/subscription"
     return raw.get(path, client=client)
 
 
@@ -659,7 +656,7 @@ def subscribe_to_task(task: str | dict, client: KitsuClient = default) -> dict:
         dict: Subscription information.
     """
     task = normalize_model_parameter(task)
-    path = "data/user/tasks/%s/subscribe" % task["id"]
+    path = f"data/user/tasks/{task['id']}/subscribe"
     return raw.post(path, {}, client=client)
 
 
@@ -673,7 +670,7 @@ def unsubscribe_from_task(
         task (str / dict): The task dict or id.
     """
     task = normalize_model_parameter(task)
-    path = "data/user/tasks/%s/unsubscribe" % task["id"]
+    path = f"data/user/tasks/{task['id']}/unsubscribe"
     return raw.delete(path, client=client)
 
 
@@ -699,7 +696,7 @@ def join_chat(chat: str | dict, client: KitsuClient = default) -> dict:
         dict: Chat information.
     """
     chat = normalize_model_parameter(chat)
-    path = "data/user/chats/%s/join" % chat["id"]
+    path = f"data/user/chats/{chat['id']}/join"
     return raw.post(path, {}, client=client)
 
 
@@ -711,7 +708,7 @@ def leave_chat(chat: str | dict, client: KitsuClient = default) -> str:
         chat (str / dict): The chat dict or id.
     """
     chat = normalize_model_parameter(chat)
-    path = "data/user/chats/%s/leave" % chat["id"]
+    path = f"data/user/chats/{chat['id']}/leave"
     return raw.delete(path, client=client)
 
 

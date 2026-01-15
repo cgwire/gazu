@@ -140,7 +140,7 @@ def remove_entity_type(
         entity_type (str / dict): Entity type to remove.
     """
     entity_type = normalize_model_parameter(entity_type)
-    path = "data/entity-types/%s" % entity_type["id"]
+    path = f"data/entity-types/{entity_type['id']}"
     return raw.delete(path, client=client)
 
 
@@ -160,7 +160,7 @@ def remove_entity(
             whether it has links to tasks.
     """
     entity = normalize_model_parameter(entity)
-    path = "data/entities/%s" % entity["id"]
+    path = f"data/entities/{entity['id']}"
     params = {}
     if force:
         params = {"force": True}
@@ -179,5 +179,5 @@ def all_entities_with_tasks_linked_to_entity(
     """
     entity = normalize_model_parameter(entity)
     return raw.fetch_all(
-        "entities/%s/entities-linked/with-tasks" % entity["id"], client=client
+        f"entities/{entity['id']}/entities-linked/with-tasks", client=client
     )

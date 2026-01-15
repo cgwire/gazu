@@ -47,7 +47,7 @@ def all_assets_for_project(
     if project is None:
         return sort_by_name(raw.fetch_all("assets/all", client=client))
     else:
-        path = "projects/%s/assets" % project["id"]
+        path = f"projects/{project['id']}/assets"
         return sort_by_name(raw.fetch_all(path, client=client))
 
 
@@ -81,7 +81,7 @@ def all_assets_for_shot(
         list: Assets stored in the database for given shot.
     """
     shot = normalize_model_parameter(shot)
-    path = "shots/%s/assets" % shot["id"]
+    path = f"shots/{shot['id']}/assets"
     return sort_by_name(raw.fetch_all(path, client=client))
 
 
@@ -102,8 +102,7 @@ def all_assets_for_project_and_type(
 
     project_id = project["id"]
     asset_type_id = asset_type["id"]
-    path = "projects/{project_id}/asset-types/{asset_type_id}/assets"
-    path = path.format(project_id=project_id, asset_type_id=asset_type_id)
+    path = f"projects/{project_id}/asset-types/{asset_type_id}/assets"
 
     assets = raw.fetch_all(path, client=client)
     return sort_by_name(assets)
@@ -164,22 +163,16 @@ def get_asset_url(asset: str | dict, client: KitsuClient = default) -> str:
     asset = normalize_model_parameter(asset)
     asset = get_asset(asset["id"])
     project = gazu_project.get_project(asset["project_id"])
-    episode_id = "main"
-    path = "{host}/productions/{project_id}/"
+    host = raw.get_api_url_from_host()
+    project_id = asset["project_id"]
+    asset_id = asset["id"]
     if project["production_type"] != "tvshow":
-        path += "assets/{asset_id}/"
+        return f"{host}/productions/{project_id}/assets/{asset_id}/"
     else:
-        path += "episodes/{episode_id}/assets/{asset_id}/"
+        episode_id = "main"
         if len(asset["episode_id"]) > 0:
             episode_id = asset["episode_id"]
-
-    return path.format(
-        host=raw.get_api_url_from_host(),
-        project_id=asset["project_id"],
-        asset_id=asset["id"],
-        episode_id=episode_id,
-        client=client,
-    )
+        return f"{host}/productions/{project_id}/episodes/{episode_id}/assets/{asset_id}/"
 
 
 def new_asset(
@@ -222,8 +215,7 @@ def new_asset(
     asset = get_asset_by_name(project, name, asset_type, client=client)
     if asset is None:
         asset = raw.post(
-            "data/projects/%s/asset-types/%s/assets/new"
-            % (project["id"], asset_type["id"]),
+            f"data/projects/{project['id']}/asset-types/{asset_type['id']}/assets/new",
             data,
             client=client,
         )
@@ -240,7 +232,7 @@ def update_asset(asset: dict, client: KitsuClient = default) -> dict:
     """
     if "episode_id" in asset:
         asset["source_id"] = asset["episode_id"]
-    return raw.put("data/entities/%s" % asset["id"], asset, client=client)
+    return raw.put(f"data/entities/{asset['id']}", asset, client=client)
 
 
 def update_asset_data(
@@ -280,7 +272,7 @@ def remove_asset(
             whether it has links to tasks.
     """
     asset = normalize_model_parameter(asset)
-    path = "data/assets/%s" % asset["id"]
+    path = f"data/assets/{asset['id']}"
     params = {}
     if force:
         params = {"force": True}
@@ -308,7 +300,7 @@ def all_asset_types_for_project(
         list: Asset types from assets listed in given project.
     """
     project = normalize_model_parameter(project)
-    path = "projects/%s/asset-types" % project["id"]
+    path = f"projects/{project['id']}/asset-types"
     return sort_by_name(raw.fetch_all(path, client=client))
 
 
@@ -323,7 +315,7 @@ def all_asset_types_for_shot(
     Returns:
         list: Asset types from assets casted in given shot.
     """
-    path = "shots/%s/asset-types" % shot["id"]
+    path = f"shots/{shot['id']}/asset-types"
     return sort_by_name(raw.fetch_all(path, client=client))
 
 
@@ -382,7 +374,7 @@ def update_asset_type(asset_type: dict, client: KitsuClient = default) -> dict:
         asset_type (dict): Asset Type to save.
     """
     data = {"name": asset_type["name"]}
-    path = "data/asset-types/%s" % asset_type["id"]
+    path = f"data/asset-types/{asset_type['id']}"
     return raw.put(path, data, client=client)
 
 
@@ -396,7 +388,7 @@ def remove_asset_type(
         asset_type (str / dict): Asset type to remove.
     """
     asset_type = normalize_model_parameter(asset_type)
-    path = "data/asset-types/%s" % asset_type["id"]
+    path = f"data/asset-types/{asset_type['id']}"
     return raw.delete(path, client=client)
 
 
@@ -426,7 +418,7 @@ def all_shot_asset_instances_for_asset(
         list: Asset instances existing for a given asset.
     """
     asset = normalize_model_parameter(asset)
-    path = "assets/%s/shot-asset-instances" % asset["id"]
+    path = f"assets/{asset['id']}/shot-asset-instances"
     return raw.fetch_all(path, client=client)
 
 
@@ -441,7 +433,7 @@ def enable_asset_instance(
     """
     asset_instance = normalize_model_parameter(asset_instance)
     data = {"active": True}
-    path = "asset-instances/%s" % asset_instance["id"]
+    path = f"asset-instances/{asset_instance['id']}"
     return raw.put(path, data, client=client)
 
 
@@ -456,7 +448,7 @@ def disable_asset_instance(
     """
     asset_instance = normalize_model_parameter(asset_instance)
     data = {"active": False}
-    path = "asset-instances/%s" % asset_instance["id"]
+    path = f"asset-instances/{asset_instance['id']}"
     return raw.put(path, data, client=client)
 
 
@@ -472,7 +464,7 @@ def all_scene_asset_instances_for_asset(
         list: Scene asset instances existing for a given asset.
     """
     asset = normalize_model_parameter(asset)
-    path = "assets/%s/scene-asset-instances" % asset["id"]
+    path = f"assets/{asset['id']}/scene-asset-instances"
     return raw.fetch_all(path, client=client)
 
 
@@ -487,7 +479,7 @@ def all_asset_instances_for_shot(
     Returns:
         list: Asset instances existing for a given shot.
     """
-    path = "shots/%s/asset-instances" % shot["id"]
+    path = f"shots/{shot['id']}/asset-instances"
     return raw.fetch_all(path, client=client)
 
 
@@ -503,7 +495,7 @@ def all_asset_instances_for_asset(
         list: Asset instances existing for a given asset.
     """
     asset = normalize_model_parameter(asset)
-    path = "assets/%s/asset-asset-instances" % asset["id"]
+    path = f"assets/{asset['id']}/asset-asset-instances"
     return raw.fetch_all(path, client=client)
 
 
@@ -533,7 +525,7 @@ def new_asset_asset_instance(
         data["description"] = description
 
     return raw.post(
-        "data/assets/%s/asset-asset-instances" % asset["id"],
+        f"data/assets/{asset['id']}/asset-asset-instances",
         data,
         client=client,
     )
@@ -556,7 +548,7 @@ def import_assets_with_csv(
     """
     project = normalize_model_parameter(project)
     return raw.upload(
-        "import/csv/projects/%s/assets" % project["id"],
+        f"import/csv/projects/{project['id']}/assets",
         csv_file_path,
         client=client,
     )
@@ -599,7 +591,7 @@ def export_assets_with_csv(
     if assigned_to:
         params["assigned_to"] = assigned_to["id"]
     return raw.download(
-        "export/csv/projects/%s/assets.csv" % project["id"],
+        f"export/csv/projects/{project['id']}/assets.csv",
         csv_file_path,
         params=params,
         client=client,

@@ -35,7 +35,7 @@ def all_output_types_for_entity(
     """
     entity = normalize_model_parameter(entity)
     return raw.fetch_all(
-        "entities/%s/output-types" % entity["id"], client=client
+        f"entities/{entity['id']}/output-types", client=client
     )
 
 
@@ -48,8 +48,7 @@ def all_output_types_for_asset_instance(
         list: Output types for given asset instance and entity (shot or scene).
     """
     return raw.fetch_all(
-        "asset-instances/%s/entities/%s/output-types"
-        % (asset_instance["id"], temporal_entity["id"]),
+        f"asset-instances/{asset_instance['id']}/entities/{temporal_entity['id']}/output-types",
         client=client,
     )
 
@@ -116,7 +115,7 @@ def get_output_file(
     Returns:
         dict: Output file matching given ID.
     """
-    path = "data/output-files/%s" % (output_file_id)
+    path = f"data/output-files/{output_file_id}"
     return raw.get(path, client=client)
 
 
@@ -146,7 +145,7 @@ def get_all_working_files_for_entity(
     """
     entity = normalize_model_parameter(entity)
     task = normalize_model_parameter(task)
-    path = "entities/{entity_id}/working-files".format(entity_id=entity["id"])
+    path = f"entities/{entity['id']}/working-files"
 
     params = {}
     if task is not None:
@@ -194,7 +193,7 @@ def remove_preview_file(
     if force:
         params = {"force": True}
     return raw.delete(
-        "data/preview-files/%s" % preview_file["id"],
+        f"data/preview-files/{preview_file['id']}",
         params=params,
         client=client,
     )
@@ -228,7 +227,7 @@ def get_all_attachment_files_for_task(
     """
     task = normalize_model_parameter(task)
     return raw.fetch_all(
-        "tasks/%s/attachment-files" % task["id"], client=client
+        f"tasks/{task['id']}/attachment-files", client=client
     )
 
 
@@ -246,7 +245,7 @@ def get_all_attachment_files_for_project(
     """
     project = normalize_model_parameter(project)
     return raw.fetch_all(
-        "projects/%s/attachment-files" % project["id"], client=client
+        f"projects/{project['id']}/attachment-files", client=client
     )
 
 
@@ -277,7 +276,7 @@ def all_output_files_for_entity(
     output_type = normalize_model_parameter(output_type)
     task_type = normalize_model_parameter(task_type)
     file_status = normalize_model_parameter(file_status)
-    path = "entities/{entity_id}/output-files".format(entity_id=entity["id"])
+    path = f"entities/{entity['id']}/output-files"
 
     params = {}
     if output_type:
@@ -324,9 +323,7 @@ def all_output_files_for_asset_instance(
     task_type = normalize_model_parameter(task_type)
     output_type = normalize_model_parameter(output_type)
     file_status = normalize_model_parameter(file_status)
-    path = "asset-instances/{asset_instance_id}/output-files".format(
-        asset_instance_id=asset_instance["id"]
-    )
+    path = f"asset-instances/{asset_instance['id']}/output-files"
 
     params = {}
     if temporal_entity:
@@ -372,9 +369,7 @@ def all_output_files_for_project(
     output_type = normalize_model_parameter(output_type)
     task_type = normalize_model_parameter(task_type)
     file_status = normalize_model_parameter(file_status)
-    path = "projects/{project_id}/output-files".format(
-        project_id=project["id"]
-    )
+    path = f"projects/{project['id']}/output-files"
 
     params = {}
     if output_type:
@@ -486,13 +481,9 @@ def build_working_file_path(
     if software is not None:
         data["software_id"] = software["id"]
     result = raw.post(
-        "data/tasks/%s/working-file-path" % task["id"], data, client=client
+        f"data/tasks/{task['id']}/working-file-path", data, client=client
     )
-    return "%s%s%s" % (
-        result["path"].replace(" ", "_"),
-        sep,
-        result["name"].replace(" ", "_"),
-    )
+    return f"{result['path'].replace(' ', '_')}{sep}{result['name'].replace(' ', '_')}"
 
 
 @cache
@@ -542,13 +533,9 @@ def build_entity_output_file_path(
         "nb_elements": nb_elements,
         "separator": sep,
     }
-    path = "data/entities/%s/output-file-path" % entity["id"]
+    path = f"data/entities/{entity['id']}/output-file-path"
     result = raw.post(path, data, client=client)
-    return "%s%s%s" % (
-        result["folder_path"].replace(" ", "_"),
-        sep,
-        result["file_name"].replace(" ", "_"),
-    )
+    return f"{result['folder_path'].replace(' ', '_')}{sep}{result['file_name'].replace(' ', '_')}"
 
 
 @cache
@@ -602,16 +589,9 @@ def build_asset_instance_output_file_path(
         "nb_elements": nb_elements,
         "sep": sep,
     }
-    path = "data/asset-instances/%s/entities/%s/output-file-path" % (
-        asset_instance["id"],
-        temporal_entity["id"],
-    )
+    path = f"data/asset-instances/{asset_instance['id']}/entities/{temporal_entity['id']}/output-file-path"
     result = raw.post(path, data, client=client)
-    return "%s%s%s" % (
-        result["folder_path"].replace(" ", "_"),
-        sep,
-        result["file_name"].replace(" ", "_"),
-    )
+    return f"{result['folder_path'].replace(' ', '_')}{sep}{result['file_name'].replace(' ', '_')}"
 
 
 def new_working_file(
@@ -659,7 +639,7 @@ def new_working_file(
         data["software_id"] = software["id"]
 
     return raw.post(
-        "data/tasks/%s/working-files/new" % task["id"], data, client=client
+        f"data/tasks/{task['id']}/working-files/new", data, client=client
     )
 
 
@@ -710,7 +690,7 @@ def new_entity_output_file(
     task_type = normalize_model_parameter(task_type)
     working_file = normalize_model_parameter(working_file)
     person = normalize_model_parameter(person)
-    path = "data/entities/%s/output-files/new" % entity["id"]
+    path = f"data/entities/{entity['id']}/output-files/new"
     data = {
         "output_type_id": output_type["id"],
         "task_type_id": task_type["id"],
@@ -786,10 +766,7 @@ def new_asset_instance_output_file(
     task_type = normalize_model_parameter(task_type)
     working_file = normalize_model_parameter(working_file)
     person = normalize_model_parameter(person)
-    path = "data/asset-instances/%s/entities/%s/output-files/new" % (
-        asset_instance["id"],
-        temporal_entity["id"],
-    )
+    path = f"data/asset-instances/{asset_instance['id']}/entities/{temporal_entity['id']}/output-files/new"
     data = {
         "output_type_id": output_type["id"],
         "task_type_id": task_type["id"],
@@ -834,7 +811,7 @@ def get_next_entity_output_revision(
     entity = normalize_model_parameter(entity)
     output_type = normalize_model_parameter(output_type)
     task_type = normalize_model_parameter(task_type)
-    path = "data/entities/%s/output-files/next-revision" % entity["id"]
+    path = f"data/entities/{entity['id']}/output-files/next-revision"
     data = {
         "name": name,
         "output_type_id": output_type["id"],
@@ -867,10 +844,7 @@ def get_next_asset_instance_output_revision(
     temporal_entity = normalize_model_parameter(temporal_entity)
     output_type = normalize_model_parameter(output_type)
     task_type = normalize_model_parameter(task_type)
-    path = "data/asset-instances/%s/entities/%s/output-files/next-revision" % (
-        asset_instance["id"],
-        temporal_entity["id"],
-    )
+    path = f"data/asset-instances/{asset_instance['id']}/entities/{temporal_entity['id']}/output-files/next-revision"
     data = {
         "name": name,
         "output_type_id": output_type["id"],
@@ -964,9 +938,7 @@ def get_last_output_files_for_entity(
     output_type = normalize_model_parameter(output_type)
     task_type = normalize_model_parameter(task_type)
     file_status = normalize_model_parameter(file_status)
-    path = "entities/{entity_id}/output-files/last-revisions".format(
-        entity_id=entity["id"]
-    )
+    path = f"entities/{entity['id']}/output-files/last-revisions"
 
     params = {}
     if output_type:
@@ -1013,13 +985,7 @@ def get_last_output_files_for_asset_instance(
     output_type = normalize_model_parameter(output_type)
     task_type = normalize_model_parameter(task_type)
     file_status = normalize_model_parameter(file_status)
-    path = (
-        "asset-instances/{asset_instance_id}/entities/{temporal_entity_id}"
-        "/output-files/last-revisions"
-    ).format(
-        asset_instance_id=asset_instance["id"],
-        temporal_entity_id=temporal_entity["id"],
-    )
+    path = f"asset-instances/{asset_instance['id']}/entities/{temporal_entity['id']}/output-files/last-revisions"
 
     params = {}
     if output_type:
@@ -1048,7 +1014,7 @@ def get_working_files_for_task(
         list: Working files related to given task.
     """
     task = normalize_model_parameter(task)
-    path = "data/tasks/%s/working-files" % task["id"]
+    path = f"data/tasks/{task['id']}/working-files"
     return raw.get(path, client=client)
 
 
@@ -1065,7 +1031,7 @@ def get_last_working_files(
         availbable for given name.
     """
     task = normalize_model_parameter(task)
-    path = "data/tasks/%s/working-files/last-revisions" % task["id"]
+    path = f"data/tasks/{task['id']}/working-files/last-revisions"
     return raw.get(path, client=client)
 
 
@@ -1083,7 +1049,7 @@ def get_last_working_file_revision(
         name suffix.
     """
     task = normalize_model_parameter(task)
-    path = "data/tasks/%s/working-files/last-revisions" % task["id"]
+    path = f"data/tasks/{task['id']}/working-files/last-revisions"
     working_files_dict = raw.get(path, client=client)
     return working_files_dict.get(name)
 
@@ -1116,7 +1082,7 @@ def update_comment(
     """
     working_file = normalize_model_parameter(working_file)
     return raw.put(
-        "/actions/working-files/%s/comment" % working_file["id"],
+        f"/actions/working-files/{working_file['id']}/comment",
         {"comment": comment},
         client=client,
     )
@@ -1135,7 +1101,7 @@ def update_modification_date(
         dict: Modified working file
     """
     return raw.put(
-        "/actions/working-files/%s/modified" % working_file["id"],
+        f"/actions/working-files/{working_file['id']}/modified",
         {},
         client=client,
     )
@@ -1155,7 +1121,7 @@ def update_output_file(
         dict: Modified output file
     """
     output_file = normalize_model_parameter(output_file)
-    path = "/data/output-files/%s" % output_file["id"]
+    path = f"/data/output-files/{output_file['id']}"
     return raw.put(path, data, client=client)
 
 
@@ -1176,7 +1142,7 @@ def set_project_file_tree(
     """
     project = normalize_model_parameter(project)
     data = {"tree_name": file_tree_name}
-    path = "actions/projects/%s/set-file-tree" % project["id"]
+    path = f"actions/projects/{project['id']}/set-file-tree"
     return raw.post(path, data, client=client)
 
 
@@ -1196,7 +1162,7 @@ def update_project_file_tree(
     """
     project = normalize_model_parameter(project)
     data = {"file_tree": file_tree}
-    path = "data/projects/%s" % project["id"]
+    path = f"data/projects/{project['id']}"
     return raw.put(path, data, client=client)
 
 
@@ -1214,7 +1180,7 @@ def upload_working_file(
         (dict): the working file model dictionary.
     """
     working_file = normalize_model_parameter(working_file)
-    url_path = "/data/working-files/%s/file" % working_file["id"]
+    url_path = f"/data/working-files/{working_file['id']}/file"
     return raw.upload(url_path, file_path, client=client)
 
 
@@ -1237,7 +1203,7 @@ def download_working_file(
         )
         file_path = working_file["path"]
     return raw.download(
-        "data/working-files/%s/file" % (working_file["id"]),
+        f"data/working-files/{working_file['id']}/file",
         file_path,
         client=client,
     )
@@ -1274,11 +1240,7 @@ def get_preview_file_url(
         "preview-files", preview_file["id"], client=client
     )
     file_type = "movies" if preview_file["extension"] == "mp4" else "pictures"
-    return "%s/originals/preview-files/%s.%s" % (
-        file_type,
-        preview_file["id"],
-        preview_file["extension"],
-    )
+    return f"{file_type}/originals/preview-files/{preview_file['id']}.{preview_file['extension']}"
 
 
 def get_attachment_file(
@@ -1306,8 +1268,7 @@ def download_attachment_file(
     attachment_file = normalize_model_parameter(attachment_file)
     attachment_file = get_attachment_file(attachment_file["id"], client=client)
     return raw.download(
-        "data/attachment-files/%s/file/%s"
-        % (attachment_file["id"], attachment_file["name"]),
+        f"data/attachment-files/{attachment_file['id']}/file/{attachment_file['name']}",
         file_path,
         client=client,
     )
@@ -1326,7 +1287,7 @@ def download_preview_file_thumbnail(
     """
     preview_file = normalize_model_parameter(preview_file)
     return raw.download(
-        "pictures/thumbnails/preview-files/%s.png" % (preview_file["id"]),
+        f"pictures/thumbnails/preview-files/{preview_file['id']}.png",
         file_path,
         client=client,
     )
@@ -1343,7 +1304,7 @@ def download_preview_file_cover(
     """
     preview_file = normalize_model_parameter(preview_file)
     return raw.download(
-        "pictures/originals/preview-files/%s.png" % (preview_file["id"]),
+        f"pictures/originals/preview-files/{preview_file['id']}.png",
         file_path,
         client=client,
     )
@@ -1361,7 +1322,7 @@ def download_person_avatar(
     """
     person = normalize_model_parameter(person)
     return raw.download(
-        "pictures/thumbnails/persons/%s.png" % (person["id"]),
+        f"pictures/thumbnails/persons/{person['id']}.png",
         file_path,
         client=client,
     )
@@ -1381,10 +1342,7 @@ def upload_person_avatar(
         dict: Dictionary with a key of 'thumbnail_path' and a value of the
             path to the static image file, relative to the host url.
     """
-    path = (
-        "/pictures/thumbnails/persons/%s"
-        % normalize_model_parameter(person)["id"]
-    )
+    path = f"/pictures/thumbnails/persons/{normalize_model_parameter(person)['id']}"
     return raw.upload(path, file_path, client=client)
 
 
@@ -1400,7 +1358,7 @@ def download_project_avatar(
     """
     project = normalize_model_parameter(project)
     return raw.download(
-        "pictures/thumbnails/projects/%s.png" % (project["id"]),
+        f"pictures/thumbnails/projects/{project['id']}.png",
         file_path,
         client=client,
     )
@@ -1420,10 +1378,7 @@ def upload_project_avatar(
         dict: Dictionary with a key of 'thumbnail_path' and a value of the
             path to the static image file, relative to the host url.
     """
-    path = (
-        "/pictures/thumbnails/projects/%s"
-        % normalize_model_parameter(project)["id"]
-    )
+    path = f"/pictures/thumbnails/projects/{normalize_model_parameter(project)['id']}"
     return raw.upload(path, file_path, client=client)
 
 
@@ -1439,7 +1394,7 @@ def download_organisation_avatar(
     """
     organisation = normalize_model_parameter(organisation)
     return raw.download(
-        "pictures/thumbnails/organisations/%s.png" % (organisation["id"]),
+        f"pictures/thumbnails/organisations/{organisation['id']}.png",
         file_path,
         client=client,
     )
@@ -1459,10 +1414,7 @@ def upload_organisation_avatar(
         dict: Dictionary with a key of 'thumbnail_path' and a value of the
             path to the static image file, relative to the host url.
     """
-    path = (
-        "/pictures/thumbnails/organisations/%s"
-        % normalize_model_parameter(organisation)["id"]
-    )
+    path = f"/pictures/thumbnails/organisations/{normalize_model_parameter(organisation)['id']}"
     return raw.upload(path, file_path, client=client)
 
 
@@ -1480,7 +1432,7 @@ def update_preview(
         dict: Modified preview file
     """
     preview_file = normalize_model_parameter(preview_file)
-    path = "/data/preview-files/%s" % preview_file["id"]
+    path = f"/data/preview-files/{preview_file['id']}"
     return raw.put(path, data, client=client)
 
 
@@ -1519,11 +1471,7 @@ def get_preview_movie_url(
         path_prefix = "movies/lowdef"
     else:
         path_prefix = "movies/originals"
-    return "%s/preview-files/%s.%s" % (
-        path_prefix,
-        preview_file["id"],
-        preview_file["extension"],
-    )
+    return f"{path_prefix}/preview-files/{preview_file['id']}.{preview_file['extension']}"
 
 
 def download_preview_movie(
@@ -1590,9 +1538,7 @@ def get_attachment_thumbnail_url(
         str: URL to the attachment thumbnail.
     """
     attachment_file = normalize_model_parameter(attachment_file)
-    return (
-        "pictures/thumbnails/attachment-files/%s.png" % attachment_file["id"]
-    )
+    return f"pictures/thumbnails/attachment-files/{attachment_file['id']}.png"
 
 
 def download_attachment_thumbnail(
@@ -1632,10 +1578,7 @@ def extract_frame_from_preview(
         requests.Response: Response object containing the extracted frame.
     """
     preview_file = normalize_model_parameter(preview_file)
-    url = "pictures/preview-files/%s/extract-frame/%s" % (
-        preview_file["id"],
-        frame_number,
-    )
+    url = f"pictures/preview-files/{preview_file['id']}/extract-frame/{frame_number}"
     return raw.download(url, file_path, client=client)
 
 
@@ -1656,7 +1599,7 @@ def update_preview_position(
         dict: Updated preview file.
     """
     preview_file = normalize_model_parameter(preview_file)
-    path = "data/preview-files/%s/position" % preview_file["id"]
+    path = f"data/preview-files/{preview_file['id']}/position"
     return raw.put(path, {"position": position}, client=client)
 
 
@@ -1690,7 +1633,7 @@ def update_preview_annotations(
         dict: Updated preview file with the updated annotations array.
     """
     preview_file = normalize_model_parameter(preview_file)
-    path = "actions/preview-files/%s/update-annotations" % preview_file["id"]
+    path = f"actions/preview-files/{preview_file['id']}/update-annotations"
     data = {}
     if additions is not None:
         data["additions"] = additions
@@ -1718,7 +1661,7 @@ def extract_tile_from_preview(
         requests.Response: Response object containing the extracted tile.
     """
     preview_file = normalize_model_parameter(preview_file)
-    url = "pictures/preview-files/%s/extract-tile" % (preview_file["id"])
+    url = f"pictures/preview-files/{preview_file['id']}/extract-tile"
     return raw.download(url, file_path, client=client)
 
 
@@ -1763,4 +1706,4 @@ def get_file_status_by_name(
     Args:
         name (str): The files status name.
     """
-    return raw.fetch_first("file-status?name=%s" % name, client=client)
+    return raw.fetch_first(f"file-status?name={name}", client=client)
