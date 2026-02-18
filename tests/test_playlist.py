@@ -153,6 +153,34 @@ class TaskTestCase(unittest.TestCase):
             )
             self.assertEqual(playlist["name"], "playlist-1")
 
+    def test_new_playlist_with_is_for_all(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url(
+                    "data/playlists?project_id=%s&name=all_assets_playlist"
+                    % fakeid("project-1")
+                ),
+                text=json.dumps([]),
+            )
+            mock.post(
+                gazu.client.get_full_url("data/playlists/"),
+                text=json.dumps(
+                    {"name": "all_assets_playlist", "id": fakeid("playlist-1")}
+                ),
+            )
+
+            gazu.playlist.new_playlist(
+                project=fakeid("project-1"),
+                name="all_assets_playlist",
+                episode=None,
+                for_entity="asset",
+                for_client=False,
+                is_for_all=True,
+            )
+            body = mock.last_request.json()
+            self.assertTrue(body["is_for_all"])
+            self.assertNotIn("episode_id", body)
+
     def test_update_playlist(self):
         with requests_mock.mock() as mock:
             mock = mock.put(
