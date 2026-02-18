@@ -699,7 +699,7 @@ def add_person_to_department(
     person = normalize_model_parameter(person)
     department = normalize_model_parameter(department)
     return raw.post(
-        f"data/persons/{person['id']}/departments",
+        f"actions/persons/{person['id']}/departments/add",
         {"department_id": department["id"]},
         client=client,
     )
@@ -721,7 +721,7 @@ def remove_person_from_department(
     person = normalize_model_parameter(person)
     department = normalize_model_parameter(department)
     return raw.delete(
-        f"data/persons/{person['id']}/departments/{department['id']}",
+        f"actions/persons/{person['id']}/departments/{department['id']}",
         client=client,
     )
 
