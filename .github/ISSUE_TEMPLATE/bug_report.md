@@ -3,14 +3,13 @@ name: Bug report
 about: Create a report to help us improve
 title: ''
 labels: bug
-assignees: EvanBldy
-
+assignees: frankrousseau
 ---
 
 **Context**
 
-Studio name: 
-Gazu version: 
+Studio name:
+Gazu version:
 Zou installation type: (for example: hosted by CGWire, self-hosted, docker etc)
 
 **Describe the bug**
