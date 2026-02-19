@@ -16,6 +16,7 @@ from . import files
 from . import project
 from . import person
 from . import shot
+from . import studio
 from . import sync
 from . import task
 from . import user

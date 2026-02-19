@@ -490,7 +490,7 @@ class PersonTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "POST",
-                "data/persons/%s/departments" % person_id,
+                "actions/persons/%s/departments/add" % person_id,
                 text={"id": person_id, "departments": [dept_id]},
             )
             result = gazu.person.add_person_to_department(
@@ -505,7 +505,7 @@ class PersonTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "DELETE",
-                "data/persons/%s/departments/%s" % (person_id, dept_id),
+                "actions/persons/%s/departments/%s" % (person_id, dept_id),
                 status_code=204,
             )
             gazu.person.remove_person_from_department(

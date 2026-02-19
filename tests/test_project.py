@@ -401,6 +401,28 @@ class ProjectTestCase(unittest.TestCase):
                 },
             )
 
+    def test_remove_task_type(self):
+        with requests_mock.mock() as mock:
+            project_id = fakeid("project-1")
+            task_type_id = fakeid("task-type-1")
+            path = "data/projects/%s/settings/task-types/%s" % (
+                project_id,
+                task_type_id,
+            )
+            mock_route(mock, "DELETE", path, text="")
+            gazu.project.remove_task_type(project_id, {"id": task_type_id})
+
+    def test_remove_task_status(self):
+        with requests_mock.mock() as mock:
+            project_id = fakeid("project-1")
+            task_status_id = fakeid("task-status-1")
+            path = "data/projects/%s/settings/task-status/%s" % (
+                project_id,
+                task_status_id,
+            )
+            mock_route(mock, "DELETE", path, text="")
+            gazu.project.remove_task_status(project_id, {"id": task_status_id})
+
     def test_add_asset_type(self):
         with requests_mock.mock() as mock:
             mock_route(

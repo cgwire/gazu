@@ -721,6 +721,58 @@ class FilesTestCase(unittest.TestCase):
                 {"id": "software-01"},
             )
 
+    def test_new_software_with_secondary_extensions(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url("/data/softwares?name=Maya"),
+                text=json.dumps([]),
+            )
+            path = "/data/softwares"
+            mock.post(
+                gazu.client.get_full_url(path),
+                text=json.dumps(
+                    {
+                        "id": "software-maya",
+                        "name": "Maya",
+                        "file_extension": "mb",
+                        "secondary_extensions": ["ma", "mb"],
+                    }
+                ),
+            )
+            result = gazu.files.new_software(
+                "Maya", "maya", "mb", secondary_extensions=["ma", "mb"]
+            )
+            self.assertEqual(result["secondary_extensions"], ["ma", "mb"])
+            self.assertEqual(len(mock.request_history), 2)
+            post_request = mock.request_history[1]
+            self.assertEqual(post_request.method, "POST")
+            self.assertEqual(
+                json.loads(post_request.body)["secondary_extensions"],
+                ["ma", "mb"],
+            )
+
+    def test_update_software(self):
+        with requests_mock.mock() as mock:
+            software = {
+                "id": "software-01",
+                "name": "Maya",
+                "short_name": "maya",
+                "file_extension": "mb",
+                "secondary_extensions": ["ma", "mb"],
+            }
+            path = "/data/softwares/software-01"
+            mock.put(
+                gazu.client.get_full_url(path),
+                text=json.dumps(software),
+            )
+            result = gazu.files.update_software(software)
+            self.assertEqual(result["secondary_extensions"], ["ma", "mb"])
+            self.assertEqual(mock.request_history[0].method, "PUT")
+            self.assertEqual(
+                json.loads(mock.request_history[0].body)["secondary_extensions"],
+                ["ma", "mb"],
+            )
+
     def test_update_project_file_tree(self):
         with requests_mock.mock() as mock:
             file_tree = {

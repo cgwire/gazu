@@ -277,6 +277,48 @@ def add_task_status(
     )
 
 
+def remove_task_type(
+    project: str | dict, task_type: str | dict, client: KitsuClient = default
+) -> str:
+    """
+    Remove a task type from the project.
+
+    Args:
+        project (dict / ID): The project dict or id.
+        task_type (dict / ID): The task type dict or id.
+
+    Returns:
+        str: Response from the API.
+    """
+    project = normalize_model_parameter(project)
+    task_type = normalize_model_parameter(task_type)
+    return raw.delete(
+        f"data/projects/{project['id']}/settings/task-types/{task_type['id']}",
+        client=client,
+    )
+
+
+def remove_task_status(
+    project: str | dict, task_status: str | dict, client: KitsuClient = default
+) -> str:
+    """
+    Remove a task status from the project.
+
+    Args:
+        project (dict / ID): The project dict or id.
+        task_status (dict / ID): The task status dict or id.
+
+    Returns:
+        str: Response from the API.
+    """
+    project = normalize_model_parameter(project)
+    task_status = normalize_model_parameter(task_status)
+    return raw.delete(
+        f"data/projects/{project['id']}/settings/task-status/{task_status['id']}",
+        client=client,
+    )
+
+
 def add_metadata_descriptor(
     project: str | dict,
     name: str,
