@@ -1,8 +1,5 @@
 name: "Generate Gazu Specs for developer docs"
-on:
-  push:
-    branches:
-      - "sphinx-doc"
+on: push
 jobs:
   docs:
     runs-on: ubuntu-latest
