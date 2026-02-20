@@ -1,4 +1,4 @@
-name: "docs"
+name: "new docs"
 on:
   - pull_request
 
@@ -10,7 +10,3 @@ jobs:
       - uses: ammaraskar/sphinx-action@master
         with:
           docs-folder: "docs/"
-      - uses: actions/upload-artifact@v1
-        with:
-          name: specs.json
-          path: docs/build/json/docstrings.json
