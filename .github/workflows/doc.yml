@@ -1,0 +1,14 @@
+name: "Generate Gazu Specs for developer docs"
+on: push
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: ammaraskar/sphinx-action@master
+        with:
+          docs-folder: "docs/"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: specs.json
+          path: docs/build/html/docstrings.json
