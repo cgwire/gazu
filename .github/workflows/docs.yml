@@ -1,4 +1,4 @@
-name: "Generate Gazu Specs for developer docs"
+name: "docs"
 on:
   - pull_request
 
