@@ -1,6 +1,6 @@
 name: "Generate Gazu Specs for developer docs"
 on:
-  pull_request:
+  push_request:
     branches:
       - "sphinx-doc"
 jobs:
