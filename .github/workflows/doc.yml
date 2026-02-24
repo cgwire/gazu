@@ -16,15 +16,11 @@ jobs:
         with:
           docs-folder: "docs/"
 
-      - name: Set tag name
-        id: vars
-        run: echo "TAG=build-${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
-
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.vars.outputs.TAG }}
-          name: Build ${{ steps.vars.outputs.TAG }}
+          tag_name: latest
+          name: Generate Gazu specs
           prerelease: true
           files: docs/build/html/docstrings.json
         env:
