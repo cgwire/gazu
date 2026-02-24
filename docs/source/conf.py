@@ -133,7 +133,7 @@ def dump_docstrings(app, exception):
     if exception:
         return
 
-    output_path = os.path.join(app.outdir, "docstrings.json")
+    output_path = os.path.join(app.outdir, "gazu-specs.json")
     with open(output_path, "w") as f:
         json.dump(_collected_docstrings, f, indent=2)
 

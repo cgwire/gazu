@@ -38,6 +38,6 @@ jobs:
           tag_name: latest
           name: Generate Gazu specs
           prerelease: true
-          files: docs/build/html/docstrings.json
+          files: docs/build/html/gazu-specs.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
