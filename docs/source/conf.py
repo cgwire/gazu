@@ -5,11 +5,16 @@ import inspect
 import re
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.abspath(os.path.join(BASE_DIR, "../../")))
+GAZU_PATH=os.path.abspath(os.path.join(BASE_DIR, "../../"))
+sys.path.insert(0, GAZU_PATH)
+print(GAZU_PATH)
 
 # Minimal project info (required by Sphinx)
 project = "Gazu"
-extensions = ["sphinx.ext.autodoc"]
+extensions = ["sphinx.ext.autodoc", "sphinx.ext.autosummary"]
+
+autosummary_generate = True
+autodoc_mock_imports = ["typing_extensions"]
 
 # --- Docstring collection ---
 
@@ -128,7 +133,7 @@ def dump_docstrings(app, exception):
     if exception:
         return
 
-    output_path = os.path.join(app.outdir, "docstrings.json")
+    output_path = os.path.join(app.outdir, "gazu-specs.json")
     with open(output_path, "w") as f:
         json.dump(_collected_docstrings, f, indent=2)
 

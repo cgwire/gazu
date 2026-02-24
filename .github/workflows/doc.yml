@@ -1,14 +1,43 @@
-name: "Generate Gazu Specs for developer docs"
+name: Generate Gazu Specs for developer docs
+
 on: push
+
 jobs:
   docs:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v6
+      - name: Set up Python
+        if: ${{ !contains(fromJSON('["3.7"]'), matrix.version) }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.version }}
+          cache: pip
+      - name: Upgrade pip 📦
+        run: >-
+          python -m
+          pip install
+          --upgrade
+          pip
+      - name: Install packages 📦
+        run: >-
+          python -m
+          pip install
+          -r requirements.txt
       - uses: ammaraskar/sphinx-action@master
         with:
           docs-folder: "docs/"
-      - uses: actions/upload-artifact@v4
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: specs.json
-          path: docs/build/html/docstrings.json
+          tag_name: spec-latest
+          name: Generate Gazu specs
+          prerelease: true
+          files: docs/build/html/gazu-specs.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
