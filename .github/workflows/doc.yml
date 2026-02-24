@@ -35,7 +35,7 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: latest
+          tag_name: spec-latest
           name: Generate Gazu specs
           prerelease: true
           files: docs/build/html/gazu-specs.json
