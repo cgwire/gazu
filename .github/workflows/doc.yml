@@ -10,11 +10,28 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v4
-
+      - uses: actions/checkout@v6
+      - name: Set up Python
+        if: ${{ !contains(fromJSON('["3.7"]'), matrix.version) }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.version }}
+          cache: pip
+      - name: Upgrade pip 📦
+        run: >-
+          python -m
+          pip install
+          --upgrade
+          pip
+      - name: Install packages 📦
+        run: >-
+          python -m
+          pip install
+          -r requirements.txt
       - uses: ammaraskar/sphinx-action@master
         with:
           docs-folder: "docs/"
+          build-command: sphinx-build -W -b html docs docs/build/html
 
       - name: Create Release
         uses: softprops/action-gh-release@v2

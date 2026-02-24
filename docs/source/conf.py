@@ -9,7 +9,9 @@ sys.path.insert(0, os.path.abspath(os.path.join(BASE_DIR, "../../")))
 
 # Minimal project info (required by Sphinx)
 project = "Gazu"
-extensions = ["sphinx.ext.autodoc"]
+extensions = ["sphinx.ext.autodoc", "sphinx.ext.autosummary"]
+
+autosummary_generate = True
 
 # --- Docstring collection ---
 
