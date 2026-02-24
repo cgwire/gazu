@@ -1,14 +1,31 @@
-name: "Generate Gazu Specs for developer docs"
+name: Generate Gazu Specs for developer docs
+
 on: push
+
 jobs:
   docs:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
+
       - uses: ammaraskar/sphinx-action@master
         with:
           docs-folder: "docs/"
-      - uses: actions/upload-artifact@v4
+
+      - name: Set tag name
+        id: vars
+        run: echo "TAG=build-${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: specs.json
-          path: docs/build/html/docstrings.json
+          tag_name: ${{ steps.vars.outputs.TAG }}
+          name: Build ${{ steps.vars.outputs.TAG }}
+          prerelease: true
+          files: docs/build/html/docstrings.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
