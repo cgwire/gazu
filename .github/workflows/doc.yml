@@ -31,7 +31,6 @@ jobs:
       - uses: ammaraskar/sphinx-action@master
         with:
           docs-folder: "docs/"
-          build-command: sphinx-build -W -b html docs docs/build/html
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
