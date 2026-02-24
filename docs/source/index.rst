@@ -42,6 +42,8 @@
     :members:
 .. automodule:: gazu.sync
     :members:
+.. automodule:: gazu.studio
+    :members:
 .. automodule:: gazu.task
     :members:
 .. automodule:: gazu.user
