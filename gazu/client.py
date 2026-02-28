@@ -726,6 +726,26 @@ def update(
     )
 
 
+class _ProgressFileWrapper:
+    """Wraps a file object to track read progress via a callback."""
+
+    def __init__(self, file_obj, callback, offset, total):
+        self._file = file_obj
+        self._callback = callback
+        self._offset = offset
+        self._total = total
+
+    def read(self, size=-1):
+        data = self._file.read(size)
+        if data:
+            self._offset += len(data)
+            self._callback(self._offset, self._total)
+        return data
+
+    def __getattr__(self, name):
+        return getattr(self._file, name)
+
+
 def upload(
     path: str,
     file_path: str = None,
@@ -733,6 +753,7 @@ def upload(
     extra_files: list | None = None,
     files: dict = None,
     client: KitsuClient = default_client,
+    progress_callback: Callable | None = None,
 ) -> Any:
     """
     Upload file located at *file_path* to given url *path*.
@@ -744,6 +765,8 @@ def upload(
         extra_files (list): List of extra files to upload.
         files (dict): The dictionary of files to upload.
         client (KitsuClient): The client to use for the request.
+        progress_callback (Callable): Callback ``(bytes_read, total)``
+            invoked during upload. *total* is the sum of all file sizes.
 
     Returns:
         Any: Response from the API.
@@ -757,6 +780,19 @@ def upload(
     if not files:
         files = _build_file_dict(file_path, extra_files)
         opened_files = files
+    if progress_callback is not None:
+        total = sum(
+            os.fstat(f.fileno()).st_size for f in files.values()
+        )
+        offset = 0
+        wrapped = {}
+        for key, f in files.items():
+            wrapper = _ProgressFileWrapper(
+                f, progress_callback, offset, total
+            )
+            wrapped[key] = wrapper
+            offset += os.fstat(f.fileno()).st_size
+        files = wrapped
     try:
         retry = True
         while retry:
@@ -814,6 +850,7 @@ def download(
     file_path: str,
     params: dict | None = None,
     client: KitsuClient = default_client,
+    progress_callback: Callable | None = None,
 ) -> requests.Response:
     """
     Download file located at *file_path* to given url *path*.
@@ -823,6 +860,8 @@ def download(
         file_path (str): The location to store the file on the hard drive.
         params (dict): The parameters to pass to the request.
         client (KitsuClient): The client to use for the request.
+        progress_callback (Callable): Callback ``(bytes_read, total)``
+            invoked during download. *total* is 0 when unknown.
 
     Returns:
         Response: Request response object.
@@ -835,7 +874,17 @@ def download(
         stream=True,
     ) as response:
         with open(file_path, "wb") as target_file:
-            shutil.copyfileobj(response.raw, target_file)
+            if progress_callback is not None:
+                total = int(
+                    response.headers.get("content-length", 0)
+                )
+                bytes_read = 0
+                for chunk in response.iter_content(8192):
+                    target_file.write(chunk)
+                    bytes_read += len(chunk)
+                    progress_callback(bytes_read, total)
+            else:
+                shutil.copyfileobj(response.raw, target_file)
         return response
 
 

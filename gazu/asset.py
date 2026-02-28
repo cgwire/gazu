@@ -540,7 +540,10 @@ def new_asset_asset_instance(
 
 
 def import_assets_with_csv(
-    project: str | dict, csv_file_path: str, client: KitsuClient = default
+    project: str | dict,
+    csv_file_path: str,
+    client: KitsuClient = default,
+    progress_callback=None,
 ) -> list[dict]:
     """
     Import the Assets from a previously exported CSV file into the given
@@ -559,6 +562,7 @@ def import_assets_with_csv(
         f"import/csv/projects/{project['id']}/assets",
         csv_file_path,
         client=client,
+        progress_callback=progress_callback,
     )
 
 
@@ -568,6 +572,7 @@ def export_assets_with_csv(
     episode: str | dict | None = None,
     assigned_to: str | dict | None = None,
     client: KitsuClient = default,
+    progress_callback=None,
 ) -> requests.Response:
     """
     Export the Assets data for a project to a CSV file on disk.
@@ -603,6 +608,7 @@ def export_assets_with_csv(
         csv_file_path,
         params=params,
         client=client,
+        progress_callback=progress_callback,
     )
 
 

@@ -462,7 +462,10 @@ def remove_bot(
 
 
 def set_avatar(
-    person: str | dict, file_path: str, client: KitsuClient = default
+    person: str | dict,
+    file_path: str,
+    client: KitsuClient = default,
+    progress_callback=None,
 ) -> dict[Literal["thumbnail_path"], str]:
     """
     Upload picture and set it as avatar for given person.
@@ -481,6 +484,7 @@ def set_avatar(
         f"/pictures/thumbnails/persons/{person['id']}",
         file_path,
         client=client,
+        progress_callback=progress_callback,
     )
 
 

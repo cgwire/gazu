@@ -404,6 +404,7 @@ def download_playlist_build(
     build_job: str | dict,
     file_path: str,
     client: KitsuClient = default,
+    progress_callback=None,
 ) -> requests.Response:
     """
     Download a playlist build.
@@ -419,11 +420,16 @@ def download_playlist_build(
     playlist = normalize_model_parameter(playlist)
     build_job = normalize_model_parameter(build_job)
     path = f"data/playlists/{playlist['id']}/build-jobs/{build_job['id']}/download"
-    return raw.download(path, file_path, client=client)
+    return raw.download(
+        path, file_path, client=client, progress_callback=progress_callback
+    )
 
 
 def download_playlist_zip(
-    playlist: str | dict, file_path: str, client: KitsuClient = default
+    playlist: str | dict,
+    file_path: str,
+    client: KitsuClient = default,
+    progress_callback=None,
 ) -> requests.Response:
     """
     Download a playlist as a zip file.
@@ -437,7 +443,9 @@ def download_playlist_zip(
     """
     playlist = normalize_model_parameter(playlist)
     path = f"data/playlists/{playlist['id']}/download/zip"
-    return raw.download(path, file_path, client=client)
+    return raw.download(
+        path, file_path, client=client, progress_callback=progress_callback
+    )
 
 
 def generate_temp_playlist(

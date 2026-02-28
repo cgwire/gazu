@@ -695,7 +695,10 @@ def remove_asset_instance_from_shot(
 
 
 def import_shots_with_csv(
-    project: str | dict, csv_file_path: str, client: KitsuClient = default
+    project: str | dict,
+    csv_file_path: str,
+    client: KitsuClient = default,
+    progress_callback=None,
 ) -> list[dict]:
     """
     Import the Shots from a previously exported CSV file into the given
@@ -714,6 +717,7 @@ def import_shots_with_csv(
         f"import/csv/projects/{project['id']}/shots",
         csv_file_path,
         client=client,
+        progress_callback=progress_callback,
     )
 
 
@@ -724,6 +728,7 @@ def import_otio(
     naming_convention: str | None = None,
     match_case: bool = True,
     client: KitsuClient = default,
+    progress_callback=None,
 ) -> dict[Literal["created_shots", "updated_shots"], list[dict]]:
     """
     Import shots from an OpenTimelineIO file (works also for every OTIO
@@ -760,6 +765,7 @@ def import_otio(
             "match_case": match_case,
         },
         client=client,
+        progress_callback=progress_callback,
     )
 
 
@@ -769,6 +775,7 @@ def export_shots_with_csv(
     episode: str | dict | None = None,
     assigned_to: str | dict | None = None,
     client: KitsuClient = default,
+    progress_callback=None,
 ) -> requests.Response:
     """
     Export the Shots data for a project to a CSV file on disk.
@@ -804,4 +811,5 @@ def export_shots_with_csv(
         csv_file_path,
         params=params,
         client=client,
+        progress_callback=progress_callback,
     )

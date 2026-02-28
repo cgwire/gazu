@@ -934,6 +934,7 @@ def add_comment(
     created_at: str | None = None,
     links: list[str] | None = None,
     client: KitsuClient = default,
+    progress_callback=None,
 ) -> dict:
     """
     Add comment to given task. Each comment requires a task_status. Since the
@@ -989,6 +990,7 @@ def add_comment(
             data=data,
             extra_files=attachments,
             client=client,
+            progress_callback=progress_callback,
         )
 
 
@@ -997,6 +999,7 @@ def add_attachment_files_to_comment(
     comment: str | dict,
     attachments: str | list[str] = None,
     client: KitsuClient = default,
+    progress_callback=None,
 ) -> dict:
     """
     Add attachments files to a given comment.
@@ -1024,6 +1027,7 @@ def add_attachment_files_to_comment(
         attachment,
         extra_files=attachments,
         client=client,
+        progress_callback=progress_callback,
     )
 
 
@@ -1083,6 +1087,7 @@ def upload_preview_file(
     file_path: str,
     normalize_movie: bool = True,
     client: KitsuClient = default,
+    progress_callback=None,
 ) -> dict:
     """
     Create a preview into given comment.
@@ -1094,7 +1099,9 @@ def upload_preview_file(
     path = f"pictures/preview-files/{normalize_model_parameter(preview_file)['id']}"
     if not normalize_movie:
         path += "?normalize=false"
-    return raw.upload(path, file_path, client=client)
+    return raw.upload(
+        path, file_path, client=client, progress_callback=progress_callback
+    )
 
 
 def add_preview(
@@ -1207,6 +1214,7 @@ def batch_comments(
     comments: list[dict] | None = None,
     task: str | dict | None = None,
     client: KitsuClient = default,
+    progress_callback=None,
 ) -> list[dict]:
     """
     Publish a list of comments (with attachments and previews) for given task.
@@ -1255,6 +1263,7 @@ def batch_comments(
             file_path=None,
             files=files,
             client=client,
+            progress_callback=progress_callback,
         )
     finally:
         for f in opened_files:
@@ -1265,6 +1274,7 @@ def create_multiple_comments(
     project: str | dict,
     comments: list[dict] = None,
     client: KitsuClient = default,
+    progress_callback=None,
 ) -> list[dict]:
     """
     Create multiple comments at once for a specific project.
@@ -1313,6 +1323,7 @@ def create_multiple_comments(
             file_path=None,
             files=files,
             client=client,
+            progress_callback=progress_callback,
         )
     finally:
         for f in opened_files:
