@@ -229,6 +229,7 @@ def close_project(project: str | dict, client: KitsuClient = default) -> dict:
     for status in all_project_status(client=client):
         if status["name"].lower() == "closed":
             closed_status_id = status["id"]
+            break
 
     project["project_status_id"] = closed_status_id
     update_project(project, client=client)

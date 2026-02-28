@@ -770,7 +770,9 @@ def remove_task(task: str | dict, client: KitsuClient = default) -> str:
         task (str / dict): The task dict or the task ID.
     """
     task = normalize_model_parameter(task)
-    raw.delete(f"data/tasks/{task['id']}", {"force": True}, client=client)
+    return raw.delete(
+        f"data/tasks/{task['id']}", {"force": True}, client=client
+    )
 
 
 def start_task(
@@ -970,6 +972,7 @@ def add_comment(
             f"actions/tasks/{task['id']}/comment", data, client=client
         )
     else:
+        attachments = list(attachments)
         attachment = attachments.pop()
         data["checklist"] = json.dumps(checklist)
         return raw.upload(
@@ -984,7 +987,7 @@ def add_comment(
 def add_attachment_files_to_comment(
     task: str | dict,
     comment: str | dict,
-    attachments: str | list[str] = [],
+    attachments: str | list[str] = None,
     client: KitsuClient = default,
 ) -> dict:
     """
@@ -998,10 +1001,13 @@ def add_attachment_files_to_comment(
     Returns:
         dict: Added attachment files.
     """
+    if attachments is None:
+        attachments = []
     if isinstance(attachments, str):
         attachments = [attachments]
     if len(attachments) == 0:
         raise ValueError("The attachments list is empty")
+    attachments = list(attachments)
     task = normalize_model_parameter(task)
     comment = normalize_model_parameter(comment)
     attachment = attachments.pop()

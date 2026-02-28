@@ -94,7 +94,12 @@ def get_entity_type_by_name(
 
 
 @cache
-def guess_from_path(project_id: str, path: str, sep: str = "/") -> list[dict]:
+def guess_from_path(
+    project_id: str,
+    path: str,
+    sep: str = "/",
+    client: KitsuClient = default,
+) -> list[dict]:
     """
     Get list of possible project file tree templates matching a file path
     and data ids corresponding to template tokens.
@@ -103,12 +108,14 @@ def guess_from_path(project_id: str, path: str, sep: str = "/") -> list[dict]:
         project_id (str): Project id of given file
         path (str): Path to a file
         sep (str): File path separator, defaults to "/"
+        client (KitsuClient): The client to use for the request.
     Returns:
         list: dictionaries with the corresponding entities and template name.
     """
     return raw.post(
         "/data/entities/guess_from_path",
         {"project_id": project_id, "file_path": path, "sep": sep},
+        client=client,
     )
 
 

@@ -222,12 +222,18 @@ def add_entity_to_playlist(
             ):
                 preview_file = first_file
 
-    preview_file = normalize_model_parameter(preview_file)
-    playlist["shots"].append(
-        {"entity_id": entity["id"], "preview_file_id": preview_file["id"]}
-    )
+    entry = {"entity_id": entity["id"]}
+    if preview_file is not None:
+        entry["preview_file_id"] = preview_file["id"]
+
+    playlist["shots"].append(entry)
     if persist:
-        update_playlist(playlist, client=client)
+        preview_file = normalize_model_parameter(preview_file)
+        playlist = raw.post(
+            f"actions/playlists/{playlist['id']}/add-entity", 
+            entry,
+            client=client
+        )
     return playlist
 
 
@@ -288,7 +294,6 @@ def update_entity_preview(
     return playlist
 
 
-@cache
 def delete_playlist(
     playlist: str | dict, client: KitsuClient = default
 ) -> str:

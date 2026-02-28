@@ -835,7 +835,6 @@ def get_next_entity_output_revision(
         "name": name,
         "output_type_id": output_type["id"],
         "task_type_id": task_type["id"],
-        "name": name,
     }
     return raw.post(path, data, client=client)["next_revision"]
 
@@ -1119,6 +1118,7 @@ def update_modification_date(
     Returns:
         dict: Modified working file
     """
+    working_file = normalize_model_parameter(working_file)
     return raw.put(
         f"/actions/working-files/{working_file['id']}/modified",
         {},
@@ -1725,4 +1725,6 @@ def get_file_status_by_name(
     Args:
         name (str): The files status name.
     """
-    return raw.fetch_first(f"file-status?name={name}", client=client)
+    return raw.fetch_first(
+        "file-status", {"name": name}, client=client
+    )

@@ -272,7 +272,7 @@ def get_episode_url(episode: str | dict, client: KitsuClient = default) -> str:
         url (str): Web url associated to the given episode
     """
     episode = normalize_model_parameter(episode)
-    episode = get_episode(episode["id"])
+    episode = get_episode(episode["id"], client=client)
     host = raw.get_api_url_from_host(client=client)
     project_id = episode["project_id"]
     episode_id = episode["id"]
@@ -289,7 +289,7 @@ def get_shot_url(shot: str | dict, client: KitsuClient = default) -> str:
         url (str): Web url associated to the given shot
     """
     shot = normalize_model_parameter(shot)
-    shot = get_shot(shot["id"])
+    shot = get_shot(shot["id"], client=client)
     host = raw.get_api_url_from_host(client=client)
     project_id = shot["project_id"]
     shot_id = shot["id"]

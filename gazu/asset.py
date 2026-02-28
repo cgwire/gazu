@@ -26,7 +26,7 @@ def all_assets_for_open_projects(client: KitsuClient = default) -> list[dict]:
         list: Assets stored in the database for open projects.
     """
     all_assets = []
-    for project in gazu_project.all_open_projects(client=default):
+    for project in gazu_project.all_open_projects(client=client):
         all_assets.extend(all_assets_for_project(project, client))
     return sort_by_name(all_assets)
 
@@ -161,16 +161,18 @@ def get_asset_url(asset: str | dict, client: KitsuClient = default) -> str:
         url (str): Web url associated to the given asset
     """
     asset = normalize_model_parameter(asset)
-    asset = get_asset(asset["id"])
-    project = gazu_project.get_project(asset["project_id"])
-    host = raw.get_api_url_from_host()
+    asset = get_asset(asset["id"], client=client)
+    project = gazu_project.get_project(
+        asset["project_id"], client=client
+    )
+    host = raw.get_api_url_from_host(client=client)
     project_id = asset["project_id"]
     asset_id = asset["id"]
     if project["production_type"] != "tvshow":
         return f"{host}/productions/{project_id}/assets/{asset_id}/"
     else:
         episode_id = "main"
-        if len(asset["episode_id"]) > 0:
+        if asset.get("episode_id"):
             episode_id = asset["episode_id"]
         return f"{host}/productions/{project_id}/episodes/{episode_id}/assets/{asset_id}/"
 

@@ -52,7 +52,7 @@ def get_edit_url(edit: str | dict, client: KitsuClient = default) -> str:
         url (str): Web url associated to the given edit
     """
     edit = normalize_model_parameter(edit)
-    edit = get_edit(edit["id"])
+    edit = get_edit(edit["id"], client=client)
     host = raw.get_api_url_from_host(client=client)
     project_id = edit["project_id"]
     edit_id = edit["id"]
@@ -187,6 +187,9 @@ def update_edit_data(
     """
     edit = normalize_model_parameter(edit)
     current_edit = get_edit(edit["id"], client=client)
-    updated_edit = {"id": current_edit["id"], "data": current_edit["data"]}
+    current_data = (
+        current_edit["data"] if current_edit["data"] is not None else {}
+    )
+    updated_edit = {"id": current_edit["id"], "data": current_data}
     updated_edit["data"].update(data)
     return update_edit(updated_edit, client=client)
