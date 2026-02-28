@@ -321,6 +321,7 @@ def all_asset_types_for_shot(
     Returns:
         list: Asset types from assets casted in given shot.
     """
+    shot = normalize_model_parameter(shot)
     path = f"shots/{shot['id']}/asset-types"
     return sort_by_name(raw.fetch_all(path, client=client))
 
@@ -485,6 +486,7 @@ def all_asset_instances_for_shot(
     Returns:
         list: Asset instances existing for a given shot.
     """
+    shot = normalize_model_parameter(shot)
     path = f"shots/{shot['id']}/asset-instances"
     return raw.fetch_all(path, client=client)
 

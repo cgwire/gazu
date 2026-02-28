@@ -606,7 +606,7 @@ def build_asset_instance_output_file_path(
         "representation": representation,
         "revision": revision,
         "nb_elements": nb_elements,
-        "sep": sep,
+        "separator": sep,
     }
     path = f"data/asset-instances/{asset_instance['id']}/entities/{temporal_entity['id']}/output-file-path"
     result = raw.post(path, data, client=client)

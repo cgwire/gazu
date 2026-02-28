@@ -774,9 +774,15 @@ def _build_file_dict(file_path: str, extra_files: list[str]) -> dict:
         dict: The dictionary of files to upload.
     """
 
-    files = {"file": open(file_path, "rb")}
-    for i, extra_path in enumerate(extra_files, start=1):
-        files[f"file-{i}"] = open(extra_path, "rb")
+    files = {}
+    try:
+        files["file"] = open(file_path, "rb")
+        for i, extra_path in enumerate(extra_files, start=1):
+            files[f"file-{i}"] = open(extra_path, "rb")
+    except Exception:
+        for f in files.values():
+            f.close()
+        raise
 
     return files
 

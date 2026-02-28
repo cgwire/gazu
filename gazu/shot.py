@@ -480,7 +480,7 @@ def update_sequence_data(
         "id": current_sequence["id"],
         "data": {**current_sequence["data"], **data},
     }
-    return update_sequence(updated_sequence, client)
+    return update_sequence(updated_sequence, client=client)
 
 
 def remove_shot(
