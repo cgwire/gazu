@@ -303,7 +303,7 @@ def new_person(
     phone: str = "",
     role: str = "user",
     desktop_login: str = "",
-    departments: list[str | dict] = [],
+    departments: list[str | dict] | None = None,
     password: str | None = None,
     active: bool = True,
     contract_type: str = "open-ended",
@@ -328,6 +328,8 @@ def new_person(
     Returns:
         dict: Created person.
     """
+    if departments is None:
+        departments = []
     person = get_person_by_email(email, client=client)
     if person is None:
         person = raw.post(
@@ -394,7 +396,7 @@ def new_bot(
     name: str,
     email: str,
     role: str = "user",
-    departments: list[str | dict] = [],
+    departments: list[str | dict] | None = None,
     active: bool = True,
     expiration_date: str | None = None,
     client: KitsuClient = default,
@@ -415,6 +417,8 @@ def new_bot(
     Returns:
         dict: Created bot.
     """
+    if departments is None:
+        departments = []
     bot = raw.post(
         "data/persons",
         {

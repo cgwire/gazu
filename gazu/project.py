@@ -105,10 +105,10 @@ def get_project_by_name(
 def new_project(
     name: str,
     production_type: str = "short",
-    team: list = [],
-    asset_types: list = [],
-    task_statuses: list = [],
-    task_types: list = [],
+    team: list | None = None,
+    asset_types: list | None = None,
+    task_statuses: list | None = None,
+    task_types: list | None = None,
     production_style: str = "2d3d",
     client: KitsuClient = default,
 ) -> dict:
@@ -127,6 +127,14 @@ def new_project(
     Returns:
         dict: Created project.
     """
+    if team is None:
+        team = []
+    if asset_types is None:
+        asset_types = []
+    if task_statuses is None:
+        task_statuses = []
+    if task_types is None:
+        task_types = []
     project = get_project_by_name(name, client=client)
     if project is None:
         project = raw.create(
@@ -193,7 +201,9 @@ def update_project(project: dict, client: KitsuClient = default) -> dict:
 
 
 def update_project_data(
-    project: str | dict, data: dict = {}, client: KitsuClient = default
+    project: str | dict,
+    data: dict | None = None,
+    client: KitsuClient = default,
 ) -> dict:
     """
     Update the metadata for the provided project. Keys that are not provided
@@ -206,6 +216,8 @@ def update_project_data(
     Returns:
         dict: Updated project.
     """
+    if data is None:
+        data = {}
     project = normalize_model_parameter(project)
     project = get_project(project["id"], client=client)
     if "data" not in project or project["data"] is None:
@@ -325,9 +337,9 @@ def add_metadata_descriptor(
     name: str,
     entity_type: str,
     data_type: str = "string",
-    choices: list[str] = [],
+    choices: list[str] | None = None,
     for_client: bool = False,
-    departments: list[str | dict] = [],
+    departments: list[str | dict] | None = None,
     client: KitsuClient = default,
 ) -> dict:
     """
@@ -344,6 +356,10 @@ def add_metadata_descriptor(
     Returns:
         dict: Created metadata descriptor.
     """
+    if choices is None:
+        choices = []
+    if departments is None:
+        departments = []
     project = normalize_model_parameter(project)
     data = {
         "name": name,

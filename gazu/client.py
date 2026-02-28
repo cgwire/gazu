@@ -713,8 +713,8 @@ def update(
 def upload(
     path: str,
     file_path: str = None,
-    data: dict = {},
-    extra_files: list = [],
+    data: dict | None = None,
+    extra_files: list | None = None,
     files: dict = None,
     client: KitsuClient = default_client,
 ) -> Any:
@@ -732,6 +732,10 @@ def upload(
     Returns:
         Any: Response from the API.
     """
+    if data is None:
+        data = {}
+    if extra_files is None:
+        extra_files = []
     url = get_full_url(path, client)
     opened_files = None
     if not files:

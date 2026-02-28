@@ -50,7 +50,7 @@ def normalize_model_parameter(
 
 
 def normalize_list_of_models_for_links(
-    models: list[str | dict] = [],
+    models: list[str | dict] | None = None,
 ) -> list[str]:
     """
     Args:
@@ -59,6 +59,8 @@ def normalize_list_of_models_for_links(
     Returns:
         list: A list of ids of the models.
     """
+    if models is None:
+        models = []
     if not isinstance(models, list):
         models = [models]
 
@@ -86,7 +88,7 @@ def sanitize_filename(filename: str) -> str:
 
 
 def download_file(
-    url: str, file_path: str | None = None, headers: dict = {}
+    url: str, file_path: str | None = None, headers: dict | None = None
 ) -> str:
     """
     Download file located at *file_path* to given url *url*.
@@ -100,6 +102,8 @@ def download_file(
         str: The location where the file is stored.
 
     """
+    if headers is None:
+        headers = {}
     with requests.get(
         url,
         headers=headers,

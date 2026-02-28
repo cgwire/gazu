@@ -182,7 +182,7 @@ def new_asset(
     asset_type: str | dict,
     name: str,
     description: str | None = None,
-    extra_data: dict = {},
+    extra_data: dict | None = None,
     episode: str | dict = None,
     is_shared: bool = False,
     client: KitsuClient = default,
@@ -206,6 +206,8 @@ def new_asset(
     asset_type = normalize_model_parameter(asset_type)
     episode = normalize_model_parameter(episode)
 
+    if extra_data is None:
+        extra_data = {}
     data = {"name": name, "data": extra_data, "is_shared": is_shared}
 
     if description is not None:
@@ -238,7 +240,7 @@ def update_asset(asset: dict, client: KitsuClient = default) -> dict:
 
 
 def update_asset_data(
-    asset: str | dict, data: dict = {}, client: KitsuClient = default
+    asset: str | dict, data: dict | None = None, client: KitsuClient = default
 ) -> dict:
     """
     Update the metadata for the provided asset. Keys that are not provided are
@@ -251,6 +253,8 @@ def update_asset_data(
     Returns:
         dict: Updated asset.
     """
+    if data is None:
+        data = {}
     asset = normalize_model_parameter(asset)
     current_asset = get_asset(asset["id"], client=client)
     updated_asset = {"id": current_asset["id"], "data": current_asset["data"]}

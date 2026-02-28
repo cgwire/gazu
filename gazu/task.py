@@ -722,7 +722,7 @@ def new_task(
     name: str = "main",
     task_status: dict | None = None,
     assigner: str | dict | None = None,
-    assignees: list[str | dict] = [],
+    assignees: list[str | dict] | None = None,
     client: KitsuClient = default,
 ) -> dict:
     """
@@ -749,7 +749,9 @@ def new_task(
         "entity_id": entity["id"],
         "task_type_id": task_type["id"],
         "task_status_id": task_status["id"],
-        "assignees": normalize_list_of_models_for_links(assignees),
+        "assignees": normalize_list_of_models_for_links(
+            assignees if assignees is not None else []
+        ),
         "name": name,
     }
 
@@ -927,10 +929,10 @@ def add_comment(
     task_status: str | dict,
     comment: str = "",
     person: str | dict | None = None,
-    checklist: list[dict] = [],
-    attachments: list[str] = [],
+    checklist: list[dict] | None = None,
+    attachments: list[str] | None = None,
     created_at: str | None = None,
-    links: list[str] = [],
+    links: list[str] | None = None,
     client: KitsuClient = default,
 ) -> dict:
     """
@@ -951,6 +953,12 @@ def add_comment(
     Returns:
         dict: Created comment.
     """
+    if checklist is None:
+        checklist = []
+    if attachments is None:
+        attachments = []
+    if links is None:
+        links = []
     task = normalize_model_parameter(task)
     task_status = normalize_model_parameter(task_status)
     data = {
@@ -1134,15 +1142,15 @@ def publish_preview(
     task_status: str | dict,
     comment: str = "",
     person: str | dict | None = None,
-    checklist: list[dict] = [],
-    attachments: list[str] = [],
+    checklist: list[dict] | None = None,
+    attachments: list[str] | None = None,
     created_at: str | None = None,
     preview_file_path: str | None = None,
     preview_file_url: str | None = None,
     normalize_movie: bool = True,
     revision: int | None = None,
     set_thumbnail: bool = False,
-    links: list[str] = [],
+    links: list[str] | None = None,
     client: KitsuClient = default,
 ) -> tuple[dict, dict]:
     """
@@ -1196,7 +1204,7 @@ def publish_preview(
 
 
 def batch_comments(
-    comments: list[dict] = [],
+    comments: list[dict] | None = None,
     task: str | dict | None = None,
     client: KitsuClient = default,
 ) -> list[dict]:
@@ -1213,6 +1221,8 @@ def batch_comments(
     Returns:
         list: List of created comments.
     """
+    if comments is None:
+        comments = []
     if task is not None:
         task = normalize_model_parameter(task)
 
@@ -1508,7 +1518,9 @@ def update_task(task: dict, client: KitsuClient = default) -> dict:
 
 
 def update_task_data(
-    task: str | dict, data: dict = {}, client: KitsuClient = default
+    task: str | dict,
+    data: dict | None = None,
+    client: KitsuClient = default,
 ) -> dict:
     """
     Update the metadata for the provided task. Keys that are not provided are
@@ -1521,6 +1533,8 @@ def update_task_data(
     Returns:
         dict: Updated task.
     """
+    if data is None:
+        data = {}
     task = normalize_model_parameter(task)
     current_task = get_task(task["id"], client=client)
 

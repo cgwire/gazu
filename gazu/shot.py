@@ -342,7 +342,7 @@ def new_shot(
     frame_in: int | None = None,
     frame_out: int | None = None,
     description: str | None = None,
-    data: dict = {},
+    data: dict | None = None,
     client: KitsuClient = default,
 ) -> dict:
     """
@@ -360,6 +360,8 @@ def new_shot(
     Returns:
         dict: Created shot.
     """
+    if data is None:
+        data = {}
     project = normalize_model_parameter(project)
     sequence = normalize_model_parameter(sequence)
 
@@ -423,7 +425,9 @@ def get_asset_instances_for_shot(
 
 
 def update_shot_data(
-    shot: str | dict, data: dict = {}, client: KitsuClient = default
+    shot: str | dict,
+    data: dict | None = None,
+    client: KitsuClient = default,
 ) -> dict:
     """
     Update the metadata for the provided shot. Keys that are not provided are
@@ -436,6 +440,8 @@ def update_shot_data(
     Returns:
         dict: Updated shot.
     """
+    if data is None:
+        data = {}
     shot = normalize_model_parameter(shot)
     current_shot = get_shot(shot["id"], client=client)
     current_data = (
@@ -447,7 +453,9 @@ def update_shot_data(
 
 
 def update_sequence_data(
-    sequence: str | dict, data: dict = {}, client: KitsuClient = default
+    sequence: str | dict,
+    data: dict | None = None,
+    client: KitsuClient = default,
 ) -> dict:
     """
     Update the metadata for the provided sequence. Keys that are not provided
@@ -460,6 +468,8 @@ def update_sequence_data(
     Returns:
         dict: Updated sequence.
     """
+    if data is None:
+        data = {}
     sequence = normalize_model_parameter(sequence)
     current_sequence = get_sequence(sequence["id"], client=client)
 
@@ -549,7 +559,9 @@ def update_episode(episode: dict, client: KitsuClient = default) -> dict:
 
 
 def update_episode_data(
-    episode: str | dict, data: dict = {}, client: KitsuClient = default
+    episode: str | dict,
+    data: dict | None = None,
+    client: KitsuClient = default,
 ) -> dict:
     """
     Update the metadata for the provided episode. Keys that are not provided
@@ -562,6 +574,8 @@ def update_episode_data(
     Returns:
         dict: Updated episode.
     """
+    if data is None:
+        data = {}
     episode = normalize_model_parameter(episode)
     current_episode = get_episode(episode["id"], client=client)
     updated_episode = {
