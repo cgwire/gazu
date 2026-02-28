@@ -215,6 +215,8 @@ def add_entity_to_playlist(
         preview_files = get_entity_preview_files(entity)
         for task_type_id in preview_files.keys():
             task_type_files = preview_files[task_type_id]
+            if not task_type_files:
+                continue
             first_file = task_type_files[0]
             if (
                 preview_file is None
@@ -228,7 +230,6 @@ def add_entity_to_playlist(
 
     playlist["shots"].append(entry)
     if persist:
-        preview_file = normalize_model_parameter(preview_file)
         playlist = raw.post(
             f"actions/playlists/{playlist['id']}/add-entity", 
             entry,

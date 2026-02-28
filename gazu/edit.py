@@ -191,9 +191,9 @@ def update_edit_data(
         data = {}
     edit = normalize_model_parameter(edit)
     current_edit = get_edit(edit["id"], client=client)
-    current_data = (
-        current_edit["data"] if current_edit["data"] is not None else {}
-    )
-    updated_edit = {"id": current_edit["id"], "data": current_data}
-    updated_edit["data"].update(data)
+    current_data = current_edit["data"] or {}
+    updated_edit = {
+        "id": current_edit["id"],
+        "data": {**current_data, **data},
+    }
     return update_edit(updated_edit, client=client)

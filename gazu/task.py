@@ -1538,10 +1538,10 @@ def update_task_data(
     task = normalize_model_parameter(task)
     current_task = get_task(task["id"], client=client)
 
-    updated_task = {"id": current_task["id"], "data": current_task["data"]}
-    if updated_task["data"] is None:
-        updated_task["data"] = {}
-    updated_task["data"].update(data)
+    updated_task = {
+        "id": current_task["id"],
+        "data": {**(current_task["data"] or {}), **data},
+    }
     return update_task(updated_task, client=client)
 
 

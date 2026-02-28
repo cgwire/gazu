@@ -444,11 +444,11 @@ def update_shot_data(
         data = {}
     shot = normalize_model_parameter(shot)
     current_shot = get_shot(shot["id"], client=client)
-    current_data = (
-        current_shot["data"] if current_shot["data"] is not None else {}
-    )
-    updated_shot = {"id": current_shot["id"], "data": current_data}
-    updated_shot["data"].update(data)
+    current_data = current_shot["data"] or {}
+    updated_shot = {
+        "id": current_shot["id"],
+        "data": {**current_data, **data},
+    }
     return update_shot(updated_shot, client=client)
 
 
@@ -462,7 +462,7 @@ def update_sequence_data(
     are not changed.
 
     Args:
-        sequence (str / dict): The sequence dicto or ID to save in database.
+        sequence (str / dict): The sequence dict or ID to save in database.
         data (dict): Free field to set metadata of any kind.
 
     Returns:
@@ -478,9 +478,8 @@ def update_sequence_data(
 
     updated_sequence = {
         "id": current_sequence["id"],
-        "data": current_sequence["data"],
+        "data": {**current_sequence["data"], **data},
     }
-    updated_sequence["data"].update(data)
     return update_sequence(updated_sequence, client)
 
 
@@ -580,9 +579,8 @@ def update_episode_data(
     current_episode = get_episode(episode["id"], client=client)
     updated_episode = {
         "id": current_episode["id"],
-        "data": current_episode["data"],
+        "data": {**(current_episode["data"] or {}), **data},
     }
-    updated_episode["data"].update(data)
     return update_episode(updated_episode, client=client)
 
 

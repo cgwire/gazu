@@ -255,8 +255,10 @@ def update_asset_data(
         data = {}
     asset = normalize_model_parameter(asset)
     current_asset = get_asset(asset["id"], client=client)
-    updated_asset = {"id": current_asset["id"], "data": current_asset["data"]}
-    updated_asset["data"].update(data)
+    updated_asset = {
+        "id": current_asset["id"],
+        "data": {**(current_asset["data"] or {}), **data},
+    }
     return update_asset(updated_asset, client=client)
 
 

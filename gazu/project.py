@@ -222,7 +222,7 @@ def update_project_data(
     project = get_project(project["id"], client=client)
     if "data" not in project or project["data"] is None:
         project["data"] = {}
-    project["data"].update(data)
+    project["data"] = {**project["data"], **data}
     return update_project(project, client=client)
 
 
@@ -243,6 +243,8 @@ def close_project(project: str | dict, client: KitsuClient = default) -> dict:
             closed_status_id = status["id"]
             break
 
+    if closed_status_id is None:
+        raise ValueError("No closed project status found")
     project["project_status_id"] = closed_status_id
     update_project(project, client=client)
     return project

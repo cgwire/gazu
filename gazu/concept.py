@@ -116,8 +116,8 @@ def new_concept(
     project: str | dict,
     name: str,
     description: str | None = None,
-    data: dict = {},
-    entity_concept_links: list[str | dict] = [],
+    data: dict | None = None,
+    entity_concept_links: list[str | dict] | None = None,
     client: KitsuClient = default,
 ) -> dict:
     """
@@ -134,6 +134,10 @@ def new_concept(
         Created concept.
     """
     project = normalize_model_parameter(project)
+    if data is None:
+        data = {}
+    if entity_concept_links is None:
+        entity_concept_links = []
     data = {
         "name": name,
         "data": data,
