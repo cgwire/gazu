@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import functools
 import json
+import logging
 import shutil
 import os
 from typing import Any, Callable, cast
@@ -24,7 +25,11 @@ from .exception import (
 
 from urllib.parse import urlencode
 
-DEBUG = os.getenv("GAZU_DEBUG", "false").lower() == "true"
+logger = logging.getLogger("gazu")
+
+if os.getenv("GAZU_DEBUG", "false").lower() == "true":
+    logging.basicConfig(level=logging.DEBUG)
+    logger.setLevel(logging.DEBUG)
 
 
 class KitsuClient(object):
@@ -153,7 +158,7 @@ try:
     host = "http://gazu.change.serverhost/api"
     default_client = create_client(host)
 except Exception:
-    print("Warning, running in setup mode!")
+    logger.warning("Running in setup mode!")
 
 
 def host_is_up(client: KitsuClient = default_client) -> bool:
@@ -367,8 +372,7 @@ def get(
     Returns:
         The request result.
     """
-    if DEBUG:
-        print("GET", get_full_url(path, client))
+    logger.debug("GET %s", get_full_url(path, client))
     path = build_path_with_params(path, params)
     retry = True
     while retry:
@@ -396,11 +400,12 @@ def post(path: str, data: Any, client: KitsuClient = default_client) -> Any:
     Returns:
         The request result.
     """
-    if DEBUG:
-        print("POST", get_full_url(path, client))
-        sensitive_fields = {"password", "token", "access_token", "refresh_token", "secret"}
-        if not any(field in data for field in sensitive_fields):
-            print("Body:", data)
+    logger.debug("POST %s", get_full_url(path, client))
+    sensitive_fields = {
+        "password", "token", "access_token", "refresh_token", "secret"
+    }
+    if not any(field in data for field in sensitive_fields):
+        logger.debug("Body: %s", data)
     retry = True
     while retry:
         response = client.session.post(
@@ -412,7 +417,7 @@ def post(path: str, data: Any, client: KitsuClient = default_client) -> Any:
     try:
         result = response.json()
     except json.JSONDecodeError:
-        print(response.text)
+        logger.error("Failed to decode JSON response: %s", response.text)
         raise
     return result
 
@@ -429,9 +434,8 @@ def put(path: str, data: dict, client: KitsuClient = default_client) -> Any:
     Returns:
         The request result.
     """
-    if DEBUG:
-        print("PUT", get_full_url(path, client))
-        print("Body:", data)
+    logger.debug("PUT %s", get_full_url(path, client))
+    logger.debug("Body: %s", data)
     retry = True
     while retry:
         response = client.session.put(
@@ -457,8 +461,7 @@ def delete(
     Returns:
         The request result.
     """
-    if DEBUG:
-        print("DELETE", get_full_url(path, client))
+    logger.debug("DELETE %s", get_full_url(path, client))
     path = build_path_with_params(path, params)
 
     retry = True
@@ -557,18 +560,22 @@ def check_status(
             raise
     elif status_code in [500, 502]:
         try:
-            print("A server error occured!\n")
             stacktrace = request.json().get(
                 "stacktrace", "No stacktrace sent by the server"
             )
-            print(f"Server stacktrace:\n{stacktrace}")
             message = get_message_from_response(
                 response=request,
                 default_message="No message sent by the server",
             )
-            print(f"Error message:\n{message}\n")
+            logger.error(
+                "A server error occurred!\n"
+                "Server stacktrace:\n%s\n"
+                "Error message:\n%s",
+                stacktrace,
+                message,
+            )
         except Exception:
-            print(request.text)
+            logger.error("Server error response: %s", request.text)
         raise ServerErrorException(path)
     return status_code, False
 
@@ -752,7 +759,7 @@ def upload(
     try:
         result = response.json()
     except json.JSONDecodeError:
-        print(response.text)
+        logger.error("Failed to decode JSON response: %s", response.text)
         raise
 
     result_message = get_message_from_response(response, default_message="")

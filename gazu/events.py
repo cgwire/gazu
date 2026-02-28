@@ -1,4 +1,5 @@
 import socketio
+import logging
 import os
 import inspect
 import signal
@@ -14,6 +15,8 @@ from .client import (
     KitsuClient,
     make_auth_header,
 )
+
+logger = logging.getLogger("gazu.events")
 
 
 if os.name == "nt":
@@ -70,8 +73,7 @@ def init(
 
 
 def connect_error(data: str) -> str:
-    print("The connection failed!")
-    print(data)
+    logger.error("The connection failed! %s", data)
     return data
 
 
@@ -91,7 +93,7 @@ def run_client(event_client: socketio.Client) -> socketio.Client:
     configured.
     """
     try:
-        print("Listening to Kitsu events...")
+        logger.info("Listening to Kitsu events...")
         event_client.wait()
     except TypeError:
         raise AuthFailedException
