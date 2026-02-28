@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import tempfile
 
 from . import client as raw
 from . import asset as asset_module
@@ -620,7 +621,7 @@ def push_task_comment(
     client_source: KitsuClient,
     client_target: KitsuClient,
     author_id: str | None = None,
-    tmp_path: str = "/tmp/zou/sync/",
+    tmp_path: str | None = None,
 ) -> dict:
     """
     Create a new comment into target api for each comment in source task
@@ -641,6 +642,8 @@ def push_task_comment(
     Returns:
         dict: The source comment.
     """
+    if tmp_path is None:
+        tmp_path = tempfile.mkdtemp(prefix="zou_sync_")
     attachments = []
     for attachment_id in comment["attachment_files"]:
         if type(attachment_id) == dict:

@@ -1434,8 +1434,14 @@ def new_task_status(
     Returns:
         dict: The created task status
     """
-    assert color[0] == "#"
-    assert all(c in string.hexdigits for c in color[1:])
+    if not color or color[0] != "#":
+        raise ValueError(
+            "Color must start with '#', e.g. '#00FF00'"
+        )
+    if not all(c in string.hexdigits for c in color[1:]):
+        raise ValueError(
+            "Color must be a valid hexadecimal string, e.g. '#00FF00'"
+        )
 
     data = {"name": name, "short_name": short_name, "color": color}
     return raw.post("data/task-status", data, client=client)

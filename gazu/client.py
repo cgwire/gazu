@@ -41,10 +41,12 @@ class KitsuClient(object):
         cert: str | None = None,
         use_refresh_token: bool = True,
         callback_not_authenticated: Callable | None = None,
-        tokens: dict = {"access_token": None, "refresh_token": None},
+        tokens: dict | None = None,
         access_token: str | None = None,
         refresh_token: str | None = None,
     ) -> None:
+        if tokens is None:
+            tokens = {"access_token": None, "refresh_token": None}
         self.tokens = tokens
         if access_token:
             self.access_token = access_token
@@ -190,7 +192,7 @@ def host_is_valid(client: KitsuClient = default_client) -> bool:
     if not host_is_up(client):
         return False
     try:
-        post("auth/login", {"email": ""})
+        post("auth/login", {"email": ""}, client=client)
         return True
     except Exception as exc:
         return isinstance(exc, (NotAuthenticatedException, ParameterException))

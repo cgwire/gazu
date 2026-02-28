@@ -2,7 +2,6 @@ import socketio
 import os
 import inspect
 import signal
-import socketio
 
 from typing import Any, Callable
 
@@ -64,7 +63,9 @@ def init(
     event_client = socketio.Client(**params)
     event_client.on("connect_error", connect_error)
     event_client.register_namespace(EventsNamespace("/events"))
-    event_client.connect(get_event_host(client), make_auth_header())
+    event_client.connect(
+        get_event_host(client), make_auth_header(client=client)
+    )
     return event_client
 
 
