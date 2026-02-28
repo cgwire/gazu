@@ -23,7 +23,7 @@ if os.name == "nt":
         if event == 0:
             try:
                 signal_handler(signal.SIGINT, inspect.currentframe())
-            except:
+            except Exception:
                 # SetConsoleCtrlHandler handle cannot raise exceptions
                 pass
 

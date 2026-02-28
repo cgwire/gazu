@@ -645,7 +645,7 @@ def push_task_comment(
         tmp_path = tempfile.mkdtemp(prefix="zou_sync_")
     attachments = []
     for attachment_id in comment["attachment_files"]:
-        if type(attachment_id) == dict:
+        if isinstance(attachment_id, dict):
             attachment_id = attachment_id["id"]
         attachment_file = files_module.get_attachment_file(
             attachment_id, client=client_source
@@ -658,7 +658,7 @@ def push_task_comment(
 
     previews = []
     for preview_file in comment["previews"]:
-        if type(preview_file) is str:
+        if isinstance(preview_file, str):
             preview_file_id = preview_file
         else:
             preview_file_id = preview_file["id"]

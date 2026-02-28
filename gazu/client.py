@@ -22,7 +22,6 @@ from .exception import (
 )
 
 
-from json import JSONDecodeError
 from urllib.parse import urlencode
 
 DEBUG = os.getenv("GAZU_DEBUG", "false").lower() == "true"
@@ -221,7 +220,9 @@ def get_api_url_from_host(client: KitsuClient = default_client) -> str:
     Returns:
         str: The base Kitsu URL the client is connected to.
     """
-    return client.host[:-4]
+    if client.host.endswith("/api"):
+        return client.host[:-4]
+    return client.host
 
 
 def set_host(new_host: str, client: KitsuClient = default_client) -> str:
@@ -397,7 +398,8 @@ def post(path: str, data: Any, client: KitsuClient = default_client) -> Any:
     """
     if DEBUG:
         print("POST", get_full_url(path, client))
-        if not "password" in data:
+        sensitive_fields = {"password", "token", "access_token", "refresh_token", "secret"}
+        if not any(field in data for field in sensitive_fields):
             print("Body:", data)
     retry = True
     while retry:
@@ -409,7 +411,7 @@ def post(path: str, data: Any, client: KitsuClient = default_client) -> Any:
         _, retry = check_status(response, path, client=client)
     try:
         result = response.json()
-    except JSONDecodeError:
+    except json.JSONDecodeError:
         print(response.text)
         raise
     return result
@@ -487,7 +489,7 @@ def get_message_from_response(
     message = default_message
     message_json = response.json()
 
-    if hasattr(message_json, "get"):
+    if isinstance(message_json, dict):
         for key in ["error", "message"]:
             if message_json.get(key):
                 message = message_json[key]
@@ -541,7 +543,7 @@ def check_status(
                 client
                 and client.refresh_token
                 and client.use_refresh_token
-                and request.json()["message"] == "Signature has expired"
+                and request.json().get("message") == "Signature has expired"
             ):
                 client.refresh_access_token()
                 return status_code, True
@@ -617,7 +619,7 @@ def fetch_all(
                 params=params,
                 client=client,
             )
-            results += response.get("data", [])
+            results.extend(response.get("data", []))
 
     return results
 
@@ -635,10 +637,7 @@ def fetch_first(
         dict: The first entry for which a model is required.
     """
     entries = get(url_path_join("data", path), params=params, client=client)
-    if len(entries) > 0:
-        return entries[0]
-    else:
-        return None
+    return entries[0] if entries else None
 
 
 def fetch_one(
@@ -752,7 +751,7 @@ def upload(
                 f.close()
     try:
         result = response.json()
-    except JSONDecodeError:
+    except json.JSONDecodeError:
         print(response.text)
         raise
 
@@ -830,7 +829,7 @@ def get_file_data_from_url(
         url = get_full_url(url)
     retry = True
     while retry:
-        response = requests.get(
+        response = client.session.get(
             url,
             stream=True,
             headers=make_auth_header(client=client),
