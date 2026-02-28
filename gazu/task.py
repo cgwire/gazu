@@ -1217,26 +1217,43 @@ def batch_comments(
         task = normalize_model_parameter(task)
 
     files = {}
-    for x, comment in enumerate(comments):
-        if comment.get("attachment_files"):
-            for y, file_path in enumerate(comment["attachment_files"]):
-                files[f"attachment_file-{x}-{y}"] = open(file_path, "rb")
-        if comment.get("preview_files"):
-            for y, file_path in enumerate(comment["preview_files"]):
-                files[f"preview_file-{x}-{y}"] = open(file_path, "rb")
+    opened_files = []
+    try:
+        for x, comment in enumerate(comments):
+            if comment.get("attachment_files"):
+                for y, file_path in enumerate(
+                    comment["attachment_files"]
+                ):
+                    f = open(file_path, "rb")
+                    opened_files.append(f)
+                    files[f"attachment_file-{x}-{y}"] = f
+            if comment.get("preview_files"):
+                for y, file_path in enumerate(
+                    comment["preview_files"]
+                ):
+                    f = open(file_path, "rb")
+                    opened_files.append(f)
+                    files[f"preview_file-{x}-{y}"] = f
 
-    files["comments"] = (None, json.dumps(comments), "application/json")
-    return raw.upload(
-        f"actions/tasks/{task['id'] + '/' if task else ''}batch-comment",
-        file_path=None,
-        files=files,
-        client=client,
-    )
+        files["comments"] = (
+            None,
+            json.dumps(comments),
+            "application/json",
+        )
+        return raw.upload(
+            f"actions/tasks/{task['id'] + '/' if task else ''}batch-comment",
+            file_path=None,
+            files=files,
+            client=client,
+        )
+    finally:
+        for f in opened_files:
+            f.close()
 
 
 def create_multiple_comments(
     project: str | dict,
-    comments: list[dict] = [],
+    comments: list[dict] = None,
     client: KitsuClient = default,
 ) -> list[dict]:
     """
@@ -1253,24 +1270,43 @@ def create_multiple_comments(
     Returns:
         list: List of created comments.
     """
+    if comments is None:
+        comments = []
     project = normalize_model_parameter(project)
 
     files = {}
-    for x, comment in enumerate(comments):
-        if comment.get("attachment_files"):
-            for y, file_path in enumerate(comment["attachment_files"]):
-                files[f"attachment_file-{x}-{y}"] = open(file_path, "rb")
-        if comment.get("preview_files"):
-            for y, file_path in enumerate(comment["preview_files"]):
-                files[f"preview_file-{x}-{y}"] = open(file_path, "rb")
+    opened_files = []
+    try:
+        for x, comment in enumerate(comments):
+            if comment.get("attachment_files"):
+                for y, file_path in enumerate(
+                    comment["attachment_files"]
+                ):
+                    f = open(file_path, "rb")
+                    opened_files.append(f)
+                    files[f"attachment_file-{x}-{y}"] = f
+            if comment.get("preview_files"):
+                for y, file_path in enumerate(
+                    comment["preview_files"]
+                ):
+                    f = open(file_path, "rb")
+                    opened_files.append(f)
+                    files[f"preview_file-{x}-{y}"] = f
 
-    files["comments"] = (None, json.dumps(comments), "application/json")
-    return raw.upload(
-        f"actions/projects/{project['id']}/tasks/comment-many",
-        file_path=None,
-        files=files,
-        client=client,
-    )
+        files["comments"] = (
+            None,
+            json.dumps(comments),
+            "application/json",
+        )
+        return raw.upload(
+            f"actions/projects/{project['id']}/tasks/comment-many",
+            file_path=None,
+            files=files,
+            client=client,
+        )
+    finally:
+        for f in opened_files:
+            f.close()
 
 
 def add_tasks_batch_comments(

@@ -733,17 +733,24 @@ def upload(
         Any: Response from the API.
     """
     url = get_full_url(path, client)
+    opened_files = None
     if not files:
         files = _build_file_dict(file_path, extra_files)
-    retry = True
-    while retry:
-        response = client.session.post(
-            url,
-            data=data,
-            headers=make_auth_header(client=client),
-            files=files,
-        )
-        _, retry = check_status(response, path, client=client)
+        opened_files = files
+    try:
+        retry = True
+        while retry:
+            response = client.session.post(
+                url,
+                data=data,
+                headers=make_auth_header(client=client),
+                files=files,
+            )
+            _, retry = check_status(response, path, client=client)
+    finally:
+        if opened_files:
+            for f in opened_files.values():
+                f.close()
     try:
         result = response.json()
     except JSONDecodeError:
@@ -770,10 +777,8 @@ def _build_file_dict(file_path: str, extra_files: list[str]) -> dict:
     """
 
     files = {"file": open(file_path, "rb")}
-    i = 0
-    for file_path in extra_files:
-        i += 1
-        files[f"file-{i}"] = open(file_path, "rb")
+    for i, extra_path in enumerate(extra_files, start=1):
+        files[f"file-{i}"] = open(extra_path, "rb")
 
     return files
 
