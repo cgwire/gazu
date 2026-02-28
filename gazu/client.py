@@ -98,6 +98,21 @@ class KitsuClient(object):
 
         return tokens
 
+    def __enter__(self) -> "KitsuClient":
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        try:
+            self.session.get(
+                get_full_url("auth/logout", client=self),
+                headers=self.make_auth_header(),
+            )
+        except Exception:
+            pass
+        self.tokens = {"access_token": None, "refresh_token": None}
+        self.session.close()
+        return None
+
     def make_auth_header(self) -> dict[str, str]:
         """
         Make headers required to authenticate.

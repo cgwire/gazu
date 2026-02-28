@@ -98,6 +98,63 @@ def set_event_host(url, client=raw.default_client):
     raw.set_event_host(url, client=client)
 
 
+def create_session(
+    host,
+    email,
+    password,
+    totp=None,
+    email_otp=None,
+    fido_authentication_response=None,
+    recovery_code=None,
+    ssl_verify=True,
+    cert=None,
+    use_refresh_token=False,
+    callback_not_authenticated=None,
+):
+    """
+    Create a logged-in KitsuClient for use as a context manager.
+
+    Usage::
+
+        with gazu.create_session(host, email, password) as client:
+            assets = gazu.asset.all_assets(client=client)
+        # auto logout + session close
+
+    Args:
+        host (str): The host URL (e.g. "https://kitsu.example.com/api").
+        email (str): User email.
+        password (str): User password.
+        totp (str): TOTP code for 2FA.
+        email_otp (str): Email OTP code.
+        fido_authentication_response: FIDO authentication response.
+        recovery_code (str): Recovery code.
+        ssl_verify (bool): Whether to verify SSL certificates.
+        cert (str): Path to a client certificate.
+        use_refresh_token (bool): Whether to automatically refresh tokens.
+        callback_not_authenticated (function): Callback when not authenticated.
+
+    Returns:
+        KitsuClient: A logged-in client usable as a context manager.
+    """
+    client = raw.create_client(
+        host,
+        ssl_verify=ssl_verify,
+        cert=cert,
+        use_refresh_token=use_refresh_token,
+        callback_not_authenticated=callback_not_authenticated,
+    )
+    log_in(
+        email,
+        password,
+        totp=totp,
+        email_otp=email_otp,
+        fido_authentication_response=fido_authentication_response,
+        recovery_code=recovery_code,
+        client=client,
+    )
+    return client
+
+
 def set_token(token, client=raw.default_client):
     """
     Store authentication token to reuse them for all requests.
