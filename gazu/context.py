@@ -6,44 +6,61 @@ from . import asset as gazu_asset
 from . import task as gazu_task
 from . import shot as gazu_shot
 from . import scene as gazu_scene
+from . import client as raw
+from .client import KitsuClient
+
+default = raw.default_client
 
 
-def all_open_projects(user_context: bool = False) -> list[dict]:
+def all_open_projects(
+    user_context: bool = False, client: KitsuClient = default
+) -> list[dict]:
     """
     Return the list of projects for which the user has a task.
     """
     if user_context:
-        return gazu_user.all_open_projects()
+        return gazu_user.all_open_projects(client=client)
     else:
-        return gazu_project.all_open_projects()
+        return gazu_project.all_open_projects(client=client)
 
 
 def all_assets_for_project(
-    project: str | dict, user_context: bool = False
+    project: str | dict,
+    user_context: bool = False,
+    client: KitsuClient = default,
 ) -> list[dict]:
     """
     Return the list of assets for which the user has a task.
     """
     if user_context:
-        return gazu_user.all_assets_for_project(project)
+        return gazu_user.all_assets_for_project(project, client=client)
     else:
-        return gazu_asset.all_assets_for_project(project)
+        return gazu_asset.all_assets_for_project(project, client=client)
 
 
 def all_asset_types_for_project(
-    project: str | dict, user_context: bool = False
+    project: str | dict,
+    user_context: bool = False,
+    client: KitsuClient = default,
 ) -> list[dict]:
     """
     Return the list of asset types for which the user has a task.
     """
     if user_context:
-        return gazu_user.all_asset_types_for_project(project)
+        return gazu_user.all_asset_types_for_project(
+            project, client=client
+        )
     else:
-        return gazu_asset.all_asset_types_for_project(project)
+        return gazu_asset.all_asset_types_for_project(
+            project, client=client
+        )
 
 
 def all_assets_for_asset_type_and_project(
-    project: str | dict, asset_type: str | dict, user_context: bool = False
+    project: str | dict,
+    asset_type: str | dict,
+    user_context: bool = False,
+    client: KitsuClient = default,
 ) -> list[dict]:
     """
     Return the list of assets for given project and asset_type and for which
@@ -51,127 +68,173 @@ def all_assets_for_asset_type_and_project(
     """
     if user_context:
         return gazu_user.all_assets_for_asset_type_and_project(
-            project, asset_type
+            project, asset_type, client=client
         )
     else:
-        return gazu_asset.all_assets_for_project_and_type(project, asset_type)
+        return gazu_asset.all_assets_for_project_and_type(
+            project, asset_type, client=client
+        )
 
 
 def all_task_types_for_asset(
-    asset: str | dict, user_context: bool = False
+    asset: str | dict,
+    user_context: bool = False,
+    client: KitsuClient = default,
 ) -> list[dict]:
     """
     Return the list of tasks for given asset and current user.
     """
     if user_context:
-        return gazu_user.all_task_types_for_asset(asset)
+        return gazu_user.all_task_types_for_asset(asset, client=client)
     else:
-        return gazu_task.all_task_types_for_asset(asset)
+        return gazu_task.all_task_types_for_asset(asset, client=client)
 
 
 def all_task_types_for_shot(
-    shot: str | dict, user_context: bool = False
+    shot: str | dict,
+    user_context: bool = False,
+    client: KitsuClient = default,
 ) -> list[dict]:
     """
     Return the list of tasks for given shot and current user.
     """
     if user_context:
-        return gazu_user.all_task_types_for_shot(shot)
+        return gazu_user.all_task_types_for_shot(shot, client=client)
     else:
-        return gazu_task.all_task_types_for_shot(shot)
+        return gazu_task.all_task_types_for_shot(shot, client=client)
 
 
 def all_task_types_for_scene(
-    scene: str | dict, user_context: bool = False
+    scene: str | dict,
+    user_context: bool = False,
+    client: KitsuClient = default,
 ) -> list[dict]:
     """
     Return the list of tasks for given scene and current user.
     """
     if user_context:
-        return gazu_user.all_task_types_for_scene(scene)
+        return gazu_user.all_task_types_for_scene(scene, client=client)
     else:
-        return gazu_task.all_task_types_for_scene(scene)
+        return gazu_task.all_task_types_for_scene(scene, client=client)
 
 
 def all_task_types_for_sequence(
-    sequence: str | dict, user_context: bool = False
+    sequence: str | dict,
+    user_context: bool = False,
+    client: KitsuClient = default,
 ) -> list[dict]:
     """
     Return the list of tasks for given sequence and current user.
     """
     if user_context:
-        return gazu_user.all_task_types_for_sequence(sequence)
+        return gazu_user.all_task_types_for_sequence(
+            sequence, client=client
+        )
     else:
-        return gazu_task.all_task_types_for_sequence(sequence)
+        return gazu_task.all_task_types_for_sequence(
+            sequence, client=client
+        )
 
 
 def all_sequences_for_project(
-    project: str | dict, user_context: bool = False
+    project: str | dict,
+    user_context: bool = False,
+    client: KitsuClient = default,
 ) -> list[dict]:
     """
     Return the list of sequences for given project and current user.
     """
     if user_context:
-        return gazu_user.all_sequences_for_project(project)
+        return gazu_user.all_sequences_for_project(
+            project, client=client
+        )
     else:
-        return gazu_shot.all_sequences_for_project(project)
+        return gazu_shot.all_sequences_for_project(
+            project, client=client
+        )
 
 
 def all_scenes_for_project(
-    project: str | dict, user_context: bool = False
+    project: str | dict,
+    user_context: bool = False,
+    client: KitsuClient = default,
 ) -> list[dict]:
     """
     Return the list of scenes for given project and current user.
     """
     if user_context:
-        return gazu_user.all_scenes_for_project(project)
+        return gazu_user.all_scenes_for_project(project, client=client)
     else:
-        return gazu_scene.all_scenes(project)
+        return gazu_scene.all_scenes(project, client=client)
 
 
 def all_shots_for_sequence(
-    sequence: str | dict, user_context: bool = False
+    sequence: str | dict,
+    user_context: bool = False,
+    client: KitsuClient = default,
 ) -> list[dict]:
     """
     Return the list of shots for given sequence and current user.
     """
     if user_context:
-        return gazu_user.all_shots_for_sequence(sequence)
+        return gazu_user.all_shots_for_sequence(
+            sequence, client=client
+        )
     else:
-        return gazu_shot.all_shots_for_sequence(sequence)
+        return gazu_shot.all_shots_for_sequence(
+            sequence, client=client
+        )
 
 
 def all_scenes_for_sequence(
-    sequence: str | dict, user_context: bool = False
+    sequence: str | dict,
+    user_context: bool = False,
+    client: KitsuClient = default,
 ) -> list[dict]:
     """
     Return the list of scenes for given sequence and current user.
     """
     if user_context:
-        return gazu_user.all_scenes_for_sequence(sequence)
+        return gazu_user.all_scenes_for_sequence(
+            sequence, client=client
+        )
     else:
-        return gazu_scene.all_scenes_for_sequence(sequence)
+        return gazu_scene.all_scenes_for_sequence(
+            sequence, client=client
+        )
 
 
 def all_sequences_for_episode(
-    episode: str | dict, user_context: bool = False
+    episode: str | dict,
+    user_context: bool = False,
+    client: KitsuClient = default,
 ) -> list[dict]:
     """
     Return the list of sequences for given episode and current user.
     """
     if user_context:
-        return gazu_user.all_sequences_for_episode(episode)
+        return gazu_user.all_sequences_for_episode(
+            episode, client=client
+        )
     else:
-        return gazu_shot.all_sequences_for_episode(episode)
+        return gazu_shot.all_sequences_for_episode(
+            episode, client=client
+        )
 
 
 def all_episodes_for_project(
-    project: str | dict, user_context: bool = False
+    project: str | dict,
+    user_context: bool = False,
+    client: KitsuClient = default,
 ) -> list[dict]:
     """
     Return the list of episodes for given project and current user.
     """
     if user_context:
-        return gazu_user.all_episodes_for_project(project)
+        return gazu_user.all_episodes_for_project(
+            project, client=client
+        )
     else:
-        return gazu_shot.all_episodes_for_project(project)
+        return gazu_shot.all_episodes_for_project(
+            project, client=client
+        )
