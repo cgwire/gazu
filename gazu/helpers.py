@@ -110,7 +110,7 @@ def download_file(
                 file_path = tempfile.gettempdir()
 
             if os.path.isdir(file_path):
-                file_path = os.path.join(file_path, "")
+                file_path = file_path + os.sep
 
             (dir, filename) = os.path.split(file_path)
 
