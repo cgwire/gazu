@@ -85,7 +85,7 @@ def all_sequences_for_project(
 ) -> list[dict]:
     """
     Args:
-        sequence (str / dict): The project dict or the project ID.
+        project (str / dict): The project dict or the project ID.
 
     Returns:
         list: Sequences from database for given project.
@@ -773,7 +773,7 @@ def export_shots_with_csv(
     client: KitsuClient = default,
 ) -> requests.Response:
     """
-    Export the Assets data for a project to a CSV file on disk.
+    Export the Shots data for a project to a CSV file on disk.
 
     Args:
         project (str / dict):

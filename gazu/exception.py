@@ -79,7 +79,7 @@ class TaskMustBeADictException(Exception):
 
 class FileDoesntExistException(Exception):
     """
-    Error raised when a file should be existed when we submit a preview.
+    Error raised when a file should exist when we submit a preview.
     """
 
 

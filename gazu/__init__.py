@@ -105,7 +105,7 @@ def set_token(token, client=raw.default_client):
     Store authentication token to reuse them for all requests.
 
     Args:
-        new_tokens (dict): Tokens to use for authentication.
+        token (dict / str): Tokens to use for authentication.
     """
 
     if isinstance(token, dict):

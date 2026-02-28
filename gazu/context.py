@@ -157,7 +157,7 @@ def all_sequences_for_episode(
     episode: str | dict, user_context: bool = False
 ) -> list[dict]:
     """
-    Return the list of shots for given sequence and current user.
+    Return the list of sequences for given episode and current user.
     """
     if user_context:
         return gazu_user.all_sequences_for_episode(episode)
@@ -169,7 +169,7 @@ def all_episodes_for_project(
     project: str | dict, user_context: bool = False
 ) -> list[dict]:
     """
-    Return the list of shots for given sequence and current user.
+    Return the list of episodes for given project and current user.
     """
     if user_context:
         return gazu_user.all_episodes_for_project(project)

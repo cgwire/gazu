@@ -161,7 +161,7 @@ def all_tasks_for_scene(
 ) -> list[dict]:
     """
     Args:
-        sequence (str / dict): The scene dict or the scene ID.
+        scene (str / dict): The scene dict or the scene ID.
 
     Returns:
         list: Tasks linked to given scene.

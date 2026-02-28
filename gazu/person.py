@@ -376,13 +376,13 @@ def update_person(person: dict, client: KitsuClient = default) -> dict:
 
 
 def remove_person(
-    person: str, force: bool = False, client: KitsuClient = default
+    person: str | dict, force: bool = False, client: KitsuClient = default
 ) -> str:
     """
     Remove given person from database.
 
     Args:
-        person (dict): Person to remove.
+        person (str / dict): Person to remove.
     """
     person = normalize_model_parameter(person)
     path = f"data/persons/{person['id']}"
