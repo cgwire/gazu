@@ -7,6 +7,11 @@ try:
 except ImportError:
     pass
 
+try:
+    from . import aio
+except ImportError:
+    pass
+
 from . import asset
 from . import casting
 from . import context
