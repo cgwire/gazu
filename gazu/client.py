@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import functools
 import json
 import logging
 import shutil
@@ -166,10 +165,6 @@ default_client = cast(KitsuClient, default_client)
 try:
     import requests
 
-    # Little hack to allow json encoder to manage dates.
-    requests.models.complexjson.dumps = functools.partial(
-        json.dumps, cls=CustomJSONEncoder
-    )
     host = "http://gazu.change.serverhost/api"
     default_client = create_client(host)
 except Exception:
@@ -421,12 +416,14 @@ def post(path: str, data: Any, client: KitsuClient = default_client) -> Any:
     }
     if not any(field in data for field in sensitive_fields):
         logger.debug("Body: %s", data)
+    headers = make_auth_header(client=client)
+    headers["Content-Type"] = "application/json"
     retry = True
     while retry:
         response = client.session.post(
             get_full_url(path, client),
-            json=data,
-            headers=make_auth_header(client=client),
+            data=json.dumps(data, cls=CustomJSONEncoder),
+            headers=headers,
         )
         _, retry = check_status(response, path, client=client)
     try:
@@ -451,12 +448,14 @@ def put(path: str, data: dict, client: KitsuClient = default_client) -> Any:
     """
     logger.debug("PUT %s", get_full_url(path, client))
     logger.debug("Body: %s", data)
+    headers = make_auth_header(client=client)
+    headers["Content-Type"] = "application/json"
     retry = True
     while retry:
         response = client.session.put(
             get_full_url(path, client),
-            json=data,
-            headers=make_auth_header(client=client),
+            data=json.dumps(data, cls=CustomJSONEncoder),
+            headers=headers,
         )
         _, retry = check_status(response, path, client=client)
     return response.json()

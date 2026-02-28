@@ -607,7 +607,7 @@ class FilesTestCase(unittest.TestCase):
                 text=json.dumps(
                     {
                         "id": "working-file-01",
-                        "updated_at": datetime.datetime.now(),
+                        "updated_at": datetime.datetime.now().isoformat(),
                     }
                 ),
             )
