@@ -115,7 +115,6 @@ def get_model_list_diff(
         tuple: Two lists, one containing the missing models in the target list
         and one containing the models that should not be in the target list.
     """
-    missing = []
     source_ids = {m[id_field]: True for m in source_list}
     target_ids = {m[id_field]: True for m in target_list}
     missing = [

@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import requests
-
 from .helpers import normalize_model_parameter
 
 from . import client as raw

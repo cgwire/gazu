@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import sys
 import functools
 import json
 import shutil
@@ -23,12 +22,8 @@ from .exception import (
 )
 
 
-if sys.version_info[0] == 3:
-    from json import JSONDecodeError
-    from urllib.parse import urlencode
-else:
-    JSONDecodeError = ValueError
-    from urllib import urlencode
+from json import JSONDecodeError
+from urllib.parse import urlencode
 
 DEBUG = os.getenv("GAZU_DEBUG", "false").lower() == "true"
 
