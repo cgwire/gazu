@@ -42,6 +42,17 @@ logger = logging.getLogger("gazu.aio")
 
 
 class AsyncKitsuClient:
+    """
+    Async HTTP client for the Kitsu API.
+
+    Example::
+
+        client = AsyncKitsuClient("https://kitsu.example/api")
+        async with client:
+            await gazu.aio.log_in("user@example.com", "pass", client=client)
+            projects = await gazu.aio.get("data/projects", client=client)
+    """
+
     def __init__(
         self,
         host: str,
@@ -361,6 +372,17 @@ async def upload(
     client: AsyncKitsuClient = None,
     progress_callback: Callable | None = None,
 ) -> Any:
+    """
+    Upload a file asynchronously.
+
+    Example::
+
+        await gazu.aio.upload(
+            "pictures/thumbnails/projects/project-id",
+            "/path/to/thumbnail.png",
+            client=client,
+        )
+    """
     if data is None:
         data = {}
     if extra_files is None:
@@ -431,6 +453,17 @@ async def download(
     client: AsyncKitsuClient = None,
     progress_callback: Callable | None = None,
 ) -> None:
+    """
+    Download a file asynchronously.
+
+    Example::
+
+        await gazu.aio.download(
+            "movies/originals/preview-files/preview-id.mp4",
+            "/tmp/output.mp4",
+            client=client,
+        )
+    """
     path = build_path_with_params(path, params)
     async with client.session.get(
         get_full_url(path, client),
