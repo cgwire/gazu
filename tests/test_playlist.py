@@ -214,6 +214,24 @@ class TaskTestCase(unittest.TestCase):
                     {fakeid("task-type-1"): [{"id": fakeid("preview-1")}]}
                 ),
             )
+            mock.post(
+                gazu.client.get_full_url(
+                    "actions/playlists/%s/add-entity"
+                    % fakeid("playlist-1")
+                ),
+                text=json.dumps(
+                    {
+                        "id": fakeid("playlist-1"),
+                        "name": "name_changed",
+                        "shots": [
+                            {
+                                "entity_id": fakeid("shot-1"),
+                                "preview_file_id": fakeid("preview-1"),
+                            }
+                        ],
+                    }
+                ),
+            )
             playlist = {
                 "id": fakeid("playlist-1"),
                 "name": "name_changed",
