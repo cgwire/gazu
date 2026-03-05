@@ -100,7 +100,7 @@ def get_asset_type_casting(
 
     project = normalize_model_parameter(project)
     asset_type = normalize_model_parameter(asset_type)
-    path = f"/data/projects/{project['id']}/asset-types/{asset_type['id']}/casting"
+    path = f"data/projects/{project['id']}/asset-types/{asset_type['id']}/casting"
     return raw.get(path, client=client)
 
 
@@ -118,7 +118,7 @@ def get_sequence_casting(
             list contains dictionaries with "asset_id" and "nb_occurences" keys
             representing which assets are cast in each shot of the sequence.
     """
-    path = f"/data/projects/{sequence['project_id']}/sequences/{sequence['id']}/casting"
+    path = f"data/projects/{sequence['project_id']}/sequences/{sequence['id']}/casting"
     return raw.get(path, client=client)
 
 
@@ -134,7 +134,7 @@ def get_shot_casting(shot: dict, client: KitsuClient = default) -> dict:
             and "nb_occurences" keys representing which assets are cast in the shot
             and how many times they appear.
     """
-    path = f"/data/projects/{shot['project_id']}/entities/{shot['id']}/casting"
+    path = f"data/projects/{shot['project_id']}/entities/{shot['id']}/casting"
     return raw.get(path, client=client)
 
 
@@ -152,7 +152,7 @@ def get_asset_casting(asset: dict, client: KitsuClient = default) -> dict:
             given asset and how many times they appear.
     """
     path = (
-        f"/data/projects/{asset['project_id']}/entities/{asset['id']}/casting"
+        f"data/projects/{asset['project_id']}/entities/{asset['id']}/casting"
     )
     return raw.get(path, client=client)
 
@@ -170,7 +170,7 @@ def get_episode_casting(episode: dict, client: KitsuClient = default) -> dict:
             and "nb_occurences" keys representing which assets are cast in the
             episode and how many times they appear.
     """
-    path = f"/data/projects/{episode['project_id']}/entities/{episode['id']}/casting"
+    path = f"data/projects/{episode['project_id']}/entities/{episode['id']}/casting"
     return raw.get(path, client=client)
 
 
@@ -189,7 +189,7 @@ def get_asset_cast_in(
             fields like "id", "name", "project_id", etc.
     """
     asset = normalize_model_parameter(asset)
-    path = f"/data/assets/{asset['id']}/cast-in"
+    path = f"data/assets/{asset['id']}/cast-in"
     return raw.get(path, client=client)
 
 
@@ -211,7 +211,7 @@ def all_entity_links_for_project(
             other link-related fields.
     """
     project = normalize_model_parameter(project)
-    path = f"/data/projects/{project['id']}/entity-links"
+    path = f"data/projects/{project['id']}/entity-links"
     params = {}
     if page is not None:
         params["page"] = page
@@ -235,7 +235,7 @@ def get_episodes_casting(
             keys representing which assets are cast in each episode.
     """
     project = normalize_model_parameter(project)
-    path = f"/data/projects/{project['id']}/episodes/casting"
+    path = f"data/projects/{project['id']}/episodes/casting"
     return raw.get(path, client=client)
 
 
@@ -256,7 +256,7 @@ def get_sequence_shots_casting(
     """
     project = normalize_model_parameter(project)
     sequence = normalize_model_parameter(sequence)
-    path = f"/data/projects/{project['id']}/sequences/{sequence['id']}/shots/casting"
+    path = f"data/projects/{project['id']}/sequences/{sequence['id']}/shots/casting"
     return raw.get(path, client=client)
 
 
@@ -277,7 +277,7 @@ def get_episode_shots_casting(
     """
     project = normalize_model_parameter(project)
     episode = normalize_model_parameter(episode)
-    path = f"/data/projects/{project['id']}/episodes/{episode['id']}/shots/casting"
+    path = f"data/projects/{project['id']}/episodes/{episode['id']}/shots/casting"
     return raw.get(path, client=client)
 
 
@@ -296,7 +296,7 @@ def get_project_shots_casting(
             representing which assets are cast in each shot of the project.
     """
     project = normalize_model_parameter(project)
-    path = f"/data/projects/{project['id']}/shots/casting"
+    path = f"data/projects/{project['id']}/shots/casting"
     return raw.get(path, client=client)
 
 
@@ -313,6 +313,6 @@ def delete_entity_link(
         dict: The deleted entity link.
     """
     entity_link = normalize_model_parameter(entity_link)
-    path = f"/data/entity-links/{entity_link['id']}"
+    path = f"data/entity-links/{entity_link['id']}"
     raw.delete(path, client=client)
     return entity_link

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import sys
 import os
 import re
 import datetime
@@ -11,10 +10,7 @@ import mimetypes
 
 from gazu.exception import DownloadFileException
 
-if sys.version_info[0] == 3:
-    import urllib.parse as urlparse
-else:
-    import urlparse
+import urllib.parse as urlparse
 
 _UUID_RE = re.compile(
     "([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}){1}"
@@ -50,7 +46,7 @@ def normalize_model_parameter(
 
 
 def normalize_list_of_models_for_links(
-    models: list[str | dict] = [],
+    models: list[str | dict] | None = None,
 ) -> list[str]:
     """
     Args:
@@ -59,6 +55,8 @@ def normalize_list_of_models_for_links(
     Returns:
         list: A list of ids of the models.
     """
+    if models is None:
+        models = []
     if not isinstance(models, list):
         models = [models]
 
@@ -86,7 +84,7 @@ def sanitize_filename(filename: str) -> str:
 
 
 def download_file(
-    url: str, file_path: str | None = None, headers: dict = {}
+    url: str, file_path: str | None = None, headers: dict | None = None
 ) -> str:
     """
     Download file located at *file_path* to given url *url*.
@@ -100,6 +98,8 @@ def download_file(
         str: The location where the file is stored.
 
     """
+    if headers is None:
+        headers = {}
     with requests.get(
         url,
         headers=headers,
@@ -110,7 +110,7 @@ def download_file(
                 file_path = tempfile.gettempdir()
 
             if os.path.isdir(file_path):
-                file_path = os.path.join(file_path, "")
+                file_path = file_path + os.sep
 
             (dir, filename) = os.path.split(file_path)
 

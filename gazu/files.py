@@ -606,7 +606,7 @@ def build_asset_instance_output_file_path(
         "representation": representation,
         "revision": revision,
         "nb_elements": nb_elements,
-        "sep": sep,
+        "separator": sep,
     }
     path = f"data/asset-instances/{asset_instance['id']}/entities/{temporal_entity['id']}/output-file-path"
     result = raw.post(path, data, client=client)
@@ -835,7 +835,6 @@ def get_next_entity_output_revision(
         "name": name,
         "output_type_id": output_type["id"],
         "task_type_id": task_type["id"],
-        "name": name,
     }
     return raw.post(path, data, client=client)["next_revision"]
 
@@ -1119,6 +1118,7 @@ def update_modification_date(
     Returns:
         dict: Modified working file
     """
+    working_file = normalize_model_parameter(working_file)
     return raw.put(
         f"/actions/working-files/{working_file['id']}/modified",
         {},
@@ -1186,7 +1186,10 @@ def update_project_file_tree(
 
 
 def upload_working_file(
-    working_file: str | dict, file_path: str, client: KitsuClient = default
+    working_file: str | dict,
+    file_path: str,
+    client: KitsuClient = default,
+    progress_callback=None,
 ) -> dict:
     """
     Save given file in working file storage.
@@ -1200,13 +1203,16 @@ def upload_working_file(
     """
     working_file = normalize_model_parameter(working_file)
     url_path = f"/data/working-files/{working_file['id']}/file"
-    return raw.upload(url_path, file_path, client=client)
+    return raw.upload(
+        url_path, file_path, client=client, progress_callback=progress_callback
+    )
 
 
 def download_working_file(
     working_file: str | dict,
     file_path: str | None = None,
     client: KitsuClient = default,
+    progress_callback=None,
 ) -> requests.Response:
     """
     Download given working file and save it at given location.
@@ -1225,11 +1231,15 @@ def download_working_file(
         f"data/working-files/{working_file['id']}/file",
         file_path,
         client=client,
+        progress_callback=progress_callback,
     )
 
 
 def download_preview_file(
-    preview_file: str | dict, file_path: str, client: KitsuClient = default
+    preview_file: str | dict,
+    file_path: str,
+    client: KitsuClient = default,
+    progress_callback=None,
 ) -> requests.Response:
     """
     Download given preview file and save it at given location.
@@ -1242,6 +1252,7 @@ def download_preview_file(
         get_preview_file_url(preview_file, client=client),
         file_path,
         client=client,
+        progress_callback=progress_callback,
     )
 
 
@@ -1275,7 +1286,10 @@ def get_attachment_file(
 
 
 def download_attachment_file(
-    attachment_file: str | dict, file_path: str, client: KitsuClient = default
+    attachment_file: str | dict,
+    file_path: str,
+    client: KitsuClient = default,
+    progress_callback=None,
 ) -> requests.Response:
     """
     Download given attachment file and save it at given location.
@@ -1290,11 +1304,15 @@ def download_attachment_file(
         f"data/attachment-files/{attachment_file['id']}/file/{attachment_file['name']}",
         file_path,
         client=client,
+        progress_callback=progress_callback,
     )
 
 
 def download_preview_file_thumbnail(
-    preview_file: str | dict, file_path: str, client: KitsuClient = default
+    preview_file: str | dict,
+    file_path: str,
+    client: KitsuClient = default,
+    progress_callback=None,
 ) -> requests.Response:
     """
     Download given preview file thumbnail and save it at given location.
@@ -1309,11 +1327,15 @@ def download_preview_file_thumbnail(
         f"pictures/thumbnails/preview-files/{preview_file['id']}.png",
         file_path,
         client=client,
+        progress_callback=progress_callback,
     )
 
 
 def download_preview_file_cover(
-    preview_file: str | dict, file_path: str, client: KitsuClient = default
+    preview_file: str | dict,
+    file_path: str,
+    client: KitsuClient = default,
+    progress_callback=None,
 ) -> requests.Response:
     """
     Download given preview file cover and save it at given location.
@@ -1326,11 +1348,15 @@ def download_preview_file_cover(
         f"pictures/originals/preview-files/{preview_file['id']}.png",
         file_path,
         client=client,
+        progress_callback=progress_callback,
     )
 
 
 def download_person_avatar(
-    person: str | dict, file_path: str, client: KitsuClient = default
+    person: str | dict,
+    file_path: str,
+    client: KitsuClient = default,
+    progress_callback=None,
 ) -> requests.Response:
     """
     Download given person's avatar and save it at given location.
@@ -1344,11 +1370,15 @@ def download_person_avatar(
         f"pictures/thumbnails/persons/{person['id']}.png",
         file_path,
         client=client,
+        progress_callback=progress_callback,
     )
 
 
 def upload_person_avatar(
-    person: str | dict, file_path: str, client: KitsuClient = default
+    person: str | dict,
+    file_path: str,
+    client: KitsuClient = default,
+    progress_callback=None,
 ) -> dict[Literal["thumbnail_path"], str]:
     """
     Upload given file as person avatar.
@@ -1362,11 +1392,16 @@ def upload_person_avatar(
             path to the static image file, relative to the host url.
     """
     path = f"/pictures/thumbnails/persons/{normalize_model_parameter(person)['id']}"
-    return raw.upload(path, file_path, client=client)
+    return raw.upload(
+        path, file_path, client=client, progress_callback=progress_callback
+    )
 
 
 def download_project_avatar(
-    project: str | dict, file_path: str, client: KitsuClient = default
+    project: str | dict,
+    file_path: str,
+    client: KitsuClient = default,
+    progress_callback=None,
 ) -> requests.Response:
     """
     Download given project's avatar and save it at given location.
@@ -1380,11 +1415,15 @@ def download_project_avatar(
         f"pictures/thumbnails/projects/{project['id']}.png",
         file_path,
         client=client,
+        progress_callback=progress_callback,
     )
 
 
 def upload_project_avatar(
-    project: str | dict, file_path: str, client: KitsuClient = default
+    project: str | dict,
+    file_path: str,
+    client: KitsuClient = default,
+    progress_callback=None,
 ) -> dict[Literal["thumbnail_path"], str]:
     """
     Upload given file as project avatar.
@@ -1398,11 +1437,16 @@ def upload_project_avatar(
             path to the static image file, relative to the host url.
     """
     path = f"/pictures/thumbnails/projects/{normalize_model_parameter(project)['id']}"
-    return raw.upload(path, file_path, client=client)
+    return raw.upload(
+        path, file_path, client=client, progress_callback=progress_callback
+    )
 
 
 def download_organisation_avatar(
-    organisation: str | dict, file_path: str, client: KitsuClient = default
+    organisation: str | dict,
+    file_path: str,
+    client: KitsuClient = default,
+    progress_callback=None,
 ) -> requests.Response:
     """
     Download given organisation's avatar and save it at given location.
@@ -1416,11 +1460,15 @@ def download_organisation_avatar(
         f"pictures/thumbnails/organisations/{organisation['id']}.png",
         file_path,
         client=client,
+        progress_callback=progress_callback,
     )
 
 
 def upload_organisation_avatar(
-    organisation: str | dict, file_path: str, client: KitsuClient = default
+    organisation: str | dict,
+    file_path: str,
+    client: KitsuClient = default,
+    progress_callback=None,
 ) -> dict[Literal["thumbnail_path"], str]:
     """
     Upload given file as organisation avatar.
@@ -1434,7 +1482,9 @@ def upload_organisation_avatar(
             path to the static image file, relative to the host url.
     """
     path = f"/pictures/thumbnails/organisations/{normalize_model_parameter(organisation)['id']}"
-    return raw.upload(path, file_path, client=client)
+    return raw.upload(
+        path, file_path, client=client, progress_callback=progress_callback
+    )
 
 
 def update_preview(
@@ -1494,7 +1544,10 @@ def get_preview_movie_url(
 
 
 def download_preview_movie(
-    preview_file: str | dict, file_path: str, client: KitsuClient = default
+    preview_file: str | dict,
+    file_path: str,
+    client: KitsuClient = default,
+    progress_callback=None,
 ) -> requests.Response:
     """
     Download the preview movie file.
@@ -1508,7 +1561,9 @@ def download_preview_movie(
     """
     preview_file = normalize_model_parameter(preview_file)
     url = get_preview_movie_url(preview_file, lowdef=False, client=client)
-    return raw.download(url, file_path, client=client)
+    return raw.download(
+        url, file_path, client=client, progress_callback=progress_callback
+    )
 
 
 def get_preview_lowdef_movie_url(
@@ -1527,7 +1582,10 @@ def get_preview_lowdef_movie_url(
 
 
 def download_preview_lowdef_movie(
-    preview_file: str | dict, file_path: str, client: KitsuClient = default
+    preview_file: str | dict,
+    file_path: str,
+    client: KitsuClient = default,
+    progress_callback=None,
 ) -> requests.Response:
     """
     Download the low-definition preview movie file.
@@ -1541,7 +1599,9 @@ def download_preview_lowdef_movie(
     """
     preview_file = normalize_model_parameter(preview_file)
     url = get_preview_movie_url(preview_file, lowdef=True, client=client)
-    return raw.download(url, file_path, client=client)
+    return raw.download(
+        url, file_path, client=client, progress_callback=progress_callback
+    )
 
 
 def get_attachment_thumbnail_url(
@@ -1561,7 +1621,10 @@ def get_attachment_thumbnail_url(
 
 
 def download_attachment_thumbnail(
-    attachment_file: str | dict, file_path: str, client: KitsuClient = default
+    attachment_file: str | dict,
+    file_path: str,
+    client: KitsuClient = default,
+    progress_callback=None,
 ) -> requests.Response:
     """
     Download the attachment file thumbnail.
@@ -1575,7 +1638,9 @@ def download_attachment_thumbnail(
     """
     attachment_file = normalize_model_parameter(attachment_file)
     url = get_attachment_thumbnail_url(attachment_file, client=client)
-    return raw.download(url, file_path, client=client)
+    return raw.download(
+        url, file_path, client=client, progress_callback=progress_callback
+    )
 
 
 def extract_frame_from_preview(
@@ -1583,6 +1648,7 @@ def extract_frame_from_preview(
     frame_number: int,
     file_path: str | None = None,
     client: KitsuClient = default,
+    progress_callback=None,
 ) -> requests.Response:
     """
     Extract a specific frame from a preview file.
@@ -1598,7 +1664,9 @@ def extract_frame_from_preview(
     """
     preview_file = normalize_model_parameter(preview_file)
     url = f"pictures/preview-files/{preview_file['id']}/extract-frame/{frame_number}"
-    return raw.download(url, file_path, client=client)
+    return raw.download(
+        url, file_path, client=client, progress_callback=progress_callback
+    )
 
 
 def update_preview_position(
@@ -1667,6 +1735,7 @@ def extract_tile_from_preview(
     preview_file: str | dict,
     file_path: str | None = None,
     client: KitsuClient = default,
+    progress_callback=None,
 ) -> requests.Response:
     """
     Extract a tile from a preview file.
@@ -1681,7 +1750,9 @@ def extract_tile_from_preview(
     """
     preview_file = normalize_model_parameter(preview_file)
     url = f"pictures/preview-files/{preview_file['id']}/extract-tile"
-    return raw.download(url, file_path, client=client)
+    return raw.download(
+        url, file_path, client=client, progress_callback=progress_callback
+    )
 
 
 def new_file_status(
@@ -1725,4 +1796,6 @@ def get_file_status_by_name(
     Args:
         name (str): The files status name.
     """
-    return raw.fetch_first(f"file-status?name={name}", client=client)
+    return raw.fetch_first(
+        "file-status", {"name": name}, client=client
+    )

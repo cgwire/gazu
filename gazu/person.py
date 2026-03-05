@@ -303,7 +303,7 @@ def new_person(
     phone: str = "",
     role: str = "user",
     desktop_login: str = "",
-    departments: list[str | dict] = [],
+    departments: list[str | dict] | None = None,
     password: str | None = None,
     active: bool = True,
     contract_type: str = "open-ended",
@@ -328,6 +328,8 @@ def new_person(
     Returns:
         dict: Created person.
     """
+    if departments is None:
+        departments = []
     person = get_person_by_email(email, client=client)
     if person is None:
         person = raw.post(
@@ -374,13 +376,13 @@ def update_person(person: dict, client: KitsuClient = default) -> dict:
 
 
 def remove_person(
-    person: str, force: bool = False, client: KitsuClient = default
+    person: str | dict, force: bool = False, client: KitsuClient = default
 ) -> str:
     """
     Remove given person from database.
 
     Args:
-        person (dict): Person to remove.
+        person (str / dict): Person to remove.
     """
     person = normalize_model_parameter(person)
     path = f"data/persons/{person['id']}"
@@ -394,7 +396,7 @@ def new_bot(
     name: str,
     email: str,
     role: str = "user",
-    departments: list[str | dict] = [],
+    departments: list[str | dict] | None = None,
     active: bool = True,
     expiration_date: str | None = None,
     client: KitsuClient = default,
@@ -415,6 +417,8 @@ def new_bot(
     Returns:
         dict: Created bot.
     """
+    if departments is None:
+        departments = []
     bot = raw.post(
         "data/persons",
         {
@@ -458,7 +462,10 @@ def remove_bot(
 
 
 def set_avatar(
-    person: str | dict, file_path: str, client: KitsuClient = default
+    person: str | dict,
+    file_path: str,
+    client: KitsuClient = default,
+    progress_callback=None,
 ) -> dict[Literal["thumbnail_path"], str]:
     """
     Upload picture and set it as avatar for given person.
@@ -477,6 +484,7 @@ def set_avatar(
         f"/pictures/thumbnails/persons/{person['id']}",
         file_path,
         client=client,
+        progress_callback=progress_callback,
     )
 
 

@@ -200,7 +200,10 @@ class TaskTestCase(unittest.TestCase):
             task = gazu.task.get_task_by_path(
                 {"id": "project-id"}, file_path, "shot"
             )
-            request_body_string = mock.request_history[0].body.decode("utf-8")
+            body = mock.request_history[0].body
+            request_body_string = (
+                body.decode("utf-8") if isinstance(body, bytes) else body
+            )
             request_body = json.loads(request_body_string)
             self.assertEqual(request_body["project_id"], "project-id")
             self.assertEqual(request_body["type"], "shot")

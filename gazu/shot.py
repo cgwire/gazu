@@ -85,7 +85,7 @@ def all_sequences_for_project(
 ) -> list[dict]:
     """
     Args:
-        sequence (str / dict): The project dict or the project ID.
+        project (str / dict): The project dict or the project ID.
 
     Returns:
         list: Sequences from database for given project.
@@ -272,7 +272,7 @@ def get_episode_url(episode: str | dict, client: KitsuClient = default) -> str:
         url (str): Web url associated to the given episode
     """
     episode = normalize_model_parameter(episode)
-    episode = get_episode(episode["id"])
+    episode = get_episode(episode["id"], client=client)
     host = raw.get_api_url_from_host(client=client)
     project_id = episode["project_id"]
     episode_id = episode["id"]
@@ -289,7 +289,7 @@ def get_shot_url(shot: str | dict, client: KitsuClient = default) -> str:
         url (str): Web url associated to the given shot
     """
     shot = normalize_model_parameter(shot)
-    shot = get_shot(shot["id"])
+    shot = get_shot(shot["id"], client=client)
     host = raw.get_api_url_from_host(client=client)
     project_id = shot["project_id"]
     shot_id = shot["id"]
@@ -342,7 +342,7 @@ def new_shot(
     frame_in: int | None = None,
     frame_out: int | None = None,
     description: str | None = None,
-    data: dict = {},
+    data: dict | None = None,
     client: KitsuClient = default,
 ) -> dict:
     """
@@ -360,6 +360,8 @@ def new_shot(
     Returns:
         dict: Created shot.
     """
+    if data is None:
+        data = {}
     project = normalize_model_parameter(project)
     sequence = normalize_model_parameter(sequence)
 
@@ -423,7 +425,9 @@ def get_asset_instances_for_shot(
 
 
 def update_shot_data(
-    shot: str | dict, data: dict = {}, client: KitsuClient = default
+    shot: str | dict,
+    data: dict | None = None,
+    client: KitsuClient = default,
 ) -> dict:
     """
     Update the metadata for the provided shot. Keys that are not provided are
@@ -436,30 +440,36 @@ def update_shot_data(
     Returns:
         dict: Updated shot.
     """
+    if data is None:
+        data = {}
     shot = normalize_model_parameter(shot)
     current_shot = get_shot(shot["id"], client=client)
-    current_data = (
-        current_shot["data"] if current_shot["data"] is not None else {}
-    )
-    updated_shot = {"id": current_shot["id"], "data": current_data}
-    updated_shot["data"].update(data)
+    current_data = current_shot["data"] or {}
+    updated_shot = {
+        "id": current_shot["id"],
+        "data": {**current_data, **data},
+    }
     return update_shot(updated_shot, client=client)
 
 
 def update_sequence_data(
-    sequence: str | dict, data: dict = {}, client: KitsuClient = default
+    sequence: str | dict,
+    data: dict | None = None,
+    client: KitsuClient = default,
 ) -> dict:
     """
     Update the metadata for the provided sequence. Keys that are not provided
     are not changed.
 
     Args:
-        sequence (str / dict): The sequence dicto or ID to save in database.
+        sequence (str / dict): The sequence dict or ID to save in database.
         data (dict): Free field to set metadata of any kind.
 
     Returns:
         dict: Updated sequence.
     """
+    if data is None:
+        data = {}
     sequence = normalize_model_parameter(sequence)
     current_sequence = get_sequence(sequence["id"], client=client)
 
@@ -468,10 +478,9 @@ def update_sequence_data(
 
     updated_sequence = {
         "id": current_sequence["id"],
-        "data": current_sequence["data"],
+        "data": {**current_sequence["data"], **data},
     }
-    updated_sequence["data"].update(data)
-    return update_sequence(updated_sequence, client)
+    return update_sequence(updated_sequence, client=client)
 
 
 def remove_shot(
@@ -549,7 +558,9 @@ def update_episode(episode: dict, client: KitsuClient = default) -> dict:
 
 
 def update_episode_data(
-    episode: str | dict, data: dict = {}, client: KitsuClient = default
+    episode: str | dict,
+    data: dict | None = None,
+    client: KitsuClient = default,
 ) -> dict:
     """
     Update the metadata for the provided episode. Keys that are not provided
@@ -562,13 +573,14 @@ def update_episode_data(
     Returns:
         dict: Updated episode.
     """
+    if data is None:
+        data = {}
     episode = normalize_model_parameter(episode)
     current_episode = get_episode(episode["id"], client=client)
     updated_episode = {
         "id": current_episode["id"],
-        "data": current_episode["data"],
+        "data": {**(current_episode["data"] or {}), **data},
     }
-    updated_episode["data"].update(data)
     return update_episode(updated_episode, client=client)
 
 
@@ -683,7 +695,10 @@ def remove_asset_instance_from_shot(
 
 
 def import_shots_with_csv(
-    project: str | dict, csv_file_path: str, client: KitsuClient = default
+    project: str | dict,
+    csv_file_path: str,
+    client: KitsuClient = default,
+    progress_callback=None,
 ) -> list[dict]:
     """
     Import the Shots from a previously exported CSV file into the given
@@ -702,6 +717,7 @@ def import_shots_with_csv(
         f"import/csv/projects/{project['id']}/shots",
         csv_file_path,
         client=client,
+        progress_callback=progress_callback,
     )
 
 
@@ -712,6 +728,7 @@ def import_otio(
     naming_convention: str | None = None,
     match_case: bool = True,
     client: KitsuClient = default,
+    progress_callback=None,
 ) -> dict[Literal["created_shots", "updated_shots"], list[dict]]:
     """
     Import shots from an OpenTimelineIO file (works also for every OTIO
@@ -748,6 +765,7 @@ def import_otio(
             "match_case": match_case,
         },
         client=client,
+        progress_callback=progress_callback,
     )
 
 
@@ -757,9 +775,10 @@ def export_shots_with_csv(
     episode: str | dict | None = None,
     assigned_to: str | dict | None = None,
     client: KitsuClient = default,
+    progress_callback=None,
 ) -> requests.Response:
     """
-    Export the Assets data for a project to a CSV file on disk.
+    Export the Shots data for a project to a CSV file on disk.
 
     Args:
         project (str / dict):
@@ -792,4 +811,5 @@ def export_shots_with_csv(
         csv_file_path,
         params=params,
         client=client,
+        progress_callback=progress_callback,
     )

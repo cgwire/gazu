@@ -161,7 +161,7 @@ def all_tasks_for_scene(
 ) -> list[dict]:
     """
     Args:
-        sequence (str / dict): The scene dict or the scene ID.
+        scene (str / dict): The scene dict or the scene ID.
 
     Returns:
         list: Tasks linked to given scene.
@@ -722,7 +722,7 @@ def new_task(
     name: str = "main",
     task_status: dict | None = None,
     assigner: str | dict | None = None,
-    assignees: list[str | dict] = [],
+    assignees: list[str | dict] | None = None,
     client: KitsuClient = default,
 ) -> dict:
     """
@@ -749,7 +749,9 @@ def new_task(
         "entity_id": entity["id"],
         "task_type_id": task_type["id"],
         "task_status_id": task_status["id"],
-        "assignees": normalize_list_of_models_for_links(assignees),
+        "assignees": normalize_list_of_models_for_links(
+            assignees if assignees is not None else []
+        ),
         "name": name,
     }
 
@@ -770,7 +772,9 @@ def remove_task(task: str | dict, client: KitsuClient = default) -> str:
         task (str / dict): The task dict or the task ID.
     """
     task = normalize_model_parameter(task)
-    raw.delete(f"data/tasks/{task['id']}", {"force": True}, client=client)
+    return raw.delete(
+        f"data/tasks/{task['id']}", {"force": True}, client=client
+    )
 
 
 def start_task(
@@ -925,11 +929,12 @@ def add_comment(
     task_status: str | dict,
     comment: str = "",
     person: str | dict | None = None,
-    checklist: list[dict] = [],
-    attachments: list[str] = [],
+    checklist: list[dict] | None = None,
+    attachments: list[str] | None = None,
     created_at: str | None = None,
-    links: list[str] = [],
+    links: list[str] | None = None,
     client: KitsuClient = default,
+    progress_callback=None,
 ) -> dict:
     """
     Add comment to given task. Each comment requires a task_status. Since the
@@ -949,6 +954,12 @@ def add_comment(
     Returns:
         dict: Created comment.
     """
+    if checklist is None:
+        checklist = []
+    if attachments is None:
+        attachments = []
+    if links is None:
+        links = []
     task = normalize_model_parameter(task)
     task_status = normalize_model_parameter(task_status)
     data = {
@@ -970,6 +981,7 @@ def add_comment(
             f"actions/tasks/{task['id']}/comment", data, client=client
         )
     else:
+        attachments = list(attachments)
         attachment = attachments.pop()
         data["checklist"] = json.dumps(checklist)
         return raw.upload(
@@ -978,14 +990,16 @@ def add_comment(
             data=data,
             extra_files=attachments,
             client=client,
+            progress_callback=progress_callback,
         )
 
 
 def add_attachment_files_to_comment(
     task: str | dict,
     comment: str | dict,
-    attachments: str | list[str] = [],
+    attachments: str | list[str] = None,
     client: KitsuClient = default,
+    progress_callback=None,
 ) -> dict:
     """
     Add attachments files to a given comment.
@@ -998,10 +1012,13 @@ def add_attachment_files_to_comment(
     Returns:
         dict: Added attachment files.
     """
+    if attachments is None:
+        attachments = []
     if isinstance(attachments, str):
         attachments = [attachments]
     if len(attachments) == 0:
         raise ValueError("The attachments list is empty")
+    attachments = list(attachments)
     task = normalize_model_parameter(task)
     comment = normalize_model_parameter(comment)
     attachment = attachments.pop()
@@ -1010,6 +1027,7 @@ def add_attachment_files_to_comment(
         attachment,
         extra_files=attachments,
         client=client,
+        progress_callback=progress_callback,
     )
 
 
@@ -1069,6 +1087,7 @@ def upload_preview_file(
     file_path: str,
     normalize_movie: bool = True,
     client: KitsuClient = default,
+    progress_callback=None,
 ) -> dict:
     """
     Create a preview into given comment.
@@ -1080,7 +1099,9 @@ def upload_preview_file(
     path = f"pictures/preview-files/{normalize_model_parameter(preview_file)['id']}"
     if not normalize_movie:
         path += "?normalize=false"
-    return raw.upload(path, file_path, client=client)
+    return raw.upload(
+        path, file_path, client=client, progress_callback=progress_callback
+    )
 
 
 def add_preview(
@@ -1128,15 +1149,15 @@ def publish_preview(
     task_status: str | dict,
     comment: str = "",
     person: str | dict | None = None,
-    checklist: list[dict] = [],
-    attachments: list[str] = [],
+    checklist: list[dict] | None = None,
+    attachments: list[str] | None = None,
     created_at: str | None = None,
     preview_file_path: str | None = None,
     preview_file_url: str | None = None,
     normalize_movie: bool = True,
     revision: int | None = None,
     set_thumbnail: bool = False,
-    links: list[str] = [],
+    links: list[str] | None = None,
     client: KitsuClient = default,
 ) -> tuple[dict, dict]:
     """
@@ -1190,9 +1211,10 @@ def publish_preview(
 
 
 def batch_comments(
-    comments: list[dict] = [],
+    comments: list[dict] | None = None,
     task: str | dict | None = None,
     client: KitsuClient = default,
+    progress_callback=None,
 ) -> list[dict]:
     """
     Publish a list of comments (with attachments and previews) for given task.
@@ -1207,31 +1229,52 @@ def batch_comments(
     Returns:
         list: List of created comments.
     """
+    if comments is None:
+        comments = []
     if task is not None:
         task = normalize_model_parameter(task)
 
     files = {}
-    for x, comment in enumerate(comments):
-        if comment.get("attachment_files"):
-            for y, file_path in enumerate(comment["attachment_files"]):
-                files[f"attachment_file-{x}-{y}"] = open(file_path, "rb")
-        if comment.get("preview_files"):
-            for y, file_path in enumerate(comment["preview_files"]):
-                files[f"preview_file-{x}-{y}"] = open(file_path, "rb")
+    opened_files = []
+    try:
+        for x, comment in enumerate(comments):
+            if comment.get("attachment_files"):
+                for y, file_path in enumerate(
+                    comment["attachment_files"]
+                ):
+                    f = open(file_path, "rb")
+                    opened_files.append(f)
+                    files[f"attachment_file-{x}-{y}"] = f
+            if comment.get("preview_files"):
+                for y, file_path in enumerate(
+                    comment["preview_files"]
+                ):
+                    f = open(file_path, "rb")
+                    opened_files.append(f)
+                    files[f"preview_file-{x}-{y}"] = f
 
-    files["comments"] = (None, json.dumps(comments), "application/json")
-    return raw.upload(
-        f"actions/tasks/{task['id'] + '/' if task else ''}batch-comment",
-        file_path=None,
-        files=files,
-        client=client,
-    )
+        files["comments"] = (
+            None,
+            json.dumps(comments),
+            "application/json",
+        )
+        return raw.upload(
+            f"actions/tasks/{task['id'] + '/' if task else ''}batch-comment",
+            file_path=None,
+            files=files,
+            client=client,
+            progress_callback=progress_callback,
+        )
+    finally:
+        for f in opened_files:
+            f.close()
 
 
 def create_multiple_comments(
     project: str | dict,
-    comments: list[dict] = [],
+    comments: list[dict] = None,
     client: KitsuClient = default,
+    progress_callback=None,
 ) -> list[dict]:
     """
     Create multiple comments at once for a specific project.
@@ -1247,24 +1290,44 @@ def create_multiple_comments(
     Returns:
         list: List of created comments.
     """
+    if comments is None:
+        comments = []
     project = normalize_model_parameter(project)
 
     files = {}
-    for x, comment in enumerate(comments):
-        if comment.get("attachment_files"):
-            for y, file_path in enumerate(comment["attachment_files"]):
-                files[f"attachment_file-{x}-{y}"] = open(file_path, "rb")
-        if comment.get("preview_files"):
-            for y, file_path in enumerate(comment["preview_files"]):
-                files[f"preview_file-{x}-{y}"] = open(file_path, "rb")
+    opened_files = []
+    try:
+        for x, comment in enumerate(comments):
+            if comment.get("attachment_files"):
+                for y, file_path in enumerate(
+                    comment["attachment_files"]
+                ):
+                    f = open(file_path, "rb")
+                    opened_files.append(f)
+                    files[f"attachment_file-{x}-{y}"] = f
+            if comment.get("preview_files"):
+                for y, file_path in enumerate(
+                    comment["preview_files"]
+                ):
+                    f = open(file_path, "rb")
+                    opened_files.append(f)
+                    files[f"preview_file-{x}-{y}"] = f
 
-    files["comments"] = (None, json.dumps(comments), "application/json")
-    return raw.upload(
-        f"actions/projects/{project['id']}/tasks/comment-many",
-        file_path=None,
-        files=files,
-        client=client,
-    )
+        files["comments"] = (
+            None,
+            json.dumps(comments),
+            "application/json",
+        )
+        return raw.upload(
+            f"actions/projects/{project['id']}/tasks/comment-many",
+            file_path=None,
+            files=files,
+            client=client,
+            progress_callback=progress_callback,
+        )
+    finally:
+        for f in opened_files:
+            f.close()
 
 
 def add_tasks_batch_comments(
@@ -1434,8 +1497,14 @@ def new_task_status(
     Returns:
         dict: The created task status
     """
-    assert color[0] == "#"
-    assert all(c in string.hexdigits for c in color[1:])
+    if not color or color[0] != "#":
+        raise ValueError(
+            "Color must start with '#', e.g. '#00FF00'"
+        )
+    if not all(c in string.hexdigits for c in color[1:]):
+        raise ValueError(
+            "Color must be a valid hexadecimal string, e.g. '#00FF00'"
+        )
 
     data = {"name": name, "short_name": short_name, "color": color}
     return raw.post("data/task-status", data, client=client)
@@ -1460,7 +1529,9 @@ def update_task(task: dict, client: KitsuClient = default) -> dict:
 
 
 def update_task_data(
-    task: str | dict, data: dict = {}, client: KitsuClient = default
+    task: str | dict,
+    data: dict | None = None,
+    client: KitsuClient = default,
 ) -> dict:
     """
     Update the metadata for the provided task. Keys that are not provided are
@@ -1473,13 +1544,15 @@ def update_task_data(
     Returns:
         dict: Updated task.
     """
+    if data is None:
+        data = {}
     task = normalize_model_parameter(task)
     current_task = get_task(task["id"], client=client)
 
-    updated_task = {"id": current_task["id"], "data": current_task["data"]}
-    if updated_task["data"] is None:
-        updated_task["data"] = {}
-    updated_task["data"].update(data)
+    updated_task = {
+        "id": current_task["id"],
+        "data": {**(current_task["data"] or {}), **data},
+    }
     return update_task(updated_task, client=client)
 
 

@@ -1,8 +1,8 @@
 import socketio
+import logging
 import os
 import inspect
 import signal
-import socketio
 
 from typing import Any, Callable
 
@@ -16,6 +16,8 @@ from .client import (
     make_auth_header,
 )
 
+logger = logging.getLogger("gazu.events")
+
 
 if os.name == "nt":
     from win32api import SetConsoleCtrlHandler
@@ -24,7 +26,7 @@ if os.name == "nt":
         if event == 0:
             try:
                 signal_handler(signal.SIGINT, inspect.currentframe())
-            except:
+            except Exception:
                 # SetConsoleCtrlHandler handle cannot raise exceptions
                 pass
 
@@ -64,13 +66,14 @@ def init(
     event_client = socketio.Client(**params)
     event_client.on("connect_error", connect_error)
     event_client.register_namespace(EventsNamespace("/events"))
-    event_client.connect(get_event_host(client), make_auth_header())
+    event_client.connect(
+        get_event_host(client), make_auth_header(client=client)
+    )
     return event_client
 
 
 def connect_error(data: str) -> str:
-    print("The connection failed!")
-    print(data)
+    logger.error("The connection failed! %s", data)
     return data
 
 
@@ -90,7 +93,7 @@ def run_client(event_client: socketio.Client) -> socketio.Client:
     configured.
     """
     try:
-        print("Listening to Kitsu events...")
+        logger.info("Listening to Kitsu events...")
         event_client.wait()
     except TypeError:
         raise AuthFailedException

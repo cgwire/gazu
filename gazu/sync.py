@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import tempfile
 
 from . import client as raw
 from . import asset as asset_module
@@ -114,7 +115,6 @@ def get_model_list_diff(
         tuple: Two lists, one containing the missing models in the target list
         and one containing the models that should not be in the target list.
     """
-    missing = []
     source_ids = {m[id_field]: True for m in source_list}
     target_ids = {m[id_field]: True for m in target_list}
     missing = [
@@ -620,7 +620,7 @@ def push_task_comment(
     client_source: KitsuClient,
     client_target: KitsuClient,
     author_id: str | None = None,
-    tmp_path: str = "/tmp/zou/sync/",
+    tmp_path: str | None = None,
 ) -> dict:
     """
     Create a new comment into target api for each comment in source task
@@ -641,9 +641,11 @@ def push_task_comment(
     Returns:
         dict: The source comment.
     """
+    if tmp_path is None:
+        tmp_path = tempfile.mkdtemp(prefix="zou_sync_")
     attachments = []
     for attachment_id in comment["attachment_files"]:
-        if type(attachment_id) == dict:
+        if isinstance(attachment_id, dict):
             attachment_id = attachment_id["id"]
         attachment_file = files_module.get_attachment_file(
             attachment_id, client=client_source
@@ -656,7 +658,7 @@ def push_task_comment(
 
     previews = []
     for preview_file in comment["previews"]:
-        if type(preview_file) is str:
+        if isinstance(preview_file, str):
             preview_file_id = preview_file
         else:
             preview_file_id = preview_file["id"]

@@ -225,7 +225,7 @@ def get_sequence_from_scene(
     scene: str | dict, client: KitsuClient = default
 ) -> dict:
     """
-    Return sequence which is parent of given shot.
+    Return sequence which is parent of given scene.
     """
     scene = normalize_model_parameter(scene)
     return get_sequence(scene["parent_id"], client=client)

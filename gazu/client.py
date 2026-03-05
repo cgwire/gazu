@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-import sys
-import functools
 import json
+import logging
 import shutil
 import os
 from typing import Any, Callable, cast
@@ -23,14 +22,13 @@ from .exception import (
 )
 
 
-if sys.version_info[0] == 3:
-    from json import JSONDecodeError
-    from urllib.parse import urlencode
-else:
-    JSONDecodeError = ValueError
-    from urllib import urlencode
+from urllib.parse import urlencode
 
-DEBUG = os.getenv("GAZU_DEBUG", "false").lower() == "true"
+logger = logging.getLogger("gazu")
+
+if os.getenv("GAZU_DEBUG", "false").lower() == "true":
+    logging.basicConfig(level=logging.DEBUG)
+    logger.setLevel(logging.DEBUG)
 
 
 class KitsuClient(object):
@@ -41,10 +39,12 @@ class KitsuClient(object):
         cert: str | None = None,
         use_refresh_token: bool = True,
         callback_not_authenticated: Callable | None = None,
-        tokens: dict = {"access_token": None, "refresh_token": None},
+        tokens: dict | None = None,
         access_token: str | None = None,
         refresh_token: str | None = None,
     ) -> None:
+        if tokens is None:
+            tokens = {"access_token": None, "refresh_token": None}
         self.tokens = tokens
         if access_token:
             self.access_token = access_token
@@ -96,6 +96,21 @@ class KitsuClient(object):
         self.refresh_token = None
 
         return tokens
+
+    def __enter__(self) -> "KitsuClient":
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        try:
+            self.session.get(
+                get_full_url("auth/logout", client=self),
+                headers=self.make_auth_header(),
+            )
+        except Exception:
+            pass
+        self.tokens = {"access_token": None, "refresh_token": None}
+        self.session.close()
+        return None
 
     def make_auth_header(self) -> dict[str, str]:
         """
@@ -150,14 +165,10 @@ default_client = cast(KitsuClient, default_client)
 try:
     import requests
 
-    # Little hack to allow json encoder to manage dates.
-    requests.models.complexjson.dumps = functools.partial(
-        json.dumps, cls=CustomJSONEncoder
-    )
     host = "http://gazu.change.serverhost/api"
     default_client = create_client(host)
 except Exception:
-    print("Warning, running in setup mode!")
+    logger.warning("Running in setup mode!")
 
 
 def host_is_up(client: KitsuClient = default_client) -> bool:
@@ -190,7 +201,7 @@ def host_is_valid(client: KitsuClient = default_client) -> bool:
     if not host_is_up(client):
         return False
     try:
-        post("auth/login", {"email": ""})
+        post("auth/login", {"email": ""}, client=client)
         return True
     except Exception as exc:
         return isinstance(exc, (NotAuthenticatedException, ParameterException))
@@ -224,7 +235,9 @@ def get_api_url_from_host(client: KitsuClient = default_client) -> str:
     Returns:
         str: The base Kitsu URL the client is connected to.
     """
-    return client.host[:-4]
+    if client.host.endswith("/api"):
+        return client.host[:-4]
+    return client.host
 
 
 def set_host(new_host: str, client: KitsuClient = default_client) -> str:
@@ -369,8 +382,7 @@ def get(
     Returns:
         The request result.
     """
-    if DEBUG:
-        print("GET", get_full_url(path, client))
+    logger.debug("GET %s", get_full_url(path, client))
     path = build_path_with_params(path, params)
     retry = True
     while retry:
@@ -398,22 +410,26 @@ def post(path: str, data: Any, client: KitsuClient = default_client) -> Any:
     Returns:
         The request result.
     """
-    if DEBUG:
-        print("POST", get_full_url(path, client))
-        if not "password" in data:
-            print("Body:", data)
+    logger.debug("POST %s", get_full_url(path, client))
+    sensitive_fields = {
+        "password", "token", "access_token", "refresh_token", "secret"
+    }
+    if not any(field in data for field in sensitive_fields):
+        logger.debug("Body: %s", data)
+    headers = make_auth_header(client=client)
+    headers["Content-Type"] = "application/json"
     retry = True
     while retry:
         response = client.session.post(
             get_full_url(path, client),
-            json=data,
-            headers=make_auth_header(client=client),
+            data=json.dumps(data, cls=CustomJSONEncoder),
+            headers=headers,
         )
         _, retry = check_status(response, path, client=client)
     try:
         result = response.json()
-    except JSONDecodeError:
-        print(response.text)
+    except json.JSONDecodeError:
+        logger.error("Failed to decode JSON response: %s", response.text)
         raise
     return result
 
@@ -430,15 +446,16 @@ def put(path: str, data: dict, client: KitsuClient = default_client) -> Any:
     Returns:
         The request result.
     """
-    if DEBUG:
-        print("PUT", get_full_url(path, client))
-        print("Body:", data)
+    logger.debug("PUT %s", get_full_url(path, client))
+    logger.debug("Body: %s", data)
+    headers = make_auth_header(client=client)
+    headers["Content-Type"] = "application/json"
     retry = True
     while retry:
         response = client.session.put(
             get_full_url(path, client),
-            json=data,
-            headers=make_auth_header(client=client),
+            data=json.dumps(data, cls=CustomJSONEncoder),
+            headers=headers,
         )
         _, retry = check_status(response, path, client=client)
     return response.json()
@@ -458,8 +475,7 @@ def delete(
     Returns:
         The request result.
     """
-    if DEBUG:
-        print("DELETE", get_full_url(path, client))
+    logger.debug("DELETE %s", get_full_url(path, client))
     path = build_path_with_params(path, params)
 
     retry = True
@@ -490,7 +506,7 @@ def get_message_from_response(
     message = default_message
     message_json = response.json()
 
-    if hasattr(message_json, "get"):
+    if isinstance(message_json, dict):
         for key in ["error", "message"]:
             if message_json.get(key):
                 message = message_json[key]
@@ -544,7 +560,7 @@ def check_status(
                 client
                 and client.refresh_token
                 and client.use_refresh_token
-                and request.json()["message"] == "Signature has expired"
+                and request.json().get("message") == "Signature has expired"
             ):
                 client.refresh_access_token()
                 return status_code, True
@@ -558,18 +574,22 @@ def check_status(
             raise
     elif status_code in [500, 502]:
         try:
-            print("A server error occured!\n")
             stacktrace = request.json().get(
                 "stacktrace", "No stacktrace sent by the server"
             )
-            print(f"Server stacktrace:\n{stacktrace}")
             message = get_message_from_response(
                 response=request,
                 default_message="No message sent by the server",
             )
-            print(f"Error message:\n{message}\n")
+            logger.error(
+                "A server error occurred!\n"
+                "Server stacktrace:\n%s\n"
+                "Error message:\n%s",
+                stacktrace,
+                message,
+            )
         except Exception:
-            print(request.text)
+            logger.error("Server error response: %s", request.text)
         raise ServerErrorException(path)
     return status_code, False
 
@@ -620,7 +640,7 @@ def fetch_all(
                 params=params,
                 client=client,
             )
-            results += response.get("data", [])
+            results.extend(response.get("data", []))
 
     return results
 
@@ -638,10 +658,7 @@ def fetch_first(
         dict: The first entry for which a model is required.
     """
     entries = get(url_path_join("data", path), params=params, client=client)
-    if len(entries) > 0:
-        return entries[0]
-    else:
-        return None
+    return entries[0] if entries else None
 
 
 def fetch_one(
@@ -708,13 +725,34 @@ def update(
     )
 
 
+class _ProgressFileWrapper:
+    """Wraps a file object to track read progress via a callback."""
+
+    def __init__(self, file_obj, callback, offset, total):
+        self._file = file_obj
+        self._callback = callback
+        self._offset = offset
+        self._total = total
+
+    def read(self, size=-1):
+        data = self._file.read(size)
+        if data:
+            self._offset += len(data)
+            self._callback(self._offset, self._total)
+        return data
+
+    def __getattr__(self, name):
+        return getattr(self._file, name)
+
+
 def upload(
     path: str,
     file_path: str = None,
-    data: dict = {},
-    extra_files: list = [],
+    data: dict | None = None,
+    extra_files: list | None = None,
     files: dict = None,
     client: KitsuClient = default_client,
+    progress_callback: Callable | None = None,
 ) -> Any:
     """
     Upload file located at *file_path* to given url *path*.
@@ -726,26 +764,52 @@ def upload(
         extra_files (list): List of extra files to upload.
         files (dict): The dictionary of files to upload.
         client (KitsuClient): The client to use for the request.
+        progress_callback (Callable): Callback ``(bytes_read, total)``
+            invoked during upload. *total* is the sum of all file sizes.
 
     Returns:
         Any: Response from the API.
     """
+    if data is None:
+        data = {}
+    if extra_files is None:
+        extra_files = []
     url = get_full_url(path, client)
+    opened_files = None
     if not files:
         files = _build_file_dict(file_path, extra_files)
-    retry = True
-    while retry:
-        response = client.session.post(
-            url,
-            data=data,
-            headers=make_auth_header(client=client),
-            files=files,
+        opened_files = files
+    if progress_callback is not None:
+        total = sum(
+            os.fstat(f.fileno()).st_size for f in files.values()
         )
-        _, retry = check_status(response, path, client=client)
+        offset = 0
+        wrapped = {}
+        for key, f in files.items():
+            wrapper = _ProgressFileWrapper(
+                f, progress_callback, offset, total
+            )
+            wrapped[key] = wrapper
+            offset += os.fstat(f.fileno()).st_size
+        files = wrapped
+    try:
+        retry = True
+        while retry:
+            response = client.session.post(
+                url,
+                data=data,
+                headers=make_auth_header(client=client),
+                files=files,
+            )
+            _, retry = check_status(response, path, client=client)
+    finally:
+        if opened_files:
+            for f in opened_files.values():
+                f.close()
     try:
         result = response.json()
-    except JSONDecodeError:
-        print(response.text)
+    except json.JSONDecodeError:
+        logger.error("Failed to decode JSON response: %s", response.text)
         raise
 
     result_message = get_message_from_response(response, default_message="")
@@ -767,11 +831,15 @@ def _build_file_dict(file_path: str, extra_files: list[str]) -> dict:
         dict: The dictionary of files to upload.
     """
 
-    files = {"file": open(file_path, "rb")}
-    i = 0
-    for file_path in extra_files:
-        i += 1
-        files[f"file-{i}"] = open(file_path, "rb")
+    files = {}
+    try:
+        files["file"] = open(file_path, "rb")
+        for i, extra_path in enumerate(extra_files, start=1):
+            files[f"file-{i}"] = open(extra_path, "rb")
+    except Exception:
+        for f in files.values():
+            f.close()
+        raise
 
     return files
 
@@ -781,6 +849,7 @@ def download(
     file_path: str,
     params: dict | None = None,
     client: KitsuClient = default_client,
+    progress_callback: Callable | None = None,
 ) -> requests.Response:
     """
     Download file located at *file_path* to given url *path*.
@@ -790,6 +859,8 @@ def download(
         file_path (str): The location to store the file on the hard drive.
         params (dict): The parameters to pass to the request.
         client (KitsuClient): The client to use for the request.
+        progress_callback (Callable): Callback ``(bytes_read, total)``
+            invoked during download. *total* is 0 when unknown.
 
     Returns:
         Response: Request response object.
@@ -802,7 +873,17 @@ def download(
         stream=True,
     ) as response:
         with open(file_path, "wb") as target_file:
-            shutil.copyfileobj(response.raw, target_file)
+            if progress_callback is not None:
+                total = int(
+                    response.headers.get("content-length", 0)
+                )
+                bytes_read = 0
+                for chunk in response.iter_content(8192):
+                    target_file.write(chunk)
+                    bytes_read += len(chunk)
+                    progress_callback(bytes_read, total)
+            else:
+                shutil.copyfileobj(response.raw, target_file)
         return response
 
 
@@ -824,7 +905,7 @@ def get_file_data_from_url(
         url = get_full_url(url)
     retry = True
     while retry:
-        response = requests.get(
+        response = client.session.get(
             url,
             stream=True,
             headers=make_auth_header(client=client),

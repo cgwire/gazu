@@ -52,7 +52,7 @@ def get_edit_url(edit: str | dict, client: KitsuClient = default) -> str:
         url (str): Web url associated to the given edit
     """
     edit = normalize_model_parameter(edit)
-    edit = get_edit(edit["id"])
+    edit = get_edit(edit["id"], client=client)
     host = raw.get_api_url_from_host(client=client)
     project_id = edit["project_id"]
     edit_id = edit["id"]
@@ -98,7 +98,7 @@ def new_edit(
     project: str | dict,
     name: str,
     description: str | None = None,
-    data: dict = {},
+    data: dict | None = None,
     episode: str | dict | None = None,
     client: KitsuClient = default,
 ) -> dict:
@@ -116,6 +116,8 @@ def new_edit(
     Returns:
         Created edit.
     """
+    if data is None:
+        data = {}
     project = normalize_model_parameter(project)
     data = {"name": name, "data": data}
 
@@ -172,7 +174,7 @@ def update_edit(edit: dict, client: KitsuClient = default) -> dict:
 
 
 def update_edit_data(
-    edit: str | dict, data: dict = {}, client: KitsuClient = default
+    edit: str | dict, data: dict | None = None, client: KitsuClient = default
 ) -> dict:
     """
     Update the metadata for the provided edit. Keys that are not provided are
@@ -185,8 +187,13 @@ def update_edit_data(
     Returns:
         dict: Updated edit.
     """
+    if data is None:
+        data = {}
     edit = normalize_model_parameter(edit)
     current_edit = get_edit(edit["id"], client=client)
-    updated_edit = {"id": current_edit["id"], "data": current_edit["data"]}
-    updated_edit["data"].update(data)
+    current_data = current_edit["data"] or {}
+    updated_edit = {
+        "id": current_edit["id"],
+        "data": {**current_data, **data},
+    }
     return update_edit(updated_edit, client=client)

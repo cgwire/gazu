@@ -215,6 +215,8 @@ def add_entity_to_playlist(
         preview_files = get_entity_preview_files(entity)
         for task_type_id in preview_files.keys():
             task_type_files = preview_files[task_type_id]
+            if not task_type_files:
+                continue
             first_file = task_type_files[0]
             if (
                 preview_file is None
@@ -222,12 +224,17 @@ def add_entity_to_playlist(
             ):
                 preview_file = first_file
 
-    preview_file = normalize_model_parameter(preview_file)
-    playlist["shots"].append(
-        {"entity_id": entity["id"], "preview_file_id": preview_file["id"]}
-    )
+    entry = {"entity_id": entity["id"]}
+    if preview_file is not None:
+        entry["preview_file_id"] = preview_file["id"]
+
+    playlist["shots"].append(entry)
     if persist:
-        update_playlist(playlist, client=client)
+        playlist = raw.post(
+            f"actions/playlists/{playlist['id']}/add-entity", 
+            entry,
+            client=client
+        )
     return playlist
 
 
@@ -288,7 +295,6 @@ def update_entity_preview(
     return playlist
 
 
-@cache
 def delete_playlist(
     playlist: str | dict, client: KitsuClient = default
 ) -> str:
@@ -398,6 +404,7 @@ def download_playlist_build(
     build_job: str | dict,
     file_path: str,
     client: KitsuClient = default,
+    progress_callback=None,
 ) -> requests.Response:
     """
     Download a playlist build.
@@ -413,11 +420,16 @@ def download_playlist_build(
     playlist = normalize_model_parameter(playlist)
     build_job = normalize_model_parameter(build_job)
     path = f"data/playlists/{playlist['id']}/build-jobs/{build_job['id']}/download"
-    return raw.download(path, file_path, client=client)
+    return raw.download(
+        path, file_path, client=client, progress_callback=progress_callback
+    )
 
 
 def download_playlist_zip(
-    playlist: str | dict, file_path: str, client: KitsuClient = default
+    playlist: str | dict,
+    file_path: str,
+    client: KitsuClient = default,
+    progress_callback=None,
 ) -> requests.Response:
     """
     Download a playlist as a zip file.
@@ -431,7 +443,9 @@ def download_playlist_zip(
     """
     playlist = normalize_model_parameter(playlist)
     path = f"data/playlists/{playlist['id']}/download/zip"
-    return raw.download(path, file_path, client=client)
+    return raw.download(
+        path, file_path, client=client, progress_callback=progress_callback
+    )
 
 
 def generate_temp_playlist(

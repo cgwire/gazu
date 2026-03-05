@@ -71,6 +71,5 @@ def remove_studio(
     """
     studio = normalize_model_parameter(studio)
     path = f"data/studios/{studio['id']}"
-    if force:
-        path += "?force=true"
-    return raw.delete(path, client=client)
+    params = {"force": True} if force else {}
+    return raw.delete(path, params=params, client=client)

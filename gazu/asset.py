@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import requests
-
 from .helpers import normalize_model_parameter
 
 from . import client as raw
@@ -26,7 +24,7 @@ def all_assets_for_open_projects(client: KitsuClient = default) -> list[dict]:
         list: Assets stored in the database for open projects.
     """
     all_assets = []
-    for project in gazu_project.all_open_projects(client=default):
+    for project in gazu_project.all_open_projects(client=client):
         all_assets.extend(all_assets_for_project(project, client))
     return sort_by_name(all_assets)
 
@@ -161,16 +159,18 @@ def get_asset_url(asset: str | dict, client: KitsuClient = default) -> str:
         url (str): Web url associated to the given asset
     """
     asset = normalize_model_parameter(asset)
-    asset = get_asset(asset["id"])
-    project = gazu_project.get_project(asset["project_id"])
-    host = raw.get_api_url_from_host()
+    asset = get_asset(asset["id"], client=client)
+    project = gazu_project.get_project(
+        asset["project_id"], client=client
+    )
+    host = raw.get_api_url_from_host(client=client)
     project_id = asset["project_id"]
     asset_id = asset["id"]
     if project["production_type"] != "tvshow":
         return f"{host}/productions/{project_id}/assets/{asset_id}/"
     else:
         episode_id = "main"
-        if len(asset["episode_id"]) > 0:
+        if asset.get("episode_id"):
             episode_id = asset["episode_id"]
         return f"{host}/productions/{project_id}/episodes/{episode_id}/assets/{asset_id}/"
 
@@ -180,7 +180,7 @@ def new_asset(
     asset_type: str | dict,
     name: str,
     description: str | None = None,
-    extra_data: dict = {},
+    extra_data: dict | None = None,
     episode: str | dict = None,
     is_shared: bool = False,
     client: KitsuClient = default,
@@ -204,6 +204,8 @@ def new_asset(
     asset_type = normalize_model_parameter(asset_type)
     episode = normalize_model_parameter(episode)
 
+    if extra_data is None:
+        extra_data = {}
     data = {"name": name, "data": extra_data, "is_shared": is_shared}
 
     if description is not None:
@@ -236,7 +238,7 @@ def update_asset(asset: dict, client: KitsuClient = default) -> dict:
 
 
 def update_asset_data(
-    asset: str | dict, data: dict = {}, client: KitsuClient = default
+    asset: str | dict, data: dict | None = None, client: KitsuClient = default
 ) -> dict:
     """
     Update the metadata for the provided asset. Keys that are not provided are
@@ -249,10 +251,14 @@ def update_asset_data(
     Returns:
         dict: Updated asset.
     """
+    if data is None:
+        data = {}
     asset = normalize_model_parameter(asset)
     current_asset = get_asset(asset["id"], client=client)
-    updated_asset = {"id": current_asset["id"], "data": current_asset["data"]}
-    updated_asset["data"].update(data)
+    updated_asset = {
+        "id": current_asset["id"],
+        "data": {**(current_asset["data"] or {}), **data},
+    }
     return update_asset(updated_asset, client=client)
 
 
@@ -315,6 +321,7 @@ def all_asset_types_for_shot(
     Returns:
         list: Asset types from assets casted in given shot.
     """
+    shot = normalize_model_parameter(shot)
     path = f"shots/{shot['id']}/asset-types"
     return sort_by_name(raw.fetch_all(path, client=client))
 
@@ -479,6 +486,7 @@ def all_asset_instances_for_shot(
     Returns:
         list: Asset instances existing for a given shot.
     """
+    shot = normalize_model_parameter(shot)
     path = f"shots/{shot['id']}/asset-instances"
     return raw.fetch_all(path, client=client)
 
@@ -532,7 +540,10 @@ def new_asset_asset_instance(
 
 
 def import_assets_with_csv(
-    project: str | dict, csv_file_path: str, client: KitsuClient = default
+    project: str | dict,
+    csv_file_path: str,
+    client: KitsuClient = default,
+    progress_callback=None,
 ) -> list[dict]:
     """
     Import the Assets from a previously exported CSV file into the given
@@ -551,6 +562,7 @@ def import_assets_with_csv(
         f"import/csv/projects/{project['id']}/assets",
         csv_file_path,
         client=client,
+        progress_callback=progress_callback,
     )
 
 
@@ -560,6 +572,7 @@ def export_assets_with_csv(
     episode: str | dict | None = None,
     assigned_to: str | dict | None = None,
     client: KitsuClient = default,
+    progress_callback=None,
 ) -> requests.Response:
     """
     Export the Assets data for a project to a CSV file on disk.
@@ -595,6 +608,7 @@ def export_assets_with_csv(
         csv_file_path,
         params=params,
         client=client,
+        progress_callback=progress_callback,
     )
 
 
