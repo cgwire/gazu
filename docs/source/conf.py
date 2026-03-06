@@ -104,10 +104,14 @@ def collect_docstrings(app, what, name, obj, options, lines):
     # Build input params
     input_params = {}
 
-    for param_name, param in signature.parameters.items():
+    for position, (param_name, param) in enumerate(
+        signature.parameters.items()
+    ):
         doc_param = parsed["params"].get(param_name, {})
 
         input_params[param_name] = {
+            "position": position,
+            "positional_only": param.kind == param.POSITIONAL_ONLY,
             "annotation": _safe_repr(param.annotation),
             "default": _safe_repr(param.default),
             "kind": param.kind.name,
