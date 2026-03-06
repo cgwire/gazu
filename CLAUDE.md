@@ -84,3 +84,19 @@ def test_example(self, mock):
 
 - Follow PEP 8, enforced by Black with line-length 79
 - All contributions follow the C4 contract (https://rfc.zeromq.org/spec:42/C4)
+
+## PR Description Format
+
+PRs should use the following structure:
+
+```
+## Problems
+
+- bullet point describing each problem addressed by the PR
+
+## Solutions
+
+- bullet point describing each fix or change applied
+```
+
+Keep bullet points concise. The Problems section lists what was wrong, the Solutions section lists what was done to fix it. One bullet per distinct issue/fix.
