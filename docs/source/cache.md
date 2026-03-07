@@ -1,3 +1,5 @@
+> **Warning:** This documentation is no longer maintained. The new documentation is available at [dev.kitsu.cloud](https://dev.kitsu.cloud/).
+
 # Caching
 
 Results of requests can be cached in memory. By default the caching of function

@@ -1,3 +1,5 @@
+> **Warning:** This documentation is no longer maintained. The new documentation is available at [dev.kitsu.cloud](https://dev.kitsu.cloud/).
+
 ## Raw functions
 
 These functions can be considered as low level. They allow to perform requests

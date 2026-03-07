@@ -1,3 +1,5 @@
+> **Warning:** This documentation is no longer maintained. The new documentation is available at [dev.kitsu.cloud](https://dev.kitsu.cloud/).
+
 # How to get started
 
 ## Installation

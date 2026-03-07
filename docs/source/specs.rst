@@ -1,3 +1,8 @@
+.. warning::
+
+   This documentation is no longer maintained. The new documentation is
+   available at `dev.kitsu.cloud <https://dev.kitsu.cloud/>`_.
+
 Specifications
 ==============
 

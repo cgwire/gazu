@@ -3,6 +3,11 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+.. warning::
+
+   This documentation is no longer maintained. The new documentation is
+   available at `dev.kitsu.cloud <https://dev.kitsu.cloud/>`_.
+
 Welcome to Gazu's documentation!
 ================================
 
