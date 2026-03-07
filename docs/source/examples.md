@@ -1,4 +1,4 @@
-```{eval-rst}
+```eval_rst
 .. warning::
 
    This documentation is no longer maintained. The new documentation is
