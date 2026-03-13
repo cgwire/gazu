@@ -93,8 +93,7 @@ class AssetTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/entities?name=entity-1&project_id=%s"
-                % fakeid("project-1"),
+                f"data/entities?name=entity-1&project_id={fakeid('project-1')}",
                 text=[{"id": fakeid("entity-1"), "name": "entity-1"}],
             )
             entity = gazu.entity.get_entity_by_name(
@@ -119,14 +118,14 @@ class AssetTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.delete(
                 gazu.client.get_full_url(
-                    "data/entities/%s" % fakeid("entity-1")
+                    f"data/entities/{fakeid('entity-1')}"
                 ),
                 status_code=204,
             )
             gazu.entity.remove_entity(fakeid("entity-1"))
             mock.delete(
                 gazu.client.get_full_url(
-                    "data/entities/%s?force=true" % fakeid("entity-1")
+                    f"data/entities/{fakeid('entity-1')}?force=true"
                 ),
                 status_code=204,
             )
@@ -136,7 +135,7 @@ class AssetTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.delete(
                 gazu.client.get_full_url(
-                    "data/entity-types/%s" % fakeid("entity-type-1")
+                    f"data/entity-types/{fakeid('entity-type-1')}"
                 ),
                 status_code=204,
             )

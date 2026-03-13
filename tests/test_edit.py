@@ -50,15 +50,14 @@ class EditTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/edits/%s" % fakeid("edit-01"),
+                f"data/edits/{fakeid('edit-01')}",
                 text=edit,
             )
             url = gazu.edit.get_edit_url(fakeid("edit-01"))
             self.assertEqual(
                 url,
-                "%s/productions/project-01/"
-                "episodes/episode-01/edits/edit-01/"
-                % gazu.client.get_api_url_from_host(),
+                f"{gazu.client.get_api_url_from_host()}/productions/project-01/"
+                "episodes/episode-01/edits/edit-01/",
             )
 
             edit = {
@@ -79,14 +78,14 @@ class EditTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/edits/%s" % fakeid("edit-01"),
+                f"data/edits/{fakeid('edit-01')}",
                 text=edit,
             )
             url = gazu.edit.get_edit_url(fakeid("edit-01"))
             self.assertEqual(
                 url,
-                "%s/productions/project-01/"
-                "edits/edit-01/" % gazu.client.get_api_url_from_host(),
+                f"{gazu.client.get_api_url_from_host()}/productions/project-01/"
+                "edits/edit-01/",
             )
 
     def test_new_edit(self):
@@ -99,14 +98,13 @@ class EditTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/edits/all?project_id=%s&name=Edit 01"
-                % (fakeid("project-1")),
+                f"data/edits/all?project_id={fakeid('project-1')}&name=Edit 01",
                 text=[],
             )
             mock_route(
                 mock,
                 "POST",
-                "data/projects/%s/edits" % (fakeid("project-1")),
+                f"data/projects/{fakeid('project-1')}/edits",
                 text=result,
             )
             edit = gazu.edit.new_edit(
@@ -125,8 +123,7 @@ class EditTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/edits/all?project_id=%s&name=Concept 01"
-                % fakeid("project-1"),
+                f"data/edits/all?project_id={fakeid('project-1')}&name=Concept 01",
                 text=[result],
             )
 
@@ -168,13 +165,13 @@ class EditTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/edits/%s" % fakeid("edit-1"),
+                f"data/edits/{fakeid('edit-1')}",
                 text={"id": fakeid("edit-1"), "data": {}},
             )
             mock_route(
                 mock,
                 "PUT",
-                "data/entities/%s" % fakeid("edit-1"),
+                f"data/entities/{fakeid('edit-1')}",
                 text={
                     "id": fakeid("edit-1"),
                     "data": {"metadata-1": "metadata-1"},
@@ -204,7 +201,7 @@ class EditTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/edits/%s/preview-files" % fakeid("edit-1"),
+                f"data/edits/{fakeid('edit-1')}/preview-files",
                 text=[
                     {"id": fakeid("preview-1"), "name": "preview-1"},
                     {"id": fakeid("preview-2"), "name": "preview-2"},

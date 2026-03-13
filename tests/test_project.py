@@ -60,8 +60,7 @@ class ProjectTestCase(unittest.TestCase):
         url = gazu.project.get_project_url({"id": "project-01"})
         self.assertEqual(
             url,
-            "%s/productions/project-01/assets/"
-            % gazu.client.get_api_url_from_host(),
+            f"{gazu.client.get_api_url_from_host()}/productions/project-01/assets/",
         )
 
     def test_all_project_status(self):
@@ -130,7 +129,7 @@ class ProjectTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.delete(
                 gazu.client.get_full_url(
-                    "data/projects/%s?force=true" % fakeid("project-1")
+                    f"data/projects/{fakeid('project-1')}?force=true"
                 ),
                 status_code=204,
             )
@@ -149,7 +148,7 @@ class ProjectTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "PUT",
-                "data/projects/%s" % fakeid("project-1"),
+                f"data/projects/{fakeid('project-1')}",
                 text=project,
             )
             self.assertEqual(gazu.project.update_project(project), project)
@@ -158,7 +157,7 @@ class ProjectTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/projects/%s" % fakeid("project-1")
+                    f"data/projects/{fakeid('project-1')}"
                 ),
                 text=json.dumps(
                     {
@@ -169,7 +168,7 @@ class ProjectTestCase(unittest.TestCase):
             )
             mock.put(
                 gazu.client.get_full_url(
-                    "data/projects/%s" % fakeid("project-1")
+                    f"data/projects/{fakeid('project-1')}"
                 ),
                 text=json.dumps(
                     {
@@ -196,7 +195,7 @@ class ProjectTestCase(unittest.TestCase):
 
             mock.put(
                 gazu.client.get_full_url(
-                    "data/projects/%s" % fakeid("project-1")
+                    f"data/projects/{fakeid('project-1')}"
                 ),
                 text=json.dumps(
                     {
@@ -222,7 +221,7 @@ class ProjectTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "POST",
-                "data/projects/%s/metadata-descriptors" % fakeid("project-1"),
+                f"data/projects/{fakeid('project-1')}/metadata-descriptors",
                 text=result,
             ),
             self.assertEqual(
@@ -240,8 +239,7 @@ class ProjectTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/projects/%s/metadata-descriptors/%s"
-                % (fakeid("project-1"), fakeid("metadata-descriptor-1")),
+                f"data/projects/{fakeid('project-1')}/metadata-descriptors/{fakeid('metadata-descriptor-1')}",
                 text={
                     "id": fakeid("metadata-descriptor-1"),
                     "name": "metadata-descriptor-1",
@@ -262,8 +260,7 @@ class ProjectTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/metadata-descriptors?project_id=%s&field_name=studio"
-                % fakeid("project-1"),
+                f"data/metadata-descriptors?project_id={fakeid('project-1')}&field_name=studio",
                 text=[
                     {
                         "id": fakeid("metadata-descriptor-1"),
@@ -286,7 +283,7 @@ class ProjectTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/projects/%s/metadata-descriptors" % fakeid("project-1"),
+                f"data/projects/{fakeid('project-1')}/metadata-descriptors",
                 text=[
                     {
                         "id": fakeid("metadata-descriptor-1"),
@@ -312,8 +309,7 @@ class ProjectTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "PUT",
-                "data/projects/%s/metadata-descriptors/%s"
-                % (fakeid("project-1"), fakeid("metadata-descriptor-1")),
+                f"data/projects/{fakeid('project-1')}/metadata-descriptors/{fakeid('metadata-descriptor-1')}",
                 text={
                     "id": fakeid("metadata-descriptor-1"),
                     "departments": [fakeid("department-1")],
@@ -335,8 +331,7 @@ class ProjectTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "DELETE",
-                "data/projects/%s/metadata-descriptors/%s"
-                % (fakeid("project-1"), fakeid("metadata-descriptor-1")),
+                f"data/projects/{fakeid('project-1')}/metadata-descriptors/{fakeid('metadata-descriptor-1')}",
                 text="",
             ),
             response = gazu.project.remove_metadata_descriptor(
@@ -351,7 +346,7 @@ class ProjectTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "POST",
-                "data/projects/%s/settings/task-status" % fakeid("project-1"),
+                f"data/projects/{fakeid('project-1')}/settings/task-status",
                 text={
                     "name": "task-status-1",
                     "id": fakeid("task-status-1"),
@@ -378,7 +373,7 @@ class ProjectTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "POST",
-                "data/projects/%s/settings/task-types" % fakeid("project-1"),
+                f"data/projects/{fakeid('project-1')}/settings/task-types",
                 text={
                     "name": "task-types-1",
                     "id": fakeid("task-types-1"),
@@ -407,10 +402,7 @@ class ProjectTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             project_id = fakeid("project-1")
             task_type_id = fakeid("task-type-1")
-            path = "data/projects/%s/settings/task-types/%s" % (
-                project_id,
-                task_type_id,
-            )
+            path = f"data/projects/{project_id}/settings/task-types/{task_type_id}"
             mock_route(mock, "DELETE", path, text="")
             gazu.project.remove_task_type(project_id, {"id": task_type_id})
 
@@ -418,10 +410,7 @@ class ProjectTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             project_id = fakeid("project-1")
             task_status_id = fakeid("task-status-1")
-            path = "data/projects/%s/settings/task-status/%s" % (
-                project_id,
-                task_status_id,
-            )
+            path = f"data/projects/{project_id}/settings/task-status/{task_status_id}"
             mock_route(mock, "DELETE", path, text="")
             gazu.project.remove_task_status(project_id, {"id": task_status_id})
 
@@ -430,7 +419,7 @@ class ProjectTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "POST",
-                "data/projects/%s/settings/asset-types" % fakeid("project-1"),
+                f"data/projects/{fakeid('project-1')}/settings/asset-types",
                 text={
                     "name": "asset-types-1",
                     "id": fakeid("asset-types-1"),
@@ -457,7 +446,7 @@ class ProjectTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/projects/%s/team" % fakeid("project-1"),
+                f"data/projects/{fakeid('project-1')}/team",
                 text=[
                     {
                         "id": fakeid("person-1"),
@@ -477,7 +466,7 @@ class ProjectTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "POST",
-                "data/projects/%s/team" % fakeid("project-1"),
+                f"data/projects/{fakeid('project-1')}/team",
                 text={
                     "team": [fakeid("person-1")],
                 },
@@ -499,14 +488,14 @@ class ProjectTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             project_id = fakeid("project-1")
             person_id = fakeid("person-1")
-            path = "data/projects/%s/team/%s" % (project_id, person_id)
+            path = f"data/projects/{project_id}/team/{person_id}"
             mock_route(mock, "DELETE", path, text="")
             gazu.project.remove_person_from_team(project_id, person_id)
 
     def test_get_project_task_types(self):
         with requests_mock.mock() as mock:
             project_id = fakeid("project-1")
-            path = "data/projects/%s/settings/task-types" % project_id
+            path = f"data/projects/{project_id}/settings/task-types"
             mock_route(
                 mock,
                 "GET",
@@ -523,7 +512,7 @@ class ProjectTestCase(unittest.TestCase):
     def test_get_project_task_statuses(self):
         with requests_mock.mock() as mock:
             project_id = fakeid("project-1")
-            path = "data/projects/%s/settings/task-status" % project_id
+            path = f"data/projects/{project_id}/settings/task-status"
             mock_route(
                 mock,
                 "GET",
@@ -541,7 +530,7 @@ class ProjectTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             project_id = fakeid("project-1")
             get_path = (
-                "data/projects/%s/settings/status-automations" % project_id
+                f"data/projects/{project_id}/settings/status-automations"
             )
             mock_route(
                 mock,
@@ -567,10 +556,7 @@ class ProjectTestCase(unittest.TestCase):
             )
             self.assertEqual(created["id"], fakeid("auto-3"))
 
-            del_path = "data/projects/%s/settings/status-automations/%s" % (
-                project_id,
-                fakeid("auto-3"),
-            )
+            del_path = f"data/projects/{project_id}/settings/status-automations/{fakeid('auto-3')}"
             mock_route(mock, "DELETE", del_path, text="")
             gazu.project.remove_status_automation(
                 project_id, {"id": fakeid("auto-3")}
@@ -580,8 +566,7 @@ class ProjectTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             project_id = fakeid("project-1")
             base_path = (
-                "data/projects/%s/settings/preview-background-files"
-                % project_id
+                f"data/projects/{project_id}/settings/preview-background-files"
             )
 
             mock_route(
@@ -604,7 +589,7 @@ class ProjectTestCase(unittest.TestCase):
             )
             self.assertEqual(created["id"], fakeid("bg-3"))
 
-            del_path = base_path + "/%s" % fakeid("bg-3")
+            del_path = base_path + f"/{fakeid('bg-3')}"
             mock_route(mock, "DELETE", del_path, text="")
             gazu.project.remove_preview_background_file(
                 project_id, {"id": fakeid("bg-3")}
@@ -613,7 +598,7 @@ class ProjectTestCase(unittest.TestCase):
     def test_get_milestones(self):
         with requests_mock.mock() as mock:
             project_id = fakeid("project-1")
-            path = "data/projects/%s/milestones" % project_id
+            path = f"data/projects/{project_id}/milestones"
             mock_route(
                 mock,
                 "GET",
@@ -629,7 +614,7 @@ class ProjectTestCase(unittest.TestCase):
     def test_project_quotas(self):
         with requests_mock.mock() as mock:
             project_id = fakeid("project-1")
-            quotas_path = "data/projects/%s/quotas" % project_id
+            quotas_path = f"data/projects/{project_id}/quotas"
             mock_route(
                 mock,
                 "GET",
@@ -640,10 +625,7 @@ class ProjectTestCase(unittest.TestCase):
             self.assertEqual(len(quotas), 2)
 
             person_id = fakeid("person-1")
-            person_path = "data/projects/%s/person-quotas?person_id=%s" % (
-                project_id,
-                person_id,
-            )
+            person_path = f"data/projects/{project_id}/person-quotas?person_id={person_id}"
             mock_route(
                 mock,
                 "GET",
@@ -659,7 +641,7 @@ class ProjectTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             project_id = fakeid("project-1")
 
-            path = "data/projects/%s/budgets" % project_id
+            path = f"data/projects/{project_id}/budgets"
             mock_route(mock, "GET", path, text=[{"id": fakeid("budget-1")}])
             budgets = gazu.project.get_budgets(project_id)
             self.assertEqual(len(budgets), 1)
@@ -681,7 +663,7 @@ class ProjectTestCase(unittest.TestCase):
             )
             self.assertEqual(created["id"], fakeid("budget-2"))
 
-            get_one_path = path + "/%s" % fakeid("budget-2")
+            get_one_path = path + f"/{fakeid('budget-2')}"
             mock_route(
                 mock,
                 "GET",
@@ -713,7 +695,7 @@ class ProjectTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             project_id = fakeid("project-1")
             budget_id = fakeid("budget-1")
-            base = "data/projects/%s/budgets/%s" % (project_id, budget_id)
+            base = f"data/projects/{project_id}/budgets/{budget_id}"
 
             list_path = base + "/entries"
             mock_route(
@@ -746,7 +728,7 @@ class ProjectTestCase(unittest.TestCase):
             )
             self.assertEqual(created["id"], fakeid("entry-3"))
 
-            one_path = base + "/entries/%s" % fakeid("entry-3")
+            one_path = base + f"/entries/{fakeid('entry-3')}"
             mock_route(
                 mock,
                 "GET",

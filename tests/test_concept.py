@@ -42,7 +42,7 @@ class ConceptTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/concepts/%s/preview-files" % fakeid("concept-1"),
+                f"data/concepts/{fakeid('concept-1')}/preview-files",
                 text=[
                     {"id": fakeid("preview-1"), "name": "preview-1"},
                     {"id": fakeid("preview-2"), "name": "preview-2"},
@@ -118,14 +118,13 @@ class ConceptTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/concepts?project_id=%s&name=Concept 01"
-                % (fakeid("project-1")),
+                f"data/concepts?project_id={fakeid('project-1')}&name=Concept 01",
                 text=[],
             )
             mock_route(
                 mock,
                 "POST",
-                "data/projects/%s/concepts" % (fakeid("project-1")),
+                f"data/projects/{fakeid('project-1')}/concepts",
                 text=result,
             )
             concept = gazu.concept.new_concept(
@@ -143,8 +142,7 @@ class ConceptTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/concepts?project_id=%s&name=Concept 01"
-                % fakeid("project-1"),
+                f"data/concepts?project_id={fakeid('project-1')}&name=Concept 01",
                 text=[result],
             )
 
