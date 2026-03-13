@@ -98,7 +98,7 @@ class CastingTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/projects/%s/asset-types" % project_id,
+                f"data/projects/{project_id}/asset-types",
                 text=[{"name": "Asset Type 01"}],
             )
             asset_types = gazu.asset.all_asset_types_for_project(project_id)
@@ -141,7 +141,7 @@ class CastingTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/asset-types/%s" % fakeid("asset-type-1"),
+                f"data/asset-types/{fakeid('asset-type-1')}",
                 text=result,
             )
             self.assertEqual(
@@ -387,9 +387,7 @@ class CastingTestCase(unittest.TestCase):
                 text=json.dumps(project),
             )
             mock.get(
-                gazu.client.get_full_url(
-                    "data/assets/%s" % fakeid("asset-01")
-                ),
+                gazu.client.get_full_url(f"data/assets/{fakeid('asset-01')}"),
                 text=json.dumps(asset),
             )
             url = gazu.asset.get_asset_url(fakeid("asset-01"))
@@ -434,7 +432,7 @@ class CastingTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/assets?source_id=%s" % fakeid("episode-1")
+                    f"data/assets?source_id={fakeid('episode-1')}"
                 ),
                 text=json.dumps(
                     [
@@ -458,7 +456,7 @@ class CastingTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "PUT",
-                "data/entities/%s" % fakeid("asset-1"),
+                f"data/entities/{fakeid('asset-1')}",
                 text=result,
             )
             asset = {
@@ -470,13 +468,11 @@ class CastingTestCase(unittest.TestCase):
     def test_update_asset_data(self):
         with requests_mock.mock() as mock:
             mock.get(
-                gazu.client.get_full_url("data/assets/%s" % fakeid("asset-1")),
+                gazu.client.get_full_url(f"data/assets/{fakeid('asset-1')}"),
                 text=json.dumps({"id": fakeid("asset-1"), "data": {}}),
             )
             mock.put(
-                gazu.client.get_full_url(
-                    "data/entities/%s" % fakeid("asset-1")
-                ),
+                gazu.client.get_full_url(f"data/entities/{fakeid('asset-1')}"),
                 text=json.dumps(
                     {
                         "id": fakeid("asset-1"),
@@ -505,8 +501,7 @@ class CastingTestCase(unittest.TestCase):
     def test_disable_asset_instance(self):
         with requests_mock.mock() as mock:
             mock.put(
-                "%s/asset-instances/%s"
-                % (gazu.client.host, fakeid("asset-instance-1")),
+                f"{gazu.client.host}/asset-instances/{fakeid('asset-instance-1')}",
                 text=json.dumps(
                     {"id": fakeid("asset-instance-1"), "active": False}
                 ),
@@ -519,8 +514,7 @@ class CastingTestCase(unittest.TestCase):
     def test_enable_asset_instance(self):
         with requests_mock.mock() as mock:
             mock.put(
-                "%s/asset-instances/%s"
-                % (gazu.client.host, fakeid("asset-instance-1")),
+                f"{gazu.client.host}/asset-instances/{fakeid('asset-instance-1')}",
                 text=json.dumps(
                     {"id": fakeid("asset-instance-1"), "active": True}
                 ),
@@ -536,12 +530,7 @@ class CastingTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "export/csv/projects/%s/assets.csv?episode_id=%s&assigned_to=%s"
-                % (
-                    fakeid("project-1"),
-                    fakeid("episode-1"),
-                    fakeid("person-1"),
-                ),
+                f"export/csv/projects/{fakeid('project-1')}/assets.csv?episode_id={fakeid('episode-1')}&assigned_to={fakeid('person-1')}",
                 text=csv,
             )
             gazu.asset.export_assets_with_csv(
@@ -563,7 +552,7 @@ class CastingTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/episodes/%s" % (fakeid("episode-1")),
+                f"data/episodes/{fakeid('episode-1')}",
                 text=result,
             )
             self.assertEqual(
@@ -579,7 +568,7 @@ class CastingTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/asset-types/%s" % fakeid("asset-type-1"),
+                f"data/asset-types/{fakeid('asset-type-1')}",
                 text=result,
             )
             self.assertEqual(
@@ -595,13 +584,13 @@ class CastingTestCase(unittest.TestCase):
                 mock_route(
                     mock,
                     "POST",
-                    "import/csv/projects/%s/assets" % fakeid("project-1"),
+                    f"import/csv/projects/{fakeid('project-1')}/assets",
                     text={"success": True},
                 )
                 add_verify_file_callback(
                     mock,
                     {"file": test_file.read()},
-                    "import/csv/projects/%s/assets" % fakeid("project-1"),
+                    f"import/csv/projects/{fakeid('project-1')}/assets",
                 )
                 self.assertEqual(
                     gazu.asset.import_assets_with_csv(

@@ -264,7 +264,7 @@ class BaseFuncTestCase(ClientTestCase):
             raw.make_auth_header(),
             {
                 "Authorization": "Bearer token_test",
-                "User-Agent": "CGWire Gazu %s" % __version__,
+                "User-Agent": f"CGWire Gazu {__version__}",
             },
         )
 

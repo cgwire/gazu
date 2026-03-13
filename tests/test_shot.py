@@ -127,7 +127,7 @@ class ShotTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/episodes/%s" % (fakeid("episode-1")),
+                f"data/episodes/{fakeid('episode-1')}",
                 text=result,
             )
             self.assertEqual(
@@ -139,8 +139,7 @@ class ShotTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/episodes?project_id=%s&name=Episode 01"
-                % fakeid("project-1"),
+                f"data/episodes?project_id={fakeid('project-1')}&name=Episode 01",
                 text=[{"name": "Episode 01", "id": fakeid("episode-1")}],
             )
             episode = gazu.shot.get_episode_by_name(
@@ -157,7 +156,7 @@ class ShotTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/episodes/%s" % fakeid("episode-1"),
+                f"data/episodes/{fakeid('episode-1')}",
                 text=result,
             )
             self.assertEqual(
@@ -311,14 +310,13 @@ class ShotTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/shots/all?sequence_id=%s&name=Shot 01"
-                % (fakeid("sequence-1")),
+                f"data/shots/all?sequence_id={fakeid('sequence-1')}&name=Shot 01",
                 text=[],
             )
             mock_route(
                 mock,
                 "POST",
-                "data/projects/%s/shots" % (fakeid("project-1")),
+                f"data/projects/{fakeid('project-1')}/shots",
                 text=result,
             )
             shot = gazu.shot.new_shot(
@@ -340,8 +338,7 @@ class ShotTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/shots/all?sequence_id=%s&name=Shot 01"
-                % fakeid("sequence-1"),
+                f"data/shots/all?sequence_id={fakeid('sequence-1')}&name=Shot 01",
                 text=[result],
             )
 
@@ -459,13 +456,13 @@ class ShotTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/shots/%s" % fakeid("shot-01"),
+                f"data/shots/{fakeid('shot-01')}",
                 text=shot,
             )
             url = gazu.shot.get_shot_url(fakeid("shot-01"))
             self.assertEqual(
                 url,
-                "http://gazu-server/productions/project-01/"
+                f"{gazu.client.get_api_url_from_host()}/productions/project-01/"
                 "episodes/episode-01/shots/shot-01/",
             )
 
@@ -487,13 +484,14 @@ class ShotTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/shots/%s" % fakeid("shot-01"),
+                f"data/shots/{fakeid('shot-01')}",
                 text=shot,
             )
             url = gazu.shot.get_shot_url(fakeid("shot-01"))
             self.assertEqual(
                 url,
-                "http://gazu-server/productions/project-01/" "shots/shot-01/",
+                f"{gazu.client.get_api_url_from_host()}/productions/project-01/"
+                "shots/shot-01/",
             )
 
     def test_all_sequences_for_episode(self):
@@ -515,7 +513,7 @@ class ShotTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/shots/%s/preview-files" % fakeid("shot-1"),
+                f"data/shots/{fakeid('shot-1')}/preview-files",
                 text=[
                     {"id": fakeid("preview-1"), "name": "preview-1"},
                     {"id": fakeid("preview-2"), "name": "preview-2"},
@@ -531,7 +529,7 @@ class ShotTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/episodes/%s" % fakeid("episode-1")
+                    f"data/episodes/{fakeid('episode-1')}"
                 ),
                 text=json.dumps(
                     {
@@ -543,16 +541,15 @@ class ShotTestCase(unittest.TestCase):
             url = gazu.shot.get_episode_url(fakeid("episode-1"))
             self.assertEqual(
                 url,
-                "http://gazu-server/productions/%s/"
-                "episodes/%s/shots"
-                % (fakeid("project-1"), fakeid("episode-1")),
+                f"{gazu.client.get_api_url_from_host()}/productions/{fakeid('project-1')}/"
+                f"episodes/{fakeid('episode-1')}/shots",
             )
 
     def test_update_sequence(self):
         with requests_mock.mock() as mock:
             mock.put(
                 gazu.client.get_full_url(
-                    "data/entities/%s" % fakeid("sequence-1")
+                    f"data/entities/{fakeid('sequence-1')}"
                 ),
                 text=json.dumps(
                     {"id": fakeid("sequence-1"), "name": "sequence-1"}
@@ -566,7 +563,7 @@ class ShotTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/shots/%s/asset-instances" % fakeid("shot-1")
+                    f"data/shots/{fakeid('shot-1')}/asset-instances"
                 ),
                 text=json.dumps(
                     [
@@ -597,13 +594,13 @@ class ShotTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/shots/%s" % fakeid("shot-1"),
+                f"data/shots/{fakeid('shot-1')}",
                 text={"id": fakeid("shot-1"), "data": {}},
             )
             mock_route(
                 mock,
                 "PUT",
-                "data/entities/%s" % fakeid("shot-1"),
+                f"data/entities/{fakeid('shot-1')}",
                 text={
                     "id": fakeid("shot-1"),
                     "data": {"metadata-1": "metadata-1"},
@@ -617,13 +614,13 @@ class ShotTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/sequences/%s" % fakeid("sequence-1")
+                    f"data/sequences/{fakeid('sequence-1')}"
                 ),
                 text=json.dumps({"id": fakeid("sequence-1"), "data": {}}),
             )
             mock.put(
                 gazu.client.get_full_url(
-                    "data/entities/%s" % fakeid("sequence-1")
+                    f"data/entities/{fakeid('sequence-1')}"
                 ),
                 text=json.dumps(
                     {
@@ -642,7 +639,7 @@ class ShotTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.put(
                 gazu.client.get_full_url(
-                    "data/entities/%s" % fakeid("episode-1")
+                    f"data/entities/{fakeid('episode-1')}"
                 ),
                 text=json.dumps(
                     {"id": fakeid("episode-1"), "project_id": "project-01"}
@@ -656,13 +653,13 @@ class ShotTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/episodes/%s" % fakeid("episode-1")
+                    f"data/episodes/{fakeid('episode-1')}"
                 ),
                 text=json.dumps({"id": fakeid("episode-1"), "data": {}}),
             )
             mock.put(
                 gazu.client.get_full_url(
-                    "data/entities/%s" % fakeid("episode-1")
+                    f"data/entities/{fakeid('episode-1')}"
                 ),
                 text=json.dumps(
                     {
@@ -679,7 +676,7 @@ class ShotTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             text = {"id": fakeid("shot-1"), "canceled": False}
             mock_route(
-                mock, "PUT", "data/shots/%s" % fakeid("shot-1"), text=text
+                mock, "PUT", f"data/shots/{fakeid('shot-1')}", text=text
             )
             self.assertEqual(gazu.shot.restore_shot(fakeid("shot-1")), text)
 
@@ -689,12 +686,7 @@ class ShotTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "export/csv/projects/%s/shots.csv?episode_id=%s&assigned_to=%s"
-                % (
-                    fakeid("project-1"),
-                    fakeid("episode-1"),
-                    fakeid("person-1"),
-                ),
+                f"export/csv/projects/{fakeid('project-1')}/shots.csv?episode_id={fakeid('episode-1')}&assigned_to={fakeid('person-1')}",
                 text=csv,
             )
             gazu.shot.export_shots_with_csv(
@@ -713,14 +705,14 @@ class ShotTestCase(unittest.TestCase):
                 mock_route(
                     mock,
                     "POST",
-                    "/import/otio/projects/%s" % fakeid("project-1"),
+                    f"/import/otio/projects/{fakeid('project-1')}",
                     text={"success": True},
                 )
 
                 add_verify_file_callback(
                     mock,
                     {"file": test_file.read()},
-                    "/import/otio/projects/%s" % fakeid("project-1"),
+                    f"/import/otio/projects/{fakeid('project-1')}",
                 )
 
                 self.assertEqual(
@@ -735,16 +727,14 @@ class ShotTestCase(unittest.TestCase):
                 mock_route(
                     mock,
                     "POST",
-                    "/import/otio/projects/%s/episodes/%s"
-                    % (fakeid("project-1"), fakeid("episode-1")),
+                    f"/import/otio/projects/{fakeid('project-1')}/episodes/{fakeid('episode-1')}",
                     text={"success": True},
                 )
 
                 add_verify_file_callback(
                     mock,
                     {"file": test_file.read()},
-                    "/import/otio/projects/%s/episodes/%s"
-                    % (fakeid("project-1"), fakeid("episode-1")),
+                    f"/import/otio/projects/{fakeid('project-1')}/episodes/{fakeid('episode-1')}",
                 )
 
                 self.assertEqual(
@@ -762,14 +752,14 @@ class ShotTestCase(unittest.TestCase):
                 mock_route(
                     mock,
                     "POST",
-                    "import/csv/projects/%s/shots" % fakeid("project-1"),
+                    f"import/csv/projects/{fakeid('project-1')}/shots",
                     text={"success": True},
                 )
 
                 add_verify_file_callback(
                     mock,
                     {"file": test_file.read()},
-                    "import/csv/projects/%s/shots" % fakeid("project-1"),
+                    f"import/csv/projects/{fakeid('project-1')}/shots",
                 )
 
                 self.assertEqual(

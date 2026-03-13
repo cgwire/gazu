@@ -69,7 +69,7 @@ class PersonTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/departments/%s" % fakeid("department-1"),
+                f"data/departments/{fakeid('department-1')}",
                 text={"name": "department-1"},
             )
             department = gazu.person.get_department(fakeid("department-1"))
@@ -97,7 +97,7 @@ class PersonTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "PUT",
-                "data/departments/%s" % fakeid("department-1"),
+                f"data/departments/{fakeid('department-1')}",
                 text=result,
             )
             department = {
@@ -112,7 +112,7 @@ class PersonTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "DELETE",
-                "data/departments/%s" % fakeid("department-1"),
+                f"data/departments/{fakeid('department-1')}",
                 status_code=204,
             )
             department = {"id": fakeid("department-1"), "name": "department-1"}
@@ -120,7 +120,7 @@ class PersonTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "DELETE",
-                "data/departments/%s?force=True" % fakeid("department-1"),
+                f"data/departments/{fakeid('department-1')}?force=True",
                 status_code=204,
             )
             department = {"id": fakeid("department-1"), "name": "department-1"}
@@ -225,7 +225,7 @@ class PersonTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "PUT",
-                "data/persons/%s" % fakeid("person-1"),
+                f"data/persons/{fakeid('person-1')}",
                 text=result,
             )
             person = {
@@ -247,7 +247,7 @@ class PersonTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "PUT",
-                "data/persons/%s" % fakeid("bot-1"),
+                f"data/persons/{fakeid('bot-1')}",
                 text=result,
             )
             bot = {
@@ -274,7 +274,7 @@ class PersonTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/persons?id=%s" % (fakeid("John Doe")),
+                f"data/persons?id={fakeid('John Doe')}",
                 text=result,
             )
             self.assertEqual(
@@ -284,7 +284,7 @@ class PersonTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/persons?id=%s&relations=True" % (fakeid("John Doe")),
+                f"data/persons?id={fakeid('John Doe')}&relations=True",
                 text=result,
             )
             self.assertEqual(
@@ -323,10 +323,7 @@ class PersonTestCase(unittest.TestCase):
             gazu.person.remove_bot(bot, True)
 
     def test_get_person_url(self):
-        wanted_result = "%s/people/%s/" % (
-            gazu.client.get_api_url_from_host(),
-            fakeid("person-1"),
-        )
+        wanted_result = f"{gazu.client.get_api_url_from_host()}/people/{fakeid('person-1')}/"
         self.assertEqual(
             wanted_result, gazu.person.get_person_url(fakeid("person-1"))
         )
@@ -355,7 +352,7 @@ class PersonTestCase(unittest.TestCase):
 
     def test_set_avatar(self):
         with requests_mock.mock() as mock:
-            path = "/pictures/thumbnails/persons/%s" % fakeid("person-1")
+            path = f"/pictures/thumbnails/persons/{fakeid('person-1')}"
             mock.post(
                 gazu.client.get_full_url(path),
                 text=json.dumps(
@@ -374,7 +371,7 @@ class PersonTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "POST",
-                "actions/persons/%s/change-password" % person_id,
+                f"actions/persons/{person_id}/change-password",
                 text={"success": True},
             )
             self.assertEqual(
@@ -388,7 +385,7 @@ class PersonTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "actions/persons/%s/invite" % person_id,
+                f"actions/persons/{person_id}/invite",
                 text={"success": True},
             )
             self.assertEqual(
@@ -402,8 +399,7 @@ class PersonTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/persons/%s/time-spents/by-date?date=2025-01-15"
-                % person_id,
+                f"data/persons/{person_id}/time-spents/by-date?date=2025-01-15",
                 text=[{"id": fakeid("ts-1")}, {"id": fakeid("ts-2")}],
             )
             time_spents = gazu.person.get_time_spents_by_date(
@@ -417,7 +413,7 @@ class PersonTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/persons/%s/time-spents/week/2025/3" % person_id,
+                f"data/persons/{person_id}/time-spents/week/2025/3",
                 text=[{"id": fakeid("ts-1")}],
             )
             time_spents = gazu.person.get_week_time_spents(person_id, 2025, 3)
@@ -429,7 +425,7 @@ class PersonTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/persons/%s/time-spents/year/2025" % person_id,
+                f"data/persons/{person_id}/time-spents/year/2025",
                 text=[{"id": fakeid("ts-1")}, {"id": fakeid("ts-2")}],
             )
             time_spents = gazu.person.get_year_time_spents(person_id, 2025)
@@ -441,7 +437,7 @@ class PersonTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/persons/%s/day-offs" % person_id,
+                f"data/persons/{person_id}/day-offs",
                 text=[{"id": fakeid("dayoff-1")}, {"id": fakeid("dayoff-2")}],
             )
             day_offs = gazu.person.get_day_offs(person_id)
@@ -453,7 +449,7 @@ class PersonTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/persons/%s/day-offs/week/2025/3" % person_id,
+                f"data/persons/{person_id}/day-offs/week/2025/3",
                 text=[{"id": fakeid("dayoff-1")}],
             )
             day_offs = gazu.person.get_week_day_offs(person_id, 2025, 3)
@@ -465,7 +461,7 @@ class PersonTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/persons/%s/day-offs/month/2025/01" % person_id,
+                f"data/persons/{person_id}/day-offs/month/2025/01",
                 text=[{"id": fakeid("dayoff-1")}],
             )
             day_offs = gazu.person.get_month_day_offs(person_id, 2025, 1)
@@ -477,7 +473,7 @@ class PersonTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/persons/%s/day-offs/year/2025" % person_id,
+                f"data/persons/{person_id}/day-offs/year/2025",
                 text=[{"id": fakeid("dayoff-1")}, {"id": fakeid("dayoff-2")}],
             )
             day_offs = gazu.person.get_year_day_offs(person_id, 2025)
@@ -490,7 +486,7 @@ class PersonTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "POST",
-                "actions/persons/%s/departments/add" % person_id,
+                f"actions/persons/{person_id}/departments/add",
                 text={"id": person_id, "departments": [dept_id]},
             )
             result = gazu.person.add_person_to_department(
@@ -505,7 +501,7 @@ class PersonTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "DELETE",
-                "actions/persons/%s/departments/%s" % (person_id, dept_id),
+                f"actions/persons/{person_id}/departments/{dept_id}",
                 status_code=204,
             )
             gazu.person.remove_person_from_department(
@@ -518,7 +514,7 @@ class PersonTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "DELETE",
-                "data/persons/%s/two-factor-authentication" % person_id,
+                f"data/persons/{person_id}/two-factor-authentication",
                 status_code=204,
             )
             gazu.person.disable_two_factor_authentication(person_id)
@@ -529,7 +525,7 @@ class PersonTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "DELETE",
-                "data/persons/%s/avatar" % person_id,
+                f"data/persons/{person_id}/avatar",
                 status_code=204,
             )
             gazu.person.clear_person_avatar(person_id)

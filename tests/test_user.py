@@ -231,7 +231,7 @@ class ProjectTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/user/scenes/%s/tasks" % fakeid("scene-1")
+                    f"data/user/scenes/{fakeid('scene-1')}/tasks"
                 ),
                 text=json.dumps(
                     [
@@ -328,7 +328,7 @@ class ProjectTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/user/projects/%s/assets" % fakeid("project-1"),
+                f"data/user/projects/{fakeid('project-1')}/assets",
                 text=[{"id": fakeid("asset-1")}, {"id": fakeid("asset-2")}],
             )
             assets = gazu.user.all_project_assets(fakeid("project-1"))
@@ -373,7 +373,7 @@ class ProjectTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/user/filter-groups/%s" % fakeid("fg-3"),
+                f"data/user/filter-groups/{fakeid('fg-3')}",
                 text={"id": fakeid("fg-3"), "name": "My Group"},
             )
             group = gazu.user.get_filter_group(fakeid("fg-3"))
@@ -383,7 +383,7 @@ class ProjectTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "PUT",
-                "data/user/filter-groups/%s" % fakeid("fg-3"),
+                f"data/user/filter-groups/{fakeid('fg-3')}",
                 text={"id": fakeid("fg-3"), "name": "Updated Group"},
             )
             updated = gazu.user.update_filter_group(
@@ -395,7 +395,7 @@ class ProjectTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "DELETE",
-                "data/user/filter-groups/%s" % fakeid("fg-3"),
+                f"data/user/filter-groups/{fakeid('fg-3')}",
                 status_code=204,
             )
             gazu.user.remove_filter_group(fakeid("fg-3"))
@@ -427,7 +427,7 @@ class ProjectTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/user/tasks/%s/time-spent" % fakeid("task-1"),
+                f"data/user/tasks/{fakeid('task-1')}/time-spent",
                 text={"id": fakeid("ts-1"), "duration": 3600},
             )
             time_spent = gazu.user.get_task_time_spent(fakeid("task-1"))
@@ -458,7 +458,7 @@ class ProjectTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/user/notifications/%s" % fakeid("notif-1"),
+                f"data/user/notifications/{fakeid('notif-1')}",
                 text={"id": fakeid("notif-1"), "read": False},
             )
             notif = gazu.user.get_notification(fakeid("notif-1"))
@@ -467,7 +467,7 @@ class ProjectTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "PUT",
-                "data/user/notifications/%s" % fakeid("notif-1"),
+                f"data/user/notifications/{fakeid('notif-1')}",
                 text={"id": fakeid("notif-1"), "read": True},
             )
             updated = gazu.user.update_notification(
@@ -490,7 +490,7 @@ class ProjectTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/user/tasks/%s/subscription" % fakeid("task-1"),
+                f"data/user/tasks/{fakeid('task-1')}/subscription",
                 text={"subscribed": True},
             )
             sub = gazu.user.check_task_subscription(fakeid("task-1"))
@@ -499,7 +499,7 @@ class ProjectTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "POST",
-                "data/user/tasks/%s/subscribe" % fakeid("task-1"),
+                f"data/user/tasks/{fakeid('task-1')}/subscribe",
                 text={"subscribed": True},
             )
             result = gazu.user.subscribe_to_task(fakeid("task-1"))
@@ -508,7 +508,7 @@ class ProjectTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "DELETE",
-                "data/user/tasks/%s/unsubscribe" % fakeid("task-1"),
+                f"data/user/tasks/{fakeid('task-1')}/unsubscribe",
                 status_code=204,
             )
             gazu.user.unsubscribe_from_task(fakeid("task-1"))
@@ -528,7 +528,7 @@ class ProjectTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "POST",
-                "data/user/chats/%s/join" % fakeid("chat-1"),
+                f"data/user/chats/{fakeid('chat-1')}/join",
                 text={"id": fakeid("chat-1"), "joined": True},
             )
             chat = gazu.user.join_chat(fakeid("chat-1"))
@@ -537,7 +537,7 @@ class ProjectTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "DELETE",
-                "data/user/chats/%s/leave" % fakeid("chat-1"),
+                f"data/user/chats/{fakeid('chat-1')}/leave",
                 status_code=204,
             )
             gazu.user.leave_chat(fakeid("chat-1"))
@@ -602,7 +602,7 @@ class ProjectTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "PUT",
-                "data/user/filters/%s" % fakeid("filter-3"),
+                f"data/user/filters/{fakeid('filter-3')}",
                 text={
                     "id": fakeid("filter-3"),
                     "name": "Updated Filter",
@@ -617,7 +617,7 @@ class ProjectTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "DELETE",
-                "data/user/filters/%s" % fakeid("filter-3"),
+                f"data/user/filters/{fakeid('filter-3')}",
                 status_code=204,
             )
             gazu.user.remove_filter(fakeid("filter-3"))
