@@ -465,8 +465,9 @@ class ShotTestCase(unittest.TestCase):
             url = gazu.shot.get_shot_url(fakeid("shot-01"))
             self.assertEqual(
                 url,
-                "http://gazu-server/productions/project-01/"
-                "episodes/episode-01/shots/shot-01/",
+                "%s/productions/project-01/"
+                "episodes/episode-01/shots/shot-01/"
+                % gazu.client.get_api_url_from_host(),
             )
 
             shot = {
@@ -493,7 +494,8 @@ class ShotTestCase(unittest.TestCase):
             url = gazu.shot.get_shot_url(fakeid("shot-01"))
             self.assertEqual(
                 url,
-                "http://gazu-server/productions/project-01/" "shots/shot-01/",
+                "%s/productions/project-01/"
+                "shots/shot-01/" % gazu.client.get_api_url_from_host(),
             )
 
     def test_all_sequences_for_episode(self):
@@ -543,9 +545,13 @@ class ShotTestCase(unittest.TestCase):
             url = gazu.shot.get_episode_url(fakeid("episode-1"))
             self.assertEqual(
                 url,
-                "http://gazu-server/productions/%s/"
+                "%s/productions/%s/"
                 "episodes/%s/shots"
-                % (fakeid("project-1"), fakeid("episode-1")),
+                % (
+                    gazu.client.get_api_url_from_host(),
+                    fakeid("project-1"),
+                    fakeid("episode-1"),
+                ),
             )
 
     def test_update_sequence(self):

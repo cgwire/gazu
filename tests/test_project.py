@@ -59,7 +59,9 @@ class ProjectTestCase(unittest.TestCase):
     def test_get_url(self):
         url = gazu.project.get_project_url({"id": "project-01"})
         self.assertEqual(
-            url, "http://gazu-server/productions/project-01/assets/"
+            url,
+            "%s/productions/project-01/assets/"
+            % gazu.client.get_api_url_from_host(),
         )
 
     def test_all_project_status(self):

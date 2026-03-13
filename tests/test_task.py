@@ -915,8 +915,13 @@ class TaskTestCase(unittest.TestCase):
         }
         self.assertEqual(
             gazu.task.get_task_url(task),
-            "http://gazu-server/productions/%s/"
-            "shots/tasks/%s/" % (fakeid("project-1"), fakeid("task-1")),
+            "%s/productions/%s/"
+            "shots/tasks/%s/"
+            % (
+                gazu.client.get_api_url_from_host(),
+                fakeid("project-1"),
+                fakeid("task-1"),
+            ),
         )
         task = "test"
         self.assertRaises(

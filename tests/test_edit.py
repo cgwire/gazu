@@ -56,8 +56,9 @@ class EditTestCase(unittest.TestCase):
             url = gazu.edit.get_edit_url(fakeid("edit-01"))
             self.assertEqual(
                 url,
-                "http://gazu-server/productions/project-01/"
-                "episodes/episode-01/edits/edit-01/",
+                "%s/productions/project-01/"
+                "episodes/episode-01/edits/edit-01/"
+                % gazu.client.get_api_url_from_host(),
             )
 
             edit = {
@@ -84,7 +85,8 @@ class EditTestCase(unittest.TestCase):
             url = gazu.edit.get_edit_url(fakeid("edit-01"))
             self.assertEqual(
                 url,
-                "http://gazu-server/productions/project-01/" "edits/edit-01/",
+                "%s/productions/project-01/"
+                "edits/edit-01/" % gazu.client.get_api_url_from_host(),
             )
 
     def test_new_edit(self):
