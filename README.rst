@@ -7,7 +7,7 @@ Gazu, Python client for the Kitsu API
 
 The Kitsu Python client allows you to fetch data easily from the Kitsu
 collaboration platform. With Gazu, you bring assets and shots data into your
-pipeline tools. It comes with extra features such as preview publishing and 
+pipeline tools. It comes with extra features such as preview publishing and
 event stream listening.
 
 It is made to be used with the `Kitsu API <https://zou.cg-wire.com>`__. It
@@ -39,6 +39,31 @@ Let's finish with an example. Fetch all the open projects:
 ::
 
     projects = gazu.project.all_open_projects()
+
+
+CLI
+---
+
+Gazu ships with an optional command-line interface. Install it with:
+
+.. code:: bash
+
+    pip install gazu[cli]
+
+Then log in and start querying your Kitsu instance from the terminal:
+
+.. code:: bash
+
+    gazu-cli login --host https://zou-server-url/api
+    gazu-cli projects
+    gazu-cli assets --project "My Project"
+    gazu-cli my-tasks
+    gazu-cli shots --project "My Project" --sequence SEQ01
+    gazu-cli comment --task <task-id> --status wip --message "Started lighting"
+
+Use ``gazu-cli --help`` to see all available commands. Add ``--json`` to any
+command to get machine-readable JSON output. You can also set the
+``GAZU_PROJECT`` environment variable to avoid repeating ``--project``.
 
 
 Documentation
