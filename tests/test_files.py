@@ -69,7 +69,7 @@ class FilesTestCase(unittest.TestCase):
         person = {"id": "person-01"}
         file_status = {"id": "file-status-id-01"}
         path = gazu.client.get_full_url(
-            "data/entities/%s/output-files/new" % entity["id"]
+            f"data/entities/{entity['id']}/output-files/new"
         )
 
         with requests_mock.mock() as mock:
@@ -123,9 +123,8 @@ class FilesTestCase(unittest.TestCase):
         person = {"id": "person-01"}
         file_status = {"id": "file-status-id-01"}
         path = gazu.client.get_full_url(
-            "data/asset-instances/%s/"
-            "entities/%s/output-files/new"
-            % (asset_instance["id"], temporal_entity["id"])
+            f"data/asset-instances/{asset_instance['id']}/"
+            f"entities/{temporal_entity['id']}/output-files/new"
         )
 
         with requests_mock.mock() as mock:
@@ -769,7 +768,9 @@ class FilesTestCase(unittest.TestCase):
             self.assertEqual(result["secondary_extensions"], ["ma", "mb"])
             self.assertEqual(mock.request_history[0].method, "PUT")
             self.assertEqual(
-                json.loads(mock.request_history[0].body)["secondary_extensions"],
+                json.loads(mock.request_history[0].body)[
+                    "secondary_extensions"
+                ],
                 ["ma", "mb"],
             )
 
@@ -1025,7 +1026,7 @@ class FilesTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "PUT",
-                "/actions/working-files/%s/comment" % fakeid("working-file-1"),
+                f"/actions/working-files/{fakeid('working-file-1')}/comment",
                 text={
                     "id": fakeid("working-file-1"),
                     "comment": "test-comment",
@@ -1125,7 +1126,7 @@ class FilesTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/preview-files/%s" % fakeid("preview-file-1")
+                    f"data/preview-files/{fakeid('preview-file-1')}"
                 ),
                 text=json.dumps(
                     {
@@ -1144,7 +1145,7 @@ class FilesTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "DELETE",
-                "data/preview-files/%s" % fakeid("preview-file-1"),
+                f"data/preview-files/{fakeid('preview-file-1')}",
                 status_code=204,
             )
             gazu.files.remove_preview_file(fakeid("preview-file-1"))
@@ -1164,7 +1165,7 @@ class FilesTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/preview-files?task_id=%s" % fakeid("task-1"),
+                f"data/preview-files?task_id={fakeid('task-1')}",
                 text=text,
             )
             preview_files = gazu.files.get_all_preview_files_for_task(
@@ -1187,7 +1188,7 @@ class FilesTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/tasks/%s/attachment-files" % fakeid("task-1"),
+                f"data/tasks/{fakeid('task-1')}/attachment-files",
                 text=text,
             )
             attachment_files = gazu.files.get_all_attachment_files_for_task(
@@ -1210,7 +1211,7 @@ class FilesTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/projects/%s/attachment-files" % fakeid("project-1"),
+                f"data/projects/{fakeid('project-1')}/attachment-files",
                 text=text,
             )
             attachment_files = gazu.files.get_all_attachment_files_for_project(
@@ -1220,7 +1221,7 @@ class FilesTestCase(unittest.TestCase):
 
     def test_update_output_file(self):
         with requests_mock.mock() as mock:
-            path = "/data/output-files/%s" % fakeid("output-file-1")
+            path = f"/data/output-files/{fakeid('output-file-1')}"
             mock.put(
                 gazu.client.get_full_url(path),
                 text=json.dumps(
@@ -1239,7 +1240,7 @@ class FilesTestCase(unittest.TestCase):
 
     def test_update_preview(self):
         with requests_mock.mock() as mock:
-            path = "/data/preview-files/%s" % fakeid("preview-file-1")
+            path = f"/data/preview-files/{fakeid('preview-file-1')}"
             mock.put(
                 gazu.client.get_full_url(path),
                 text=json.dumps(
@@ -1274,20 +1275,20 @@ class FilesTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/preview-files/%s" % fakeid("preview-1"),
+                f"data/preview-files/{fakeid('preview-1')}",
                 text=preview_data,
             )
             url = gazu.files.get_preview_movie_url(fakeid("preview-1"))
-            expected = "movies/originals/preview-files/%s.mp4" % fakeid(
-                "preview-1"
+            expected = (
+                f"movies/originals/preview-files/{fakeid('preview-1')}.mp4"
             )
             self.assertEqual(url, expected)
 
             url_lowdef = gazu.files.get_preview_movie_url(
                 fakeid("preview-1"), lowdef=True
             )
-            expected_lowdef = "movies/lowdef/preview-files/%s.mp4" % fakeid(
-                "preview-1"
+            expected_lowdef = (
+                f"movies/lowdef/preview-files/{fakeid('preview-1')}.mp4"
             )
             self.assertEqual(url_lowdef, expected_lowdef)
 
@@ -1301,11 +1302,11 @@ class FilesTestCase(unittest.TestCase):
                 mock_route(
                     mock,
                     "GET",
-                    "data/preview-files/%s" % fakeid("preview-1"),
+                    f"data/preview-files/{fakeid('preview-1')}",
                     text=preview_data,
                 )
-                path = "movies/originals/preview-files/%s.mp4" % fakeid(
-                    "preview-1"
+                path = (
+                    f"movies/originals/preview-files/{fakeid('preview-1')}.mp4"
                 )
                 mock.get(gazu.client.get_full_url(path), body=movie_file)
                 gazu.files.download_preview_movie(
@@ -1323,13 +1324,11 @@ class FilesTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/preview-files/%s" % fakeid("preview-1"),
+                f"data/preview-files/{fakeid('preview-1')}",
                 text=preview_data,
             )
             url = gazu.files.get_preview_lowdef_movie_url(fakeid("preview-1"))
-            expected = "movies/lowdef/preview-files/%s.mp4" % fakeid(
-                "preview-1"
-            )
+            expected = f"movies/lowdef/preview-files/{fakeid('preview-1')}.mp4"
             self.assertEqual(url, expected)
 
     def test_download_preview_lowdef_movie(self):
@@ -1342,12 +1341,10 @@ class FilesTestCase(unittest.TestCase):
                 mock_route(
                     mock,
                     "GET",
-                    "data/preview-files/%s" % fakeid("preview-1"),
+                    f"data/preview-files/{fakeid('preview-1')}",
                     text=preview_data,
                 )
-                path = "movies/lowdef/preview-files/%s.mp4" % fakeid(
-                    "preview-1"
-                )
+                path = f"movies/lowdef/preview-files/{fakeid('preview-1')}.mp4"
                 mock.get(gazu.client.get_full_url(path), body=movie_file)
                 gazu.files.download_preview_lowdef_movie(
                     fakeid("preview-1"), "./test.mp4"
@@ -1357,17 +1354,13 @@ class FilesTestCase(unittest.TestCase):
 
     def test_get_attachment_thumbnail_url(self):
         url = gazu.files.get_attachment_thumbnail_url(fakeid("attachment-1"))
-        expected = "pictures/thumbnails/attachment-files/%s.png" % fakeid(
-            "attachment-1"
-        )
+        expected = f"pictures/thumbnails/attachment-files/{fakeid('attachment-1')}.png"
         self.assertEqual(url, expected)
 
     def test_download_attachment_thumbnail(self):
         with open("./tests/fixtures/v1.png", "rb") as thumbnail_file:
             with requests_mock.mock() as mock:
-                path = "pictures/thumbnails/attachment-files/%s.png" % fakeid(
-                    "attachment-1"
-                )
+                path = f"pictures/thumbnails/attachment-files/{fakeid('attachment-1')}.png"
                 mock.get(gazu.client.get_full_url(path), body=thumbnail_file)
                 gazu.files.download_attachment_thumbnail(
                     fakeid("attachment-1"), "./test.png"
@@ -1382,9 +1375,7 @@ class FilesTestCase(unittest.TestCase):
     def test_extract_frame_from_preview(self):
         with open("./tests/fixtures/v1.png", "rb") as frame_file:
             with requests_mock.mock() as mock:
-                path = "pictures/preview-files/%s/extract-frame/100" % fakeid(
-                    "preview-1"
-                )
+                path = f"pictures/preview-files/{fakeid('preview-1')}/extract-frame/100"
                 mock.get(gazu.client.get_full_url(path), body=frame_file)
                 gazu.files.extract_frame_from_preview(
                     fakeid("preview-1"), 100, "./test.png"
@@ -1394,7 +1385,7 @@ class FilesTestCase(unittest.TestCase):
 
     def test_update_preview_position(self):
         with requests_mock.mock() as mock:
-            path = "data/preview-files/%s/position" % fakeid("preview-1")
+            path = f"data/preview-files/{fakeid('preview-1')}/position"
             result = {
                 "id": fakeid("preview-1"),
                 "position": 5,
@@ -1408,9 +1399,7 @@ class FilesTestCase(unittest.TestCase):
 
     def test_update_preview_annotations(self):
         with requests_mock.mock() as mock:
-            path = "actions/preview-files/%s/update-annotations" % fakeid(
-                "preview-1"
-            )
+            path = f"actions/preview-files/{fakeid('preview-1')}/update-annotations"
             additions = [{"x": 100, "y": 200, "type": "drawing"}]
             updates = [{"id": fakeid("annotation-1"), "x": 150, "y": 250}]
             deletions = [fakeid("annotation-2")]
@@ -1432,9 +1421,7 @@ class FilesTestCase(unittest.TestCase):
     def test_extract_tile_from_preview(self):
         with open("./tests/fixtures/v1.png", "rb") as tile_file:
             with requests_mock.mock() as mock:
-                path = "pictures/preview-files/%s/extract-tile" % fakeid(
-                    "preview-1"
-                )
+                path = f"pictures/preview-files/{fakeid('preview-1')}/extract-tile"
                 mock.get(gazu.client.get_full_url(path), body=tile_file)
                 gazu.files.extract_tile_from_preview(
                     fakeid("preview-1"), "./test.png"
@@ -1458,7 +1445,7 @@ class FilesTestCase(unittest.TestCase):
                 mock_route(
                     mock,
                     "POST",
-                    "pictures/thumbnails/persons/%s" % fakeid("person-1"),
+                    f"pictures/thumbnails/persons/{fakeid('person-1')}",
                     text={"id": fakeid("person-1")},
                 )
 
@@ -1478,7 +1465,7 @@ class FilesTestCase(unittest.TestCase):
                 mock_route(
                     mock,
                     "POST",
-                    "pictures/thumbnails/projects/%s" % fakeid("project-1"),
+                    f"pictures/thumbnails/projects/{fakeid('project-1')}",
                     text={"id": fakeid("project-1")},
                 )
 
@@ -1498,8 +1485,7 @@ class FilesTestCase(unittest.TestCase):
                 mock_route(
                     mock,
                     "POST",
-                    "pictures/thumbnails/organisations/%s"
-                    % fakeid("organisation-1"),
+                    f"pictures/thumbnails/organisations/{fakeid('organisation-1')}",
                     text={"id": fakeid("organisation-1")},
                 )
 

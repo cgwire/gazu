@@ -28,7 +28,7 @@ class TaskTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/playlists/%s" % fakeid("playlist-1")
+                    f"data/playlists/{fakeid('playlist-1')}"
                 ),
                 text=json.dumps(
                     {
@@ -51,7 +51,7 @@ class TaskTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/projects/%s/playlists" % fakeid("project-1")
+                    f"data/projects/{fakeid('project-1')}/playlists"
                 ),
                 text=json.dumps(
                     [
@@ -70,8 +70,7 @@ class TaskTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/projects/%s/episodes/%s/playlists"
-                    % (fakeid("project-1"), fakeid("episode-1"))
+                    f"data/projects/{fakeid('project-1')}/episodes/{fakeid('episode-1')}/playlists"
                 ),
                 text=json.dumps(
                     [
@@ -93,7 +92,7 @@ class TaskTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/playlists/%s" % fakeid("playlist-1")
+                    f"data/playlists/{fakeid('playlist-1')}"
                 ),
                 text=json.dumps(
                     {
@@ -111,8 +110,7 @@ class TaskTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/playlists?project_id=%s&name=playlist-1"
-                    % fakeid("project-1")
+                    f"data/playlists?project_id={fakeid('project-1')}&name=playlist-1"
                 ),
                 text=json.dumps(
                     [
@@ -134,8 +132,7 @@ class TaskTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/playlists?project_id=%s&name=playlist-1"
-                    % fakeid("project-1")
+                    f"data/playlists?project_id={fakeid('project-1')}&name=playlist-1"
                 ),
                 text=json.dumps([]),
             )
@@ -157,8 +154,7 @@ class TaskTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/playlists?project_id=%s&name=all_assets_playlist"
-                    % fakeid("project-1")
+                    f"data/playlists?project_id={fakeid('project-1')}&name=all_assets_playlist"
                 ),
                 text=json.dumps([]),
             )
@@ -185,7 +181,7 @@ class TaskTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock = mock.put(
                 gazu.client.get_full_url(
-                    "data/playlists/%s" % fakeid("playlist-1")
+                    f"data/playlists/{fakeid('playlist-1')}"
                 ),
                 text=json.dumps(
                     {"id": fakeid("playlist-1"), "name": "name_changed"}
@@ -199,7 +195,7 @@ class TaskTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.put(
                 gazu.client.get_full_url(
-                    "data/playlists/%s" % fakeid("playlist-1")
+                    f"data/playlists/{fakeid('playlist-1')}"
                 ),
                 text=json.dumps(
                     {"id": fakeid("playlist-1"), "name": "name_changed"}
@@ -207,8 +203,7 @@ class TaskTestCase(unittest.TestCase):
             )
             mock.get(
                 gazu.client.get_full_url(
-                    "data/playlists/entities/%s/preview-files"
-                    % fakeid("shot-1")
+                    f"data/playlists/entities/{fakeid('shot-1')}/preview-files"
                 ),
                 text=json.dumps(
                     {fakeid("task-type-1"): [{"id": fakeid("preview-1")}]}
@@ -216,8 +211,7 @@ class TaskTestCase(unittest.TestCase):
             )
             mock.post(
                 gazu.client.get_full_url(
-                    "actions/playlists/%s/add-entity"
-                    % fakeid("playlist-1")
+                    f"actions/playlists/{fakeid('playlist-1')}/add-entity"
                 ),
                 text=json.dumps(
                     {
@@ -270,7 +264,7 @@ class TaskTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.delete(
                 gazu.client.get_full_url(
-                    "data/playlists/%s" % fakeid("playlist-1")
+                    f"data/playlists/{fakeid('playlist-1')}"
                 ),
                 status_code=204,
             )
@@ -280,7 +274,7 @@ class TaskTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/playlists/%s/entity-previews" % fakeid("playlist-1")
+                    f"data/playlists/{fakeid('playlist-1')}/entity-previews"
                 ),
                 text=json.dumps(
                     [
@@ -297,7 +291,7 @@ class TaskTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/playlists/build-jobs/%s" % fakeid("build-job-1")
+                    f"data/playlists/build-jobs/{fakeid('build-job-1')}"
                 ),
                 text=json.dumps(
                     {"id": fakeid("build-job-1"), "status": "done"}
@@ -311,7 +305,7 @@ class TaskTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.delete(
                 gazu.client.get_full_url(
-                    "data/playlists/build-jobs/%s" % fakeid("build-job-1")
+                    f"data/playlists/build-jobs/{fakeid('build-job-1')}"
                 ),
                 status_code=204,
             )
@@ -321,7 +315,7 @@ class TaskTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/projects/%s/build-jobs" % fakeid("project-1")
+                    f"data/projects/{fakeid('project-1')}/build-jobs"
                 ),
                 text=json.dumps(
                     [
@@ -340,7 +334,7 @@ class TaskTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.post(
                 gazu.client.get_full_url(
-                    "data/playlists/%s/build-movie" % fakeid("playlist-1")
+                    f"data/playlists/{fakeid('playlist-1')}/build-movie"
                 ),
                 text=json.dumps(
                     {"id": fakeid("build-job-1"), "status": "running"}
@@ -359,8 +353,7 @@ class TaskTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/playlists/%s/build-jobs/%s/download"
-                    % (fakeid("playlist-1"), fakeid("build-job-1"))
+                    f"data/playlists/{fakeid('playlist-1')}/build-jobs/{fakeid('build-job-1')}/download"
                 ),
                 content=b"mock movie content",
             )
@@ -385,7 +378,7 @@ class TaskTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/playlists/%s/download/zip" % fakeid("playlist-1")
+                    f"data/playlists/{fakeid('playlist-1')}/download/zip"
                 ),
                 content=b"mock zip content",
             )
@@ -405,7 +398,7 @@ class TaskTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.post(
                 gazu.client.get_full_url(
-                    "data/projects/%s/playlists/temp" % fakeid("project-1")
+                    f"data/projects/{fakeid('project-1')}/playlists/temp"
                 ),
                 text=json.dumps(
                     {
@@ -425,7 +418,7 @@ class TaskTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.post(
                 gazu.client.get_full_url(
-                    "data/playlists/%s/notify-clients" % fakeid("playlist-1")
+                    f"data/playlists/{fakeid('playlist-1')}/notify-clients"
                 ),
                 text=json.dumps({"status": "notified"}),
             )

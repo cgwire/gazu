@@ -264,7 +264,7 @@ class SceneTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.put(
                 gazu.client.get_full_url(
-                    "data/asset-instances/%s" % fakeid("asset-instance-1")
+                    f"data/asset-instances/{fakeid('asset-instance-1')}"
                 ),
                 text=json.dumps(
                     {
@@ -285,7 +285,7 @@ class SceneTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
-                    "data/sequences/%s" % fakeid("sequence-1")
+                    f"data/sequences/{fakeid('sequence-1')}"
                 ),
                 text=json.dumps(
                     {
