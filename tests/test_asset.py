@@ -399,6 +399,95 @@ class CastingTestCase(unittest.TestCase):
                 "assets/asset-01/",
             )
 
+    def test_get_all_assets_url(self):
+        host = gazu.client.get_api_url_from_host()
+        # Non-tvshow project: plain assets list URL
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url("data/projects/project-01"),
+                text=json.dumps(
+                    {"id": "project-01", "production_type": "short"}
+                ),
+            )
+            url = gazu.asset.get_all_assets_url({"id": "project-01"})
+            self.assertEqual(
+                url, f"{host}/productions/project-01/assets/"
+            )
+        # TV show: targets the "main" episode (mirrors get_asset_url)
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url("data/projects/project-01"),
+                text=json.dumps(
+                    {"id": "project-01", "production_type": "tvshow"}
+                ),
+            )
+            url = gazu.asset.get_all_assets_url({"id": "project-01"})
+            self.assertEqual(
+                url,
+                f"{host}/productions/project-01/episodes/main/assets/",
+            )
+
+    def test_get_asset_type_url(self):
+        host = gazu.client.get_api_url_from_host()
+        # Non-tvshow project, asset_type passed as dict (no extra fetch)
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url("data/projects/project-01"),
+                text=json.dumps(
+                    {"id": "project-01", "production_type": "short"}
+                ),
+            )
+            url = gazu.asset.get_asset_type_url(
+                {"id": "project-01"},
+                {"id": "asset-type-01", "name": "Character"},
+            )
+            self.assertEqual(
+                url,
+                f"{host}/productions/project-01/assets"
+                "?search=type%3D%5BCharacter%5D",
+            )
+        # TV show: search query lives on the episodes/main/assets URL
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url("data/projects/project-01"),
+                text=json.dumps(
+                    {"id": "project-01", "production_type": "tvshow"}
+                ),
+            )
+            url = gazu.asset.get_asset_type_url(
+                {"id": "project-01"},
+                {"id": "asset-type-01", "name": "Prop"},
+            )
+            self.assertEqual(
+                url,
+                f"{host}/productions/project-01/episodes/main/assets"
+                "?search=type%3D%5BProp%5D",
+            )
+        # Asset type passed by ID only — helper fetches the name
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url("data/projects/project-01"),
+                text=json.dumps(
+                    {"id": "project-01", "production_type": "short"}
+                ),
+            )
+            mock.get(
+                gazu.client.get_full_url(
+                    "data/asset-types/%s" % fakeid("asset-type-01")
+                ),
+                text=json.dumps(
+                    {"id": fakeid("asset-type-01"), "name": "Vehicle"}
+                ),
+            )
+            url = gazu.asset.get_asset_type_url(
+                {"id": "project-01"}, fakeid("asset-type-01")
+            )
+            self.assertEqual(
+                url,
+                f"{host}/productions/project-01/assets"
+                "?search=type%3D%5BVehicle%5D",
+            )
+
     def test_all_assets_for_open_projects(self):
         with requests_mock.mock() as mock:
             mock.get(

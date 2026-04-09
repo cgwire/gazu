@@ -548,6 +548,65 @@ class ShotTestCase(unittest.TestCase):
                 % (fakeid("project-1"), fakeid("episode-1")),
             )
 
+    def test_get_all_episodes_url(self):
+        host = gazu.client.get_api_url_from_host()
+        url = gazu.shot.get_all_episodes_url({"id": fakeid("project-1")})
+        self.assertEqual(
+            url, f"{host}/productions/{fakeid('project-1')}/episodes/"
+        )
+
+    def test_get_all_sequences_url(self):
+        host = gazu.client.get_api_url_from_host()
+        url = gazu.shot.get_all_sequences_url({"id": fakeid("project-1")})
+        self.assertEqual(
+            url, f"{host}/productions/{fakeid('project-1')}/sequences/"
+        )
+
+    def test_get_sequence_url_non_episodic(self):
+        host = gazu.client.get_api_url_from_host()
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url(
+                    "data/sequences/%s" % fakeid("sequence-1")
+                ),
+                text=json.dumps(
+                    {
+                        "id": fakeid("sequence-1"),
+                        "project_id": fakeid("project-1"),
+                        "parent_id": None,
+                    }
+                ),
+            )
+            url = gazu.shot.get_sequence_url(fakeid("sequence-1"))
+            self.assertEqual(
+                url,
+                f"{host}/productions/{fakeid('project-1')}"
+                f"/sequences/{fakeid('sequence-1')}/",
+            )
+
+    def test_get_sequence_url_episodic(self):
+        host = gazu.client.get_api_url_from_host()
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url(
+                    "data/sequences/%s" % fakeid("sequence-1")
+                ),
+                text=json.dumps(
+                    {
+                        "id": fakeid("sequence-1"),
+                        "project_id": fakeid("project-1"),
+                        "parent_id": fakeid("episode-1"),
+                    }
+                ),
+            )
+            url = gazu.shot.get_sequence_url(fakeid("sequence-1"))
+            self.assertEqual(
+                url,
+                f"{host}/productions/{fakeid('project-1')}"
+                f"/episodes/{fakeid('episode-1')}"
+                f"/sequences/{fakeid('sequence-1')}/",
+            )
+
     def test_update_sequence(self):
         with requests_mock.mock() as mock:
             mock.put(

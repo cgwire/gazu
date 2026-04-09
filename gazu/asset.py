@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from urllib.parse import urlencode
+
 from .helpers import normalize_model_parameter
 
 from . import client as raw
@@ -173,6 +175,64 @@ def get_asset_url(asset: str | dict, client: KitsuClient = default) -> str:
         if asset.get("episode_id"):
             episode_id = asset["episode_id"]
         return f"{host}/productions/{project_id}/episodes/{episode_id}/assets/{asset_id}/"
+
+
+@cache
+def get_all_assets_url(
+    project: str | dict, client: KitsuClient = default
+) -> str:
+    """
+    Args:
+        project (str / dict): The project dict or the project ID.
+
+    Returns:
+        url (str): Web url of the assets list page for the given project.
+        For TV shows the URL targets the "main" episode (where shared
+        assets live), mirroring the convention used by ``get_asset_url``.
+    """
+    project = normalize_model_parameter(project)
+    project = gazu_project.get_project(project["id"], client=client)
+    host = raw.get_api_url_from_host(client=client)
+    project_id = project["id"]
+    if project["production_type"] != "tvshow":
+        return f"{host}/productions/{project_id}/assets/"
+    else:
+        return f"{host}/productions/{project_id}/episodes/main/assets/"
+
+
+@cache
+def get_asset_type_url(
+    project: str | dict,
+    asset_type: str | dict,
+    client: KitsuClient = default,
+) -> str:
+    """
+    Build a URL pointing at the assets list page of the given project,
+    pre-filtered by the given asset type's name (e.g. ``Character``,
+    ``Prop``).
+
+    Args:
+        project (str / dict): The project dict or the project ID.
+        asset_type (str / dict): The asset type dict or the asset type ID.
+
+    Returns:
+        url (str): Web url of the project's assets list, with the search
+        field pre-populated with ``type=[Asset-Type-Name]``.
+    """
+    project = normalize_model_parameter(project)
+    project = gazu_project.get_project(project["id"], client=client)
+    asset_type = normalize_model_parameter(asset_type)
+    if "name" not in asset_type:
+        asset_type = get_asset_type(asset_type["id"], client=client)
+    host = raw.get_api_url_from_host(client=client)
+    project_id = project["id"]
+    query = urlencode({"search": f"type=[{asset_type['name']}]"})
+    if project["production_type"] != "tvshow":
+        return f"{host}/productions/{project_id}/assets?{query}"
+    else:
+        return (
+            f"{host}/productions/{project_id}/episodes/main/assets?{query}"
+        )
 
 
 def new_asset(
