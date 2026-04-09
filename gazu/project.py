@@ -110,6 +110,7 @@ def new_project(
     task_statuses: list | None = None,
     task_types: list | None = None,
     production_style: str = "2d3d",
+    project_template: str | dict | None = None,
     client: KitsuClient = default,
 ) -> dict:
     """
@@ -124,6 +125,9 @@ def new_project(
         task_types (list): Task types of the project.
         production_style (str): 2d, 3d, 2d3d, ar, vfx, stop-motion, motion-design,
             archviz, commercial, catalog, immersive, nft, video-game, vr.
+        project_template (dict / ID): Optional project template to apply
+            after creation. Settings explicitly provided in the call (fps,
+            ratio, etc.) take precedence over the template's defaults.
     Returns:
         dict: Created project.
     """
@@ -137,19 +141,23 @@ def new_project(
         task_types = []
     project = get_project_by_name(name, client=client)
     if project is None:
+        data = {
+            "name": name,
+            "production_type": production_type,
+            "team": normalize_list_of_models_for_links(team),
+            "asset_types": normalize_list_of_models_for_links(asset_types),
+            "task_statuses": normalize_list_of_models_for_links(
+                task_statuses
+            ),
+            "task_types": normalize_list_of_models_for_links(task_types),
+            "production_style": production_style,
+        }
+        if project_template is not None:
+            template = normalize_model_parameter(project_template)
+            data["project_template_id"] = template["id"]
         project = raw.create(
             "projects",
-            {
-                "name": name,
-                "production_type": production_type,
-                "team": normalize_list_of_models_for_links(team),
-                "asset_types": normalize_list_of_models_for_links(asset_types),
-                "task_statuses": normalize_list_of_models_for_links(
-                    task_statuses
-                ),
-                "task_types": normalize_list_of_models_for_links(task_types),
-                "production_style": production_style,
-            },
+            data,
             client=client,
         )
     return project

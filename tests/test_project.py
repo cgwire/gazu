@@ -124,6 +124,60 @@ class ProjectTestCase(unittest.TestCase):
             self.assertEqual(project["name"], "project-1")
             self.assertEqual(project["id"], fakeid("project-1"))
 
+    def test_new_project_with_template(self):
+        with requests_mock.mock() as mock:
+            mock.post(
+                gazu.client.get_full_url("data/projects"),
+                text=json.dumps(
+                    {
+                        "id": fakeid("project-1"),
+                        "name": "project-1",
+                        "fps": "30",
+                    }
+                ),
+            )
+            mock.get(
+                gazu.client.get_full_url("data/projects?name=project-1"),
+                text=json.dumps([]),
+            )
+            project = gazu.project.new_project(
+                "project-1",
+                project_template={"id": fakeid("template-1")},
+            )
+            self.assertEqual(project["fps"], "30")
+            # Verify project_template_id was forwarded in the request body
+            request_body = json.loads(mock.request_history[-1].text)
+            self.assertEqual(
+                request_body["project_template_id"], fakeid("template-1")
+            )
+
+    def test_new_project_explicit_field_overrides_template(self):
+        with requests_mock.mock() as mock:
+            mock.post(
+                gazu.client.get_full_url("data/projects"),
+                text=json.dumps(
+                    {
+                        "id": fakeid("project-1"),
+                        "name": "project-1",
+                    }
+                ),
+            )
+            mock.get(
+                gazu.client.get_full_url("data/projects?name=project-1"),
+                text=json.dumps([]),
+            )
+            gazu.project.new_project(
+                "project-1",
+                production_type="featurefilm",
+                project_template={"id": fakeid("template-1")},
+            )
+            # gazu just forwards both — zou enforces the precedence rule
+            request_body = json.loads(mock.request_history[-1].text)
+            self.assertEqual(request_body["production_type"], "featurefilm")
+            self.assertEqual(
+                request_body["project_template_id"], fakeid("template-1")
+            )
+
     def test_remove_project(self):
         with requests_mock.mock() as mock:
             mock.delete(
