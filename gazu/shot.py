@@ -300,6 +300,68 @@ def get_shot_url(shot: str | dict, client: KitsuClient = default) -> str:
         return f"{host}/productions/{project_id}/episodes/{episode_id}/shots/{shot_id}/"
 
 
+@cache
+def get_all_episodes_url(
+    project: str | dict, client: KitsuClient = default
+) -> str:
+    """
+    Args:
+        project (str / dict): The project dict or the project ID.
+
+    Returns:
+        url (str): Web url of the episodes list page for the given project.
+        Only meaningful for TV show productions; for other production types
+        the page exists in the UI but will be empty.
+    """
+    project = normalize_model_parameter(project)
+    host = raw.get_api_url_from_host(client=client)
+    return f"{host}/productions/{project['id']}/episodes/"
+
+
+@cache
+def get_all_sequences_url(
+    project: str | dict, client: KitsuClient = default
+) -> str:
+    """
+    Args:
+        project (str / dict): The project dict or the project ID.
+
+    Returns:
+        url (str): Web url of the sequences list page for the given project.
+    """
+    project = normalize_model_parameter(project)
+    host = raw.get_api_url_from_host(client=client)
+    return f"{host}/productions/{project['id']}/sequences/"
+
+
+@cache
+def get_sequence_url(
+    sequence: str | dict, client: KitsuClient = default
+) -> str:
+    """
+    Args:
+        sequence (str / dict): The sequence dict or the sequence ID.
+
+    Returns:
+        url (str): Web url associated to the given sequence. The URL shape
+        depends on whether the sequence belongs to an episode (TV show) or
+        to the project root (non-episodic).
+    """
+    sequence = normalize_model_parameter(sequence)
+    sequence = get_sequence(sequence["id"], client=client)
+    host = raw.get_api_url_from_host(client=client)
+    project_id = sequence["project_id"]
+    sequence_id = sequence["id"]
+    if sequence.get("parent_id") is None:
+        return f"{host}/productions/{project_id}/sequences/{sequence_id}/"
+    else:
+        episode_id = sequence["parent_id"]
+        return (
+            f"{host}/productions/{project_id}/episodes/{episode_id}"
+            f"/sequences/{sequence_id}/"
+        )
+
+
 def new_sequence(
     project: str | dict,
     name: str,
