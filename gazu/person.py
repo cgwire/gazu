@@ -691,6 +691,85 @@ def get_year_day_offs(
     )
 
 
+@cache
+def get_day_off(day_off_id: str, client: KitsuClient = default) -> dict:
+    """
+    Get a day off by its ID.
+
+    Args:
+        day_off_id (str): ID of the day off.
+
+    Returns:
+        dict: Day off matching the given ID.
+    """
+    return raw.fetch_one("day-offs", day_off_id, client=client)
+
+
+def new_day_off(
+    person: str | dict,
+    date: str,
+    end_date: str,
+    description: str | None = None,
+    client: KitsuClient = default,
+) -> dict:
+    """
+    Create a new day off for the given person. The server rejects the
+    request if the period overlaps with an existing day off. Time-spent
+    entries that fall within the period are automatically removed by zou.
+
+    Args:
+        person (str / dict): The person dict or id.
+        date (str): Start date (ISO format, e.g. ``"2026-04-10"``).
+        end_date (str): End date (ISO format, inclusive).
+        description (str): Optional description.
+
+    Returns:
+        dict: Created day off.
+    """
+    person = normalize_model_parameter(person)
+    data = {
+        "person_id": person["id"],
+        "date": date,
+        "end_date": end_date,
+    }
+    if description is not None:
+        data["description"] = description
+    return raw.create("day-offs", data, client=client)
+
+
+def update_day_off(day_off: dict, client: KitsuClient = default) -> dict:
+    """
+    Update a day off.
+
+    Args:
+        day_off (dict): The day off dict to update. Must include the
+            ``id`` key. Fields that can be changed: ``date``,
+            ``end_date``, ``description``, ``person_id``.
+
+    Returns:
+        dict: Updated day off.
+    """
+    return raw.put(
+        f"data/day-offs/{day_off['id']}", day_off, client=client
+    )
+
+
+def remove_day_off(
+    day_off: str | dict, client: KitsuClient = default
+) -> str:
+    """
+    Delete a day off.
+
+    Args:
+        day_off (dict / ID): The day off dict or id.
+
+    Returns:
+        str: Empty response.
+    """
+    day_off = normalize_model_parameter(day_off)
+    return raw.delete(f"data/day-offs/{day_off['id']}", client=client)
+
+
 def add_person_to_department(
     person: str | dict, department: str | dict, client: KitsuClient = default
 ) -> dict:

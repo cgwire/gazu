@@ -479,6 +479,105 @@ class PersonTestCase(unittest.TestCase):
             day_offs = gazu.person.get_year_day_offs(person_id, 2025)
             self.assertEqual(len(day_offs), 2)
 
+    def test_get_day_off(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/day-offs/%s" % fakeid("dayoff-1"),
+                text={
+                    "id": fakeid("dayoff-1"),
+                    "date": "2026-04-10",
+                    "end_date": "2026-04-11",
+                    "person_id": fakeid("person-1"),
+                },
+            )
+            day_off = gazu.person.get_day_off(fakeid("dayoff-1"))
+            self.assertEqual(day_off["id"], fakeid("dayoff-1"))
+            self.assertEqual(day_off["date"], "2026-04-10")
+
+    def test_new_day_off(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "POST",
+                "data/day-offs",
+                text={
+                    "id": fakeid("dayoff-1"),
+                    "date": "2026-04-10",
+                    "end_date": "2026-04-11",
+                    "person_id": fakeid("person-1"),
+                    "description": "Vacances",
+                },
+                status_code=201,
+            )
+            day_off = gazu.person.new_day_off(
+                fakeid("person-1"),
+                "2026-04-10",
+                "2026-04-11",
+                description="Vacances",
+            )
+            self.assertEqual(day_off["id"], fakeid("dayoff-1"))
+            self.assertEqual(day_off["description"], "Vacances")
+            request_body = json.loads(mock.request_history[0].text)
+            self.assertEqual(request_body["person_id"], fakeid("person-1"))
+            self.assertEqual(request_body["date"], "2026-04-10")
+            self.assertEqual(request_body["end_date"], "2026-04-11")
+            self.assertEqual(request_body["description"], "Vacances")
+
+    def test_new_day_off_without_description(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "POST",
+                "data/day-offs",
+                text={
+                    "id": fakeid("dayoff-1"),
+                    "date": "2026-04-10",
+                    "end_date": "2026-04-10",
+                    "person_id": fakeid("person-1"),
+                },
+                status_code=201,
+            )
+            day_off = gazu.person.new_day_off(
+                fakeid("person-1"), "2026-04-10", "2026-04-10"
+            )
+            self.assertEqual(day_off["id"], fakeid("dayoff-1"))
+            request_body = json.loads(mock.request_history[0].text)
+            self.assertNotIn("description", request_body)
+
+    def test_update_day_off(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "PUT",
+                "data/day-offs/%s" % fakeid("dayoff-1"),
+                text={
+                    "id": fakeid("dayoff-1"),
+                    "date": "2026-04-12",
+                    "end_date": "2026-04-14",
+                    "person_id": fakeid("person-1"),
+                },
+            )
+            day_off = gazu.person.update_day_off(
+                {
+                    "id": fakeid("dayoff-1"),
+                    "date": "2026-04-12",
+                    "end_date": "2026-04-14",
+                }
+            )
+            self.assertEqual(day_off["date"], "2026-04-12")
+
+    def test_remove_day_off(self):
+        with requests_mock.mock() as mock:
+            mock.delete(
+                gazu.client.get_full_url(
+                    "data/day-offs/%s" % fakeid("dayoff-1")
+                ),
+                status_code=204,
+            )
+            gazu.person.remove_day_off(fakeid("dayoff-1"))
+
     def test_add_person_to_department(self):
         with requests_mock.mock() as mock:
             person_id = fakeid("person-1")

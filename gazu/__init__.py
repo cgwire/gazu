@@ -19,6 +19,7 @@ from . import edit
 from . import entity
 from . import files
 from . import project
+from . import project_template
 from . import person
 from . import shot
 from . import studio
