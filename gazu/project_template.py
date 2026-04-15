@@ -417,6 +417,79 @@ def remove_status_automation_from_project_template(
     )
 
 
+@cache
+def all_preview_background_files_for_project_template(
+    project_template: str | dict, client: KitsuClient = default
+) -> list[dict]:
+    """
+    List the preview background files attached to a project template.
+    """
+    project_template = normalize_model_parameter(project_template)
+    return raw.fetch_all(
+        f"project-templates/{project_template['id']}/preview-background-files",
+        client=client,
+    )
+
+
+def add_preview_background_file_to_project_template(
+    project_template: str | dict,
+    preview_background_file: str | dict,
+    client: KitsuClient = default,
+) -> dict:
+    """
+    Attach a preview background file to a project template.
+    """
+    project_template = normalize_model_parameter(project_template)
+    preview_background_file = normalize_model_parameter(
+        preview_background_file
+    )
+    return raw.post(
+        f"data/project-templates/{project_template['id']}/preview-background-files",
+        {"preview_background_file_id": preview_background_file["id"]},
+        client=client,
+    )
+
+
+def remove_preview_background_file_from_project_template(
+    project_template: str | dict,
+    preview_background_file: str | dict,
+    client: KitsuClient = default,
+) -> str:
+    """
+    Detach a preview background file from a project template.
+    """
+    project_template = normalize_model_parameter(project_template)
+    preview_background_file = normalize_model_parameter(
+        preview_background_file
+    )
+    return raw.delete(
+        f"data/project-templates/{project_template['id']}/preview-background-files/{preview_background_file['id']}",
+        client=client,
+    )
+
+
+def set_project_template_default_preview_background_file(
+    project_template: str | dict,
+    preview_background_file: str | dict | None,
+    client: KitsuClient = default,
+) -> dict:
+    """
+    Set (or unset) the default preview background file for a project
+    template. Pass ``None`` to clear the default.
+    """
+    project_template = normalize_model_parameter(project_template)
+    background_id = None
+    if preview_background_file is not None:
+        background_id = normalize_model_parameter(preview_background_file)[
+            "id"
+        ]
+    return raw.put(
+        f"data/project-templates/{project_template['id']}/default-preview-background-file",
+        {"default_preview_background_file_id": background_id},
+        client=client,
+    )
+
+
 def set_project_template_metadata_descriptors(
     project_template: str | dict,
     descriptors: list[dict],

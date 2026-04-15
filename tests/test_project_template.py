@@ -285,6 +285,104 @@ class ProjectTemplateTestCase(unittest.TestCase):
                 {"id": template_id}, {"id": automation_id}
             )
 
+    def test_preview_background_file_link_calls(self):
+        template_id = fakeid("template-1")
+        background_id = fakeid("background-1")
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/project-templates/%s/preview-background-files"
+                % template_id,
+                text=[{"id": background_id, "name": "Studio", "is_default": False}],
+            )
+            mock_route(
+                mock,
+                "POST",
+                "data/project-templates/%s/preview-background-files"
+                % template_id,
+                text={
+                    "id": background_id,
+                    "name": "Studio",
+                    "is_default": False,
+                },
+                status_code=201,
+            )
+            mock_route(
+                mock,
+                "DELETE",
+                "data/project-templates/%s/preview-background-files/%s"
+                % (template_id, background_id),
+                status_code=204,
+            )
+
+            listed = (
+                gazu.project_template.all_preview_background_files_for_project_template(
+                    {"id": template_id}
+                )
+            )
+            self.assertEqual(len(listed), 1)
+
+            result = (
+                gazu.project_template.add_preview_background_file_to_project_template(
+                    {"id": template_id}, {"id": background_id}
+                )
+            )
+            self.assertEqual(result["id"], background_id)
+
+            gazu.project_template.remove_preview_background_file_from_project_template(
+                {"id": template_id}, {"id": background_id}
+            )
+
+    def test_set_project_template_default_preview_background_file(self):
+        template_id = fakeid("template-1")
+        background_id = fakeid("background-1")
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "PUT",
+                "data/project-templates/%s/default-preview-background-file"
+                % template_id,
+                text={
+                    "id": template_id,
+                    "default_preview_background_file_id": background_id,
+                },
+            )
+            updated = (
+                gazu.project_template.set_project_template_default_preview_background_file(
+                    {"id": template_id}, {"id": background_id}
+                )
+            )
+            self.assertEqual(
+                updated["default_preview_background_file_id"], background_id
+            )
+            request_body = json.loads(mock.request_history[0].text)
+            self.assertEqual(
+                request_body["default_preview_background_file_id"],
+                background_id,
+            )
+
+    def test_clear_project_template_default_preview_background_file(self):
+        template_id = fakeid("template-1")
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "PUT",
+                "data/project-templates/%s/default-preview-background-file"
+                % template_id,
+                text={
+                    "id": template_id,
+                    "default_preview_background_file_id": None,
+                },
+            )
+            gazu.project_template.set_project_template_default_preview_background_file(
+                {"id": template_id}, None
+            )
+            request_body = json.loads(mock.request_history[0].text)
+            self.assertIsNone(
+                request_body["default_preview_background_file_id"]
+            )
+
     def test_set_project_template_metadata_descriptors(self):
         template_id = fakeid("template-1")
         descriptors = [
