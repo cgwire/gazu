@@ -468,6 +468,28 @@ class TaskTestCase(unittest.TestCase):
                 created_at=date,
             )
             self.assertEqual(comment, result)
+            self.assertEqual(mock.last_request.json()["for_client"], False)
+
+    def test_add_comment_for_client(self):
+        with requests_mock.mock() as mock:
+            result = {
+                "id": "comment-1",
+                "for_client": True,
+            }
+            mock_route(
+                mock,
+                "POST",
+                "actions/tasks/%s/comment" % fakeid("task-1"),
+                text=result,
+            )
+            comment = gazu.task.add_comment(
+                fakeid("task-1"),
+                fakeid("task-status-01"),
+                "Visible to client",
+                for_client=True,
+            )
+            self.assertEqual(comment, result)
+            self.assertEqual(mock.last_request.json()["for_client"], True)
 
     def test_remove_comment(self):
         with requests_mock.mock() as mock:
