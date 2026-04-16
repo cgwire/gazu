@@ -933,6 +933,7 @@ def add_comment(
     attachments: list[str] | None = None,
     created_at: str | None = None,
     links: list[str] | None = None,
+    for_client: bool = False,
     client: KitsuClient = default,
     progress_callback=None,
 ) -> dict:
@@ -950,6 +951,8 @@ def add_comment(
         attachments (list[file_path]): Attachments file paths
         created_at (str): Comment date
         links (list): List of URL links to add to the comment
+        for_client (bool): When True, make the comment visible to clients
+            (manager-only).
 
     Returns:
         dict: Created comment.
@@ -967,6 +970,7 @@ def add_comment(
         "comment": comment,
         "checklist": checklist,
         "links": links,
+        "for_client": for_client,
     }
 
     if person is not None:
