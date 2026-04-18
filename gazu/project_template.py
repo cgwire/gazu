@@ -51,11 +51,9 @@ def get_project_template_by_name(
     Returns:
         dict: Project template matching the given name, or None.
     """
-    templates = raw.fetch_all("project-templates", client=client)
-    for template in templates:
-        if template.get("name", "").lower() == name.lower():
-            return template
-    return None
+    return raw.fetch_first(
+        "project-templates", {"name": name}, client=client
+    )
 
 
 # ---------------------------------------------------------------------------

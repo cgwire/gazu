@@ -47,11 +47,8 @@ class ProjectTemplateTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/project-templates",
-                text=[
-                    {"id": fakeid("template-1"), "name": "Series Setup"},
-                    {"id": fakeid("template-2"), "name": "Short Film"},
-                ],
+                "data/project-templates?name=Short Film",
+                text=[{"id": fakeid("template-2"), "name": "Short Film"}],
             )
             template = gazu.project_template.get_project_template_by_name(
                 "Short Film"
