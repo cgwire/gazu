@@ -483,3 +483,73 @@ def notify_clients_playlist_ready(
     return raw.post(
         f"data/playlists/{playlist['id']}/notify-clients", {}, client=client
     )
+
+
+def create_share_link(
+    playlist: str | dict,
+    expiration_date: str | None = None,
+    can_comment: bool = True,
+    password: str | None = None,
+    client: KitsuClient = default,
+) -> dict:
+    """
+    Generate a share link for a playlist. Only managers and above can
+    call this.
+
+    Args:
+        playlist (str / dict): The playlist dict or ID.
+        expiration_date (str): Optional ISO date for link expiry.
+        can_comment (bool): Whether guests can comment (default True).
+        password (str): Optional password protection.
+
+    Returns:
+        dict: Created share link with token.
+    """
+    playlist = normalize_model_parameter(playlist)
+    data = {"can_comment": can_comment}
+    if expiration_date:
+        data["expiration_date"] = expiration_date
+    if password:
+        data["password"] = password
+    return raw.post(
+        f"data/playlists/{playlist['id']}/share", data, client=client
+    )
+
+
+def get_share_links(
+    playlist: str | dict, client: KitsuClient = default
+) -> list[dict]:
+    """
+    List all active share links for a playlist.
+
+    Args:
+        playlist (str / dict): The playlist dict or ID.
+
+    Returns:
+        list: Active share links.
+    """
+    playlist = normalize_model_parameter(playlist)
+    return raw.fetch_all(
+        f"playlists/{playlist['id']}/share", client=client
+    )
+
+
+def revoke_share_link(
+    playlist: str | dict,
+    token: str,
+    client: KitsuClient = default,
+) -> dict:
+    """
+    Revoke (deactivate) a share link.
+
+    Args:
+        playlist (str / dict): The playlist dict or ID.
+        token (str): The share link token to revoke.
+
+    Returns:
+        dict: Revoked share link.
+    """
+    playlist = normalize_model_parameter(playlist)
+    return raw.delete(
+        f"data/playlists/{playlist['id']}/share/{token}", client=client
+    )
