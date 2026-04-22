@@ -38,7 +38,7 @@ def add_verify_file_callback(mock, dict_assert={}, url=None):
         if url is None or url == request.url:
             body_file = io.BytesIO(request.body)
 
-            if sys.version_info >= (3, 13):
+            if sys.version_info >= (3, 8):
                 import multipart
 
                 p = multipart.MultipartParser(
@@ -56,10 +56,7 @@ def add_verify_file_callback(mock, dict_assert={}, url=None):
                 import cgi
 
                 _, pdict = cgi.parse_header(request.headers["Content-Type"])
-                if sys.version_info[0] == 3:
-                    pdict["boundary"] = bytes(pdict["boundary"], "utf-8")
-                else:
-                    pdict["boundary"] = bytes(pdict["boundary"])
+                pdict["boundary"] = bytes(pdict["boundary"], "utf-8")
                 parsed = cgi.parse_multipart(fp=body_file, pdict=pdict)
             for key in dict_assert.keys():
                 assert key in parsed.keys()
