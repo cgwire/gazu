@@ -485,7 +485,7 @@ def notify_clients_playlist_ready(
     )
 
 
-def create_share_link(
+def new_share_link(
     playlist: str | dict,
     expiration_date: str | None = None,
     can_comment: bool = True,
@@ -516,7 +516,7 @@ def create_share_link(
     )
 
 
-def get_share_links(
+def all_share_links_for_playlist(
     playlist: str | dict, client: KitsuClient = default
 ) -> list[dict]:
     """
@@ -534,11 +534,11 @@ def get_share_links(
     )
 
 
-def revoke_share_link(
+def remove_share_link(
     playlist: str | dict,
     token: str,
     client: KitsuClient = default,
-) -> dict:
+) -> str:
     """
     Revoke (deactivate) a share link.
 
@@ -547,7 +547,7 @@ def revoke_share_link(
         token (str): The share link token to revoke.
 
     Returns:
-        dict: Revoked share link.
+        str: API response.
     """
     playlist = normalize_model_parameter(playlist)
     return raw.delete(

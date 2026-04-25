@@ -427,7 +427,7 @@ class TaskTestCase(unittest.TestCase):
             )
             self.assertEqual(response["status"], "notified")
 
-    def test_create_share_link(self):
+    def test_new_share_link(self):
         with requests_mock.mock() as mock:
             result = {
                 "id": fakeid("share-1"),
@@ -440,12 +440,38 @@ class TaskTestCase(unittest.TestCase):
                 ),
                 text=json.dumps(result),
             )
-            response = gazu.playlist.create_share_link(
+            response = gazu.playlist.new_share_link(
                 fakeid("playlist-1"), can_comment=True
             )
             self.assertEqual(response["token"], "abc-123")
+            self.assertEqual(
+                mock.last_request.json(), {"can_comment": True}
+            )
 
-    def test_get_share_links(self):
+    def test_new_share_link_with_expiration_and_password(self):
+        with requests_mock.mock() as mock:
+            mock.post(
+                gazu.client.get_full_url(
+                    f"data/playlists/{fakeid('playlist-1')}/share"
+                ),
+                text=json.dumps({"id": fakeid("share-1"), "token": "x"}),
+            )
+            gazu.playlist.new_share_link(
+                fakeid("playlist-1"),
+                expiration_date="2026-12-31",
+                can_comment=False,
+                password="s3cret",
+            )
+            self.assertEqual(
+                mock.last_request.json(),
+                {
+                    "can_comment": False,
+                    "expiration_date": "2026-12-31",
+                    "password": "s3cret",
+                },
+            )
+
+    def test_all_share_links_for_playlist(self):
         with requests_mock.mock() as mock:
             mock.get(
                 gazu.client.get_full_url(
@@ -455,12 +481,12 @@ class TaskTestCase(unittest.TestCase):
                     [{"id": fakeid("share-1"), "token": "abc-123"}]
                 ),
             )
-            response = gazu.playlist.get_share_links(
+            response = gazu.playlist.all_share_links_for_playlist(
                 fakeid("playlist-1")
             )
             self.assertEqual(len(response), 1)
 
-    def test_revoke_share_link(self):
+    def test_remove_share_link(self):
         with requests_mock.mock() as mock:
             mock.delete(
                 gazu.client.get_full_url(
@@ -469,6 +495,6 @@ class TaskTestCase(unittest.TestCase):
                 status_code=200,
                 text="",
             )
-            gazu.playlist.revoke_share_link(
+            gazu.playlist.remove_share_link(
                 fakeid("playlist-1"), "abc-123"
             )
