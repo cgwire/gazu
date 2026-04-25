@@ -435,22 +435,33 @@ def get_metadata_descriptor_by_field_name(
 
 
 def all_metadata_descriptors(
-    project: str | dict, client: KitsuClient = default
+    project: str | dict,
+    client: KitsuClient = default,
+    *,
+    entity_type: str | None = None,
 ) -> list[dict]:
     """
-    Get all the metadata descriptors.
+    Get all the metadata descriptors for a project.
 
     Args:
         project (dict / ID): The project dict or id.
+        entity_type (str, optional): If set, only descriptors for this
+            model are returned. Values match the API (e.g. "Asset",
+            "Shot", "Project"); casing is significant. Must be passed as a
+            keyword argument so a custom ``client`` can still be the second
+            positional parameter.
 
     Returns:
         list: The metadata descriptors.
     """
     project = normalize_model_parameter(project)
-    return raw.fetch_all(
+    descriptors = raw.fetch_all(
         f"projects/{project['id']}/metadata-descriptors",
         client=client,
     )
+    if entity_type is None:
+        return descriptors
+    return [d for d in descriptors if d.get("entity_type") == entity_type]
 
 
 def update_metadata_descriptor(
