@@ -358,6 +358,40 @@ class ProjectTestCase(unittest.TestCase):
                 metadata_descriptors[1]["id"], fakeid("metadata-descriptor-2")
             )
 
+    def test_all_metadata_descriptors_filter_entity_type(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                f"data/projects/{fakeid('project-1')}/metadata-descriptors",
+                text=[
+                    {
+                        "id": fakeid("metadata-descriptor-1"),
+                        "entity_type": "Project",
+                    },
+                    {
+                        "id": fakeid("metadata-descriptor-2"),
+                        "entity_type": "Asset",
+                    },
+                ],
+            )
+            all_desc = gazu.project.all_metadata_descriptors(
+                fakeid("project-1")
+            )
+            self.assertEqual(len(all_desc), 2)
+            project_desc = gazu.project.all_metadata_descriptors(
+                fakeid("project-1"), entity_type="Project"
+            )
+            self.assertEqual(len(project_desc), 1)
+            self.assertEqual(
+                project_desc[0]["id"], fakeid("metadata-descriptor-1")
+            )
+            self.assertEqual(project_desc[0]["entity_type"], "Project")
+            other_filter = gazu.project.all_metadata_descriptors(
+                fakeid("project-1"), entity_type="Sequence"
+            )
+            self.assertEqual(len(other_filter), 0)
+
     def test_update_metadata_descriptor(self):
         with requests_mock.mock() as mock:
             mock_route(
