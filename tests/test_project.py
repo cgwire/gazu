@@ -429,6 +429,43 @@ class ProjectTestCase(unittest.TestCase):
             )
             self.assertEqual(response, "")
 
+    def test_reorder_metadata_descriptors(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "POST",
+                f"data/projects/{fakeid('project-1')}/metadata-descriptors/reorder",
+                text=[
+                    {
+                        "id": fakeid("metadata-descriptor-1"),
+                        "position": 1,
+                    },
+                    {
+                        "id": fakeid("metadata-descriptor-2"),
+                        "position": 2,
+                    },
+                ],
+            )
+            result = gazu.project.reorder_metadata_descriptors(
+                fakeid("project-1"),
+                "Shot",
+                [
+                    fakeid("metadata-descriptor-1"),
+                    {"id": fakeid("metadata-descriptor-2")},
+                ],
+            )
+            self.assertEqual(len(result), 2)
+            self.assertEqual(
+                mock.last_request.json(),
+                {
+                    "entity_type": "Shot",
+                    "descriptor_ids": [
+                        fakeid("metadata-descriptor-1"),
+                        fakeid("metadata-descriptor-2"),
+                    ],
+                },
+            )
+
     def test_add_task_status(self):
         with requests_mock.mock() as mock:
             mock_route(
