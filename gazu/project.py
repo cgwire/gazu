@@ -519,6 +519,39 @@ def remove_metadata_descriptor(
     )
 
 
+def reorder_metadata_descriptors(
+    project: str | dict,
+    entity_type: str,
+    descriptor_ids: list[str | dict],
+    client: KitsuClient = default,
+) -> list[dict]:
+    """
+    Reorder metadata descriptors for a given entity type. Position is set
+    according to the order of ids in the list.
+
+    Args:
+        project (dict / ID): The project dict or id.
+        entity_type (str): One of "Asset", "Shot", "Edit", "Episode",
+            "Sequence", "Project".
+        descriptor_ids (list): The descriptors (ids or dicts) in the
+            desired order.
+
+    Returns:
+        list: The reordered metadata descriptors.
+    """
+    project = normalize_model_parameter(project)
+    return raw.post(
+        f"data/projects/{project['id']}/metadata-descriptors/reorder",
+        {
+            "entity_type": entity_type,
+            "descriptor_ids": normalize_list_of_models_for_links(
+                descriptor_ids
+            ),
+        },
+        client=client,
+    )
+
+
 def get_team(project: str | dict, client: KitsuClient = default) -> list[dict]:
     """
     Get team for project.
