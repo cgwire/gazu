@@ -260,6 +260,51 @@ class TaskTestCase(unittest.TestCase):
             )
             self.assertEqual(playlist["shots"], [])
 
+    def test_add_entity_to_playlist_with_null_shots(self):
+        """Regression test for #386: a fresh playlist has shots=None."""
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url(
+                    f"data/playlists/entities/{fakeid('shot-1')}/preview-files"
+                ),
+                text=json.dumps({}),
+            )
+            mock.post(
+                gazu.client.get_full_url(
+                    f"actions/playlists/{fakeid('playlist-1')}/add-entity"
+                ),
+                text=json.dumps(
+                    {
+                        "id": fakeid("playlist-1"),
+                        "shots": [{"entity_id": fakeid("shot-1")}],
+                    }
+                ),
+            )
+            playlist = {"id": fakeid("playlist-1"), "shots": None}
+            shot = {"id": fakeid("shot-1")}
+            playlist = gazu.playlist.add_entity_to_playlist(playlist, shot)
+            self.assertEqual(
+                playlist["shots"], [{"entity_id": fakeid("shot-1")}]
+            )
+
+    def test_add_entity_to_playlist_no_persist_with_null_shots(self):
+        """Without persist=True, the local dict must still be usable."""
+        playlist = {"id": fakeid("playlist-1"), "shots": None}
+        shot = {"id": fakeid("shot-1")}
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url(
+                    f"data/playlists/entities/{fakeid('shot-1')}/preview-files"
+                ),
+                text=json.dumps({}),
+            )
+            playlist = gazu.playlist.add_entity_to_playlist(
+                playlist, shot, persist=False
+            )
+            self.assertEqual(
+                playlist["shots"], [{"entity_id": fakeid("shot-1")}]
+            )
+
     def test_delete_playlist(self):
         with requests_mock.mock() as mock:
             mock.delete(

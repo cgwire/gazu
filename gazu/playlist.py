@@ -228,12 +228,14 @@ def add_entity_to_playlist(
     if preview_file is not None:
         entry["preview_file_id"] = preview_file["id"]
 
+    if playlist.get("shots") is None:
+        playlist["shots"] = []
     playlist["shots"].append(entry)
     if persist:
         playlist = raw.post(
-            f"actions/playlists/{playlist['id']}/add-entity", 
+            f"actions/playlists/{playlist['id']}/add-entity",
             entry,
-            client=client
+            client=client,
         )
     return playlist
 
