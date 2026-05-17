@@ -226,6 +226,7 @@ def add_entity_to_playlist(
 
     entry = {"entity_id": entity["id"]}
     if preview_file is not None:
+        preview_file = normalize_model_parameter(preview_file)
         entry["preview_file_id"] = preview_file["id"]
 
     if playlist.get("shots") is None:

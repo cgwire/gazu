@@ -287,6 +287,41 @@ class TaskTestCase(unittest.TestCase):
                 playlist["shots"], [{"entity_id": fakeid("shot-1")}]
             )
 
+    def test_add_entity_to_playlist_with_preview_file_id(self):
+        """Regression test for #386: preview_file can be an ID string."""
+        with requests_mock.mock() as mock:
+            mock.post(
+                gazu.client.get_full_url(
+                    f"actions/playlists/{fakeid('playlist-1')}/add-entity"
+                ),
+                text=json.dumps(
+                    {
+                        "id": fakeid("playlist-1"),
+                        "shots": [
+                            {
+                                "entity_id": fakeid("shot-1"),
+                                "preview_file_id": fakeid("preview-1"),
+                            }
+                        ],
+                    }
+                ),
+            )
+            playlist = {"id": fakeid("playlist-1"), "shots": []}
+            playlist = gazu.playlist.add_entity_to_playlist(
+                playlist,
+                fakeid("shot-1"),
+                preview_file=fakeid("preview-1"),
+            )
+
+            expected_entry = {
+                "entity_id": fakeid("shot-1"),
+                "preview_file_id": fakeid("preview-1"),
+            }
+            self.assertEqual(playlist["shots"], [expected_entry])
+            self.assertEqual(
+                json.loads(mock.last_request.text), expected_entry
+            )
+
     def test_add_entity_to_playlist_no_persist_with_null_shots(self):
         """Without persist=True, the local dict must still be usable."""
         playlist = {"id": fakeid("playlist-1"), "shots": None}
