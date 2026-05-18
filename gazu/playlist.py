@@ -116,7 +116,9 @@ def new_playlist(
     project: str | dict,
     name: str,
     episode: str | dict | None = None,
-    for_entity: Literal["shot", "asset", "sequence", "edit"] = "shot",
+    for_entity: Literal[
+        "shot", "asset", "sequence", "edit", "episode"
+    ] = "shot",
     for_client: bool = False,
     is_for_all: bool = False,
     client: KitsuClient = default,
@@ -131,7 +133,7 @@ def new_playlist(
             playlist is project-level; set is_for_all=True to place it under
             "All Assets" in the web UI.
         for_entity (str): The type of entity to include in the playlist, can
-            be one of "asset", "edit", "sequence" or "shot".
+            be one of "asset", "edit", "episode", "sequence" or "shot".
         for_client (bool): Whether the playlist should be shared with clients.
         is_for_all (bool): If True and episode is None, the playlist is
             created under "All Assets" instead of "Main Pack" in the web UI.
