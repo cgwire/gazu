@@ -1379,6 +1379,25 @@ class TaskTestCase(unittest.TestCase):
             self.assertEqual(result["id"], fakeid("comment-1"))
             self.assertTrue(result["acknowledged"])
 
+    def test_move_comment_to_task(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "POST",
+                f"actions/tasks/{fakeid('task-1')}/comments/{fakeid('comment-1')}/move",
+                text={
+                    "id": fakeid("comment-1"),
+                    "object_id": fakeid("task-2"),
+                },
+            )
+            result = gazu.task.move_comment_to_task(
+                fakeid("task-1"),
+                fakeid("comment-1"),
+                fakeid("task-2"),
+            )
+            self.assertEqual(result["id"], fakeid("comment-1"))
+            self.assertEqual(result["object_id"], fakeid("task-2"))
+
     def test_reply_to_comment(self):
         with requests_mock.mock() as mock:
             mock_route(

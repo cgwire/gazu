@@ -1927,6 +1927,38 @@ def remove_preview_from_comment(
     )
 
 
+def move_comment_to_task(
+    task: str | dict,
+    comment: str | dict,
+    target_task: str | dict,
+    client: KitsuClient = default,
+) -> dict:
+    """
+    Move a comment from its current task to another task that belongs to the
+    same entity. Reserved to production managers and studio admins. The
+    original creation date, text, attachments, mentions and status change
+    carried by the comment are preserved. Notifications and news are rebuilt
+    against the target task as if a new comment was posted.
+
+    Args:
+        task (str / dict): The task dict or id currently holding the comment.
+        comment (str / dict): The comment dict or id to move.
+        target_task (str / dict): The destination task dict or id. Must
+            belong to the same entity as the current task.
+
+    Returns:
+        dict: Updated comment whose object_id is now the target task id.
+    """
+    task = normalize_model_parameter(task)
+    comment = normalize_model_parameter(comment)
+    target_task = normalize_model_parameter(target_task)
+    return raw.post(
+        f"actions/tasks/{task['id']}/comments/{comment['id']}/move",
+        {"target_task_id": target_task["id"]},
+        client=client,
+    )
+
+
 def acknowledge_comment(
     task: str | dict,
     comment: str | dict,
