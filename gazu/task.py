@@ -2073,15 +2073,7 @@ def create_shot_tasks(
     Returns:
         list: Created tasks.
     """
-    shot = normalize_model_parameter(shot)
-    task_type_ids = [
-        normalize_model_parameter(task_type)["id"] for task_type in task_types
-    ]
-    return raw.post(
-        f"data/shots/{shot['id']}/tasks",
-        {"task_type_ids": task_type_ids},
-        client=client,
-    )
+    return create_entity_tasks(shot, task_types, client=client)
 
 
 def create_asset_tasks(
@@ -2099,15 +2091,7 @@ def create_asset_tasks(
     Returns:
         list: Created tasks.
     """
-    asset = normalize_model_parameter(asset)
-    task_type_ids = [
-        normalize_model_parameter(task_type)["id"] for task_type in task_types
-    ]
-    return raw.post(
-        f"data/assets/{asset['id']}/tasks",
-        {"task_type_ids": task_type_ids},
-        client=client,
-    )
+    return create_entity_tasks(asset, task_types, client=client)
 
 
 def create_edit_tasks(
@@ -2125,15 +2109,7 @@ def create_edit_tasks(
     Returns:
         list: Created tasks.
     """
-    edit = normalize_model_parameter(edit)
-    task_type_ids = [
-        normalize_model_parameter(task_type)["id"] for task_type in task_types
-    ]
-    return raw.post(
-        f"data/edits/{edit['id']}/tasks",
-        {"task_type_ids": task_type_ids},
-        client=client,
-    )
+    return create_entity_tasks(edit, task_types, client=client)
 
 
 def create_concept_tasks(
@@ -2151,15 +2127,7 @@ def create_concept_tasks(
     Returns:
         list: Created tasks.
     """
-    concept = normalize_model_parameter(concept)
-    task_type_ids = [
-        normalize_model_parameter(task_type)["id"] for task_type in task_types
-    ]
-    return raw.post(
-        f"data/concepts/{concept['id']}/tasks",
-        {"task_type_ids": task_type_ids},
-        client=client,
-    )
+    return create_entity_tasks(concept, task_types, client=client)
 
 
 def create_entity_tasks(
