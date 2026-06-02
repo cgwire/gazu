@@ -840,10 +840,17 @@ class TaskTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "DELETE",
-                f"data/task-types/{fakeid('task-type-1')}?force=true",
+                f"data/task-types/{fakeid('task-type-1')}",
                 status_code=204,
             )
             gazu.task.remove_task_type(fakeid("task-type-1"))
+            mock_route(
+                mock,
+                "DELETE",
+                f"data/task-types/{fakeid('task-type-1')}?force=true",
+                status_code=204,
+            )
+            gazu.task.remove_task_type(fakeid("task-type-1"), force=True)
 
     def test_update_task(self):
         with requests_mock.mock() as mock:

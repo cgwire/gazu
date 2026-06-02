@@ -634,18 +634,26 @@ def get_task_status_by_short_name(
 
 
 def remove_task_type(
-    task_type: str | dict, client: KitsuClient = default
+    task_type: str | dict,
+    force: bool = False,
+    client: KitsuClient = default,
 ) -> str:
     """
     Remove given task type from database.
 
     Args:
         task_type (str / dict): The task type dict or ID.
+        force (bool): Whether to force deletion regardless of links to
+            tasks. A task type still attached to a project must first be
+            detached with gazu.project.remove_task_type.
     """
     task_type = normalize_model_parameter(task_type)
+    params = {}
+    if force:
+        params = {"force": True}
     return raw.delete(
         f"data/task-types/{task_type['id']}",
-        {"force": True},
+        params,
         client=client,
     )
 
