@@ -146,9 +146,7 @@ def new_project(
             "production_type": production_type,
             "team": normalize_list_of_models_for_links(team),
             "asset_types": normalize_list_of_models_for_links(asset_types),
-            "task_statuses": normalize_list_of_models_for_links(
-                task_statuses
-            ),
+            "task_statuses": normalize_list_of_models_for_links(task_statuses),
             "task_types": normalize_list_of_models_for_links(task_types),
             "production_style": production_style,
         }

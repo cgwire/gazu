@@ -47,13 +47,9 @@ def all_asset_types_for_project(
     Return the list of asset types for which the user has a task.
     """
     if user_context:
-        return gazu_user.all_asset_types_for_project(
-            project, client=client
-        )
+        return gazu_user.all_asset_types_for_project(project, client=client)
     else:
-        return gazu_asset.all_asset_types_for_project(
-            project, client=client
-        )
+        return gazu_asset.all_asset_types_for_project(project, client=client)
 
 
 def all_assets_for_asset_type_and_project(
@@ -127,13 +123,9 @@ def all_task_types_for_sequence(
     Return the list of tasks for given sequence and current user.
     """
     if user_context:
-        return gazu_user.all_task_types_for_sequence(
-            sequence, client=client
-        )
+        return gazu_user.all_task_types_for_sequence(sequence, client=client)
     else:
-        return gazu_task.all_task_types_for_sequence(
-            sequence, client=client
-        )
+        return gazu_task.all_task_types_for_sequence(sequence, client=client)
 
 
 def all_sequences_for_project(
@@ -145,13 +137,9 @@ def all_sequences_for_project(
     Return the list of sequences for given project and current user.
     """
     if user_context:
-        return gazu_user.all_sequences_for_project(
-            project, client=client
-        )
+        return gazu_user.all_sequences_for_project(project, client=client)
     else:
-        return gazu_shot.all_sequences_for_project(
-            project, client=client
-        )
+        return gazu_shot.all_sequences_for_project(project, client=client)
 
 
 def all_scenes_for_project(
@@ -177,13 +165,9 @@ def all_shots_for_sequence(
     Return the list of shots for given sequence and current user.
     """
     if user_context:
-        return gazu_user.all_shots_for_sequence(
-            sequence, client=client
-        )
+        return gazu_user.all_shots_for_sequence(sequence, client=client)
     else:
-        return gazu_shot.all_shots_for_sequence(
-            sequence, client=client
-        )
+        return gazu_shot.all_shots_for_sequence(sequence, client=client)
 
 
 def all_scenes_for_sequence(
@@ -195,13 +179,9 @@ def all_scenes_for_sequence(
     Return the list of scenes for given sequence and current user.
     """
     if user_context:
-        return gazu_user.all_scenes_for_sequence(
-            sequence, client=client
-        )
+        return gazu_user.all_scenes_for_sequence(sequence, client=client)
     else:
-        return gazu_scene.all_scenes_for_sequence(
-            sequence, client=client
-        )
+        return gazu_scene.all_scenes_for_sequence(sequence, client=client)
 
 
 def all_sequences_for_episode(
@@ -213,13 +193,9 @@ def all_sequences_for_episode(
     Return the list of sequences for given episode and current user.
     """
     if user_context:
-        return gazu_user.all_sequences_for_episode(
-            episode, client=client
-        )
+        return gazu_user.all_sequences_for_episode(episode, client=client)
     else:
-        return gazu_shot.all_sequences_for_episode(
-            episode, client=client
-        )
+        return gazu_shot.all_sequences_for_episode(episode, client=client)
 
 
 def all_episodes_for_project(
@@ -231,10 +207,6 @@ def all_episodes_for_project(
     Return the list of episodes for given project and current user.
     """
     if user_context:
-        return gazu_user.all_episodes_for_project(
-            project, client=client
-        )
+        return gazu_user.all_episodes_for_project(project, client=client)
     else:
-        return gazu_shot.all_episodes_for_project(
-            project, client=client
-        )
+        return gazu_shot.all_episodes_for_project(project, client=client)

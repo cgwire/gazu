@@ -816,15 +816,11 @@ def upload(
         files = _build_file_dict(file_path, extra_files)
         opened_files = files
     if progress_callback is not None:
-        total = sum(
-            os.fstat(f.fileno()).st_size for f in files.values()
-        )
+        total = sum(os.fstat(f.fileno()).st_size for f in files.values())
         offset = 0
         wrapped = {}
         for key, f in files.items():
-            wrapper = _ProgressFileWrapper(
-                f, progress_callback, offset, total
-            )
+            wrapper = _ProgressFileWrapper(f, progress_callback, offset, total)
             wrapped[key] = wrapper
             offset += os.fstat(f.fileno()).st_size
         files = wrapped
@@ -910,9 +906,7 @@ def download(
     ) as response:
         with open(file_path, "wb") as target_file:
             if progress_callback is not None:
-                total = int(
-                    response.headers.get("content-length", 0)
-                )
+                total = int(response.headers.get("content-length", 0))
                 bytes_read = 0
                 for chunk in response.iter_content(8192):
                     target_file.write(chunk)

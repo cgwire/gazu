@@ -1243,16 +1243,12 @@ def batch_comments(
     try:
         for x, comment in enumerate(comments):
             if comment.get("attachment_files"):
-                for y, file_path in enumerate(
-                    comment["attachment_files"]
-                ):
+                for y, file_path in enumerate(comment["attachment_files"]):
                     f = open(file_path, "rb")
                     opened_files.append(f)
                     files[f"attachment_file-{x}-{y}"] = f
             if comment.get("preview_files"):
-                for y, file_path in enumerate(
-                    comment["preview_files"]
-                ):
+                for y, file_path in enumerate(comment["preview_files"]):
                     f = open(file_path, "rb")
                     opened_files.append(f)
                     files[f"preview_file-{x}-{y}"] = f
@@ -1303,16 +1299,12 @@ def create_multiple_comments(
     try:
         for x, comment in enumerate(comments):
             if comment.get("attachment_files"):
-                for y, file_path in enumerate(
-                    comment["attachment_files"]
-                ):
+                for y, file_path in enumerate(comment["attachment_files"]):
                     f = open(file_path, "rb")
                     opened_files.append(f)
                     files[f"attachment_file-{x}-{y}"] = f
             if comment.get("preview_files"):
-                for y, file_path in enumerate(
-                    comment["preview_files"]
-                ):
+                for y, file_path in enumerate(comment["preview_files"]):
                     f = open(file_path, "rb")
                     opened_files.append(f)
                     files[f"preview_file-{x}-{y}"] = f
@@ -1502,9 +1494,7 @@ def new_task_status(
         dict: The created task status
     """
     if not color or color[0] != "#":
-        raise ValueError(
-            "Color must start with '#', e.g. '#00FF00'"
-        )
+        raise ValueError("Color must start with '#', e.g. '#00FF00'")
     if not all(c in string.hexdigits for c in color[1:]):
         raise ValueError(
             "Color must be a valid hexadecimal string, e.g. '#00FF00'"

@@ -20,12 +20,8 @@ import gazu.aio
 async def list_project_contents(client, project):
     """Fetch assets and shots for a project concurrently."""
     assets, shots = await asyncio.gather(
-        gazu.aio.fetch_all(
-            f"projects/{project['id']}/assets", client=client
-        ),
-        gazu.aio.fetch_all(
-            f"projects/{project['id']}/shots", client=client
-        ),
+        gazu.aio.fetch_all(f"projects/{project['id']}/assets", client=client),
+        gazu.aio.fetch_all(f"projects/{project['id']}/shots", client=client),
     )
     return assets, shots
 

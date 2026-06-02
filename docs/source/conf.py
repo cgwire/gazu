@@ -5,7 +5,7 @@ import inspect
 import re
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-GAZU_PATH=os.path.abspath(os.path.join(BASE_DIR, "../../"))
+GAZU_PATH = os.path.abspath(os.path.join(BASE_DIR, "../../"))
 sys.path.insert(0, GAZU_PATH)
 print(GAZU_PATH)
 
@@ -19,6 +19,7 @@ autodoc_mock_imports = ["typing_extensions"]
 # --- Docstring collection ---
 
 _collected_docstrings = {}
+
 
 def _safe_repr(value):
     if value is inspect._empty:
@@ -132,6 +133,7 @@ def collect_docstrings(app, what, name, obj, options, lines):
         "input_params": input_params,
         "output_params": return_info,
     }
+
 
 def dump_docstrings(app, exception):
     if exception:

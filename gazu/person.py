@@ -749,14 +749,10 @@ def update_day_off(day_off: dict, client: KitsuClient = default) -> dict:
     Returns:
         dict: Updated day off.
     """
-    return raw.put(
-        f"data/day-offs/{day_off['id']}", day_off, client=client
-    )
+    return raw.put(f"data/day-offs/{day_off['id']}", day_off, client=client)
 
 
-def remove_day_off(
-    day_off: str | dict, client: KitsuClient = default
-) -> str:
+def remove_day_off(day_off: str | dict, client: KitsuClient = default) -> str:
     """
     Delete a day off.
 

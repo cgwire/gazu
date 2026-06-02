@@ -552,9 +552,7 @@ class TaskTestCase(unittest.TestCase):
                 fakeid("playlist-1"), can_comment=True
             )
             self.assertEqual(response["token"], "abc-123")
-            self.assertEqual(
-                mock.last_request.json(), {"can_comment": True}
-            )
+            self.assertEqual(mock.last_request.json(), {"can_comment": True})
 
     def test_new_share_link_with_expiration_and_password(self):
         with requests_mock.mock() as mock:
@@ -603,6 +601,4 @@ class TaskTestCase(unittest.TestCase):
                 status_code=200,
                 text="",
             )
-            gazu.playlist.remove_share_link(
-                fakeid("playlist-1"), "abc-123"
-            )
+            gazu.playlist.remove_share_link(fakeid("playlist-1"), "abc-123")

@@ -534,9 +534,7 @@ def all_share_links_for_playlist(
         list: Active share links.
     """
     playlist = normalize_model_parameter(playlist)
-    return raw.fetch_all(
-        f"playlists/{playlist['id']}/share", client=client
-    )
+    return raw.fetch_all(f"playlists/{playlist['id']}/share", client=client)
 
 
 def remove_share_link(

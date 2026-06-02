@@ -126,9 +126,7 @@ class AsyncKitsuClient:
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
         try:
             url = get_full_url("auth/logout", client=self)
-            async with self.session.get(
-                url, headers=self.make_auth_header()
-            ):
+            async with self.session.get(url, headers=self.make_auth_header()):
                 pass
         except Exception:
             pass
@@ -268,9 +266,7 @@ async def get(
                     return await response.text()
 
 
-async def post(
-    path: str, data: Any, client: AsyncKitsuClient = None
-) -> Any:
+async def post(path: str, data: Any, client: AsyncKitsuClient = None) -> Any:
     logger.debug("POST %s", get_full_url(path, client))
     retry = True
     while retry:
@@ -285,15 +281,11 @@ async def post(
                     return await response.json()
                 except Exception:
                     text = await response.text()
-                    logger.error(
-                        "Failed to decode JSON response: %s", text
-                    )
+                    logger.error("Failed to decode JSON response: %s", text)
                     raise
 
 
-async def put(
-    path: str, data: dict, client: AsyncKitsuClient = None
-) -> Any:
+async def put(path: str, data: dict, client: AsyncKitsuClient = None) -> Any:
     logger.debug("PUT %s", get_full_url(path, client))
     retry = True
     while retry:
@@ -441,9 +433,7 @@ async def upload(
         files_to_close.append(f)
         size = os.fstat(f.fileno()).st_size
         total_size += size
-        form.add_field(
-            f"file-{i}", f, filename=os.path.basename(extra_path)
-        )
+        form.add_field(f"file-{i}", f, filename=os.path.basename(extra_path))
 
     try:
         retry = True
@@ -453,9 +443,7 @@ async def upload(
                 data=form,
                 headers=client.make_auth_header(),
             ) as response:
-                _, retry = await check_status(
-                    response, path, client=client
-                )
+                _, retry = await check_status(response, path, client=client)
                 if not retry:
                     try:
                         result = await response.json()
