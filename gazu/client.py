@@ -413,14 +413,18 @@ def post(path: str, data: Any, client: KitsuClient = default_client) -> Any:
     """
     logger.debug("POST %s", get_full_url(path, client))
     sensitive_fields = {
-        "password", "token", "access_token", "refresh_token", "secret"
+        "password",
+        "token",
+        "access_token",
+        "refresh_token",
+        "secret",
     }
     if not any(field in data for field in sensitive_fields):
         logger.debug("Body: %s", data)
-    headers = make_auth_header(client=client)
-    headers["Content-Type"] = "application/json"
     retry = True
     while retry:
+        headers = make_auth_header(client=client)
+        headers["Content-Type"] = "application/json"
         response = client.session.post(
             get_full_url(path, client),
             data=json.dumps(data, cls=CustomJSONEncoder),
@@ -449,10 +453,10 @@ def put(path: str, data: dict, client: KitsuClient = default_client) -> Any:
     """
     logger.debug("PUT %s", get_full_url(path, client))
     logger.debug("Body: %s", data)
-    headers = make_auth_header(client=client)
-    headers["Content-Type"] = "application/json"
     retry = True
     while retry:
+        headers = make_auth_header(client=client)
+        headers["Content-Type"] = "application/json"
         response = client.session.put(
             get_full_url(path, client),
             data=json.dumps(data, cls=CustomJSONEncoder),
