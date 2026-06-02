@@ -35,6 +35,7 @@ from .exception import (
     ParameterException,
     RouteNotFoundException,
     ServerErrorException,
+    ValidationException,
     UploadFailedException,
 )
 
@@ -166,7 +167,41 @@ async def check_status(
             f"{path}: You send a too big file. "
             "Change your proxy configuration to allow bigger files."
         )
-    elif status_code in [401, 422]:
+    elif status_code == 422:
+        try:
+            data = await response.json()
+        except Exception:
+            data = {}
+        message = "No additional information"
+        if isinstance(data, dict):
+            for key in ["error", "message"]:
+                if data.get(key):
+                    message = data[key]
+                    break
+        jwt_expired = (
+            isinstance(data, dict)
+            and data.get("message") == "Signature has expired"
+        )
+        # flask-jwt-extended returns 422 with this message when the JWT
+        # signature has expired -- this is an auth case, not a validation one.
+        if jwt_expired:
+            try:
+                if (
+                    client
+                    and client.refresh_token
+                    and client.use_refresh_token
+                ):
+                    await client.refresh_access_token()
+                    return status_code, True
+                raise NotAuthenticatedException(path)
+            except NotAuthenticatedException:
+                if client and client.callback_not_authenticated:
+                    retry = client.callback_not_authenticated(client, path)
+                    if retry:
+                        return status_code, True
+                raise
+        raise ValidationException(path, message)
+    elif status_code == 401:
         try:
             data = await response.json()
             if (

@@ -17,6 +17,7 @@ from gazu.exception import (
     NotAllowedException,
     TooBigFileException,
     ServerErrorException,
+    ValidationException,
 )
 
 from utils import add_verify_file_callback, mock_route
@@ -395,6 +396,66 @@ class BaseFuncTestCase(ClientTestCase):
         self.assertRaises(
             ServerErrorException, raw.check_status, RequestJSON(502), "/"
         )
+
+    def test_check_status_422_raises_validation_with_body_message(self):
+        class Request422(object):
+            status_code = 422
+            text = '{"message": "name: missing required field"}'
+
+            def json(self):
+                return {"message": "name: missing required field"}
+
+        with self.assertRaises(ValidationException) as context:
+            raw.check_status(Request422(), "/data/persons")
+        self.assertIn("name: missing required field", str(context.exception))
+
+    def test_check_status_422_non_json_body_raises_validation(self):
+        class Request422(object):
+            status_code = 422
+            text = "<html>502 Bad Gateway</html>"
+
+            def json(self):
+                raise ValueError("no json")
+
+        with self.assertRaises(ValidationException) as context:
+            raw.check_status(Request422(), "/data/persons")
+        self.assertIn("No additional information", str(context.exception))
+
+    def test_check_status_422_signature_expired_refreshes_token(self):
+        class Request422(object):
+            status_code = 422
+
+            def json(self):
+                return {"message": "Signature has expired"}
+
+        class FakeClient(object):
+            refresh_token = "a-refresh-token"
+            use_refresh_token = True
+            callback_not_authenticated = None
+
+            def __init__(self):
+                self.refreshed = False
+
+            def refresh_access_token(self):
+                self.refreshed = True
+
+        client = FakeClient()
+        status_code, retry = raw.check_status(
+            Request422(), "/data/persons", client=client
+        )
+        self.assertEqual(status_code, 422)
+        self.assertTrue(retry)
+        self.assertTrue(client.refreshed)
+
+    def test_check_status_422_signature_expired_without_refresh_raises(self):
+        class Request422(object):
+            status_code = 422
+
+            def json(self):
+                return {"message": "Signature has expired"}
+
+        with self.assertRaises(NotAuthenticatedException):
+            raw.check_status(Request422(), "/data/persons")
 
     def test_init_host(self):
         gazu.set_host("newhost")

@@ -18,6 +18,7 @@ from .exception import (
     ParameterException,
     RouteNotFoundException,
     ServerErrorException,
+    ValidationException,
     UploadFailedException,
 )
 
@@ -538,6 +539,7 @@ def check_status(
         NotAllowedException: when 403 response occurs
         MethodNotAllowedException: when 405 response occurs
         TooBigFileException: when 413 response occurs
+        ValidationException: when 422 response occurs (non auth-related)
         ServerErrorException: when 500 response occurs
     """
     status_code = request.status_code
@@ -554,7 +556,41 @@ def check_status(
             f"{path}: You send a too big file. "
             "Change your proxy configuration to allow bigger files."
         )
-    elif status_code in [401, 422]:
+    elif status_code == 422:
+        try:
+            body = request.json()
+        except Exception:
+            body = {}
+        message = "No additional information"
+        if isinstance(body, dict):
+            for key in ["error", "message"]:
+                if body.get(key):
+                    message = body[key]
+                    break
+        jwt_expired = (
+            isinstance(body, dict)
+            and body.get("message") == "Signature has expired"
+        )
+        # flask-jwt-extended returns 422 with this message when the JWT
+        # signature has expired -- this is an auth case, not a validation one.
+        if jwt_expired:
+            try:
+                if (
+                    client
+                    and client.refresh_token
+                    and client.use_refresh_token
+                ):
+                    client.refresh_access_token()
+                    return status_code, True
+                raise NotAuthenticatedException(path)
+            except NotAuthenticatedException:
+                if client and client.callback_not_authenticated:
+                    retry = client.callback_not_authenticated(client, path)
+                    if retry:
+                        return status_code, True
+                raise
+        raise ValidationException(path, message)
+    elif status_code == 401:
         try:
             if (
                 client
