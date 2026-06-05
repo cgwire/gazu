@@ -1094,6 +1094,36 @@ def create_preview(
     return raw.post(path, data, client=client)
 
 
+def create_extra_preview(
+    task: str | dict,
+    comment: str | dict,
+    preview_file: str | dict,
+    client: KitsuClient = default,
+) -> dict:
+    """
+    Create an extra preview file for a comment revision.
+
+    The new preview file shares the same revision as the given preview file.
+    Use upload_preview_file to upload the file content afterwards.
+
+    Args:
+        task (str / dict): The task dict or the task ID.
+        comment (str / dict): The comment or the comment ID.
+        preview_file (str / dict): The reference preview file dict or ID.
+
+    Returns:
+        dict: Created preview file model.
+    """
+    task = normalize_model_parameter(task)
+    comment = normalize_model_parameter(comment)
+    preview_file = normalize_model_parameter(preview_file)
+    path = (
+        f"actions/tasks/{task['id']}/comments/{comment['id']}"
+        f"/preview-files/{preview_file['id']}"
+    )
+    return raw.post(path, {}, client=client)
+
+
 def upload_preview_file(
     preview_file: str | dict,
     file_path: str,
@@ -1150,6 +1180,50 @@ def add_preview(
     )
     return upload_preview_file(
         preview_file,
+        preview_file_path,
+        normalize_movie=normalize_movie,
+        client=client,
+    )
+
+
+def add_extra_preview(
+    task: str | dict,
+    comment: str | dict,
+    preview_file: str | dict,
+    preview_file_path: str | None = None,
+    preview_file_url: str | None = None,
+    normalize_movie: bool = True,
+    client: KitsuClient = default,
+) -> dict:
+    """
+    Add an extra preview to given comment revision.
+
+    The extra preview shares the same revision as the given reference preview
+    file. The file content is uploaded afterwards.
+
+    Args:
+        task (str / dict): The task dict or the task ID.
+        comment (str / dict): The comment or the comment ID.
+        preview_file (str / dict): The reference preview file dict or ID
+        (the new preview shares its revision).
+        preview_file_path (str): Path of the file to upload as preview.
+        preview_file_url (str): Url to download the preview file if no path is
+        given.
+        normalize_movie (bool): Normalize the movie or not.
+
+    Returns:
+        dict: Created preview file model.
+    """
+    if preview_file_url is not None:
+        preview_file_path = download_file(
+            preview_file_url,
+        )
+
+    new_preview_file = create_extra_preview(
+        task, comment, preview_file, client=client
+    )
+    return upload_preview_file(
+        new_preview_file,
         preview_file_path,
         normalize_movie=normalize_movie,
         client=client,

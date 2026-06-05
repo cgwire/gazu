@@ -1001,6 +1001,63 @@ class TaskTestCase(unittest.TestCase):
                 {"id": fakeid("preview-1")},
             )
 
+    def test_create_extra_preview(self):
+        with requests_mock.Mocker() as mock:
+            mock_route(
+                mock,
+                "POST",
+                (
+                    f"actions/tasks/{fakeid('task-1')}/comments/"
+                    f"{fakeid('comment-1')}/preview-files/{fakeid('preview-1')}"
+                ),
+                text={"id": fakeid("preview-2")},
+            )
+
+            self.assertEqual(
+                gazu.task.create_extra_preview(
+                    fakeid("task-1"),
+                    fakeid("comment-1"),
+                    fakeid("preview-1"),
+                ),
+                {"id": fakeid("preview-2")},
+            )
+
+    def test_add_extra_preview(self):
+        with open("./tests/fixtures/v1.png", "rb") as test_file:
+            with requests_mock.Mocker() as mock:
+                mock_route(
+                    mock,
+                    "POST",
+                    (
+                        f"actions/tasks/{fakeid('task-1')}/comments/"
+                        f"{fakeid('comment-1')}/preview-files/"
+                        f"{fakeid('preview-1')}"
+                    ),
+                    text={"id": fakeid("preview-2")},
+                )
+                mock_route(
+                    mock,
+                    "POST",
+                    f"pictures/preview-files/{fakeid('preview-2')}",
+                    text={"id": fakeid("preview-2")},
+                )
+
+                add_verify_file_callback(
+                    mock,
+                    {"file": test_file.read()},
+                    f"pictures/preview-files/{fakeid('preview-2')}",
+                )
+
+                self.assertEqual(
+                    gazu.task.add_extra_preview(
+                        fakeid("task-1"),
+                        fakeid("comment-1"),
+                        fakeid("preview-1"),
+                        "./tests/fixtures/v1.png",
+                    ),
+                    {"id": fakeid("preview-2")},
+                )
+
     def test_add_preview(self):
         with open("./tests/fixtures/v1.png", "rb") as test_file:
             with requests_mock.Mocker() as mock:
