@@ -634,18 +634,26 @@ def get_task_status_by_short_name(
 
 
 def remove_task_type(
-    task_type: str | dict, client: KitsuClient = default
+    task_type: str | dict,
+    force: bool = False,
+    client: KitsuClient = default,
 ) -> str:
     """
     Remove given task type from database.
 
     Args:
         task_type (str / dict): The task type dict or ID.
+        force (bool): Whether to force deletion regardless of links to
+            tasks. A task type still attached to a project must first be
+            detached with gazu.project.remove_task_type.
     """
     task_type = normalize_model_parameter(task_type)
+    params = {}
+    if force:
+        params = {"force": True}
     return raw.delete(
         f"data/task-types/{task_type['id']}",
-        {"force": True},
+        params,
         client=client,
     )
 
@@ -1243,16 +1251,12 @@ def batch_comments(
     try:
         for x, comment in enumerate(comments):
             if comment.get("attachment_files"):
-                for y, file_path in enumerate(
-                    comment["attachment_files"]
-                ):
+                for y, file_path in enumerate(comment["attachment_files"]):
                     f = open(file_path, "rb")
                     opened_files.append(f)
                     files[f"attachment_file-{x}-{y}"] = f
             if comment.get("preview_files"):
-                for y, file_path in enumerate(
-                    comment["preview_files"]
-                ):
+                for y, file_path in enumerate(comment["preview_files"]):
                     f = open(file_path, "rb")
                     opened_files.append(f)
                     files[f"preview_file-{x}-{y}"] = f
@@ -1303,16 +1307,12 @@ def create_multiple_comments(
     try:
         for x, comment in enumerate(comments):
             if comment.get("attachment_files"):
-                for y, file_path in enumerate(
-                    comment["attachment_files"]
-                ):
+                for y, file_path in enumerate(comment["attachment_files"]):
                     f = open(file_path, "rb")
                     opened_files.append(f)
                     files[f"attachment_file-{x}-{y}"] = f
             if comment.get("preview_files"):
-                for y, file_path in enumerate(
-                    comment["preview_files"]
-                ):
+                for y, file_path in enumerate(comment["preview_files"]):
                     f = open(file_path, "rb")
                     opened_files.append(f)
                     files[f"preview_file-{x}-{y}"] = f
@@ -1502,9 +1502,7 @@ def new_task_status(
         dict: The created task status
     """
     if not color or color[0] != "#":
-        raise ValueError(
-            "Color must start with '#', e.g. '#00FF00'"
-        )
+        raise ValueError("Color must start with '#', e.g. '#00FF00'")
     if not all(c in string.hexdigits for c in color[1:]):
         raise ValueError(
             "Color must be a valid hexadecimal string, e.g. '#00FF00'"
@@ -2073,15 +2071,7 @@ def create_shot_tasks(
     Returns:
         list: Created tasks.
     """
-    shot = normalize_model_parameter(shot)
-    task_type_ids = [
-        normalize_model_parameter(task_type)["id"] for task_type in task_types
-    ]
-    return raw.post(
-        f"data/shots/{shot['id']}/tasks",
-        {"task_type_ids": task_type_ids},
-        client=client,
-    )
+    return create_entity_tasks(shot, task_types, client=client)
 
 
 def create_asset_tasks(
@@ -2099,15 +2089,7 @@ def create_asset_tasks(
     Returns:
         list: Created tasks.
     """
-    asset = normalize_model_parameter(asset)
-    task_type_ids = [
-        normalize_model_parameter(task_type)["id"] for task_type in task_types
-    ]
-    return raw.post(
-        f"data/assets/{asset['id']}/tasks",
-        {"task_type_ids": task_type_ids},
-        client=client,
-    )
+    return create_entity_tasks(asset, task_types, client=client)
 
 
 def create_edit_tasks(
@@ -2125,15 +2107,7 @@ def create_edit_tasks(
     Returns:
         list: Created tasks.
     """
-    edit = normalize_model_parameter(edit)
-    task_type_ids = [
-        normalize_model_parameter(task_type)["id"] for task_type in task_types
-    ]
-    return raw.post(
-        f"data/edits/{edit['id']}/tasks",
-        {"task_type_ids": task_type_ids},
-        client=client,
-    )
+    return create_entity_tasks(edit, task_types, client=client)
 
 
 def create_concept_tasks(
@@ -2151,15 +2125,7 @@ def create_concept_tasks(
     Returns:
         list: Created tasks.
     """
-    concept = normalize_model_parameter(concept)
-    task_type_ids = [
-        normalize_model_parameter(task_type)["id"] for task_type in task_types
-    ]
-    return raw.post(
-        f"data/concepts/{concept['id']}/tasks",
-        {"task_type_ids": task_type_ids},
-        client=client,
-    )
+    return create_entity_tasks(concept, task_types, client=client)
 
 
 def create_entity_tasks(

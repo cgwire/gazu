@@ -49,7 +49,7 @@ def init(
     ssl_verify: bool = False,
     reconnection: bool = True,
     logger: bool = False,
-    **kwargs: Any
+    **kwargs: Any,
 ) -> socketio.Client:
     """
     Init configuration for SocketIO client.

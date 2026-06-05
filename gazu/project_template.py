@@ -51,9 +51,7 @@ def get_project_template_by_name(
     Returns:
         dict: Project template matching the given name, or None.
     """
-    return raw.fetch_first(
-        "project-templates", {"name": name}, client=client
-    )
+    return raw.fetch_first("project-templates", {"name": name}, client=client)
 
 
 # ---------------------------------------------------------------------------

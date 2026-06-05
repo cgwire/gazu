@@ -46,6 +46,13 @@ class ParameterException(Exception):
     """
 
 
+class ValidationException(Exception):
+    """
+    Error raised when a 422 error (unprocessable entity) is sent by the API.
+    Carries the validation message returned in the response body.
+    """
+
+
 class UploadFailedException(Exception):
     """
     Error raised when an error while uploading a file, mainly to handle cases

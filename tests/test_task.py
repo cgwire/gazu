@@ -840,10 +840,17 @@ class TaskTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "DELETE",
-                f"data/task-types/{fakeid('task-type-1')}?force=true",
+                f"data/task-types/{fakeid('task-type-1')}",
                 status_code=204,
             )
             gazu.task.remove_task_type(fakeid("task-type-1"))
+            mock_route(
+                mock,
+                "DELETE",
+                f"data/task-types/{fakeid('task-type-1')}?force=true",
+                status_code=204,
+            )
+            gazu.task.remove_task_type(fakeid("task-type-1"), force=True)
 
     def test_update_task(self):
         with requests_mock.mock() as mock:
@@ -1304,7 +1311,7 @@ class TaskTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "POST",
-                f"data/shots/{fakeid('shot-1')}/tasks",
+                f"data/entities/{fakeid('shot-1')}/tasks",
                 text=[{"id": fakeid("task-1")}, {"id": fakeid("task-2")}],
             )
             tasks = gazu.task.create_shot_tasks(
@@ -1318,7 +1325,7 @@ class TaskTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "POST",
-                f"data/assets/{fakeid('asset-1')}/tasks",
+                f"data/entities/{fakeid('asset-1')}/tasks",
                 text=[{"id": fakeid("task-1")}],
             )
             tasks = gazu.task.create_asset_tasks(
@@ -1331,7 +1338,7 @@ class TaskTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "POST",
-                f"data/edits/{fakeid('edit-1')}/tasks",
+                f"data/entities/{fakeid('edit-1')}/tasks",
                 text=[{"id": fakeid("task-1")}],
             )
             tasks = gazu.task.create_edit_tasks(
@@ -1344,7 +1351,7 @@ class TaskTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "POST",
-                f"data/concepts/{fakeid('concept-1')}/tasks",
+                f"data/entities/{fakeid('concept-1')}/tasks",
                 text=[{"id": fakeid("task-1")}],
             )
             tasks = gazu.task.create_concept_tasks(

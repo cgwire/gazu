@@ -27,9 +27,7 @@ with gazu.create_session(
     print(f"Found {len(projects)} open projects")
 
     for project in projects:
-        assets = gazu.asset.all_assets_for_project(
-            project, client=client
-        )
+        assets = gazu.asset.all_assets_for_project(project, client=client)
         shots = gazu.shot.all_shots_for_project(project, client=client)
         print(f"  {project['name']}: {len(assets)} assets, {len(shots)} shots")
 
@@ -78,8 +76,8 @@ print(f"\nBot client: {len(projects)} projects")
 
 client = create_client(
     "https://kitsu.example.com/api",
-    ssl_verify=False,           # disable SSL verification
-    use_refresh_token=True,     # auto-refresh expired tokens
+    ssl_verify=False,  # disable SSL verification
+    use_refresh_token=True,  # auto-refresh expired tokens
 )
 gazu.log_in("user@example.com", "password", client=client)
 

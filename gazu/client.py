@@ -18,6 +18,7 @@ from .exception import (
     ParameterException,
     RouteNotFoundException,
     ServerErrorException,
+    ValidationException,
     UploadFailedException,
 )
 
@@ -412,14 +413,18 @@ def post(path: str, data: Any, client: KitsuClient = default_client) -> Any:
     """
     logger.debug("POST %s", get_full_url(path, client))
     sensitive_fields = {
-        "password", "token", "access_token", "refresh_token", "secret"
+        "password",
+        "token",
+        "access_token",
+        "refresh_token",
+        "secret",
     }
     if not any(field in data for field in sensitive_fields):
         logger.debug("Body: %s", data)
-    headers = make_auth_header(client=client)
-    headers["Content-Type"] = "application/json"
     retry = True
     while retry:
+        headers = make_auth_header(client=client)
+        headers["Content-Type"] = "application/json"
         response = client.session.post(
             get_full_url(path, client),
             data=json.dumps(data, cls=CustomJSONEncoder),
@@ -448,10 +453,10 @@ def put(path: str, data: dict, client: KitsuClient = default_client) -> Any:
     """
     logger.debug("PUT %s", get_full_url(path, client))
     logger.debug("Body: %s", data)
-    headers = make_auth_header(client=client)
-    headers["Content-Type"] = "application/json"
     retry = True
     while retry:
+        headers = make_auth_header(client=client)
+        headers["Content-Type"] = "application/json"
         response = client.session.put(
             get_full_url(path, client),
             data=json.dumps(data, cls=CustomJSONEncoder),
@@ -538,6 +543,7 @@ def check_status(
         NotAllowedException: when 403 response occurs
         MethodNotAllowedException: when 405 response occurs
         TooBigFileException: when 413 response occurs
+        ValidationException: when 422 response occurs (non auth-related)
         ServerErrorException: when 500 response occurs
     """
     status_code = request.status_code
@@ -554,7 +560,41 @@ def check_status(
             f"{path}: You send a too big file. "
             "Change your proxy configuration to allow bigger files."
         )
-    elif status_code in [401, 422]:
+    elif status_code == 422:
+        try:
+            body = request.json()
+        except Exception:
+            body = {}
+        message = "No additional information"
+        if isinstance(body, dict):
+            for key in ["error", "message"]:
+                if body.get(key):
+                    message = body[key]
+                    break
+        jwt_expired = (
+            isinstance(body, dict)
+            and body.get("message") == "Signature has expired"
+        )
+        # flask-jwt-extended returns 422 with this message when the JWT
+        # signature has expired -- this is an auth case, not a validation one.
+        if jwt_expired:
+            try:
+                if (
+                    client
+                    and client.refresh_token
+                    and client.use_refresh_token
+                ):
+                    client.refresh_access_token()
+                    return status_code, True
+                raise NotAuthenticatedException(path)
+            except NotAuthenticatedException:
+                if client and client.callback_not_authenticated:
+                    retry = client.callback_not_authenticated(client, path)
+                    if retry:
+                        return status_code, True
+                raise
+        raise ValidationException(path, message)
+    elif status_code == 401:
         try:
             if (
                 client
@@ -780,15 +820,11 @@ def upload(
         files = _build_file_dict(file_path, extra_files)
         opened_files = files
     if progress_callback is not None:
-        total = sum(
-            os.fstat(f.fileno()).st_size for f in files.values()
-        )
+        total = sum(os.fstat(f.fileno()).st_size for f in files.values())
         offset = 0
         wrapped = {}
         for key, f in files.items():
-            wrapper = _ProgressFileWrapper(
-                f, progress_callback, offset, total
-            )
+            wrapper = _ProgressFileWrapper(f, progress_callback, offset, total)
             wrapped[key] = wrapper
             offset += os.fstat(f.fileno()).st_size
         files = wrapped
@@ -874,9 +910,7 @@ def download(
     ) as response:
         with open(file_path, "wb") as target_file:
             if progress_callback is not None:
-                total = int(
-                    response.headers.get("content-length", 0)
-                )
+                total = int(response.headers.get("content-length", 0))
                 bytes_read = 0
                 for chunk in response.iter_content(8192):
                     target_file.write(chunk)

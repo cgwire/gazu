@@ -127,12 +127,10 @@ class ProjectTemplateTestCase(unittest.TestCase):
                 text={"id": fakeid("template-1"), "name": "Snapshot"},
                 status_code=201,
             )
-            template = (
-                gazu.project_template.new_project_template_from_project(
-                    {"id": fakeid("project-1")},
-                    name="Snapshot",
-                    description="from project",
-                )
+            template = gazu.project_template.new_project_template_from_project(
+                {"id": fakeid("project-1")},
+                name="Snapshot",
+                description="from project",
             )
             self.assertEqual(template["name"], "Snapshot")
 
@@ -182,10 +180,8 @@ class ProjectTemplateTestCase(unittest.TestCase):
                 status_code=204,
             )
 
-            listed = (
-                gazu.project_template.all_task_types_for_project_template(
-                    {"id": template_id}
-                )
+            listed = gazu.project_template.all_task_types_for_project_template(
+                {"id": template_id}
             )
             self.assertEqual(len(listed), 1)
 
@@ -216,13 +212,11 @@ class ProjectTemplateTestCase(unittest.TestCase):
                 },
                 status_code=201,
             )
-            link = (
-                gazu.project_template.add_task_status_to_project_template(
-                    {"id": template_id},
-                    {"id": task_status_id},
-                    priority=1,
-                    roles_for_board=["admin", "manager"],
-                )
+            link = gazu.project_template.add_task_status_to_project_template(
+                {"id": template_id},
+                {"id": task_status_id},
+                priority=1,
+                roles_for_board=["admin", "manager"],
             )
             self.assertEqual(link["priority"], 1)
             request_body = json.loads(mock.request_history[0].text)
@@ -291,7 +285,13 @@ class ProjectTemplateTestCase(unittest.TestCase):
                 "GET",
                 "data/project-templates/%s/preview-background-files"
                 % template_id,
-                text=[{"id": background_id, "name": "Studio", "is_default": False}],
+                text=[
+                    {
+                        "id": background_id,
+                        "name": "Studio",
+                        "is_default": False,
+                    }
+                ],
             )
             mock_route(
                 mock,
@@ -313,17 +313,13 @@ class ProjectTemplateTestCase(unittest.TestCase):
                 status_code=204,
             )
 
-            listed = (
-                gazu.project_template.all_preview_background_files_for_project_template(
-                    {"id": template_id}
-                )
+            listed = gazu.project_template.all_preview_background_files_for_project_template(
+                {"id": template_id}
             )
             self.assertEqual(len(listed), 1)
 
-            result = (
-                gazu.project_template.add_preview_background_file_to_project_template(
-                    {"id": template_id}, {"id": background_id}
-                )
+            result = gazu.project_template.add_preview_background_file_to_project_template(
+                {"id": template_id}, {"id": background_id}
             )
             self.assertEqual(result["id"], background_id)
 
@@ -345,10 +341,8 @@ class ProjectTemplateTestCase(unittest.TestCase):
                     "default_preview_background_file_id": background_id,
                 },
             )
-            updated = (
-                gazu.project_template.set_project_template_default_preview_background_file(
-                    {"id": template_id}, {"id": background_id}
-                )
+            updated = gazu.project_template.set_project_template_default_preview_background_file(
+                {"id": template_id}, {"id": background_id}
             )
             self.assertEqual(
                 updated["default_preview_background_file_id"], background_id
@@ -396,8 +390,7 @@ class ProjectTemplateTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "PUT",
-                "data/project-templates/%s/metadata-descriptors"
-                % template_id,
+                "data/project-templates/%s/metadata-descriptors" % template_id,
                 text={
                     "id": template_id,
                     "metadata_descriptors": descriptors,

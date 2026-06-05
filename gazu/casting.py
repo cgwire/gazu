@@ -100,7 +100,9 @@ def get_asset_type_casting(
 
     project = normalize_model_parameter(project)
     asset_type = normalize_model_parameter(asset_type)
-    path = f"data/projects/{project['id']}/asset-types/{asset_type['id']}/casting"
+    path = (
+        f"data/projects/{project['id']}/asset-types/{asset_type['id']}/casting"
+    )
     return raw.get(path, client=client)
 
 
@@ -277,7 +279,9 @@ def get_episode_shots_casting(
     """
     project = normalize_model_parameter(project)
     episode = normalize_model_parameter(episode)
-    path = f"data/projects/{project['id']}/episodes/{episode['id']}/shots/casting"
+    path = (
+        f"data/projects/{project['id']}/episodes/{episode['id']}/shots/casting"
+    )
     return raw.get(path, client=client)
 
 

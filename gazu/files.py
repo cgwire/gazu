@@ -453,9 +453,7 @@ def new_software(
         return software
 
 
-def update_software(
-    software: dict, client: KitsuClient = default
-) -> dict:
+def update_software(software: dict, client: KitsuClient = default) -> dict:
     """
     Save given software data into the API. Use this to set or change
     secondary_extensions and other fields.
@@ -1796,6 +1794,4 @@ def get_file_status_by_name(
     Args:
         name (str): The files status name.
     """
-    return raw.fetch_first(
-        "file-status", {"name": name}, client=client
-    )
+    return raw.fetch_first("file-status", {"name": name}, client=client)

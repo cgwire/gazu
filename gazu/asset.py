@@ -162,9 +162,7 @@ def get_asset_url(asset: str | dict, client: KitsuClient = default) -> str:
     """
     asset = normalize_model_parameter(asset)
     asset = get_asset(asset["id"], client=client)
-    project = gazu_project.get_project(
-        asset["project_id"], client=client
-    )
+    project = gazu_project.get_project(asset["project_id"], client=client)
     host = raw.get_api_url_from_host(client=client)
     project_id = asset["project_id"]
     asset_id = asset["id"]
@@ -230,9 +228,7 @@ def get_asset_type_url(
     if project["production_type"] != "tvshow":
         return f"{host}/productions/{project_id}/assets?{query}"
     else:
-        return (
-            f"{host}/productions/{project_id}/episodes/main/assets?{query}"
-        )
+        return f"{host}/productions/{project_id}/episodes/main/assets?{query}"
 
 
 def new_asset(
@@ -441,7 +437,9 @@ def update_asset_type(asset_type: dict, client: KitsuClient = default) -> dict:
         asset_type (dict): Asset Type to save.
     """
     data = {"name": asset_type["name"]}
-    path = f"data/asset-types/{asset_type['id']}"
+    # Asset types are entity types in Zou; the data/asset-types route is
+    # read-only (GET), so writes must go through data/entity-types.
+    path = f"data/entity-types/{asset_type['id']}"
     return raw.put(path, data, client=client)
 
 
@@ -455,7 +453,9 @@ def remove_asset_type(
         asset_type (str / dict): Asset type to remove.
     """
     asset_type = normalize_model_parameter(asset_type)
-    path = f"data/asset-types/{asset_type['id']}"
+    # Asset types are entity types in Zou; the data/asset-types route is
+    # read-only (GET), so deletes must go through data/entity-types.
+    path = f"data/entity-types/{asset_type['id']}"
     return raw.delete(path, client=client)
 
 

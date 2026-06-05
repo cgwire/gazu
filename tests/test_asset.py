@@ -189,7 +189,7 @@ class CastingTestCase(unittest.TestCase):
         with requests_mock.mock() as mock:
             name = "Modeling edited"
             mock.put(
-                gazu.client.get_full_url("data/asset-types/asset-type-01"),
+                gazu.client.get_full_url("data/entity-types/asset-type-01"),
                 text=json.dumps({"id": "asset-type-01", "name": name}),
             )
             asset_type = {"id": "asset-type-01", "name": name}
@@ -199,7 +199,7 @@ class CastingTestCase(unittest.TestCase):
     def test_remove_asset_type(self):
         with requests_mock.mock() as mock:
             mock_route(
-                mock, "DELETE", "data/asset-types/asset-type-01", text=""
+                mock, "DELETE", "data/entity-types/asset-type-01", text=""
             )
             asset_type = {"id": "asset-type-01", "name": "Modeling edited"}
             response = gazu.asset.remove_asset_type(asset_type)
@@ -408,9 +408,7 @@ class CastingTestCase(unittest.TestCase):
                 ),
             )
             url = gazu.asset.get_all_assets_url({"id": "project-01"})
-            self.assertEqual(
-                url, f"{host}/productions/project-01/assets/"
-            )
+            self.assertEqual(url, f"{host}/productions/project-01/assets/")
         # TV show: targets the "main" episode (mirrors get_asset_url)
         with requests_mock.mock() as mock:
             mock.get(
