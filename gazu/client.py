@@ -509,13 +509,33 @@ def get_message_from_response(
         str: The message to display to the user.
     """
     message = default_message
-    message_json = response.json()
+    try:
+        message_json = response.json()
+    except ValueError:
+        return message
 
     if isinstance(message_json, dict):
-        for key in ["error", "message"]:
-            if message_json.get(key):
-                message = message_json[key]
+        for key in ["message", "error"]:
+            value = message_json.get(key)
+            # Zou sends a boolean "error" flag alongside the human-readable
+            # "message", so only keep string values here.
+            if isinstance(value, str) and value:
+                message = value
                 break
+
+        # Pydantic validation failures carry field-level details in
+        # data.errors ([{"field": ..., "message": ...}]); surface them so the
+        # caller sees what was actually rejected.
+        data = message_json.get("data")
+        errors = data.get("errors") if isinstance(data, dict) else None
+        if isinstance(errors, list) and errors:
+            details = ", ".join(
+                f"{error.get('field')}: {error.get('message')}"
+                for error in errors
+                if isinstance(error, dict)
+            )
+            if details:
+                message = f"{message} ({details})"
 
     return message
 

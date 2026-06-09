@@ -1499,7 +1499,7 @@ def assign_task(
     person = normalize_model_parameter(person)
     task = normalize_model_parameter(task)
     path = f"/actions/persons/{person['id']}/assign"
-    return raw.put(path, {"task_ids": task["id"]}, client=client)
+    return raw.put(path, {"task_ids": [task["id"]]}, client=client)
 
 
 def clear_assignations(
