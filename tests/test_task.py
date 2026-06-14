@@ -528,6 +528,10 @@ class TaskTestCase(unittest.TestCase):
                 {"id": "task-01"}, {"id": "person-01"}
             )[0]
             self.assertIn("person-01", task["assignees"])
+            # The endpoint expects task_ids as a list, not a single string.
+            self.assertEqual(
+                mock.last_request.json(), {"task_ids": ["task-01"]}
+            )
 
     def test_new_task_type(self):
         with requests_mock.mock() as mock:

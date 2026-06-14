@@ -421,6 +421,42 @@ class BaseFuncTestCase(ClientTestCase):
             raw.check_status(Request422(), "/data/persons")
         self.assertIn("No additional information", str(context.exception))
 
+    def test_get_message_from_response_ignores_error_flag(self):
+        # Zou sends a boolean "error" flag next to the real "message"; the
+        # boolean must not be returned in place of the message.
+        class Response(object):
+            def json(self):
+                return {"error": True, "message": "Validation error."}
+
+        message = raw.get_message_from_response(Response())
+        self.assertEqual(message, "Validation error.")
+
+    def test_get_message_from_response_appends_field_errors(self):
+        class Response(object):
+            def json(self):
+                return {
+                    "error": True,
+                    "message": "Validation error.",
+                    "data": {
+                        "errors": [
+                            {"field": "task_ids", "message": "Tasks required."}
+                        ]
+                    },
+                }
+
+        message = raw.get_message_from_response(Response())
+        self.assertEqual(
+            message, "Validation error. (task_ids: Tasks required.)"
+        )
+
+    def test_get_message_from_response_non_json(self):
+        class Response(object):
+            def json(self):
+                raise ValueError("no json")
+
+        message = raw.get_message_from_response(Response())
+        self.assertEqual(message, "No additional information")
+
     def test_check_status_422_signature_expired_refreshes_token(self):
         class Request422(object):
             status_code = 422
