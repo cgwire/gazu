@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-set -euo pipefail
-
 git pull --rebase origin main
 
 last_release_number=$(python -c "from gazu import __version__; print(__version__)")
