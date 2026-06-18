@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gazu"
-version = "1.1.6"
+dynamic = ["version"]
 description = "Gazu is a client for Zou, the API to store the data of your CG production."
 readme = "README.rst"
 license = { text = "GNU Library or Lesser General Public License (LGPL)" }
@@ -60,6 +60,9 @@ cli = ["click>=7.0"]
 
 [project.scripts]
 gazu-cli = "gazu.cli:main"
+
+[tool.setuptools.dynamic]
+version = { attr = "gazu.__version__.__version__" }
 
 [tool.setuptools.packages.find]
 include = ["gazu*"]
