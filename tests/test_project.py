@@ -636,6 +636,45 @@ class ProjectTestCase(unittest.TestCase):
                 },
             )
 
+    def test_add_person_to_team_with_role(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "POST",
+                f"data/projects/{fakeid('project-1')}/team",
+                text={
+                    "team": [fakeid("person-1")],
+                },
+            )
+            gazu.project.add_person_to_team(
+                fakeid("project-1"), fakeid("person-1"), role="supervisor"
+            )
+            self.assertEqual(
+                mock.last_request.json(),
+                {"person_id": fakeid("person-1"), "role": "supervisor"},
+            )
+
+    def test_update_team_member_role(self):
+        with requests_mock.mock() as mock:
+            project_id = fakeid("project-1")
+            person_id = fakeid("person-1")
+            path = f"data/projects/{project_id}/team/{person_id}"
+            mock_route(
+                mock,
+                "PUT",
+                path,
+                text={
+                    "project_id": project_id,
+                    "person_id": person_id,
+                    "role": "manager",
+                },
+            )
+            link = gazu.project.update_team_member_role(
+                project_id, person_id, "manager"
+            )
+            self.assertEqual(link["role"], "manager")
+            self.assertEqual(mock.last_request.json(), {"role": "manager"})
+
     def test_remove_person_from_team(self):
         with requests_mock.mock() as mock:
             project_id = fakeid("project-1")

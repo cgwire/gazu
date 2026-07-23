@@ -577,7 +577,10 @@ def get_team(project: str | dict, client: KitsuClient = default) -> list[dict]:
 
 
 def add_person_to_team(
-    project: str | dict, person: str | dict, client: KitsuClient = default
+    project: str | dict,
+    person: str | dict,
+    role: str | None = None,
+    client: KitsuClient = default,
 ) -> dict:
     """
     Add a person to the team project.
@@ -585,6 +588,9 @@ def add_person_to_team(
     Args:
         project (dict / ID): The project dict or id.
         person (dict / ID): The person dict or id.
+        role (str): Role of the person on this project only (user,
+            supervisor, manager, client or vendor). None means the person
+            keeps their global role.
 
     Returns:
         dict: The project dictionary.
@@ -592,7 +598,36 @@ def add_person_to_team(
     project = normalize_model_parameter(project)
     person = normalize_model_parameter(person)
     data = {"person_id": person["id"]}
+    if role is not None:
+        data["role"] = role
     return raw.post(f"data/projects/{project['id']}/team", data, client=client)
+
+
+def update_team_member_role(
+    project: str | dict,
+    person: str | dict,
+    role: str | None,
+    client: KitsuClient = default,
+) -> dict:
+    """
+    Set the role a person has on given project only.
+
+    Args:
+        project (dict / ID): The project dict or id.
+        person (dict / ID): The person dict or id.
+        role (str): user, supervisor, manager, client or vendor. None
+            restores inheritance of the person's global role.
+
+    Returns:
+        dict: The updated team link (project_id, person_id and role).
+    """
+    project = normalize_model_parameter(project)
+    person = normalize_model_parameter(person)
+    return raw.put(
+        f"data/projects/{project['id']}/team/{person['id']}",
+        {"role": role},
+        client=client,
+    )
 
 
 def remove_person_from_team(
