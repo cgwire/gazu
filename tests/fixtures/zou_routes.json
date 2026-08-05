@@ -23,6 +23,7 @@
  "/actions/production-schedule-versions/<production_schedule_version_id>/set-task-links-from-production-schedule-version",
  "/actions/projects/<project_id>/asset-types/<asset_type_id>/assets/share",
  "/actions/projects/<project_id>/assets/share",
+ "/actions/projects/<project_id>/delete-entities",
  "/actions/projects/<project_id>/delete-tasks",
  "/actions/projects/<project_id>/set-file-tree",
  "/actions/projects/<project_id>/task-types/<task_type_id>/assets/create-tasks",

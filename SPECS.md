@@ -43,7 +43,7 @@ classes, just functions that call `raw.get()`, `raw.post()`, etc.
 | `scene.py`            | Scenes              | 17        |
 | `edit.py`             | Edits               | 9         |
 | `concept.py`          | Concepts            | 8         |
-| `entity.py`           | Generic entities    | 11        |
+| `entity.py`           | Generic entities    | 12        |
 | `task.py`             | Tasks, comments, previews | 100 |
 | `files.py`            | Working/output/preview files | 76 |
 | `person.py`           | Persons, departments, orgs | 41 |

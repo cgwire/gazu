@@ -131,6 +131,74 @@ class AssetTestCase(unittest.TestCase):
             )
             gazu.entity.remove_entity(fakeid("entity-1"), True)
 
+    def test_remove_entities(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "POST",
+                f"actions/projects/{fakeid('project-1')}/delete-entities",
+                text=[fakeid("asset-1"), fakeid("shot-1")],
+            )
+            entity_ids = gazu.entity.remove_entities(
+                fakeid("project-1"),
+                [fakeid("asset-1"), fakeid("shot-1")],
+            )
+            self.assertEqual(entity_ids, [fakeid("asset-1"), fakeid("shot-1")])
+            self.assertEqual(
+                mock.last_request.json(),
+                [fakeid("asset-1"), fakeid("shot-1")],
+            )
+            self.assertNotIn("force", mock.last_request.qs)
+
+    def test_remove_entities_with_force(self):
+        with requests_mock.mock() as mock:
+            path = (
+                f"actions/projects/{fakeid('project-1')}"
+                "/delete-entities?force=true"
+            )
+            mock_route(mock, "POST", path, text=[fakeid("asset-1")])
+            entity_ids = gazu.entity.remove_entities(
+                fakeid("project-1"), [fakeid("asset-1")], force=True
+            )
+            self.assertEqual(entity_ids, [fakeid("asset-1")])
+            self.assertEqual(
+                mock.last_request.url, gazu.client.get_full_url(path)
+            )
+            self.assertEqual(mock.last_request.json(), [fakeid("asset-1")])
+
+    def test_remove_entities_with_dicts(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "POST",
+                f"actions/projects/{fakeid('project-1')}/delete-entities",
+                text=[fakeid("asset-1"), fakeid("shot-1")],
+            )
+            entity_ids = gazu.entity.remove_entities(
+                {"id": fakeid("project-1"), "name": "Project 01"},
+                [
+                    {"id": fakeid("asset-1"), "name": "Asset 01"},
+                    {"id": fakeid("shot-1"), "name": "Shot 01"},
+                ],
+            )
+            self.assertEqual(entity_ids, [fakeid("asset-1"), fakeid("shot-1")])
+            self.assertEqual(
+                mock.last_request.json(),
+                [fakeid("asset-1"), fakeid("shot-1")],
+            )
+
+    def test_remove_entities_with_empty_list(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "POST",
+                f"actions/projects/{fakeid('project-1')}/delete-entities",
+                text=[],
+            )
+            entity_ids = gazu.entity.remove_entities(fakeid("project-1"), [])
+            self.assertEqual(entity_ids, [])
+            self.assertEqual(mock.last_request.json(), [])
+
     def test_remove_entity_type(self):
         with requests_mock.mock() as mock:
             mock.delete(

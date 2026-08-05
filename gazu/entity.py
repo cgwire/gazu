@@ -5,7 +5,10 @@ from . import client as raw
 from .cache import cache
 from .client import KitsuClient
 from .sorting import sort_by_name
-from .helpers import normalize_model_parameter
+from .helpers import (
+    normalize_model_parameter,
+    normalize_list_of_models_for_links,
+)
 
 default = raw.default_client
 
@@ -172,6 +175,50 @@ def remove_entity(
     if force:
         params = {"force": True}
     return raw.delete(path, params, client=client)
+
+
+def remove_entities(
+    project: str | dict,
+    entities: list[str | dict],
+    force: bool = False,
+    client: KitsuClient = default,
+) -> list[str]:
+    """
+    Remove several entities (assets, shots, edits and concepts) of a given
+    project in a single request.
+
+    Without `force`, entities that have tasks linked to them are only marked
+    as canceled on a first call, and really removed on a second one. Concepts
+    are always really removed. With `force`, every entity and its tasks are
+    removed right away.
+
+    Only the creator of an entity or a project manager can remove it. For
+    managers, entities that don't exist, that belong to another project, or
+    that are neither an asset, a shot, an edit nor a concept are silently
+    ignored: they don't make the whole batch fail, they are simply absent
+    from the returned list. For other users, a single entity created by
+    someone else makes the whole request fail and nothing is removed.
+
+    Entities are removed one by one by the API: if an error occurs
+    mid-batch, entities already processed remain deleted even though no
+    list is returned.
+
+    Args:
+        project (str / dict): The project the entities belong to.
+        entities (list): Entities to remove, as IDs or dicts. Every ID must
+            be a valid UUID, otherwise the whole batch is rejected.
+        force (bool): Whether to force deletion of the entities regardless of
+            whether they have links to tasks.
+
+    Returns:
+        list: IDs of the entities effectively processed by the API.
+    """
+    project = normalize_model_parameter(project)
+    entity_ids = normalize_list_of_models_for_links(entities)
+    path = f"actions/projects/{project['id']}/delete-entities"
+    if force:
+        path += "?force=true"
+    return raw.post(path, entity_ids, client=client)
 
 
 def all_entities_with_tasks_linked_to_entity(
