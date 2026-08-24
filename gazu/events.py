@@ -11,12 +11,14 @@ from typing import Any, Callable
 from engineio.base_client import signal_handler
 from .exception import AuthFailedException
 
+from . import client as raw
 from .client import (
     default_client,
     get_event_host,
     KitsuClient,
     make_auth_header,
 )
+from .helpers import normalize_model_parameter, validate_date_format
 
 logger = logging.getLogger("gazu.events")
 
@@ -94,6 +96,44 @@ def init(
 
     event_client.connect(get_event_host(client), auth_headers)
     return event_client
+
+
+def get_last_login_logs(
+    after: str | None = None,
+    before: str | None = None,
+    limit: int = 100,
+    cursor_login_log_id: str | None = None,
+    person_ids: list[str | dict] | None = None,
+    client: KitsuClient = default_client,
+) -> list[dict]:
+    """
+    Get last login logs. Requires admin permissions (login logs carry the IP
+    address of every person and cover the whole studio).
+
+    Args:
+        after (str): Get only logins occuring after given date.
+        before (str): Get only logins occuring before given date.
+        limit (int): Number of login logs to retrieve (server caps at 1000).
+        cursor_login_log_id (str): ID of the last login log from previous
+            page, for cursor-based pagination.
+        person_ids (list[str / dict]): Get only logins of given persons.
+
+    Returns:
+        list[dict]: Last login logs (person id, date, IP address and origin)
+        matching criterions, most recent first.
+    """
+    params = {"limit": limit}
+    if after is not None:
+        params["after"] = validate_date_format(after)
+    if before is not None:
+        params["before"] = validate_date_format(before)
+    if cursor_login_log_id is not None:
+        params["cursor_login_log_id"] = cursor_login_log_id
+    if person_ids:
+        params["person_ids"] = [
+            normalize_model_parameter(person)["id"] for person in person_ids
+        ]
+    return raw.get("data/events/login-logs/last", params=params, client=client)
 
 
 def connect_error(data: str) -> str:

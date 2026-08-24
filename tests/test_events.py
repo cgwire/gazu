@@ -1,8 +1,12 @@
 import unittest
 from unittest import mock
 
+import requests_mock
+
 import gazu.client
 import gazu.events
+
+from utils import fakeid, mock_route
 
 
 class EventsInitTestCase(unittest.TestCase):
@@ -39,6 +43,35 @@ class EventsInitTestCase(unittest.TestCase):
             # Subsequent (reconnect) attempts refresh the token.
             headers_cb()
             refresh.assert_called_once()
+
+
+class EventsLoginLogsTestCase(unittest.TestCase):
+    def test_get_last_login_logs(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/events/login-logs/last",
+                text=[
+                    {"id": fakeid("log-1"), "person_id": fakeid("person-1")}
+                ],
+            )
+            result = gazu.events.get_last_login_logs(
+                after="2026-01-01",
+                limit=10,
+                person_ids=[fakeid("person-1"), {"id": fakeid("person-2")}],
+            )
+            self.assertEqual(len(result), 1)
+            self.assertEqual(result[0]["id"], fakeid("log-1"))
+            qs = mock.last_request.qs
+            self.assertEqual(qs["limit"], ["10"])
+            self.assertEqual(qs["after"], ["2026-01-01"])
+            # person_ids must be repeated params, one per person, with dicts
+            # and raw ids both accepted.
+            self.assertEqual(
+                qs["person_ids"],
+                [fakeid("person-1"), fakeid("person-2")],
+            )
 
 
 if __name__ == "__main__":
