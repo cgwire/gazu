@@ -365,7 +365,9 @@ def build_path_with_params(path: str, params: dict) -> str:
     if not params:
         return path
 
-    query_string = urlencode(params)
+    # doseq: encode list values as repeated params (?ids=a&ids=b), the form
+    # Zou's "append" query arguments expect.
+    query_string = urlencode(params, doseq=True)
 
     if query_string:
         # Support base paths that already contain query parameters.
