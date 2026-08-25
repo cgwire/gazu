@@ -14,7 +14,16 @@ project = "Gazu"
 extensions = ["sphinx.ext.autodoc", "sphinx.ext.autosummary"]
 
 autosummary_generate = True
-autodoc_mock_imports = ["typing_extensions"]
+# The sphinx-action Docker container only ships requests: mock every other
+# import so gazu.events, gazu.aio and gazu.cli make it into gazu-specs.json.
+autodoc_mock_imports = [
+    "typing_extensions",
+    "socketio",
+    "engineio",
+    "aiohttp",
+    "click",
+    "win32api",
+]
 
 # --- Docstring collection ---
 
