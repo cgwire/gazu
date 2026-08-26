@@ -4,7 +4,10 @@ from . import client as raw
 
 from .client import KitsuClient
 
-from .helpers import normalize_model_parameter
+from .helpers import (
+    normalize_list_of_models_for_links,
+    normalize_model_parameter,
+)
 from .cache import cache
 
 default = raw.default_client
@@ -84,6 +87,68 @@ def update_episode_casting(
 
 
 @cache
+def cast_asset(
+    project: str | dict,
+    entities: list[str | dict] | str | dict,
+    asset: str | dict,
+    nb_occurences: int | None = None,
+    label: str | None = None,
+    client: KitsuClient = default,
+) -> dict:
+    """
+    Cast given asset in given entities (shots, assets or episodes) without
+    touching the other assets of their casting. Prefer it to the
+    update_*_casting functions when several people edit the breakdown at
+    once: those replace the whole casting with what the caller knows.
+
+    Args:
+        project (str / dict): The project dictionary or ID.
+        entities (list / str / dict): The entities (or IDs) to cast the
+            asset in.
+        asset (str / dict): The asset dict or the asset ID.
+        nb_occurences (int): Number of occurences of the asset. Omit to keep
+            the current one (1 on a new link), 0 removes the asset.
+        label (str): The casting label. Omit to keep the current one.
+
+    Returns:
+        dict: The updated casting of each entity, keyed by entity ID.
+    """
+    project = normalize_model_parameter(project)
+    asset = normalize_model_parameter(asset)
+    data = {"entity_ids": normalize_list_of_models_for_links(entities)}
+    if nb_occurences is not None:
+        data["nb_occurences"] = nb_occurences
+    if label is not None:
+        data["label"] = label
+    path = (
+        f"data/projects/{project['id']}"
+        f"/entities/casting/assets/{asset['id']}"
+    )
+    return raw.put(path, data, client=client)
+
+
+def uncast_asset(
+    project: str | dict,
+    entities: list[str | dict] | str | dict,
+    asset: str | dict,
+    client: KitsuClient = default,
+) -> dict:
+    """
+    Remove given asset from the casting of given entities, leaving their
+    other assets as they are.
+
+    Args:
+        project (str / dict): The project dictionary or ID.
+        entities (list / str / dict): The entities (or IDs) to remove the
+            asset from.
+        asset (str / dict): The asset dict or the asset ID.
+
+    Returns:
+        dict: The updated casting of each entity, keyed by entity ID.
+    """
+    return cast_asset(project, entities, asset, nb_occurences=0, client=client)
+
+
 def get_asset_type_casting(
     project: str | dict, asset_type: str | dict, client: KitsuClient = default
 ) -> dict:
