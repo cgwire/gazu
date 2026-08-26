@@ -31,6 +31,67 @@ class CastingTestCase(unittest.TestCase):
             )
             self.assertEqual(casting[0]["asset_id"], fakeid("asset-1"))
 
+    def test_cast_asset(self):
+        path = (
+            f"data/projects/{fakeid('project-01')}"
+            f"/entities/casting/assets/{fakeid('asset-01')}"
+        )
+        with requests_mock.mock() as mock:
+            mock.put(
+                gazu.client.get_full_url(path),
+                text=json.dumps({fakeid("shot-01"): []}),
+            )
+            result = gazu.casting.cast_asset(
+                {"id": fakeid("project-01")},
+                [{"id": fakeid("shot-01")}],
+                {"id": fakeid("asset-01")},
+                nb_occurences=3,
+                label="animate",
+            )
+            self.assertEqual(
+                mock.last_request.json(),
+                {
+                    "entity_ids": [fakeid("shot-01")],
+                    "nb_occurences": 3,
+                    "label": "animate",
+                },
+            )
+            self.assertIn(fakeid("shot-01"), result)
+
+    def test_cast_asset_keeps_what_is_not_given(self):
+        path = (
+            f"data/projects/{fakeid('project-01')}"
+            f"/entities/casting/assets/{fakeid('asset-01')}"
+        )
+        with requests_mock.mock() as mock:
+            mock.put(gazu.client.get_full_url(path), text="{}")
+            gazu.casting.cast_asset(
+                fakeid("project-01"), fakeid("shot-01"), fakeid("asset-01")
+            )
+            self.assertEqual(
+                mock.last_request.json(), {"entity_ids": [fakeid("shot-01")]}
+            )
+
+    def test_uncast_asset(self):
+        path = (
+            f"data/projects/{fakeid('project-01')}"
+            f"/entities/casting/assets/{fakeid('asset-01')}"
+        )
+        with requests_mock.mock() as mock:
+            mock.put(gazu.client.get_full_url(path), text="{}")
+            gazu.casting.uncast_asset(
+                fakeid("project-01"),
+                [fakeid("shot-01"), fakeid("shot-02")],
+                fakeid("asset-01"),
+            )
+            self.assertEqual(
+                mock.last_request.json(),
+                {
+                    "entity_ids": [fakeid("shot-01"), fakeid("shot-02")],
+                    "nb_occurences": 0,
+                },
+            )
+
     def test_update_episode_casting(self):
         casting = [{"asset_id": fakeid("asset-1"), "nb_occurences": 3}]
         path = f"data/projects/{fakeid('project-01')}/entities/{fakeid('episode-01')}/casting"
