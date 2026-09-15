@@ -219,6 +219,8 @@ def add_task_type_to_project_template(
     project_template: str | dict,
     task_type: str | dict,
     priority: int | None = None,
+    hd_bitrate_compression: int | None = None,
+    ld_bitrate_compression: int | None = None,
     client: KitsuClient = default,
 ) -> dict:
     """
@@ -229,12 +231,20 @@ def add_task_type_to_project_template(
         task_type (dict / ID): The task type to attach.
         priority (int): Optional priority for the task type within the
             template.
+        hd_bitrate_compression (int): Optional high definition movie
+            bitrate in Mbit/s for that task type.
+        ld_bitrate_compression (int): Optional low definition movie
+            bitrate in Mbit/s for that task type.
     """
     project_template = normalize_model_parameter(project_template)
     task_type = normalize_model_parameter(task_type)
     data = {"task_type_id": task_type["id"]}
     if priority is not None:
         data["priority"] = priority
+    if hd_bitrate_compression is not None:
+        data["hd_bitrate_compression"] = hd_bitrate_compression
+    if ld_bitrate_compression is not None:
+        data["ld_bitrate_compression"] = ld_bitrate_compression
     return raw.post(
         f"data/project-templates/{project_template['id']}/task-types",
         data,
