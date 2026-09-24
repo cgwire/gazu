@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import time
+
 from typing_extensions import Literal
 
 import requests
@@ -8,6 +10,7 @@ from . import client as raw
 
 from .cache import cache
 from .client import KitsuClient
+from .exception import PreviewFileProcessingException
 from .helpers import normalize_model_parameter
 
 default = raw.default_client
@@ -207,6 +210,42 @@ def get_preview_file(
         dict: Preview file corresponding to given ID.
     """
     return raw.fetch_one("preview-files", preview_file_id, client=client)
+
+
+def wait_for_preview_file(
+    preview_file: str | dict,
+    timeout: float = 60,
+    poll_interval: float = 5,
+    client: KitsuClient = default,
+) -> dict:
+    """
+    Wait for a preview file to leave the "processing" status and return
+    it. Useful after an upload, when a script wants to know whether the
+    server could build the preview before going on.
+
+    Args:
+        preview_file (str / dict): The preview file dict or ID.
+        timeout (float): Seconds to wait before giving up.
+        poll_interval (float): Seconds between two checks.
+
+    Returns:
+        dict: The preview file, ready or broken.
+
+    Raises:
+        PreviewFileProcessingException: the preview file was still being
+            processed when the timeout elapsed.
+    """
+    preview_file = normalize_model_parameter(preview_file)
+    deadline = time.monotonic() + timeout
+    while True:
+        current = raw.fetch_one(
+            "preview-files", preview_file["id"], client=client
+        )
+        if current.get("status") != "processing":
+            return current
+        if time.monotonic() >= deadline:
+            raise PreviewFileProcessingException(preview_file["id"])
+        time.sleep(poll_interval)
 
 
 def remove_preview_file(

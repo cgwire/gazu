@@ -1081,19 +1081,34 @@ def upload_preview_file(
     preview_file: str | dict,
     file_path: str,
     normalize_movie: bool = True,
+    no_job: bool = False,
     client: KitsuClient = default,
     progress_callback=None,
 ) -> dict:
     """
     Upload the file content for a given preview file.
 
+    The server builds the preview variants in the background: the
+    preview file comes back with the status "processing" and turns
+    "ready" once they are stored. Pass no_job=True to have the server do
+    that work inside the request, the way it did before, when the script
+    needs the files right after the upload.
+
     Args:
         preview_file (str / dict): The preview_file dict or the preview_file ID.
         file_path (str): Path of the file to upload as preview.
     """
-    path = f"pictures/preview-files/{normalize_model_parameter(preview_file)['id']}"
+    path = (
+        f"pictures/preview-files/"
+        f"{normalize_model_parameter(preview_file)['id']}"
+    )
+    params = []
     if not normalize_movie:
-        path += "?normalize=false"
+        params.append("normalize=false")
+    if no_job:
+        params.append("no_job=true")
+    if params:
+        path += "?" + "&".join(params)
     return raw.upload(
         path, file_path, client=client, progress_callback=progress_callback
     )

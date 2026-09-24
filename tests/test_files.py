@@ -1536,3 +1536,57 @@ class FilesTestCase(unittest.TestCase):
                     os.path.getsize("./tests/fixtures/v1.png"),
                 )
                 os.remove("./test.png")
+
+
+class WaitForPreviewFileTestCase(unittest.TestCase):
+    def setUp(self):
+        gazu.client.set_host("http://gazu-server/")
+
+    def test_wait_returns_the_preview_once_ready(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url(
+                    "data/preview-files/{}".format(fakeid("preview-1"))
+                ),
+                [
+                    {
+                        "json": {
+                            "id": fakeid("preview-1"),
+                            "status": "processing",
+                        }
+                    },
+                    {"json": {"id": fakeid("preview-1"), "status": "ready"}},
+                ],
+            )
+            preview_file = gazu.files.wait_for_preview_file(
+                fakeid("preview-1"), timeout=5, poll_interval=0
+            )
+        self.assertEqual(preview_file["status"], "ready")
+
+    def test_wait_returns_a_broken_preview_too(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url(
+                    "data/preview-files/{}".format(fakeid("preview-1"))
+                ),
+                json={"id": fakeid("preview-1"), "status": "broken"},
+            )
+            preview_file = gazu.files.wait_for_preview_file(
+                fakeid("preview-1"), timeout=5, poll_interval=0
+            )
+        self.assertEqual(preview_file["status"], "broken")
+
+    def test_wait_gives_up_after_the_timeout(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url(
+                    "data/preview-files/{}".format(fakeid("preview-1"))
+                ),
+                json={"id": fakeid("preview-1"), "status": "processing"},
+            )
+            with self.assertRaises(
+                gazu.exception.PreviewFileProcessingException
+            ):
+                gazu.files.wait_for_preview_file(
+                    fakeid("preview-1"), timeout=0, poll_interval=0
+                )

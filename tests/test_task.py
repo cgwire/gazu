@@ -1614,3 +1614,34 @@ class TaskTestCase(unittest.TestCase):
                 [fakeid("task-1"), fakeid("task-2")],
             )
             self.assertEqual(sent[0]["text"], "Batch comment")
+
+
+class UploadPreviewFileNoJobTestCase(unittest.TestCase):
+    def setUp(self):
+        gazu.client.set_host("http://gazu-server/")
+
+    def test_upload_is_asynchronous_by_default(self):
+        with requests_mock.mock() as mock:
+            mock.post(
+                gazu.client.get_full_url(
+                    "pictures/preview-files/{}".format(fakeid("preview-1"))
+                ),
+                text=json.dumps({"id": fakeid("preview-1")}),
+            )
+            gazu.task.upload_preview_file(
+                fakeid("preview-1"), "./tests/fixtures/v1.png"
+            )
+            self.assertNotIn("no_job", mock.last_request.url)
+
+    def test_no_job_asks_for_a_synchronous_upload(self):
+        with requests_mock.mock() as mock:
+            mock.post(
+                gazu.client.get_full_url(
+                    "pictures/preview-files/{}".format(fakeid("preview-1"))
+                ),
+                text=json.dumps({"id": fakeid("preview-1")}),
+            )
+            gazu.task.upload_preview_file(
+                fakeid("preview-1"), "./tests/fixtures/v1.png", no_job=True
+            )
+            self.assertIn("no_job=true", mock.last_request.url)
