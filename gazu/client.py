@@ -4,6 +4,7 @@ import json
 import logging
 import shutil
 import os
+import time
 from typing import Any, Callable, cast
 
 from .encoder import CustomJSONEncoder
@@ -16,6 +17,7 @@ from .exception import (
     NotAllowedException,
     MethodNotAllowedException,
     ParameterException,
+    PreviewFileProcessingException,
     RouteNotFoundException,
     ServerErrorException,
     ValidationException,
@@ -31,6 +33,16 @@ logger.addHandler(logging.NullHandler())
 
 # Bound the auth-recovery retries to avoid an infinite loop.
 MAX_AUTH_RETRIES = 3
+
+# Downloads announce they can read a JSON answer, so the server can say
+# "the file is being built" with a 202 instead of a 404. The low quality
+# on */* keeps an image the preferred answer.
+DOWNLOAD_ACCEPT_HEADER = "application/json, */*;q=0.1"
+# Seconds a download waits, in total, for a preview file still being
+# processed. A bounded wait: a script that hangs forever is worse than
+# one that fails.
+DEFAULT_PROCESSING_TIMEOUT = 60
+DEFAULT_RETRY_AFTER = 5
 
 if os.getenv("GAZU_DEBUG", "false").lower() == "true":
     # Debug opt-in: only touch the "gazu" logger, never the root logger
@@ -996,9 +1008,16 @@ def download(
     params: dict | None = None,
     client: KitsuClient = default_client,
     progress_callback: Callable | None = None,
+    processing_timeout: float = DEFAULT_PROCESSING_TIMEOUT,
 ) -> requests.Response:
     """
     Download file located at *file_path* to given url *path*.
+
+    A preview file whose variants are still being built answers 202: the
+    download waits for the delay the server asks for and tries again,
+    silently, for at most *processing_timeout* seconds. It then raises
+    PreviewFileProcessingException. A missing file (404) is an error
+    right away.
 
     Args:
         path (str): The url path to download file from.
@@ -1007,6 +1026,8 @@ def download(
         client (KitsuClient): The client to use for the request.
         progress_callback (Callable): Callback ``(bytes_read, total)``
             invoked during download. *total* is 0 when unknown.
+        processing_timeout (float): Seconds to wait for a preview file
+            still being processed by the server.
 
     Returns:
         Response: Request response object.
@@ -1014,19 +1035,15 @@ def download(
     """
     path = build_path_with_params(path, params)
     url = get_full_url(path, client)
-    for _ in range(MAX_AUTH_RETRIES):
-        response = client.session.get(
-            url, headers=make_auth_header(client=client), stream=True
-        )
-        # Check the status *before* streaming to the file, so an error body
-        # (404/403/500 JSON) is never written into the target, and an expired
-        # token triggers a refresh + retry like the other verbs.
-        _, retry = check_status(response, path, client=client)
-        if not retry:
+    deadline = time.monotonic() + processing_timeout
+    while True:
+        response = _download_once(url, path, client)
+        if response.status_code != 202:
             break
         response.close()
-    else:
-        raise NotAuthenticatedException(path)
+        if time.monotonic() >= deadline:
+            raise PreviewFileProcessingException(path)
+        time.sleep(_retry_after(response))
 
     with response:
         if file_path is None:
@@ -1044,6 +1061,35 @@ def download(
             else:
                 shutil.copyfileobj(response.raw, target_file)
         return response
+
+
+def _download_once(url, path, client):
+    """
+    One download request, with the auth refresh the other verbs get. The
+    status is checked before anything is streamed to a file, so an error
+    body is never written into the target.
+    """
+    headers = make_auth_header(client=client)
+    headers["Accept"] = DOWNLOAD_ACCEPT_HEADER
+    for _ in range(MAX_AUTH_RETRIES):
+        response = client.session.get(url, headers=headers, stream=True)
+        if response.status_code == 202:
+            return response
+        _, retry = check_status(response, path, client=client)
+        if not retry:
+            return response
+        response.close()
+    raise NotAuthenticatedException(path)
+
+
+def _retry_after(response):
+    """
+    The delay the server asks for before the next try, in seconds.
+    """
+    try:
+        return max(0, float(response.headers.get("Retry-After")))
+    except (TypeError, ValueError):
+        return DEFAULT_RETRY_AFTER
 
 
 def get_file_data_from_url(

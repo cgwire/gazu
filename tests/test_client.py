@@ -1,5 +1,6 @@
 import datetime
 import json
+import os
 import random
 import string
 
@@ -20,7 +21,7 @@ from gazu.exception import (
     ValidationException,
 )
 
-from utils import add_verify_file_callback, mock_route
+from utils import add_verify_file_callback, fakeid, mock_route
 
 
 class ClientTestCase(unittest.TestCase):
@@ -663,3 +664,85 @@ class BaseFuncTestCase(ClientTestCase):
                 raw.download("movies/originals/preview-files/x.mp4", target)
             # The error body must not have been written to the target.
             self.assertFalse(os.path.exists(target))
+
+
+class DownloadProcessingTestCase(unittest.TestCase):
+    def setUp(self):
+        gazu.client.set_host("http://gazu-server/")
+
+    def path(self):
+        return "pictures/thumbnails/preview-files/{}.png".format(
+            fakeid("preview-1")
+        )
+
+    def test_download_retries_while_the_preview_is_processing(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url(self.path()),
+                [
+                    {
+                        "status_code": 202,
+                        "json": {
+                            "status": "processing",
+                            "preview_file_id": fakeid("preview-1"),
+                        },
+                        "headers": {"Retry-After": "0"},
+                    },
+                    {"status_code": 200, "content": b"PNG-BYTES"},
+                ],
+            )
+            gazu.client.download(self.path(), "./test.png")
+        with open("./test.png", "rb") as downloaded:
+            self.assertEqual(downloaded.read(), b"PNG-BYTES")
+        os.remove("./test.png")
+
+    def test_download_without_file_path_retries_too(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url(self.path()),
+                [
+                    {
+                        "status_code": 202,
+                        "json": {"status": "processing"},
+                        "headers": {"Retry-After": "0"},
+                    },
+                    {"status_code": 200, "content": b"PNG-BYTES"},
+                ],
+            )
+            response = gazu.client.download(self.path(), None)
+        self.assertEqual(response.content, b"PNG-BYTES")
+
+    def test_download_gives_up_after_the_processing_timeout(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url(self.path()),
+                status_code=202,
+                json={"status": "processing"},
+                headers={"Retry-After": "0"},
+            )
+            with self.assertRaises(
+                gazu.exception.PreviewFileProcessingException
+            ):
+                gazu.client.download(
+                    self.path(), "./test.png", processing_timeout=0
+                )
+        self.assertFalse(os.path.exists("./test.png"))
+
+    def test_download_does_not_retry_a_missing_file(self):
+        with requests_mock.mock() as mock:
+            mock.get(gazu.client.get_full_url(self.path()), status_code=404)
+            with self.assertRaises(gazu.exception.RouteNotFoundException):
+                gazu.client.download(self.path(), "./test.png")
+        self.assertFalse(os.path.exists("./test.png"))
+
+    def test_download_asks_for_json_so_the_server_can_answer_202(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url(self.path()), content=b"PNG-BYTES"
+            )
+            gazu.client.download(self.path(), "./test.png")
+            self.assertEqual(
+                mock.last_request.headers["Accept"],
+                gazu.client.DOWNLOAD_ACCEPT_HEADER,
+            )
+        os.remove("./test.png")
