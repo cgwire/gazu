@@ -1,7 +1,9 @@
 import datetime
 import json
+import os
 import random
 import string
+import time
 
 import unittest
 import requests_mock
@@ -20,7 +22,7 @@ from gazu.exception import (
     ValidationException,
 )
 
-from utils import add_verify_file_callback, mock_route
+from utils import add_verify_file_callback, fakeid, mock_route
 
 
 class ClientTestCase(unittest.TestCase):
@@ -663,3 +665,162 @@ class BaseFuncTestCase(ClientTestCase):
                 raw.download("movies/originals/preview-files/x.mp4", target)
             # The error body must not have been written to the target.
             self.assertFalse(os.path.exists(target))
+
+
+class DownloadProcessingTestCase(unittest.TestCase):
+    def setUp(self):
+        gazu.client.set_host("http://gazu-server/")
+
+    def path(self):
+        return "pictures/thumbnails/preview-files/{}.png".format(
+            fakeid("preview-1")
+        )
+
+    def test_download_retries_while_the_preview_is_processing(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url(self.path()),
+                [
+                    {
+                        "status_code": 202,
+                        "json": {
+                            "status": "processing",
+                            "preview_file_id": fakeid("preview-1"),
+                        },
+                        "headers": {"Retry-After": "0"},
+                    },
+                    {"status_code": 200, "content": b"PNG-BYTES"},
+                ],
+            )
+            gazu.client.download(self.path(), "./test.png")
+        with open("./test.png", "rb") as downloaded:
+            self.assertEqual(downloaded.read(), b"PNG-BYTES")
+        os.remove("./test.png")
+
+    def test_download_without_file_path_retries_too(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url(self.path()),
+                [
+                    {
+                        "status_code": 202,
+                        "json": {"status": "processing"},
+                        "headers": {"Retry-After": "0"},
+                    },
+                    {"status_code": 200, "content": b"PNG-BYTES"},
+                ],
+            )
+            response = gazu.client.download(self.path(), None)
+        self.assertEqual(response.content, b"PNG-BYTES")
+
+    def test_download_gives_up_after_the_processing_timeout(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url(self.path()),
+                status_code=202,
+                json={"status": "processing"},
+                headers={"Retry-After": "0"},
+            )
+            with self.assertRaises(
+                gazu.exception.PreviewFileProcessingException
+            ):
+                gazu.client.download(
+                    self.path(), "./test.png", processing_timeout=0
+                )
+        self.assertFalse(os.path.exists("./test.png"))
+
+    def test_download_does_not_retry_a_missing_file(self):
+        with requests_mock.mock() as mock:
+            mock.get(gazu.client.get_full_url(self.path()), status_code=404)
+            with self.assertRaises(gazu.exception.RouteNotFoundException):
+                gazu.client.download(self.path(), "./test.png")
+        self.assertFalse(os.path.exists("./test.png"))
+
+    def test_download_asks_for_json_so_the_server_can_answer_202(self):
+        with requests_mock.mock() as mock:
+            mock.get(
+                gazu.client.get_full_url(self.path()), content=b"PNG-BYTES"
+            )
+            gazu.client.download(self.path(), "./test.png")
+            self.assertEqual(
+                mock.last_request.headers["Accept"],
+                gazu.client.DOWNLOAD_ACCEPT_HEADER,
+            )
+        os.remove("./test.png")
+
+    def test_download_retries_with_the_refreshed_token(self):
+        client = raw.create_client(
+            "http://gazu-server/api", use_refresh_token=True
+        )
+        client.tokens = {
+            "access_token": "old-token",
+            "refresh_token": "a-refresh-token",
+        }
+        with requests_mock.mock() as mock:
+            mock.get(
+                raw.get_full_url(self.path(), client=client),
+                [
+                    {
+                        "status_code": 401,
+                        "json": {"message": "Signature has expired"},
+                    },
+                    {"status_code": 200, "content": b"PNG-BYTES"},
+                ],
+            )
+            mock.get(
+                raw.get_full_url("auth/refresh-token", client=client),
+                json={"access_token": "new-token"},
+            )
+            response = raw.download(self.path(), None, client=client)
+            self.assertEqual(
+                mock.last_request.headers["Authorization"], "Bearer new-token"
+            )
+            self.assertEqual(
+                mock.last_request.headers["Accept"],
+                raw.DOWNLOAD_ACCEPT_HEADER,
+            )
+        self.assertEqual(response.content, b"PNG-BYTES")
+
+
+class _FakeResponse:
+    """
+    A stand-in response exposing only what _retry_after reads.
+    """
+
+    def __init__(self, headers):
+        self.headers = headers
+
+
+class RetryAfterTestCase(unittest.TestCase):
+    """
+    The delay _retry_after computes before the next processing retry.
+    """
+
+    def test_falls_back_to_default_when_the_header_is_missing(self):
+        deadline = time.monotonic() + 100
+        self.assertEqual(
+            raw._retry_after(_FakeResponse({}), deadline),
+            raw.DEFAULT_RETRY_AFTER,
+        )
+
+    def test_falls_back_to_default_when_the_header_is_not_numeric(self):
+        deadline = time.monotonic() + 100
+        self.assertEqual(
+            raw._retry_after(_FakeResponse({"Retry-After": "soon"}), deadline),
+            raw.DEFAULT_RETRY_AFTER,
+        )
+
+    def test_is_bounded_by_the_remaining_budget(self):
+        # A server asking to wait an hour must not make the caller sleep
+        # anywhere near that: the deadline check right after the sleep
+        # would only run once the whole hour has elapsed.
+        deadline = time.monotonic() + 0.05
+        delay = raw._retry_after(
+            _FakeResponse({"Retry-After": "3600"}), deadline
+        )
+        self.assertLessEqual(delay, 0.1)
+
+    def test_never_returns_a_negative_delay_past_the_deadline(self):
+        deadline = time.monotonic() - 10
+        delay = raw._retry_after(_FakeResponse({"Retry-After": "5"}), deadline)
+        self.assertEqual(delay, 0)

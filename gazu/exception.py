@@ -102,3 +102,10 @@ class ProjectDoesntExistException(GazuException):
     """
     Error raised when a project isn't available.
     """
+
+
+class PreviewFileProcessingException(GazuException):
+    """
+    The preview file exists but its files are still being built by the
+    server, and they did not arrive within the allotted time.
+    """
