@@ -1121,10 +1121,15 @@ def add_preview(
     preview_file_url: str | None = None,
     normalize_movie: bool = True,
     revision: int | None = None,
+    no_job: bool = False,
     client: KitsuClient = default,
 ) -> dict:
     """
     Add a preview to given comment.
+
+    The server builds the preview in the background and the preview file
+    comes back "processing"; pass no_job=True to have the server do that
+    work inside the request instead.
 
     Args:
         task (str / dict): The task dict or the task ID.
@@ -1154,6 +1159,7 @@ def add_preview(
             preview_file,
             preview_file_path,
             normalize_movie=normalize_movie,
+            no_job=no_job,
             client=client,
         )
     finally:
@@ -1168,13 +1174,17 @@ def add_extra_preview(
     preview_file_path: str | None = None,
     preview_file_url: str | None = None,
     normalize_movie: bool = True,
+    no_job: bool = False,
     client: KitsuClient = default,
 ) -> dict:
     """
     Add an extra preview to given comment revision.
 
     The extra preview shares the same revision as the given reference preview
-    file. The file content is uploaded afterwards.
+    file. The file content is uploaded afterwards. The server builds the
+    preview in the background and the preview file comes back "processing";
+    pass no_job=True to have the server do that work inside the request
+    instead.
 
     Args:
         task (str / dict): The task dict or the task ID.
@@ -1205,6 +1215,7 @@ def add_extra_preview(
             new_preview_file,
             preview_file_path,
             normalize_movie=normalize_movie,
+            no_job=no_job,
             client=client,
         )
     finally:

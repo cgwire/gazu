@@ -1126,6 +1126,106 @@ class TaskTestCase(unittest.TestCase):
                     {"id": fakeid("preview-1")},
                 )
 
+    def test_add_preview_is_asynchronous_by_default(self):
+        with requests_mock.Mocker() as mock:
+            mock_route(
+                mock,
+                "POST",
+                f"actions/tasks/{fakeid('task-1')}/comments/{fakeid('comment-1')}/add-preview",
+                text={"id": fakeid("preview-1")},
+            )
+            mock_route(
+                mock,
+                "POST",
+                f"pictures/preview-files/{fakeid('preview-1')}",
+                text={"id": fakeid("preview-1")},
+            )
+
+            gazu.task.add_preview(
+                fakeid("task-1"),
+                fakeid("comment-1"),
+                "./tests/fixtures/v1.png",
+            )
+            self.assertNotIn("no_job", mock.last_request.url)
+
+    def test_add_preview_no_job_asks_for_a_synchronous_upload(self):
+        with requests_mock.Mocker() as mock:
+            mock_route(
+                mock,
+                "POST",
+                f"actions/tasks/{fakeid('task-1')}/comments/{fakeid('comment-1')}/add-preview",
+                text={"id": fakeid("preview-1")},
+            )
+            mock_route(
+                mock,
+                "POST",
+                f"pictures/preview-files/{fakeid('preview-1')}",
+                text={"id": fakeid("preview-1")},
+            )
+
+            gazu.task.add_preview(
+                fakeid("task-1"),
+                fakeid("comment-1"),
+                "./tests/fixtures/v1.png",
+                no_job=True,
+            )
+            self.assertIn("no_job=true", mock.last_request.url)
+
+    def test_add_extra_preview_is_asynchronous_by_default(self):
+        with requests_mock.Mocker() as mock:
+            mock_route(
+                mock,
+                "POST",
+                (
+                    f"actions/tasks/{fakeid('task-1')}/comments/"
+                    f"{fakeid('comment-1')}/preview-files/"
+                    f"{fakeid('preview-1')}"
+                ),
+                text={"id": fakeid("preview-2")},
+            )
+            mock_route(
+                mock,
+                "POST",
+                f"pictures/preview-files/{fakeid('preview-2')}",
+                text={"id": fakeid("preview-2")},
+            )
+
+            gazu.task.add_extra_preview(
+                fakeid("task-1"),
+                fakeid("comment-1"),
+                fakeid("preview-1"),
+                "./tests/fixtures/v1.png",
+            )
+            self.assertNotIn("no_job", mock.last_request.url)
+
+    def test_add_extra_preview_no_job_asks_for_a_synchronous_upload(self):
+        with requests_mock.Mocker() as mock:
+            mock_route(
+                mock,
+                "POST",
+                (
+                    f"actions/tasks/{fakeid('task-1')}/comments/"
+                    f"{fakeid('comment-1')}/preview-files/"
+                    f"{fakeid('preview-1')}"
+                ),
+                text={"id": fakeid("preview-2")},
+            )
+            mock_route(
+                mock,
+                "POST",
+                f"pictures/preview-files/{fakeid('preview-2')}",
+                text={"id": fakeid("preview-2")},
+            )
+
+            gazu.task.add_extra_preview(
+                fakeid("task-1"),
+                fakeid("comment-1"),
+                fakeid("preview-1"),
+                "./tests/fixtures/v1.png",
+                no_job=True,
+            )
+            self.assertIn("no_job=true", mock.last_request.url)
+
     def test_clear_assignations_empty_is_noop(self):
         # An empty list must not hit the API (which would 400): the mock has
         # no routes, so any request would raise NoMockAddress.
