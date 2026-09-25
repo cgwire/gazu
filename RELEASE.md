@@ -8,6 +8,11 @@ follow this process:
 3. Push changes to `main` branch.
 4. Tag the commit and push the changes to Github.
 5. Github Actions will build the package from the sources and publish the package on Pypi
+   once the tests pass.
+
+Every commit pushed to `main` is also published on
+[TestPyPI](https://test.pypi.org/project/gazu/) as a `.devN` version, `N`
+being the short commit hash read as a number.
 
 You can run a script to perform these commands at once, he is located in scripts/release.sh.
 

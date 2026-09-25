@@ -1,11 +1,25 @@
 ---
 name: Gazu CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [main]
+    tags: ["*"]
+  pull_request:
+
+# A new push to a pull request makes the run in flight pointless: stop it
+# instead of paying for it to finish. Any other run, a push to main or a
+# tag, is alone in its group: every commit on main keeps a verdict to
+# bisect from, and its TestPyPI publish. The group is keyed on the run id
+# rather than the sha, which the bump commit of a release and its tag
+# share: pushed together, one would cancel the other.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
 
 jobs:
-  ci:
-    name: Test with different versions of Python 🐍
+  test:
+    name: Test Python ${{ matrix.version }} 🐍
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -17,7 +31,7 @@ jobs:
     container: ${{ matrix.container }}
     steps:
       - uses: actions/checkout@v6
-      - name: Set up Python
+      - name: Set up Python 🐍
         if: ${{ !contains(fromJSON('["3.7"]'), matrix.version) }}
         uses: actions/setup-python@v6
         with:
@@ -25,30 +39,93 @@ jobs:
           cache: pip
       - name: Upgrade pip 📦
         run: >-
-          python -m
-          pip install
-          --upgrade
-          pip
+          python -m pip install --upgrade pip
       - name: Install packages 📦
         run: >-
-          python -m
-          pip install
-          -r requirements.txt
+          python -m pip install -r requirements.txt
       - name: Run tests 🧪
         run: >-
           py.test
 
   audit:
-    name: Audit dependencies for known vulnerabilities 🔒
+    name: Audit dependencies 🔒
     runs-on: ubuntu-latest
     # Advisory only: a new CVE in a dependency should not block the build.
     continue-on-error: true
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-python@v6
+      - name: Set up Python 🐍
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - name: Install pip-audit 📦
         run: python -m pip install --upgrade pip pip-audit
-      - name: Run pip-audit 🔍
+      - name: Run pip-audit 🔒
         run: pip-audit
+
+  # Every package is built here, pull requests included, so a broken
+  # build shows up before the merge. The publish jobs reuse the artifact
+  # instead of building again.
+  build:
+    name: Build the distributions 🏗️
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Set up Python 🐍
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.x"
+      # Each commit on main is published to TestPyPI, which refuses to
+      # overwrite a version: the short hash, read as a number, makes the
+      # version unique to the commit.
+      - name: Append short commit hash to version
+        if: github.ref == 'refs/heads/main'
+        run: |
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          DEV_NUM=$(printf '%d' "0x${SHORT_SHA}")
+          sed -i "s/^__version__ = \"\\(.*\\)\"/__version__ = \"\\1.dev${DEV_NUM}\"/" gazu/__version__.py
+          grep __version__ gazu/__version__.py
+      - name: Install pypa/build
+        run: >-
+          python3 -m pip install build --user
+      - name: Build a binary wheel and a source tarball 🏗️
+        run: >-
+          python3 -m build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  publish-test:
+    name: Publish to TestPyPI 📦
+    needs: [test, build]
+    if: github.ref == 'refs/heads/main' && github.repository == 'cgwire/gazu'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    environment: testpypi
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - name: Publish to TestPyPI 📦
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
+  publish:
+    name: Publish to PyPI 📦
+    needs: [test, build]
+    if: startsWith(github.ref, 'refs/tags') && github.repository == 'cgwire/gazu'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    environment: pypi
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - name: Publish to PyPI 📦
+        uses: pypa/gh-action-pypi-publish@release/v1
