@@ -3,6 +3,7 @@ import json
 import os
 import random
 import string
+import time
 
 import unittest
 import requests_mock
@@ -746,3 +747,47 @@ class DownloadProcessingTestCase(unittest.TestCase):
                 gazu.client.DOWNLOAD_ACCEPT_HEADER,
             )
         os.remove("./test.png")
+
+
+class _FakeResponse:
+    """
+    A stand-in response exposing only what _retry_after reads.
+    """
+
+    def __init__(self, headers):
+        self.headers = headers
+
+
+class RetryAfterTestCase(unittest.TestCase):
+    """
+    The delay _retry_after computes before the next processing retry.
+    """
+
+    def test_falls_back_to_default_when_the_header_is_missing(self):
+        deadline = time.monotonic() + 100
+        self.assertEqual(
+            raw._retry_after(_FakeResponse({}), deadline),
+            raw.DEFAULT_RETRY_AFTER,
+        )
+
+    def test_falls_back_to_default_when_the_header_is_not_numeric(self):
+        deadline = time.monotonic() + 100
+        self.assertEqual(
+            raw._retry_after(_FakeResponse({"Retry-After": "soon"}), deadline),
+            raw.DEFAULT_RETRY_AFTER,
+        )
+
+    def test_is_bounded_by_the_remaining_budget(self):
+        # A server asking to wait an hour must not make the caller sleep
+        # anywhere near that: the deadline check right after the sleep
+        # would only run once the whole hour has elapsed.
+        deadline = time.monotonic() + 0.05
+        delay = raw._retry_after(
+            _FakeResponse({"Retry-After": "3600"}), deadline
+        )
+        self.assertLessEqual(delay, 0.1)
+
+    def test_never_returns_a_negative_delay_past_the_deadline(self):
+        deadline = time.monotonic() - 10
+        delay = raw._retry_after(_FakeResponse({"Retry-After": "5"}), deadline)
+        self.assertEqual(delay, 0)

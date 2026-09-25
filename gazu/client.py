@@ -1043,7 +1043,7 @@ def download(
         response.close()
         if time.monotonic() >= deadline:
             raise PreviewFileProcessingException(path)
-        time.sleep(_retry_after(response))
+        time.sleep(_retry_after(response, deadline))
 
     with response:
         if file_path is None:
@@ -1082,14 +1082,21 @@ def _download_once(url, path, client):
     raise NotAuthenticatedException(path)
 
 
-def _retry_after(response):
+def _retry_after(response, deadline):
     """
-    The delay the server asks for before the next try, in seconds.
+    The delay before the next try, in seconds: the server's Retry-After
+    header, or DEFAULT_RETRY_AFTER when it is missing or not a number.
+    Either way, the delay never exceeds what remains of the processing
+    budget: a large Retry-After (e.g. a misconfigured proxy sending
+    Retry-After: 3600) would otherwise sleep well past the deadline that
+    is only checked once the sleep returns.
     """
     try:
-        return max(0, float(response.headers.get("Retry-After")))
+        delay = max(0, float(response.headers.get("Retry-After")))
     except (TypeError, ValueError):
-        return DEFAULT_RETRY_AFTER
+        delay = DEFAULT_RETRY_AFTER
+    remaining = deadline - time.monotonic()
+    return max(0, min(delay, remaining))
 
 
 def get_file_data_from_url(
