@@ -1069,9 +1069,10 @@ def _download_once(url, path, client):
     status is checked before anything is streamed to a file, so an error
     body is never written into the target.
     """
-    headers = make_auth_header(client=client)
-    headers["Accept"] = DOWNLOAD_ACCEPT_HEADER
     for _ in range(MAX_AUTH_RETRIES):
+        # Built on each try: a token refresh must reach the retry.
+        headers = make_auth_header(client=client)
+        headers["Accept"] = DOWNLOAD_ACCEPT_HEADER
         response = client.session.get(url, headers=headers, stream=True)
         if response.status_code == 202:
             return response

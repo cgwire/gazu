@@ -748,6 +748,39 @@ class DownloadProcessingTestCase(unittest.TestCase):
             )
         os.remove("./test.png")
 
+    def test_download_retries_with_the_refreshed_token(self):
+        client = raw.create_client(
+            "http://gazu-server/api", use_refresh_token=True
+        )
+        client.tokens = {
+            "access_token": "old-token",
+            "refresh_token": "a-refresh-token",
+        }
+        with requests_mock.mock() as mock:
+            mock.get(
+                raw.get_full_url(self.path(), client=client),
+                [
+                    {
+                        "status_code": 401,
+                        "json": {"message": "Signature has expired"},
+                    },
+                    {"status_code": 200, "content": b"PNG-BYTES"},
+                ],
+            )
+            mock.get(
+                raw.get_full_url("auth/refresh-token", client=client),
+                json={"access_token": "new-token"},
+            )
+            response = raw.download(self.path(), None, client=client)
+            self.assertEqual(
+                mock.last_request.headers["Authorization"], "Bearer new-token"
+            )
+            self.assertEqual(
+                mock.last_request.headers["Accept"],
+                raw.DOWNLOAD_ACCEPT_HEADER,
+            )
+        self.assertEqual(response.content, b"PNG-BYTES")
+
 
 class _FakeResponse:
     """
