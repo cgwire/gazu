@@ -912,15 +912,27 @@ class ProjectTestCase(unittest.TestCase):
             created = gazu.project.create_budget_entry(
                 project_id,
                 {"id": budget_id},
-                name="Rent",
-                date="2025-02-01",
-                amount=500,
-                quantity=1,
-                unit_price=500,
-                description="Studio rent",
-                category="overhead",
+                fakeid("department-1"),
+                person={"id": fakeid("person-1")},
+                position="artist",
+                seniority="senior",
+                start_date="2025-02-01",
+                months_duration=3,
+                daily_salary=400,
             )
             self.assertEqual(created["id"], fakeid("entry-3"))
+            self.assertEqual(
+                mock.last_request.json(),
+                {
+                    "department_id": fakeid("department-1"),
+                    "person_id": fakeid("person-1"),
+                    "position": "artist",
+                    "seniority": "senior",
+                    "start_date": "2025-02-01",
+                    "months_duration": 3,
+                    "daily_salary": 400,
+                },
+            )
 
             one_path = base + f"/entries/{fakeid('entry-3')}"
             mock_route(
