@@ -1310,11 +1310,19 @@ class TaskTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                "data/tasks/open-tasks",
-                text=[{"id": fakeid("task-1")}, {"id": fakeid("task-2")}],
+                "data/tasks/open-tasks?page=1",
+                text={"data": [{"id": fakeid("task-1")}], "is_more": True},
+            )
+            mock_route(
+                mock,
+                "GET",
+                "data/tasks/open-tasks?page=2",
+                text={"data": [{"id": fakeid("task-2")}], "is_more": False},
             )
             tasks = gazu.task.all_open_tasks()
-            self.assertEqual(len(tasks), 2)
+            self.assertEqual(
+                tasks, [{"id": fakeid("task-1")}, {"id": fakeid("task-2")}]
+            )
 
     def test_get_open_tasks_stats(self):
         with requests_mock.mock() as mock:

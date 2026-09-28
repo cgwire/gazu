@@ -1665,9 +1665,20 @@ def all_open_tasks(client: KitsuClient = default) -> list[dict]:
     Get all open tasks.
 
     Returns:
-        list: Open tasks.
+        list: Open tasks, every page gathered.
     """
-    return raw.fetch_all("tasks/open-tasks", client=client)
+    # Zou answers one page of tasks at a time, wrapped with their stats.
+    tasks = []
+    page = 1
+    is_more = True
+    while is_more:
+        result = raw.get(
+            "data/tasks/open-tasks", params={"page": page}, client=client
+        )
+        tasks += result["data"]
+        is_more = result["is_more"]
+        page += 1
+    return tasks
 
 
 @cache
