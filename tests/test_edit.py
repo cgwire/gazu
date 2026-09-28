@@ -114,6 +114,9 @@ class EditTestCase(unittest.TestCase):
                 description="test description",
             )
             self.assertEqual(edit, result)
+            self.assertEqual(
+                mock.last_request.json()["episode_id"], fakeid("episode-1")
+            )
 
         with requests_mock.mock() as mock:
             result = {
