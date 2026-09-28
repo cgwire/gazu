@@ -686,7 +686,7 @@ class ProjectTestCase(unittest.TestCase):
     def test_get_project_task_types(self):
         with requests_mock.mock() as mock:
             project_id = fakeid("project-1")
-            path = f"data/projects/{project_id}/settings/task-types"
+            path = f"data/projects/{project_id}/task-types"
             mock_route(
                 mock,
                 "GET",

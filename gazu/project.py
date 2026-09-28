@@ -662,9 +662,7 @@ def get_project_task_types(
         list: The task types.
     """
     project = normalize_model_parameter(project)
-    return raw.fetch_all(
-        f"projects/{project['id']}/settings/task-types", client=client
-    )
+    return raw.fetch_all(f"projects/{project['id']}/task-types", client=client)
 
 
 @cache
