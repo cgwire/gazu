@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import warnings
+
 from typing_extensions import Literal  # Python 3.7 compatibility.
 
 from . import client as raw
@@ -893,24 +895,30 @@ def create_budget(
     Args:
         project (dict / ID): The project dict or id.
         name (str): Budget name. Required.
-        description (str, optional): Human description.
+        description (str, optional): Deprecated, ignored by the API.
         currency (str, optional): Currency code (e.g. "USD", "EUR").
-        start_date (str, optional): Start date ISO format (YYYY-MM-DD).
-        end_date (str, optional): End date ISO format (YYYY-MM-DD).
-        amount (number, optional): Overall budget amount.
+        start_date (str, optional): Deprecated, ignored by the API.
+        end_date (str, optional): Deprecated, ignored by the API.
+        amount (number, optional): Deprecated, ignored by the API.
     """
+    ignored = {
+        "description": description,
+        "start_date": start_date,
+        "end_date": end_date,
+        "amount": amount,
+    }
+    ignored = [key for key, value in ignored.items() if value is not None]
+    if ignored:
+        warnings.warn(
+            "create_budget: %s ignored, a budget only stores its name and "
+            "currency" % ", ".join(ignored),
+            DeprecationWarning,
+            stacklevel=2,
+        )
     project = normalize_model_parameter(project)
     data = {"name": name}
-    if description is not None:
-        data["description"] = description
     if currency is not None:
         data["currency"] = currency
-    if start_date is not None:
-        data["start_date"] = start_date
-    if end_date is not None:
-        data["end_date"] = end_date
-    if amount is not None:
-        data["amount"] = amount
     return raw.post(
         f"data/projects/{project['id']}/budgets", data, client=client
     )

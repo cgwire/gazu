@@ -847,15 +847,19 @@ class ProjectTestCase(unittest.TestCase):
                 text={"id": fakeid("budget-2"), "name": "Budget 2"},
             )
             created = gazu.project.create_budget(
-                project_id,
-                name="Budget 2",
-                description="Desc",
-                currency="EUR",
-                start_date="2025-01-01",
-                end_date="2025-12-31",
-                amount=1000,
+                project_id, name="Budget 2", currency="EUR"
             )
             self.assertEqual(created["id"], fakeid("budget-2"))
+            self.assertEqual(
+                mock.last_request.json(),
+                {"name": "Budget 2", "currency": "EUR"},
+            )
+
+            with self.assertWarns(DeprecationWarning):
+                gazu.project.create_budget(
+                    project_id, name="Budget 2", amount=1000
+                )
+            self.assertEqual(mock.last_request.json(), {"name": "Budget 2"})
 
             get_one_path = path + f"/{fakeid('budget-2')}"
             mock_route(
