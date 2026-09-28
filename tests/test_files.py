@@ -26,7 +26,7 @@ class FilesTestCase(unittest.TestCase):
             )
             self.assertEqual(path, "U:/PROD/FX/S01/P01/Tree\\filename.max")
             # The chosen separator must reach the server too.
-            self.assertEqual(mock.last_request.json()["separator"], "\\")
+            self.assertEqual(mock.last_request.json()["sep"], "\\")
 
     def test_new_working_file(self):
         with requests_mock.mock() as mock:
