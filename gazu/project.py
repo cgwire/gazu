@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import warnings
+
 from typing_extensions import Literal  # Python 3.7 compatibility.
 
 from . import client as raw
@@ -673,9 +675,7 @@ def get_project_task_types(
         list: The task types.
     """
     project = normalize_model_parameter(project)
-    return raw.fetch_all(
-        f"projects/{project['id']}/settings/task-types", client=client
-    )
+    return raw.fetch_all(f"projects/{project['id']}/task-types", client=client)
 
 
 @cache
@@ -906,24 +906,30 @@ def create_budget(
     Args:
         project (dict / ID): The project dict or id.
         name (str): Budget name. Required.
-        description (str, optional): Human description.
+        description (str, optional): Deprecated, ignored by the API.
         currency (str, optional): Currency code (e.g. "USD", "EUR").
-        start_date (str, optional): Start date ISO format (YYYY-MM-DD).
-        end_date (str, optional): End date ISO format (YYYY-MM-DD).
-        amount (number, optional): Overall budget amount.
+        start_date (str, optional): Deprecated, ignored by the API.
+        end_date (str, optional): Deprecated, ignored by the API.
+        amount (number, optional): Deprecated, ignored by the API.
     """
+    ignored = {
+        "description": description,
+        "start_date": start_date,
+        "end_date": end_date,
+        "amount": amount,
+    }
+    ignored = [key for key, value in ignored.items() if value is not None]
+    if ignored:
+        warnings.warn(
+            "create_budget: %s ignored, a budget only stores its name and "
+            "currency" % ", ".join(ignored),
+            DeprecationWarning,
+            stacklevel=2,
+        )
     project = normalize_model_parameter(project)
     data = {"name": name}
-    if description is not None:
-        data["description"] = description
     if currency is not None:
         data["currency"] = currency
-    if start_date is not None:
-        data["start_date"] = start_date
-    if end_date is not None:
-        data["end_date"] = end_date
-    if amount is not None:
-        data["amount"] = amount
     return raw.post(
         f"data/projects/{project['id']}/budgets", data, client=client
     )
@@ -1010,44 +1016,46 @@ def get_budget_entries(
 def create_budget_entry(
     project: str | dict,
     budget: str | dict,
-    name: str,
-    date: str | None = None,
-    amount: int | float | None = None,
-    quantity: int | float | None = None,
-    unit_price: int | float | None = None,
-    description: str | None = None,
-    category: str | None = None,
+    department: str | dict,
+    person: str | dict | None = None,
+    position: str | None = None,
+    seniority: str | None = None,
+    start_date: str | None = None,
+    months_duration: int | None = None,
+    daily_salary: int | float | None = None,
     client: KitsuClient = default,
 ) -> dict:
     """
-    Create a budget entry for a specific budget.
+    Create a budget entry for a specific budget: one person, or one open
+    position, of a department over a number of months.
 
     Args:
         project (dict / ID): The project dict or id.
         budget (dict / ID): The budget dict or id.
-        name (str): Entry name. Required.
-        date (str, optional): Entry date in ISO format (YYYY-MM-DD).
-        amount (number, optional): Total amount for the entry.
-        quantity (number, optional): Quantity used to compute amount.
-        unit_price (number, optional): Unit price used with quantity.
-        description (str, optional): Human description for the entry.
-        category (str, optional): Category label for the entry.
+        department (dict / ID): The department dict or id. Required.
+        person (dict / ID, optional): The person dict or id.
+        position (str, optional): Position label (e.g. "artist").
+        seniority (str, optional): Seniority label (e.g. "senior").
+        start_date (str, optional): Start date in ISO format (YYYY-MM-DD).
+        months_duration (int, optional): Duration in months.
+        daily_salary (number, optional): Daily salary.
     """
     project = normalize_model_parameter(project)
     budget = normalize_model_parameter(budget)
-    data = {"name": name}
-    if date is not None:
-        data["date"] = date
-    if amount is not None:
-        data["amount"] = amount
-    if quantity is not None:
-        data["quantity"] = quantity
-    if unit_price is not None:
-        data["unit_price"] = unit_price
-    if description is not None:
-        data["description"] = description
-    if category is not None:
-        data["category"] = category
+    department = normalize_model_parameter(department)
+    data = {"department_id": department["id"]}
+    if person is not None:
+        data["person_id"] = normalize_model_parameter(person)["id"]
+    if position is not None:
+        data["position"] = position
+    if seniority is not None:
+        data["seniority"] = seniority
+    if start_date is not None:
+        data["start_date"] = start_date
+    if months_duration is not None:
+        data["months_duration"] = months_duration
+    if daily_salary is not None:
+        data["daily_salary"] = daily_salary
     return raw.post(
         f"data/projects/{project['id']}/budgets/{budget['id']}/entries",
         data,

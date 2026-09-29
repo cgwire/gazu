@@ -123,7 +123,7 @@ def new_edit(
 
     if episode is not None:
         episode = normalize_model_parameter(episode)
-        data["parent_id"] = episode["id"]
+        data["episode_id"] = episode["id"]
 
     if description is not None:
         data["description"] = description

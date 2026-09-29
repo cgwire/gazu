@@ -537,7 +537,7 @@ def build_working_file_path(
         "mode": mode,
         "name": name,
         "revision": revision,
-        "separator": sep,
+        "sep": sep,
     }
     task = normalize_model_parameter(task)
     software = normalize_model_parameter(software)

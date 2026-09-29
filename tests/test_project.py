@@ -707,7 +707,7 @@ class ProjectTestCase(unittest.TestCase):
     def test_get_project_task_types(self):
         with requests_mock.mock() as mock:
             project_id = fakeid("project-1")
-            path = f"data/projects/{project_id}/settings/task-types"
+            path = f"data/projects/{project_id}/task-types"
             mock_route(
                 mock,
                 "GET",
@@ -868,15 +868,19 @@ class ProjectTestCase(unittest.TestCase):
                 text={"id": fakeid("budget-2"), "name": "Budget 2"},
             )
             created = gazu.project.create_budget(
-                project_id,
-                name="Budget 2",
-                description="Desc",
-                currency="EUR",
-                start_date="2025-01-01",
-                end_date="2025-12-31",
-                amount=1000,
+                project_id, name="Budget 2", currency="EUR"
             )
             self.assertEqual(created["id"], fakeid("budget-2"))
+            self.assertEqual(
+                mock.last_request.json(),
+                {"name": "Budget 2", "currency": "EUR"},
+            )
+
+            with self.assertWarns(DeprecationWarning):
+                gazu.project.create_budget(
+                    project_id, name="Budget 2", amount=1000
+                )
+            self.assertEqual(mock.last_request.json(), {"name": "Budget 2"})
 
             get_one_path = path + f"/{fakeid('budget-2')}"
             mock_route(
@@ -933,15 +937,27 @@ class ProjectTestCase(unittest.TestCase):
             created = gazu.project.create_budget_entry(
                 project_id,
                 {"id": budget_id},
-                name="Rent",
-                date="2025-02-01",
-                amount=500,
-                quantity=1,
-                unit_price=500,
-                description="Studio rent",
-                category="overhead",
+                fakeid("department-1"),
+                person={"id": fakeid("person-1")},
+                position="artist",
+                seniority="senior",
+                start_date="2025-02-01",
+                months_duration=3,
+                daily_salary=400,
             )
             self.assertEqual(created["id"], fakeid("entry-3"))
+            self.assertEqual(
+                mock.last_request.json(),
+                {
+                    "department_id": fakeid("department-1"),
+                    "person_id": fakeid("person-1"),
+                    "position": "artist",
+                    "seniority": "senior",
+                    "start_date": "2025-02-01",
+                    "months_duration": 3,
+                    "daily_salary": 400,
+                },
+            )
 
             one_path = base + f"/entries/{fakeid('entry-3')}"
             mock_route(
