@@ -278,11 +278,22 @@ def add_task_type(
     project: str | dict,
     task_type: str | dict,
     priority: int,
+    hd_bitrate_compression: int | None = None,
+    ld_bitrate_compression: int | None = None,
     client: KitsuClient = default,
 ) -> dict:
+    """
+    Link a task type to a project with a priority. The optional bitrates,
+    in Mbit/s, set the movie encoding of that task type in the project
+    and update an existing link.
+    """
     project = normalize_model_parameter(project)
     task_type = normalize_model_parameter(task_type)
     data = {"task_type_id": task_type["id"], "priority": priority}
+    if hd_bitrate_compression is not None:
+        data["hd_bitrate_compression"] = hd_bitrate_compression
+    if ld_bitrate_compression is not None:
+        data["ld_bitrate_compression"] = ld_bitrate_compression
     return raw.post(
         f"data/projects/{project['id']}/settings/task-types",
         data,

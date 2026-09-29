@@ -550,6 +550,27 @@ class ProjectTestCase(unittest.TestCase):
                 },
             )
 
+    def test_add_task_type_with_bitrates(self):
+        with requests_mock.mock() as mock:
+            path = f"data/projects/{fakeid('project-1')}/settings/task-types"
+            mock_route(mock, "POST", path, text={"id": fakeid("project-1")})
+            gazu.project.add_task_type(
+                fakeid("project-1"),
+                fakeid("task-types-1"),
+                priority=2,
+                hd_bitrate_compression=20,
+                ld_bitrate_compression=4,
+            )
+            self.assertEqual(
+                mock.last_request.json(),
+                {
+                    "task_type_id": fakeid("task-types-1"),
+                    "priority": 2,
+                    "hd_bitrate_compression": 20,
+                    "ld_bitrate_compression": 4,
+                },
+            )
+
     def test_remove_task_type(self):
         with requests_mock.mock() as mock:
             project_id = fakeid("project-1")

@@ -196,6 +196,32 @@ class ProjectTemplateTestCase(unittest.TestCase):
                 {"id": template_id}, {"id": task_type_id}
             )
 
+    def test_task_type_link_bitrates(self):
+        template_id = fakeid("template-1")
+        task_type_id = fakeid("task-type-1")
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "POST",
+                "data/project-templates/%s/task-types" % template_id,
+                text={"task_type_id": task_type_id},
+                status_code=201,
+            )
+            gazu.project_template.add_task_type_to_project_template(
+                {"id": template_id},
+                {"id": task_type_id},
+                hd_bitrate_compression=20,
+                ld_bitrate_compression=4,
+            )
+            self.assertEqual(
+                mock.last_request.json(),
+                {
+                    "task_type_id": task_type_id,
+                    "hd_bitrate_compression": 20,
+                    "ld_bitrate_compression": 4,
+                },
+            )
+
     def test_task_status_link_calls(self):
         template_id = fakeid("template-1")
         task_status_id = fakeid("task-status-1")
