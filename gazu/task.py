@@ -1660,25 +1660,69 @@ def update_comment(comment: dict, client: KitsuClient = default) -> dict:
 
 
 @cache
-def all_open_tasks(client: KitsuClient = default) -> list[dict]:
+def all_open_tasks(
+    project: str | dict | None = None,
+    task_type: str | dict | None = None,
+    task_status: str | dict | None = None,
+    person: str | dict | list | None = None,
+    department: str | dict | None = None,
+    studio: str | dict | None = None,
+    start_date: str | None = None,
+    due_date: str | None = None,
+    priority: int | None = None,
+    page: int | None = None,
+    limit: int | None = None,
+    client: KitsuClient = default,
+) -> dict:
     """
-    Get all open tasks.
+    Get one page of the open tasks, the same way the Kitsu task list does.
+
+    Args:
+        project (str / dict, optional): The project dict or id.
+        task_type (str / dict, optional): The task type dict or id.
+        task_status (str / dict, optional): The task status dict or id.
+        person (str / dict / list, optional): A person, a list of persons,
+            or "unassigned" for the tasks nobody is assigned to.
+        department (str / dict, optional): The department dict or id.
+        studio (str / dict, optional): The studio dict or id.
+        start_date (str, optional): Tasks starting from this date
+            (YYYY-MM-DD).
+        due_date (str, optional): Tasks due before this date (YYYY-MM-DD).
+        priority (int, optional): Task priority.
+        page (int, optional): Page number, from 1.
+        limit (int, optional): Tasks per page, 100 by default.
 
     Returns:
-        list: Open tasks, every page gathered.
+        dict: The page, with "data" (the tasks), "stats", "is_more",
+        "limit" and "page".
     """
-    # Zou answers one page of tasks at a time, wrapped with their stats.
-    tasks = []
-    page = 1
-    is_more = True
-    while is_more:
-        result = raw.get(
-            "data/tasks/open-tasks", params={"page": page}, client=client
+    params = {}
+    for key, model in (
+        ("project_id", project),
+        ("task_type_id", task_type),
+        ("task_status_id", task_status),
+        ("department_id", department),
+        ("studio_id", studio),
+    ):
+        if model is not None:
+            params[key] = normalize_model_parameter(model)["id"]
+    if person == "unassigned":
+        params["person_id"] = person
+    elif person is not None:
+        persons = person if isinstance(person, list) else [person]
+        params["person_id"] = ",".join(
+            normalize_model_parameter(entry)["id"] for entry in persons
         )
-        tasks += result["data"]
-        is_more = result["is_more"]
-        page += 1
-    return tasks
+    for key, value in (
+        ("start_date", start_date),
+        ("due_date", due_date),
+        ("priority", priority),
+        ("page", page),
+        ("limit", limit),
+    ):
+        if value is not None:
+            params[key] = value
+    return raw.get("data/tasks/open-tasks", params=params, client=client)
 
 
 @cache

@@ -1306,22 +1306,53 @@ class TaskTestCase(unittest.TestCase):
             self.assertEqual(comment["text"], "test-comment")
 
     def test_all_open_tasks(self):
+        page = {
+            "data": [{"id": fakeid("task-1")}],
+            "stats": {"total": 1},
+            "is_more": False,
+            "limit": 100,
+            "page": 1,
+        }
         with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                "data/tasks/open-tasks?page=1",
-                text={"data": [{"id": fakeid("task-1")}], "is_more": True},
+            mock_route(mock, "GET", "data/tasks/open-tasks", text=page)
+            self.assertEqual(gazu.task.all_open_tasks(), page)
+            self.assertEqual(mock.last_request.qs, {})
+
+            gazu.task.all_open_tasks(
+                project=fakeid("project-1"),
+                task_type={"id": fakeid("task-type-1")},
+                task_status=fakeid("task-status-1"),
+                person=[fakeid("person-1"), {"id": fakeid("person-2")}],
+                department=fakeid("department-1"),
+                studio=fakeid("studio-1"),
+                start_date="2026-09-01",
+                due_date="2026-09-30",
+                priority=2,
+                page=2,
+                limit=20,
             )
-            mock_route(
-                mock,
-                "GET",
-                "data/tasks/open-tasks?page=2",
-                text={"data": [{"id": fakeid("task-2")}], "is_more": False},
-            )
-            tasks = gazu.task.all_open_tasks()
             self.assertEqual(
-                tasks, [{"id": fakeid("task-1")}, {"id": fakeid("task-2")}]
+                mock.last_request.qs,
+                {
+                    "project_id": [fakeid("project-1")],
+                    "task_type_id": [fakeid("task-type-1")],
+                    "task_status_id": [fakeid("task-status-1")],
+                    "person_id": [
+                        "%s,%s" % (fakeid("person-1"), fakeid("person-2"))
+                    ],
+                    "department_id": [fakeid("department-1")],
+                    "studio_id": [fakeid("studio-1")],
+                    "start_date": ["2026-09-01"],
+                    "due_date": ["2026-09-30"],
+                    "priority": ["2"],
+                    "page": ["2"],
+                    "limit": ["20"],
+                },
+            )
+
+            gazu.task.all_open_tasks(person="unassigned")
+            self.assertEqual(
+                mock.last_request.qs, {"person_id": ["unassigned"]}
             )
 
     def test_get_open_tasks_stats(self):
