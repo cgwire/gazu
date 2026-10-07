@@ -118,6 +118,7 @@ def new_concept(
     description: str | None = None,
     data: dict | None = None,
     entity_concept_links: list[str | dict] | None = None,
+    concept_folder: str | dict | None = None,
     client: KitsuClient = default,
 ) -> dict:
     """
@@ -130,11 +131,15 @@ def new_concept(
         data (dict): Free field to set metadata of any kind.
         entity_concept_links (list): List of entities to tag, as either
             ID strings or model dicts.
+        concept_folder (str / dict): The concept folder dict or ID to create
+            the concept in. The concept is created at the root of the
+            project when no folder is given.
 
     Returns:
         Created concept.
     """
     project = normalize_model_parameter(project)
+    concept_folder = normalize_model_parameter(concept_folder)
     if data is None:
         data = {}
     if entity_concept_links is None:
@@ -149,6 +154,9 @@ def new_concept(
 
     if description is not None:
         data["description"] = description
+
+    if concept_folder is not None:
+        data["parent_id"] = concept_folder["id"]
 
     concept = get_concept_by_name(project, name, client=client)
     if concept is None:
@@ -170,3 +178,142 @@ def update_concept(concept: dict, client: KitsuClient = default) -> dict:
         dict: Updated concept.
     """
     return raw.put(f"data/entities/{concept['id']}", concept, client=client)
+
+
+@cache
+def all_concept_folders_for_project(
+    project: str | dict, client: KitsuClient = default
+) -> list[dict]:
+    """
+    Args:
+        project (str / dict): The project dict or the project ID.
+
+    Returns:
+        list: The folders the concepts of given project are sorted in. A
+        concept names its folder through its `parent_id`.
+    """
+    project = normalize_model_parameter(project)
+    concept_folders = raw.fetch_all(
+        f"projects/{project['id']}/concept-folders", client=client
+    )
+    return sort_by_name(concept_folders)
+
+
+@cache
+def get_concept_folder_by_name(
+    project: str | dict, name: str, client: KitsuClient = default
+) -> dict | None:
+    """
+    Args:
+        project (str / dict): The project dict or the project ID.
+        name (str): Name of claimed concept folder.
+
+    Returns:
+        dict: Concept folder corresponding to given name and project, None
+        if there is no such folder.
+    """
+    concept_folders = all_concept_folders_for_project(project, client=client)
+    return next(
+        (
+            concept_folder
+            for concept_folder in concept_folders
+            if concept_folder["name"] == name
+        ),
+        None,
+    )
+
+
+def new_concept_folder(
+    project: str | dict, name: str, client: KitsuClient = default
+) -> dict:
+    """
+    Create a concept folder for given project. Reserved to the managers and
+    the supervisors of the project. If a folder with this name already
+    exists, it is returned as is.
+
+    Args:
+        project (str / dict): The project dict or the project ID.
+        name (str): The name of the concept folder to create.
+
+    Returns:
+        dict: Created concept folder.
+    """
+    project = normalize_model_parameter(project)
+    return raw.post(
+        f"data/projects/{project['id']}/concept-folders",
+        {"name": name},
+        client=client,
+    )
+
+
+def update_concept_folder(
+    concept_folder: dict, client: KitsuClient = default
+) -> dict:
+    """
+    Save the name of given concept folder into the API. Reserved to the
+    managers and the supervisors of the project.
+
+    Args:
+        concept_folder (dict): The concept folder dict to update.
+
+    Returns:
+        dict: Updated concept folder.
+    """
+    return raw.put(
+        f"data/concept-folders/{concept_folder['id']}",
+        {"name": concept_folder["name"]},
+        client=client,
+    )
+
+
+def remove_concept_folder(
+    concept_folder: str | dict, client: KitsuClient = default
+) -> str:
+    """
+    Remove given concept folder from the database. Its concepts are kept,
+    they go back to the root of the project. Reserved to the managers and the
+    supervisors of the project.
+
+    Args:
+        concept_folder (str / dict): The concept folder dict or ID to remove.
+    """
+    concept_folder = normalize_model_parameter(concept_folder)
+    return raw.delete(
+        f"data/concept-folders/{concept_folder['id']}", client=client
+    )
+
+
+def move_concepts(
+    project: str | dict,
+    concepts: list[str | dict],
+    concept_folder: str | dict | None = None,
+    client: KitsuClient = default,
+) -> list[str]:
+    """
+    Move given concepts to given concept folder, or back to the root of the
+    project when no folder is given. Reserved to the managers and the
+    supervisors of the project.
+
+    Args:
+        project (str / dict): The project dict or the project ID.
+        concepts (list): The concepts to move, as either ID strings or
+            model dicts.
+        concept_folder (str / dict): The concept folder dict or ID to move
+            the concepts to.
+
+    Returns:
+        list: IDs of the concepts that were moved. Concepts that do not
+        belong to the project are skipped.
+    """
+    project = normalize_model_parameter(project)
+    concept_folder = normalize_model_parameter(concept_folder)
+    return raw.post(
+        f"actions/projects/{project['id']}/move-concepts",
+        {
+            "concept_ids": normalize_list_of_models_for_links(concepts),
+            "concept_folder_id": (
+                concept_folder["id"] if concept_folder is not None else None
+            ),
+        },
+        client=client,
+    )

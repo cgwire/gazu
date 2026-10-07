@@ -151,3 +151,132 @@ class ConceptTestCase(unittest.TestCase):
                 "Concept 01",
             )
             self.assertEqual(concept, result)
+
+    def test_new_concept_in_a_folder(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                f"data/concepts?project_id={fakeid('project-1')}&name=Concept 01",
+                text=[],
+            )
+            mock_route(
+                mock,
+                "POST",
+                f"data/projects/{fakeid('project-1')}/concepts",
+                text={"id": fakeid("concept-1")},
+            )
+            gazu.concept.new_concept(
+                fakeid("project-1"),
+                "Concept 01",
+                concept_folder={"id": fakeid("folder-1")},
+            )
+            self.assertEqual(
+                mock.last_request.json()["parent_id"], fakeid("folder-1")
+            )
+
+    def test_all_concept_folders_for_project(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                f"data/projects/{fakeid('project-1')}/concept-folders",
+                text=[{"name": "Sets"}, {"name": "Characters"}],
+            )
+            concept_folders = gazu.concept.all_concept_folders_for_project(
+                fakeid("project-1")
+            )
+            self.assertEqual(
+                [concept_folder["name"] for concept_folder in concept_folders],
+                ["Characters", "Sets"],
+            )
+
+    def test_get_concept_folder_by_name(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                f"data/projects/{fakeid('project-1')}/concept-folders",
+                text=[{"id": fakeid("folder-1"), "name": "Sets"}],
+            )
+            concept_folder = gazu.concept.get_concept_folder_by_name(
+                fakeid("project-1"), "Sets"
+            )
+            self.assertEqual(concept_folder["id"], fakeid("folder-1"))
+            self.assertIsNone(
+                gazu.concept.get_concept_folder_by_name(
+                    fakeid("project-1"), "Characters"
+                )
+            )
+
+    def test_new_concept_folder(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "POST",
+                f"data/projects/{fakeid('project-1')}/concept-folders",
+                text={"id": fakeid("folder-1"), "name": "Sets"},
+            )
+            concept_folder = gazu.concept.new_concept_folder(
+                fakeid("project-1"), "Sets"
+            )
+            self.assertEqual(concept_folder["id"], fakeid("folder-1"))
+            self.assertEqual(mock.last_request.json(), {"name": "Sets"})
+
+    def test_update_concept_folder(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "PUT",
+                f"data/concept-folders/{fakeid('folder-1')}",
+                text={"id": fakeid("folder-1"), "name": "Environments"},
+            )
+            concept_folder = gazu.concept.update_concept_folder(
+                {
+                    "id": fakeid("folder-1"),
+                    "name": "Environments",
+                    "project_id": fakeid("project-1"),
+                }
+            )
+            self.assertEqual(concept_folder["name"], "Environments")
+            self.assertEqual(
+                mock.last_request.json(), {"name": "Environments"}
+            )
+
+    def test_remove_concept_folder(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "DELETE",
+                f"data/concept-folders/{fakeid('folder-1')}",
+                status_code=204,
+            )
+            gazu.concept.remove_concept_folder(fakeid("folder-1"))
+            self.assertEqual(mock.last_request.method, "DELETE")
+
+    def test_move_concepts(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "POST",
+                f"actions/projects/{fakeid('project-1')}/move-concepts",
+                text=[fakeid("concept-1")],
+            )
+            moved_ids = gazu.concept.move_concepts(
+                fakeid("project-1"),
+                [fakeid("concept-1"), {"id": fakeid("concept-2")}],
+                fakeid("folder-1"),
+            )
+            self.assertEqual(moved_ids, [fakeid("concept-1")])
+            self.assertEqual(
+                mock.last_request.json(),
+                {
+                    "concept_ids": [fakeid("concept-1"), fakeid("concept-2")],
+                    "concept_folder_id": fakeid("folder-1"),
+                },
+            )
+
+            gazu.concept.move_concepts(
+                fakeid("project-1"), [fakeid("concept-1")]
+            )
+            self.assertIsNone(mock.last_request.json()["concept_folder_id"])
