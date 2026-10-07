@@ -876,8 +876,7 @@ class BrowserLoginTestCase(unittest.TestCase):
 
         return open_browser
 
-    def mock_server(self, mock, version="1.0.94", **exchange):
-        mock_route(mock, "GET", "/", text={"version": version})
+    def mock_server(self, mock, **exchange):
         mock_route(mock, "POST", "auth/app-login/token", **exchange)
 
     def test_log_in_with_browser(self):
@@ -951,6 +950,15 @@ class BrowserLoginTestCase(unittest.TestCase):
                     gazu.log_in_with_browser(timeout=0.2)
         self.assertIn("timed out", str(context.exception))
 
+    def test_log_in_with_browser_logs_url_without_browser(self):
+        with requests_mock.mock() as mock:
+            self.mock_server(mock, text={})
+            with mock_patch("webbrowser.open", lambda url: False):
+                with self.assertLogs("gazu", "INFO") as logs:
+                    with self.assertRaises(AuthFailedException):
+                        gazu.log_in_with_browser(timeout=0.2)
+        self.assertIn("/app-login?", logs.output[0])
+
     def test_log_in_with_browser_exchange_rejected(self):
         browser = self.fake_browser({"code": "code1", "state": STATE})
         with requests_mock.mock() as mock:
@@ -961,20 +969,3 @@ class BrowserLoginTestCase(unittest.TestCase):
                 with self.assertRaises(AuthFailedException) as context:
                     gazu.log_in_with_browser()
         self.assertIn("rejected", str(context.exception))
-
-    def test_log_in_with_browser_old_server(self):
-        with requests_mock.mock() as mock:
-            self.mock_server(mock, version="1.0.93", text={})
-            with mock_patch("webbrowser.open") as browser:
-                with self.assertRaises(AuthFailedException) as context:
-                    gazu.log_in_with_browser()
-            browser.assert_not_called()
-        self.assertIn("1.0.94", str(context.exception))
-
-    def test_log_in_with_browser_compares_versions_numerically(self):
-        tokens = {"access_token": "access"}
-        browser = self.fake_browser({"code": "code1", "state": STATE})
-        with requests_mock.mock() as mock:
-            self.mock_server(mock, version="1.0.100", text=tokens)
-            with mock_patch("webbrowser.open", browser):
-                self.assertEqual(gazu.log_in_with_browser(), tokens)

@@ -122,9 +122,6 @@ def log_in(
     return tokens
 
 
-BROWSER_LOGIN_MIN_ZOU_VERSION = (1, 0, 94)
-
-
 def log_in_with_browser(
     app_name="gazu",
     timeout=300,
@@ -135,6 +132,7 @@ def log_in_with_browser(
     client. Works with every login method Kitsu supports (password, 2FA,
     SAML, OIDC). The browser must run on the same machine as the script.
     This call blocks until the user answers or the timeout expires.
+    Requires Zou 1.0.95 and Kitsu 1.0.71 or later.
 
     Args:
         app_name (str): Name shown to the user on the Kitsu consent page.
@@ -144,16 +142,9 @@ def log_in_with_browser(
         dict: The authentication tokens returned by the API.
 
     Raises:
-        AuthFailedException: when the server is too old, the user refuses,
-            the timeout expires or the exchange is rejected.
+        AuthFailedException: when the user refuses, the timeout expires or
+            the exchange is rejected.
     """
-    version = raw.get_api_version(client=client)
-    if tuple(map(int, version.split(".")[:3])) < BROWSER_LOGIN_MIN_ZOU_VERSION:
-        raise AuthFailedException(
-            "Browser login requires Zou %s or later, the server runs %s."
-            % (".".join(map(str, BROWSER_LOGIN_MIN_ZOU_VERSION)), version)
-        )
-
     code_verifier = secrets.token_urlsafe(64)
     code_challenge = (
         base64.urlsafe_b64encode(
@@ -207,7 +198,8 @@ def log_in_with_browser(
                 }
             ),
         )
-        webbrowser.open(url)
+        if not webbrowser.open(url):
+            _logger.info("Open this URL in a browser to log in: %s", url)
         deadline = time.monotonic() + timeout
         while not callback:
             remaining = deadline - time.monotonic()
