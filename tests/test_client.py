@@ -1,11 +1,18 @@
+import base64
 import datetime
+import hashlib
 import json
 import os
 import random
 import string
+import threading
 import time
+import urllib.error
+import urllib.parse
+import urllib.request
 
 import unittest
+from unittest.mock import patch as mock_patch
 import requests_mock
 import gazu
 from gazu.__version__ import __version__
@@ -23,6 +30,9 @@ from gazu.exception import (
 )
 
 from utils import add_verify_file_callback, fakeid, mock_route
+
+# Placeholder replaced by the state gazu generates.
+STATE = object()
 
 
 class ClientTestCase(unittest.TestCase):
@@ -824,3 +834,147 @@ class RetryAfterTestCase(unittest.TestCase):
         deadline = time.monotonic() - 10
         delay = raw._retry_after(_FakeResponse({"Retry-After": "5"}), deadline)
         self.assertEqual(delay, 0)
+
+
+class BrowserLoginTestCase(unittest.TestCase):
+    def fake_browser(self, *queries):
+        """
+        Return a webbrowser.open replacement that sends each query to the
+        loopback listener, the way the Kitsu page would.
+        """
+        self.opened = []
+
+        def visit(port, query):
+            opener = urllib.request.build_opener(
+                urllib.request.ProxyHandler({})
+            )
+            for params in query:
+                try:
+                    opener.open(
+                        "http://127.0.0.1:%s/?%s"
+                        % (port, urllib.parse.urlencode(params)),
+                        timeout=5,
+                    )
+                except urllib.error.HTTPError:
+                    pass
+
+        def open_browser(url):
+            parsed = urllib.parse.urlparse(url)
+            params = dict(urllib.parse.parse_qsl(parsed.query))
+            self.opened.append((parsed, params))
+            query = [
+                {
+                    key: (params["state"] if value is STATE else value)
+                    for key, value in item.items()
+                }
+                for item in queries
+            ]
+            threading.Thread(
+                target=visit, args=(params["port"], query)
+            ).start()
+            return True
+
+        return open_browser
+
+    def mock_server(self, mock, version="1.0.94", **exchange):
+        mock_route(mock, "GET", "/", text={"version": version})
+        mock_route(mock, "POST", "auth/app-login/token", **exchange)
+
+    def test_log_in_with_browser(self):
+        tokens = {
+            "login": True,
+            "access_token": "access",
+            "refresh_token": "refresh",
+        }
+        browser = self.fake_browser({"code": "code1", "state": STATE})
+        with requests_mock.mock() as mock:
+            self.mock_server(mock, text=tokens)
+            with mock_patch("webbrowser.open", browser):
+                result = gazu.log_in_with_browser(app_name="Prism")
+            body = mock.request_history[-1].json()
+
+        self.assertEqual(result, tokens)
+        self.assertEqual(raw.default_client.tokens, tokens)
+        parsed, params = self.opened[0]
+        self.assertEqual(parsed.path, "/app-login")
+        self.assertEqual(params["app_name"], "Prism")
+        self.assertEqual(body["code"], "code1")
+        challenge = (
+            base64.urlsafe_b64encode(
+                hashlib.sha256(body["code_verifier"].encode()).digest()
+            )
+            .decode()
+            .rstrip("=")
+        )
+        self.assertEqual(params["code_challenge"], challenge)
+
+    def test_log_in_with_browser_refused(self):
+        browser = self.fake_browser({"error": "access_denied", "state": STATE})
+        with requests_mock.mock() as mock:
+            self.mock_server(mock, text={})
+            with mock_patch("webbrowser.open", browser):
+                with self.assertRaises(AuthFailedException) as context:
+                    gazu.log_in_with_browser()
+            self.assertIn("access_denied", str(context.exception))
+            self.assertFalse(
+                any(r.method == "POST" for r in mock.request_history)
+            )
+
+    def test_log_in_with_browser_ignores_wrong_state(self):
+        tokens = {"access_token": "access", "refresh_token": "refresh"}
+        browser = self.fake_browser(
+            {"code": "forged", "state": "wrong"},
+            {},
+            {"code": "code1", "state": STATE},
+        )
+        with requests_mock.mock() as mock:
+            self.mock_server(mock, text=tokens)
+            with mock_patch("webbrowser.open", browser):
+                gazu.log_in_with_browser()
+            body = mock.request_history[-1].json()
+        self.assertEqual(body["code"], "code1")
+
+    def test_log_in_with_browser_wrong_state_then_timeout(self):
+        browser = self.fake_browser({"code": "forged", "state": "wrong"})
+        with requests_mock.mock() as mock:
+            self.mock_server(mock, text={})
+            with mock_patch("webbrowser.open", browser):
+                with self.assertRaises(AuthFailedException) as context:
+                    gazu.log_in_with_browser(timeout=1)
+        self.assertIn("timed out", str(context.exception))
+
+    def test_log_in_with_browser_timeout(self):
+        with requests_mock.mock() as mock:
+            self.mock_server(mock, text={})
+            with mock_patch("webbrowser.open", lambda url: True):
+                with self.assertRaises(AuthFailedException) as context:
+                    gazu.log_in_with_browser(timeout=0.2)
+        self.assertIn("timed out", str(context.exception))
+
+    def test_log_in_with_browser_exchange_rejected(self):
+        browser = self.fake_browser({"code": "code1", "state": STATE})
+        with requests_mock.mock() as mock:
+            self.mock_server(
+                mock, text={"message": "Invalid code"}, status_code=400
+            )
+            with mock_patch("webbrowser.open", browser):
+                with self.assertRaises(AuthFailedException) as context:
+                    gazu.log_in_with_browser()
+        self.assertIn("rejected", str(context.exception))
+
+    def test_log_in_with_browser_old_server(self):
+        with requests_mock.mock() as mock:
+            self.mock_server(mock, version="1.0.93", text={})
+            with mock_patch("webbrowser.open") as browser:
+                with self.assertRaises(AuthFailedException) as context:
+                    gazu.log_in_with_browser()
+            browser.assert_not_called()
+        self.assertIn("1.0.94", str(context.exception))
+
+    def test_log_in_with_browser_compares_versions_numerically(self):
+        tokens = {"access_token": "access"}
+        browser = self.fake_browser({"code": "code1", "state": STATE})
+        with requests_mock.mock() as mock:
+            self.mock_server(mock, version="1.0.100", text=tokens)
+            with mock_patch("webbrowser.open", browser):
+                self.assertEqual(gazu.log_in_with_browser(), tokens)

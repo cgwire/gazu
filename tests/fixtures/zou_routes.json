@@ -70,6 +70,8 @@
  "/actions/working-files/<working_file_id>/comment",
  "/actions/working-files/<working_file_id>/modified",
  "/admin/config/check",
+ "/auth/app-login/code",
+ "/auth/app-login/token",
  "/auth/authenticated",
  "/auth/change-password",
  "/auth/email-otp",
