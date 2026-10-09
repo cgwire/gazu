@@ -629,9 +629,10 @@ def export_assets_with_csv(
     project: str | dict,
     csv_file_path: str,
     episode: str | dict | None = None,
-    assigned_to: str | dict | None = None,
+    assigned_to_me: bool = False,
     client: KitsuClient = default,
     progress_callback=None,
+    assigned_to: str | dict | bool | None = None,
 ) -> requests.Response:
     """
     Export the Assets data for a project to a CSV file on disk.
@@ -646,22 +647,24 @@ def export_assets_with_csv(
             Only export Assets that are linked to the given Episode, which can
             be provided as an ID string or model dict. If None, all assets will
             be exported.
-        assigned_to (str | dict | None):
+        assigned_to_me (bool):
             Only export Assets that have one or more Tasks assigned to the
-            given Person, specified as an ID string or model dict. If None,
-            no filtering is put in place.
+            logged-in user. Zou does not support filtering on another
+            person.
+        assigned_to:
+            Deprecated alias of ``assigned_to_me``: any truthy value enables
+            the filter, the person passed is ignored by Zou.
 
     Returns:
         (requests.Response): the response from the API server.
     """
     project = normalize_model_parameter(project)
     episode = normalize_model_parameter(episode)
-    assigned_to = normalize_model_parameter(assigned_to)
     params = {}
     if episode:
         params["episode_id"] = episode["id"]
-    if assigned_to:
-        params["assigned_to"] = assigned_to["id"]
+    if assigned_to_me or assigned_to:
+        params["assigned_to"] = "true"
     return raw.download(
         f"export/csv/projects/{project['id']}/assets.csv",
         csv_file_path,

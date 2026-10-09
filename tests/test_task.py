@@ -1689,45 +1689,43 @@ class TaskTestCase(unittest.TestCase):
             )
 
     def test_create_multiple_comments(self):
-        with open("./tests/fixtures/v1.png", "rb") as test_file:
-            file_content = test_file.read()
-            with requests_mock.Mocker() as mock:
-                text = [
+        with requests_mock.Mocker() as mock:
+            mock_route(
+                mock,
+                "POST",
+                f"actions/projects/{fakeid('project-1')}/tasks/comment-many",
+                text=[
                     {"id": fakeid("comment-1")},
                     {"id": fakeid("comment-2")},
-                ]
-                mock_route(
-                    mock,
-                    "POST",
-                    f"actions/projects/{fakeid('project-1')}/tasks/comment-many",
-                    text=text,
-                )
-
-                # Verify that the attachment file is sent with the correct key
-                # The second comment (index 1) has the attachment, so key is "attachment_file-1-0"
-                add_verify_file_callback(
-                    mock,
-                    {"attachment_file-1-0": file_content},
-                    f"actions/projects/{fakeid('project-1')}/tasks/comment-many",
-                )
-
-                comments = [
-                    {
-                        "task_id": fakeid("task-1"),
-                        "task_status_id": fakeid("status-1"),
-                        "comment": "Comment 1",
-                    },
-                    {
-                        "task_id": fakeid("task-2"),
-                        "task_status_id": fakeid("status-1"),
-                        "comment": "Comment 2",
-                        "attachment_files": ["./tests/fixtures/v1.png"],
-                    },
-                ]
-                result = gazu.task.create_multiple_comments(
-                    fakeid("project-1"), comments
-                )
-                self.assertEqual(len(result), 2)
+                ],
+            )
+            comments = [
+                {
+                    "object_id": fakeid("task-1"),
+                    "task_status_id": fakeid("status-1"),
+                    "comment": "Comment 1",
+                },
+                {
+                    "task_id": fakeid("task-2"),
+                    "task_status_id": fakeid("status-1"),
+                    "comment": "Comment 2",
+                },
+            ]
+            result = gazu.task.create_multiple_comments(
+                fakeid("project-1"), comments
+            )
+            self.assertEqual(len(result), 2)
+            sent = mock.last_request.json()
+            self.assertEqual(
+                mock.last_request.headers["Content-Type"], "application/json"
+            )
+            self.assertEqual(
+                [c["object_id"] for c in sent],
+                [fakeid("task-1"), fakeid("task-2")],
+            )
+            self.assertNotIn("task_id", sent[1])
+            # The caller's dicts are left untouched.
+            self.assertEqual(comments[1]["task_id"], fakeid("task-2"))
 
     def test_add_tasks_batch_comments(self):
         with requests_mock.mock() as mock:

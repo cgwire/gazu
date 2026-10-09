@@ -5,6 +5,19 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- `task.create_multiple_comments` posts a JSON array like Kitsu does, instead
+  of a multipart body Zou never read. Comments use `object_id` (`task_id` is
+  accepted as an alias), `task_status_id` and `comment`; the never-working
+  `attachment_files` / `preview_files` handling is dropped (#424).
+- `asset.export_assets_with_csv` / `shot.export_shots_with_csv`: Zou only
+  filters on the logged-in user, so the person passed as `assigned_to` was
+  ignored. The flag is now `assigned_to_me=True`; `assigned_to` stays as a
+  deprecated alias (#425).
+
 ## [1.2.0] - 2026-07-04
 
 ### Fixed
