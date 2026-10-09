@@ -1,4 +1,12 @@
+import base64
+import hashlib
+import hmac
 import logging
+import secrets
+import time
+import webbrowser
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from urllib.parse import parse_qs, urlencode, urlparse
 
 from . import client as raw
 from . import cache
@@ -111,6 +119,116 @@ def log_in(
         raise AuthFailedException
     else:
         raw.set_tokens(tokens, client=client)
+    return tokens
+
+
+def log_in_with_browser(
+    app_name="gazu",
+    timeout=300,
+    client=raw.default_client,
+):
+    """
+    Log in through the Kitsu web page and store the returned tokens on the
+    client. Works with every login method Kitsu supports (password, 2FA,
+    SAML, OIDC). The browser must run on the same machine as the script.
+    This call blocks until the user answers or the timeout expires.
+    Requires Zou 1.0.95 and Kitsu 1.0.71 or later.
+
+    Args:
+        app_name (str): Name shown to the user on the Kitsu consent page.
+        timeout (int): Seconds to wait for the user to answer.
+
+    Returns:
+        dict: The authentication tokens returned by the API.
+
+    Raises:
+        AuthFailedException: when the user refuses, the timeout expires or
+            the exchange is rejected.
+    """
+    code_verifier = secrets.token_urlsafe(64)
+    code_challenge = (
+        base64.urlsafe_b64encode(
+            hashlib.sha256(code_verifier.encode()).digest()
+        )
+        .decode()
+        .rstrip("=")
+    )
+    state = secrets.token_urlsafe(32)
+    callback = {}
+
+    class Handler(BaseHTTPRequestHandler):
+        def do_GET(self):
+            params = {
+                key: values[0]
+                for key, values in parse_qs(urlparse(self.path).query).items()
+            }
+            if not hmac.compare_digest(
+                params.get("state", "").encode(), state.encode()
+            ):
+                self.send_response(400)
+                self.end_headers()
+                return
+            callback.update(params)
+            if "code" in params:
+                message = "Login complete, you can close this tab."
+            else:
+                message = "Login cancelled, you can close this tab."
+            body = (
+                "<!doctype html><html><body><p>%s</p></body></html>" % message
+            ).encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
+        def log_message(self, format, *args):
+            pass
+
+    server = HTTPServer(("127.0.0.1", 0), Handler)
+    try:
+        url = "%s/app-login?%s" % (
+            raw.get_api_url_from_host(client),
+            urlencode(
+                {
+                    "port": server.server_address[1],
+                    "code_challenge": code_challenge,
+                    "state": state,
+                    "app_name": app_name,
+                }
+            ),
+        )
+        if not webbrowser.open(url):
+            _logger.info("Open this URL in a browser to log in: %s", url)
+        deadline = time.monotonic() + timeout
+        while not callback:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise AuthFailedException(
+                    "Browser login timed out after %s seconds. If the "
+                    "browser did not open, visit: %s" % (timeout, url)
+                )
+            server.timeout = remaining
+            server.handle_request()
+    finally:
+        server.server_close()
+
+    if "code" not in callback:
+        raise AuthFailedException(
+            "Browser login refused: %s"
+            % callback.get("error", "no code received")
+        )
+    try:
+        tokens = raw.post(
+            "auth/app-login/token",
+            {"code": callback["code"], "code_verifier": code_verifier},
+            client=client,
+        )
+    except (NotAuthenticatedException, ParameterException) as exc:
+        raise AuthFailedException(
+            "Browser login code exchange rejected: %s" % exc
+        )
+    raw.set_tokens(tokens, client=client)
     return tokens
 
 

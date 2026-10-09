@@ -432,6 +432,7 @@ _SENSITIVE_BODY_FIELDS = {
     "access_token",
     "refresh_token",
     "secret",
+    "code_verifier",
 }
 
 
