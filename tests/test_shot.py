@@ -751,14 +751,14 @@ class ShotTestCase(unittest.TestCase):
             mock_route(
                 mock,
                 "GET",
-                f"export/csv/projects/{fakeid('project-1')}/shots.csv?episode_id={fakeid('episode-1')}&assigned_to={fakeid('person-1')}",
+                f"export/csv/projects/{fakeid('project-1')}/shots.csv?episode_id={fakeid('episode-1')}&assigned_to=true",
                 text=csv,
             )
             gazu.shot.export_shots_with_csv(
                 fakeid("project-1"),
                 "./test.csv",
                 fakeid("episode-1"),
-                fakeid("person-1"),
+                assigned_to_me=True,
             )
             with open("./test.csv", "r") as export_csv:
                 self.assertEqual(csv, export_csv.read())
