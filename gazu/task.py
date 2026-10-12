@@ -1336,13 +1336,20 @@ def create_multiple_comments(
     """
     Create multiple comments at once for a specific project.
     Each comment updates the respective task status.
-    Each dict comments may contain a list of attachment files path and preview
-    files path in the keys "attachment_files" and "preview_files".
+
+    Zou skips silently any entry missing one of ``object_id``,
+    ``task_status_id`` or ``comment``. Files cannot be sent through this
+    route: upload them afterwards with ``add_attachment_files_to_comment``
+    or ``add_preview``.
 
     Args:
         project (str / dict): The project dict or the project ID.
         comments (list): List of comments to publish. Each comment must have
-            a task_id key.
+            an ``object_id`` (the task ID; ``task_id`` is accepted as an
+            alias), a ``task_status_id`` and a ``comment`` text. An optional
+            ``links`` list is accepted.
+        progress_callback: Unused, kept for backward compatibility (the
+            route takes no files).
 
     Returns:
         list: List of created comments.
@@ -1351,18 +1358,17 @@ def create_multiple_comments(
         comments = []
     project = normalize_model_parameter(project)
 
-    files, opened_files = _open_comment_files(comments)
-    try:
-        return raw.upload(
-            f"actions/projects/{project['id']}/tasks/comment-many",
-            file_path=None,
-            files=files,
-            client=client,
-            progress_callback=progress_callback,
-        )
-    finally:
-        for f in opened_files:
-            f.close()
+    payload = []
+    for comment in comments:
+        comment = dict(comment)
+        if "task_id" in comment:
+            comment.setdefault("object_id", comment.pop("task_id"))
+        payload.append(comment)
+    return raw.post(
+        f"actions/projects/{project['id']}/tasks/comment-many",
+        payload,
+        client=client,
+    )
 
 
 def add_tasks_batch_comments(
