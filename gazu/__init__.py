@@ -2,6 +2,7 @@ import base64
 import hashlib
 import hmac
 import logging
+import os
 import secrets
 import time
 import webbrowser
@@ -145,6 +146,11 @@ def log_in_with_browser(
         AuthFailedException: when the user refuses, the timeout expires or
             the exchange is rejected.
     """
+    with open(
+        os.path.join(os.path.dirname(__file__), "browser_login.html"),
+        encoding="utf-8",
+    ) as page_file:
+        page = page_file.read()
     code_verifier = secrets.token_urlsafe(64)
     code_challenge = (
         base64.urlsafe_b64encode(
@@ -170,12 +176,16 @@ def log_in_with_browser(
                 return
             callback.update(params)
             if "code" in params:
-                message = "Login complete, you can close this tab."
+                status, icon, title = "success", "&#10003;", "Login complete"
             else:
-                message = "Login cancelled, you can close this tab."
+                status, icon, title = "cancel", "&#10005;", "Login cancelled"
+            # replace() because CSS braces break str.format().
             body = (
-                "<!doctype html><html><body><p>%s</p></body></html>" % message
-            ).encode()
+                page.replace("{status}", status)
+                .replace("{icon}", icon)
+                .replace("{title}", title)
+                .encode()
+            )
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
             self.send_header("Content-Length", str(len(body)))

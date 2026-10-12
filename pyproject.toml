@@ -66,6 +66,9 @@ version = { attr = "gazu.__version__.__version__" }
 [tool.setuptools.packages.find]
 include = ["gazu*"]
 
+[tool.setuptools.package-data]
+gazu = ["*.html"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
