@@ -41,6 +41,7 @@
  "/actions/projects/<project_id>/task-types/<task_type_id>/set-shot-nb-frames",
  "/actions/projects/<project_id>/task-types/<task_type_id>/shots/create-tasks",
  "/actions/projects/<project_id>/tasks/comment-many",
+ "/actions/projects/<project_id>/tasks/copy-client-comments",
  "/actions/task-types/reorder",
  "/actions/tasks/<task_id>/assign",
  "/actions/tasks/<task_id>/batch-comment",

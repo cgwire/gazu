@@ -1371,6 +1371,39 @@ def create_multiple_comments(
     )
 
 
+def copy_last_client_comments(
+    project: str | dict,
+    tasks: list[str | dict],
+    prefix: str = "",
+    client: KitsuClient = default,
+) -> list[dict]:
+    """
+    Copy the last client comment of each given task into a new comment of
+    the current user, so the artists, who do not see the client comments,
+    get it. The tasks keep their status. A task without client comment is
+    skipped. Project managers only.
+
+    Args:
+        project (str / dict): The project dict or the project ID.
+        tasks (list): The task dicts or task IDs.
+        prefix (str): Text put before the client text, on its own line.
+
+    Returns:
+        list: List of created comments.
+    """
+    project = normalize_model_parameter(project)
+    return raw.post(
+        f"actions/projects/{project['id']}/tasks/copy-client-comments",
+        {
+            "task_ids": [
+                normalize_model_parameter(task)["id"] for task in tasks
+            ],
+            "prefix": prefix,
+        },
+        client=client,
+    )
+
+
 def add_tasks_batch_comments(
     tasks: list[str | dict],
     comments_data: dict,
