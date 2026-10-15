@@ -970,15 +970,81 @@ class TaskTestCase(unittest.TestCase):
             self.assertEqual(task["data"], {})
 
     def test_get_task_url(self):
-        task = {
-            "id": fakeid("task-1"),
-            "project_id": fakeid("project-1"),
-        }
-        self.assertEqual(
-            gazu.task.get_task_url(task),
-            f"{gazu.client.get_api_url_from_host()}/productions/{fakeid('project-1')}/"
-            f"shots/tasks/{fakeid('task-1')}/",
-        )
+        host = gazu.client.get_api_url_from_host()
+        project_url = f"{host}/productions/{fakeid('project-1')}"
+
+        def full_task(for_entity, production_type="featurefilm", **fields):
+            return {
+                "id": fakeid("task-1"),
+                "project_id": fakeid("project-1"),
+                "entity_id": fakeid("entity-1"),
+                "task_type": {"for_entity": for_entity},
+                "project": {"production_type": production_type},
+                **fields,
+            }
+
+        cases = [
+            (full_task("Asset"), "assets"),
+            (full_task("Shot"), "shots"),
+            (full_task("Edit"), "edits"),
+            (full_task("Sequence"), "sequences"),
+            (
+                full_task("Episode", "tvshow"),
+                f"episodes/{fakeid('entity-1')}",
+            ),
+            (
+                full_task(
+                    "Shot", "tvshow", episode={"id": fakeid("episode-1")}
+                ),
+                f"episodes/{fakeid('episode-1')}/shots",
+            ),
+            (
+                full_task(
+                    "Sequence", "tvshow", episode={"id": fakeid("episode-1")}
+                ),
+                f"episodes/{fakeid('episode-1')}/sequences",
+            ),
+            (
+                full_task(
+                    "Edit",
+                    "tvshow",
+                    entity={"parent_id": fakeid("episode-1")},
+                ),
+                f"episodes/{fakeid('episode-1')}/edits",
+            ),
+            (
+                full_task(
+                    "Asset",
+                    "tvshow",
+                    entity={"source_id": fakeid("episode-1")},
+                ),
+                f"episodes/{fakeid('episode-1')}/assets",
+            ),
+            (
+                full_task("Asset", "tvshow", entity={"source_id": None}),
+                "episodes/main/assets",
+            ),
+        ]
+        for task, path in cases:
+            self.assertEqual(
+                gazu.task.get_task_url(task),
+                f"{project_url}/{path}/tasks/{fakeid('task-1')}/",
+            )
+
+        with requests_mock.Mocker() as mock:
+            mock_route(
+                mock,
+                "GET",
+                f"data/tasks/{fakeid('task-1')}/full",
+                text=full_task("Asset"),
+            )
+            self.assertEqual(
+                gazu.task.get_task_url(
+                    {"id": fakeid("task-1"), "project_id": fakeid("project-1")}
+                ),
+                f"{project_url}/assets/tasks/{fakeid('task-1')}/",
+            )
+
         task = "test"
         self.assertRaises(
             TaskMustBeADictException, gazu.task.get_task_url, task

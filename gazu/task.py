@@ -1608,22 +1608,56 @@ def update_task_data(
     return result
 
 
+_ROUTE_TYPES = {
+    "Asset": "assets",
+    "Edit": "edits",
+    "Sequence": "sequences",
+    "Shot": "shots",
+}
+
+
 @cache
 def get_task_url(task: dict, client: KitsuClient = default) -> str:
     """
     Args:
-        task (dict): The task dict.
+        task (dict): The task dict. If it does not contain the task type and
+            the project, the full task is fetched.
 
     Returns:
-        url (str): Web url associated to the given task
+        url (str): Web url associated to the given task. In a TV show, the
+            url contains the episode of the task entity.
     """
     if not isinstance(task, dict):
         raise TaskMustBeADictException
+    if "task_type" not in task or "project" not in task:
+        task = get_task(task["id"], client=client)
     host = raw.get_api_url_from_host(client=client)
-    return f"{host}/productions/{task['project_id']}/shots/tasks/{task['id']}/"
+    base = f"{host}/productions/{task['project_id']}"
+    for_entity = task["task_type"].get("for_entity") or "Asset"
+    if for_entity == "Episode":
+        return f"{base}/episodes/{task['entity_id']}/tasks/{task['id']}/"
+    if task["project"].get("production_type") == "tvshow":
+        episode_id = _get_task_episode_id(task, for_entity)
+        if episode_id:
+            base = f"{base}/episodes/{episode_id}"
+    route_type = _ROUTE_TYPES.get(for_entity, "assets")
+    return f"{base}/{route_type}/tasks/{task['id']}/"
 
 
-@cache
+def _get_task_episode_id(task: dict, for_entity: str) -> str | None:
+    # The full task gives the episode of a shot or a sequence. An edit
+    # belongs to its parent episode. An asset belongs to the episode that
+    # created it, or to the "main" pack of Kitsu.
+    if task.get("episode"):
+        return task["episode"]["id"]
+    entity = task.get("entity") or {}
+    if for_entity == "Edit":
+        return entity.get("parent_id")
+    if for_entity == "Asset":
+        return entity.get("source_id") or "main"
+    return None
+
+
 def all_tasks_for_project(
     project: str | dict,
     task_type: str | dict | None = None,
