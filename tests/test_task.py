@@ -409,6 +409,30 @@ class TaskTestCase(unittest.TestCase):
             )
             self.assertEqual(task, result)
 
+    def test_copy_last_client_comments(self):
+        with requests_mock.mock() as mock:
+            result = [{"id": fakeid("comment-1"), "text": "Note:\n\nRedo"}]
+            mock_route(
+                mock,
+                "POST",
+                f"actions/projects/{fakeid('project-1')}/tasks/"
+                "copy-client-comments",
+                text=result,
+            )
+            comments = gazu.task.copy_last_client_comments(
+                fakeid("project-1"),
+                [fakeid("task-1"), {"id": fakeid("task-2")}],
+                prefix="Note:",
+            )
+            self.assertEqual(comments, result)
+            self.assertEqual(
+                mock.last_request.json(),
+                {
+                    "task_ids": [fakeid("task-1"), fakeid("task-2")],
+                    "prefix": "Note:",
+                },
+            )
+
     def test_add_comment(self):
         with requests_mock.mock() as mock:
             date = "2021-03-13T18:47:15"
