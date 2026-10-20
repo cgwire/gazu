@@ -571,6 +571,25 @@ class ProjectTestCase(unittest.TestCase):
                 },
             )
 
+    def test_add_task_type_with_client_visibility(self):
+        with requests_mock.mock() as mock:
+            path = f"data/projects/{fakeid('project-1')}/settings/task-types"
+            mock_route(mock, "POST", path, text={"id": fakeid("project-1")})
+            gazu.project.add_task_type(
+                fakeid("project-1"),
+                fakeid("task-types-1"),
+                priority=2,
+                is_client_visible=False,
+            )
+            self.assertEqual(
+                mock.last_request.json(),
+                {
+                    "task_type_id": fakeid("task-types-1"),
+                    "priority": 2,
+                    "is_client_visible": False,
+                },
+            )
+
     def test_remove_task_type(self):
         with requests_mock.mock() as mock:
             project_id = fakeid("project-1")
@@ -578,6 +597,26 @@ class ProjectTestCase(unittest.TestCase):
             path = f"data/projects/{project_id}/settings/task-types/{task_type_id}"
             mock_route(mock, "DELETE", path, text="")
             gazu.project.remove_task_type(project_id, {"id": task_type_id})
+
+    def test_set_task_status_client_allowed(self):
+        with requests_mock.mock() as mock:
+            project_id = fakeid("project-1")
+            task_status_id = fakeid("task-status-1")
+            path = f"data/projects/{project_id}/settings/task-status/{task_status_id}"
+            mock_route(mock, "PUT", path, text={"is_client_allowed": False})
+            link = gazu.project.set_task_status_client_allowed(
+                project_id, {"id": task_status_id}, False
+            )
+            self.assertEqual(link, {"is_client_allowed": False})
+            self.assertEqual(
+                mock.request_history[0].json(), {"is_client_allowed": False}
+            )
+            gazu.project.set_task_status_client_allowed(
+                project_id, task_status_id, None
+            )
+            self.assertEqual(
+                mock.request_history[1].json(), {"is_client_allowed": None}
+            )
 
     def test_remove_task_status(self):
         with requests_mock.mock() as mock:
