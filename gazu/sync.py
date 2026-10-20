@@ -9,6 +9,9 @@ from typing import Callable
 from . import client as raw
 from . import asset as asset_module
 from . import casting as casting_module
+from . import concept as concept_module
+from . import edit as edit_module
+from . import entity as entity_module
 from . import person as person_module
 from . import project as project_module
 from . import files as files_module
@@ -355,6 +358,21 @@ def get_sync_person_id_map(
     )
 
 
+def _map_created_by(
+    entities: list[dict],
+    client_source: KitsuClient,
+    client_target: KitsuClient,
+) -> list[dict]:
+    """
+    Point the `created_by` field of given entities to the matching target
+    person, or to nobody: the source person IDs do not exist on the target.
+    """
+    person_map = get_sync_person_id_map(client_source, client_target)
+    for entity in entities:
+        entity["created_by"] = person_map.get(entity.get("created_by"))
+    return entities
+
+
 def push_assets(
     project_source: dict,
     project_target: dict,
@@ -404,6 +422,7 @@ def push_assets(
                 asset["ready_for"] = task_types_map[asset["ready_for"]]
         asset["project_id"] = project_target["id"]
         mapped_assets.append(asset)
+    _map_created_by(mapped_assets, client_source, client_target)
     return import_entities(mapped_assets, client=client_target)
 
 
@@ -431,6 +450,7 @@ def push_episodes(
     )
     for episode in episodes:
         episode["project_id"] = project_target["id"]
+    _map_created_by(episodes, client_source, client_target)
     return import_entities(episodes, client=client_target)
 
 
@@ -458,6 +478,7 @@ def push_sequences(
     )
     for sequence in sequences:
         sequence["project_id"] = project_target["id"]
+    _map_created_by(sequences, client_source, client_target)
     return import_entities(sequences, client=client_target)
 
 
@@ -485,7 +506,98 @@ def push_shots(
     )
     for shot in shots:
         shot["project_id"] = project_target["id"]
+    _map_created_by(shots, client_source, client_target)
     return import_entities(shots, client=client_target)
+
+
+def push_edits(
+    project_source: dict,
+    project_target: dict,
+    client_source: KitsuClient,
+    client_target: KitsuClient,
+) -> list[dict]:
+    """
+    Copy edits from source to target and preserve audit fields (`id`,
+    `created_at`, and `updated_at`).
+
+    Args:
+        project_source (dict): The project to get edits from
+        project_target (dict): The project to push edits to
+        client_source (KitsuClient): client to get data from source API
+        client_target (KitsuClient): client to push data to target API
+
+    Returns:
+        list: Pushed edits
+    """
+    edits = edit_module.all_edits_for_project(
+        project_source, client=client_source
+    )
+    for edit in edits:
+        edit["project_id"] = project_target["id"]
+    _map_created_by(edits, client_source, client_target)
+    return import_entities(edits, client=client_target)
+
+
+def push_concepts(
+    project_source: dict,
+    project_target: dict,
+    client_source: KitsuClient,
+    client_target: KitsuClient,
+) -> list[dict]:
+    """
+    Copy concept folders and concepts from source to target and preserve
+    audit fields (`id`, `created_at`, and `updated_at`).
+
+    Args:
+        project_source (dict): The project to get concepts from
+        project_target (dict): The project to push concepts to
+        client_source (KitsuClient): client to get data from source API
+        client_target (KitsuClient): client to push data to target API
+
+    Returns:
+        list: Pushed concept folders and concepts
+    """
+    entity_type_map = _get_sync_id_map(
+        client_source, client_target, entity_module.all_entity_types
+    )
+    # A concept or a folder points to its folder through parent_id: the
+    # folders are pushed first, each parent before its children.
+    folders = concept_module.all_concept_folders_for_project(
+        project_source, client=client_source
+    )
+    ordered_folders = []
+    while folders:
+        pushed_ids = {folder["id"] for folder in ordered_folders}
+        ready = [
+            folder
+            for folder in folders
+            if folder.get("parent_id") is None
+            or folder["parent_id"] in pushed_ids
+        ]
+        if not ready:
+            ready = folders
+        ordered_folders += ready
+        folders = [folder for folder in folders if folder not in ready]
+    concepts = concept_module.all_concepts_for_project(
+        project_source, client=client_source
+    )
+
+    mapped_entities = []
+    for entity in ordered_folders + concepts:
+        entity_type_id = entity["entity_type_id"]
+        if entity_type_id not in entity_type_map:
+            logger.warning(
+                "Skipping concept %s: entity type %s is not mapped to the "
+                "target.",
+                entity.get("id"),
+                entity_type_id,
+            )
+            continue
+        entity["entity_type_id"] = entity_type_map[entity_type_id]
+        entity["project_id"] = project_target["id"]
+        mapped_entities.append(entity)
+    _map_created_by(mapped_entities, client_source, client_target)
+    return import_entities(mapped_entities, client=client_target)
 
 
 def push_entity_links(
@@ -520,8 +632,9 @@ def push_project_entities(
     client_target: KitsuClient,
 ) -> dict:
     """
-    Copy assets, episodes, sequences, shots and entity links from source to
-    target and preserve audit fields (`id`, `created_at`, and `updated_at`).
+    Copy assets, episodes, sequences, shots, edits, concepts and entity
+    links from source to target and preserve audit fields (`id`,
+    `created_at`, and `updated_at`).
 
     Args:
         project_source (dict): The project to get assets from
@@ -546,6 +659,12 @@ def push_project_entities(
     shots = push_shots(
         project_source, project_target, client_source, client_target
     )
+    edits = push_edits(
+        project_source, project_target, client_source, client_target
+    )
+    concepts = push_concepts(
+        project_source, project_target, client_source, client_target
+    )
     entity_links = push_entity_links(
         project_source, project_target, client_source, client_target
     )
@@ -554,6 +673,8 @@ def push_project_entities(
         "episodes": episodes,
         "sequences": sequences,
         "shots": shots,
+        "edits": edits,
+        "concepts": concepts,
         "entity_links": entity_links,
     }
 
@@ -621,6 +742,7 @@ def push_tasks_comments(
     project_source: dict,
     client_source: KitsuClient,
     client_target: KitsuClient,
+    normalize_movie: bool = True,
 ) -> list[dict]:
     """
     Create a new comment into target api for each comment in source project
@@ -631,6 +753,9 @@ def push_tasks_comments(
         project_source (dict): The project to get assets from
         client_source (KitsuClient): client to get data from source API
         client_target (KitsuClient): client to push data to target API
+        normalize_movie (bool): Whether the target normalizes the pushed
+            movie previews. Turn it off for previews already normalized
+            by the source.
 
     Returns:
         list: Source tasks whose comments were pushed
@@ -642,7 +767,12 @@ def push_tasks_comments(
     )
     for task in tasks:
         push_task_comments(
-            task_status_map, person_map, task, client_source, client_target
+            task_status_map,
+            person_map,
+            task,
+            client_source,
+            client_target,
+            normalize_movie=normalize_movie,
         )
     return tasks
 
@@ -653,6 +783,7 @@ def push_task_comments(
     task: str | dict,
     client_source: KitsuClient,
     client_target: KitsuClient,
+    normalize_movie: bool = True,
 ) -> list[dict]:
     """
     Create a new comment into target api for each comment in source task
@@ -665,6 +796,8 @@ def push_task_comments(
         task (str / dict): The task to push comments for
         client_source (KitsuClient): client to get data from source API
         client_target (KitsuClient): client to push data to target API
+        normalize_movie (bool): Whether the target normalizes the pushed
+            movie previews.
 
     Returns:
         list: Created comments
@@ -680,6 +813,7 @@ def push_task_comments(
             comment,
             client_source,
             client_target,
+            normalize_movie=normalize_movie,
         )
         if comment_target is not None:
             comments_target.append(comment_target)
@@ -695,6 +829,7 @@ def push_task_comment(
     client_target: KitsuClient,
     author_id: str | None = None,
     tmp_path: str | None = None,
+    normalize_movie: bool = True,
 ) -> dict:
     """
     Create a new comment into target api for each comment in source task
@@ -711,6 +846,8 @@ def push_task_comment(
         author_id (str): The ID of the Person to set as the comment author.
         tmp_path (str): The local path on disk to download the attachment files
             for syncing.
+        normalize_movie (bool): Whether the target normalizes the pushed
+            movie previews.
 
     Returns:
         dict: The source comment.
@@ -724,9 +861,8 @@ def push_task_comment(
         attachment_file = files_module.get_attachment_file(
             attachment_id, client=client_source
         )
-        # Sanitize the server-provided name so it can't escape tmp_path.
-        file_path = os.path.join(
-            tmp_path, sanitize_filename(attachment_file["name"])
+        file_path = _get_sync_file_path(
+            tmp_path, attachment_id, attachment_file["name"]
         )
         files_module.download_attachment_file(
             attachment_file, file_path, client=client_source
@@ -746,14 +882,12 @@ def push_task_comment(
             preview_file["original_name"] is not None
             and preview_file["extension"] is not None
         ):
-            # Sanitize the server-provided name so it can't escape tmp_path.
-            file_path = os.path.join(
+            file_path = _get_sync_file_path(
                 tmp_path,
-                sanitize_filename(
-                    preview_file["original_name"]
-                    + "."
-                    + preview_file["extension"]
-                ),
+                preview_file_id,
+                preview_file["original_name"]
+                + "."
+                + preview_file["extension"],
             )
             files_module.download_preview_file(
                 preview_file, file_path, client=client_source
@@ -802,25 +936,42 @@ def push_task_comment(
 
     for preview in previews:
         new_preview_file = task_module.add_preview(
-            task, comment_target, preview["file_path"], client=client_target
+            task,
+            comment_target,
+            preview["file_path"],
+            normalize_movie=normalize_movie,
+            client=client_target,
         )
         files_module.update_preview(
             new_preview_file,
             {"annotations": preview["annotations"]},
             client=client_target,
         )
-        try:
-            os.remove(preview["file_path"])
-        except OSError:
-            pass
+        _remove_sync_file(preview["file_path"])
 
     for attachment_path in attachments:
-        try:
-            os.remove(attachment_path)
-        except OSError:
-            pass
+        _remove_sync_file(attachment_path)
 
     return comment
+
+
+def _get_sync_file_path(tmp_path: str, file_id: str, name: str) -> str:
+    """
+    Return a path for a downloaded file in a folder of its own: two files
+    of a comment can share the same name.
+    """
+    # Sanitize the server-provided values so they can't escape tmp_path.
+    folder = os.path.join(tmp_path, sanitize_filename(file_id))
+    os.makedirs(folder, exist_ok=True)
+    return os.path.join(folder, sanitize_filename(name))
+
+
+def _remove_sync_file(file_path: str) -> None:
+    try:
+        os.remove(file_path)
+        os.rmdir(os.path.dirname(file_path))
+    except OSError:
+        pass
 
 
 def convert_id_list(ids: list[str], model_map: dict) -> list:
