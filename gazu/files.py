@@ -1164,6 +1164,24 @@ def update_output_file(
     return raw.put(path, data, client=client)
 
 
+def update_working_file(
+    working_file: str | dict, data: dict, client: KitsuClient = default
+) -> dict:
+    """
+    Update the data of given working file.
+
+    Args:
+        working_file (str / dict): The working file dict or ID.
+        data (dict): Data to update on the working file.
+
+    Returns:
+        dict: Modified working file
+    """
+    working_file = normalize_model_parameter(working_file)
+    path = f"/data/working-files/{working_file['id']}"
+    return raw.put(path, data, client=client)
+
+
 def update_project_file_tree(
     project: str | dict, file_tree: dict, client: KitsuClient = default
 ) -> dict:

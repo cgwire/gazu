@@ -1239,6 +1239,25 @@ class FilesTestCase(unittest.TestCase):
             self.assertEqual(output_file["id"], fakeid("output-file-1"))
             self.assertEqual(output_file["name"], "test-name")
 
+    def test_update_working_file(self):
+        with requests_mock.mock() as mock:
+            path = f"/data/working-files/{fakeid('working-file-1')}"
+            mock.put(
+                gazu.client.get_full_url(path),
+                text=json.dumps(
+                    {
+                        "id": fakeid("working-file-1"),
+                        "validation_status": "validated",
+                    }
+                ),
+            )
+            data = {"validation_status": "validated"}
+            working_file = gazu.files.update_working_file(
+                fakeid("working-file-1"), data
+            )
+            self.assertEqual(working_file["id"], fakeid("working-file-1"))
+            self.assertEqual(working_file["validation_status"], "validated")
+
     def test_update_preview(self):
         with requests_mock.mock() as mock:
             path = f"/data/preview-files/{fakeid('preview-file-1')}"
