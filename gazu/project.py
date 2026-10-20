@@ -282,12 +282,14 @@ def add_task_type(
     priority: int,
     hd_bitrate_compression: int | None = None,
     ld_bitrate_compression: int | None = None,
+    is_client_visible: bool | None = None,
     client: KitsuClient = default,
 ) -> dict:
     """
     Link a task type to a project with a priority. The optional bitrates,
     in Mbit/s, set the movie encoding of that task type in the project
-    and update an existing link.
+    and update an existing link. The optional is_client_visible says
+    whether the clients of the project see that task type.
     """
     project = normalize_model_parameter(project)
     task_type = normalize_model_parameter(task_type)
@@ -296,6 +298,8 @@ def add_task_type(
         data["hd_bitrate_compression"] = hd_bitrate_compression
     if ld_bitrate_compression is not None:
         data["ld_bitrate_compression"] = ld_bitrate_compression
+    if is_client_visible is not None:
+        data["is_client_visible"] = is_client_visible
     return raw.post(
         f"data/projects/{project['id']}/settings/task-types",
         data,
@@ -312,6 +316,36 @@ def add_task_status(
     return raw.post(
         f"data/projects/{project['id']}/settings/task-status",
         data,
+        client=client,
+    )
+
+
+def set_task_status_client_allowed(
+    project: str | dict,
+    task_status: str | dict,
+    is_client_allowed: bool | None,
+    client: KitsuClient = default,
+) -> dict:
+    """
+    Set, for this project, whether clients can set the given task status
+    when they comment. None goes back to the task status value.
+
+    Args:
+        project (dict / ID): The project dict or id.
+        task_status (dict / ID): The task status dict or id, linked to the
+            project.
+        is_client_allowed (bool / None): The project value, or None to
+            follow the task status.
+
+    Returns:
+        dict: The task status link of the project.
+    """
+    project = normalize_model_parameter(project)
+    task_status = normalize_model_parameter(task_status)
+    return raw.put(
+        f"data/projects/{project['id']}/settings/task-status/"
+        f"{task_status['id']}",
+        {"is_client_allowed": is_client_allowed},
         client=client,
     )
 
