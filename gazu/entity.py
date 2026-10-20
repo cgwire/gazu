@@ -19,7 +19,7 @@ def all_entities(client: KitsuClient = default) -> list[dict]:
     Returns:
         list: Retrieve all entities
     """
-    return raw.fetch_all("entities", client=client)
+    return raw.fetch_all("entities", paginated=True, client=client)
 
 
 @cache
@@ -233,5 +233,7 @@ def all_entities_with_tasks_linked_to_entity(
     """
     entity = normalize_model_parameter(entity)
     return raw.fetch_all(
-        f"entities/{entity['id']}/entities-linked/with-tasks", client=client
+        f"entities/{entity['id']}/entities-linked/with-tasks",
+        paginated=True,
+        client=client,
     )

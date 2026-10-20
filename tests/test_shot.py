@@ -25,6 +25,28 @@ class ShotTestCase(unittest.TestCase):
             self.assertEqual(shot_instance["name"], "Shot 01")
             self.assertEqual(shot_instance["project_id"], "project-01")
 
+    def test_all_shots_for_project_reads_every_page(self):
+        with requests_mock.mock() as mock:
+            for page, name in [(1, "Shot 02"), (2, "Shot 01")]:
+                mock_route(
+                    mock,
+                    "GET",
+                    f"data/projects/project-02/shots?page={page}",
+                    text={
+                        "data": [{"name": name}],
+                        "total": 2,
+                        "nb_pages": 2,
+                        "limit": 1,
+                        "offset": page - 1,
+                        "page": page,
+                    },
+                )
+            shots = gazu.shot.all_shots_for_project({"id": "project-02"})
+            self.assertEqual(
+                [shot["name"] for shot in shots], ["Shot 01", "Shot 02"]
+            )
+            self.assertEqual(mock.call_count, 2)
+
     def test_all_shots_for_sequence(self):
         with requests_mock.mock() as mock:
             mock_route(

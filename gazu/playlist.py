@@ -21,7 +21,9 @@ def all_playlists(client: KitsuClient = default) -> list[dict]:
     Returns:
         list: All playlists for all projects.
     """
-    return sort_by_name(raw.fetch_all("playlists", client=client))
+    return sort_by_name(
+        raw.fetch_all("playlists", paginated=True, client=client)
+    )
 
 
 @cache

@@ -1,5 +1,6 @@
 import asyncio
 import unittest
+import unittest.mock
 
 import pytest
 
@@ -125,3 +126,33 @@ class AioClientTestCase(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class AioFetchAllPaginatedTestCase(unittest.TestCase):
+    def test_fetch_all_paginated(self):
+        pages = {
+            1: {"data": [{"id": "a"}], "nb_pages": 2, "page": 1},
+            2: {"data": [{"id": "b"}], "nb_pages": 2, "page": 2},
+        }
+        calls = []
+
+        async def fake_get(path, params=None, client=None):
+            calls.append(dict(params))
+            return pages[params["page"]]
+
+        params = {"project_id": "p"}
+        with unittest.mock.patch.object(gazu.aio, "get", fake_get):
+            result = asyncio.run(
+                gazu.aio.fetch_all("tasks", params, paginated=True)
+            )
+        self.assertEqual(result, [{"id": "a"}, {"id": "b"}])
+        self.assertEqual(params, {"project_id": "p"})
+        self.assertEqual(calls[0]["limit"], gazu.client.PAGE_SIZE)
+
+    def test_fetch_all_paginated_on_unpaginated_route(self):
+        async def fake_get(path, params=None, client=None):
+            return [{"id": "a"}]
+
+        with unittest.mock.patch.object(gazu.aio, "get", fake_get):
+            result = asyncio.run(gazu.aio.fetch_all("tasks", paginated=True))
+        self.assertEqual(result, [{"id": "a"}])

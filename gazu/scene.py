@@ -38,10 +38,10 @@ def all_scenes(
     project = normalize_model_parameter(project)
     if project is not None:
         scenes = raw.fetch_all(
-            f"projects/{project['id']}/scenes", client=client
+            f"projects/{project['id']}/scenes", paginated=True, client=client
         )
     else:
-        scenes = raw.fetch_all("scenes/all", client=client)
+        scenes = raw.fetch_all("scenes/all", paginated=True, client=client)
     return sort_by_name(scenes)
 
 
@@ -64,7 +64,9 @@ def all_scenes_for_sequence(
     """
     sequence = normalize_model_parameter(sequence)
     return sort_by_name(
-        raw.fetch_all(f"sequences/{sequence['id']}/scenes", client=client),
+        raw.fetch_all(
+            f"sequences/{sequence['id']}/scenes", paginated=True, client=client
+        ),
     )
 
 

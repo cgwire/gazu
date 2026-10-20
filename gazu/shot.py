@@ -41,7 +41,9 @@ def all_shots_for_project(
         list: Shots from database or for given project.
     """
     project = normalize_model_parameter(project)
-    shots = raw.fetch_all(f"projects/{project['id']}/shots", client=client)
+    shots = raw.fetch_all(
+        f"projects/{project['id']}/shots", paginated=True, client=client
+    )
     return sort_by_name(shots)
 
 
@@ -58,7 +60,9 @@ def all_shots_for_episode(
     """
     episode = normalize_model_parameter(episode)
     return sort_by_name(
-        raw.fetch_all(f"episodes/{episode['id']}/shots", client=client)
+        raw.fetch_all(
+            f"episodes/{episode['id']}/shots", paginated=True, client=client
+        )
     )
 
 
@@ -75,7 +79,9 @@ def all_shots_for_sequence(
     """
     sequence = normalize_model_parameter(sequence)
     return sort_by_name(
-        raw.fetch_all(f"sequences/{sequence['id']}/shots", client=client)
+        raw.fetch_all(
+            f"sequences/{sequence['id']}/shots", paginated=True, client=client
+        )
     )
 
 
@@ -92,7 +98,7 @@ def all_sequences_for_project(
     """
     project = normalize_model_parameter(project)
     path = f"projects/{project['id']}/sequences"
-    sequences = raw.fetch_all(path, client=client)
+    sequences = raw.fetch_all(path, paginated=True, client=client)
     return sort_by_name(sequences)
 
 
@@ -109,7 +115,7 @@ def all_sequences_for_episode(
     """
     episode = normalize_model_parameter(episode)
     path = f"episodes/{episode['id']}/sequences"
-    sequences = raw.fetch_all(path, client=client)
+    sequences = raw.fetch_all(path, paginated=True, client=client)
     return sort_by_name(sequences)
 
 
@@ -126,7 +132,7 @@ def all_episodes_for_project(
     """
     project = normalize_model_parameter(project)
     path = f"projects/{project['id']}/episodes"
-    episodes = raw.fetch_all(path, client=client)
+    episodes = raw.fetch_all(path, paginated=True, client=client)
     return sort_by_name(episodes)
 
 

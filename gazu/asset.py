@@ -46,10 +46,12 @@ def all_assets_for_project(
     project = normalize_model_parameter(project)
 
     if project is None:
-        return sort_by_name(raw.fetch_all("assets/all", client=client))
+        return sort_by_name(
+            raw.fetch_all("assets/all", paginated=True, client=client)
+        )
     else:
         path = f"projects/{project['id']}/assets"
-        return sort_by_name(raw.fetch_all(path, client=client))
+        return sort_by_name(raw.fetch_all(path, paginated=True, client=client))
 
 
 @cache
@@ -66,7 +68,12 @@ def all_assets_for_episode(
     episode = normalize_model_parameter(episode)
 
     return sort_by_name(
-        raw.fetch_all("assets", {"source_id": episode["id"]}, client=client)
+        raw.fetch_all(
+            "assets",
+            {"source_id": episode["id"]},
+            paginated=True,
+            client=client,
+        )
     )
 
 
@@ -105,7 +112,7 @@ def all_assets_for_project_and_type(
     asset_type_id = asset_type["id"]
     path = f"projects/{project_id}/asset-types/{asset_type_id}/assets"
 
-    assets = raw.fetch_all(path, client=client)
+    assets = raw.fetch_all(path, paginated=True, client=client)
     return sort_by_name(assets)
 
 

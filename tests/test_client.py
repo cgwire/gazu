@@ -227,6 +227,67 @@ class BaseFuncTestCase(ClientTestCase):
                 mock.last_request.qs, {"fields": ["first_name,last_name"]}
             )
 
+    def test_fetch_all_paginated(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/persons?page=1",
+                text={
+                    "data": [{"first_name": "John"}],
+                    "total": 2,
+                    "nb_pages": 2,
+                    "limit": 1,
+                    "offset": 0,
+                    "page": 1,
+                },
+            )
+            mock_route(
+                mock,
+                "GET",
+                "data/persons?page=2",
+                text={
+                    "data": [{"first_name": "Jane"}],
+                    "total": 2,
+                    "nb_pages": 2,
+                    "limit": 1,
+                    "offset": 1,
+                    "page": 2,
+                },
+            )
+            params = {"is_bot": "false"}
+            self.assertEqual(
+                raw.fetch_all("persons", params, paginated=True),
+                [{"first_name": "John"}, {"first_name": "Jane"}],
+            )
+            self.assertEqual(params, {"is_bot": "false"})
+            self.assertEqual(
+                mock.request_history[0].qs,
+                {
+                    "is_bot": ["false"],
+                    "page": ["1"],
+                    "limit": [str(raw.PAGE_SIZE)],
+                },
+            )
+            self.assertEqual(mock.request_history[1].qs["page"], ["2"])
+
+    def test_fetch_all_paginated_on_unpaginated_route(self):
+        # A route, or an older API, that ignores the page parameters
+        # answers with the whole list at once.
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/persons",
+                text=[{"first_name": "John"}],
+            )
+            self.assertEqual(
+                raw.fetch_all("persons", paginated=True, limit=10),
+                [{"first_name": "John"}],
+            )
+            self.assertEqual(mock.call_count, 1)
+            self.assertEqual(mock.last_request.qs["limit"], ["10"])
+
     def test_fetch_first(self):
         with requests_mock.mock() as mock:
             mock_route(
