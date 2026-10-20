@@ -240,12 +240,19 @@ class SyncestCase(unittest.TestCase):
         self.assertEqual(result[fakeid("src-1")], fakeid("tgt-1"))
 
     @patch("gazu.sync.import_entities")
+    @patch("gazu.sync.get_sync_person_id_map")
     @patch("gazu.sync.get_sync_task_type_id_map")
     @patch("gazu.sync.get_sync_asset_type_id_map")
     @patch("gazu.asset.all_assets_for_project")
     def test_push_assets(
-        self, mock_all_assets, mock_at_map, mock_tt_map, mock_import
+        self,
+        mock_all_assets,
+        mock_at_map,
+        mock_tt_map,
+        mock_person_map,
+        mock_import,
     ):
+        mock_person_map.return_value = {fakeid("src-p"): fakeid("tgt-p")}
         mock_at_map.return_value = {fakeid("src-at"): fakeid("tgt-at")}
         mock_tt_map.return_value = {fakeid("src-tt"): fakeid("tgt-tt")}
         mock_all_assets.return_value = [
@@ -254,7 +261,15 @@ class SyncestCase(unittest.TestCase):
                 "entity_type_id": fakeid("src-at"),
                 "ready_for": fakeid("src-tt"),
                 "project_id": fakeid("src-proj"),
-            }
+                "created_by": fakeid("src-p"),
+            },
+            {
+                "id": fakeid("asset-2"),
+                "entity_type_id": fakeid("src-at"),
+                "ready_for": None,
+                "project_id": fakeid("src-proj"),
+                "created_by": fakeid("unknown-p"),
+            },
         ]
         mock_import.return_value = [{"id": fakeid("asset-1")}]
 
@@ -265,10 +280,14 @@ class SyncestCase(unittest.TestCase):
             MagicMock(),
         )
         mock_import.assert_called_once()
+        pushed = mock_import.call_args[0][0]
+        self.assertEqual(pushed[0]["created_by"], fakeid("tgt-p"))
+        self.assertIsNone(pushed[1]["created_by"])
 
+    @patch("gazu.sync.get_sync_person_id_map", return_value={})
     @patch("gazu.sync.import_entities")
     @patch("gazu.shot.all_episodes_for_project")
-    def test_push_episodes(self, mock_all_episodes, mock_import):
+    def test_push_episodes(self, mock_all_episodes, mock_import, _):
         mock_all_episodes.return_value = [{"id": fakeid("ep-1")}]
         mock_import.return_value = [{"id": fakeid("ep-1")}]
 
@@ -280,9 +299,10 @@ class SyncestCase(unittest.TestCase):
         )
         mock_import.assert_called_once()
 
+    @patch("gazu.sync.get_sync_person_id_map", return_value={})
     @patch("gazu.sync.import_entities")
     @patch("gazu.shot.all_sequences_for_project")
-    def test_push_sequences(self, mock_all_sequences, mock_import):
+    def test_push_sequences(self, mock_all_sequences, mock_import, _):
         mock_all_sequences.return_value = [{"id": fakeid("seq-1")}]
         mock_import.return_value = [{"id": fakeid("seq-1")}]
 
@@ -294,9 +314,10 @@ class SyncestCase(unittest.TestCase):
         )
         mock_import.assert_called_once()
 
+    @patch("gazu.sync.get_sync_person_id_map", return_value={})
     @patch("gazu.sync.import_entities")
     @patch("gazu.shot.all_shots_for_project")
-    def test_push_shots(self, mock_all_shots, mock_import):
+    def test_push_shots(self, mock_all_shots, mock_import, _):
         mock_all_shots.return_value = [{"id": fakeid("shot-1")}]
         mock_import.return_value = [{"id": fakeid("shot-1")}]
 
@@ -322,7 +343,92 @@ class SyncestCase(unittest.TestCase):
         )
         mock_import.assert_called_once()
 
+    @patch("gazu.sync.get_sync_person_id_map")
+    @patch("gazu.sync.import_entities")
+    @patch("gazu.edit.all_edits_for_project")
+    def test_push_edits(self, mock_all_edits, mock_import, mock_person_map):
+        mock_person_map.return_value = {fakeid("src-p"): fakeid("tgt-p")}
+        mock_all_edits.return_value = [
+            {"id": fakeid("edit-1"), "created_by": fakeid("src-p")}
+        ]
+        mock_import.return_value = [{"id": fakeid("edit-1")}]
+
+        gazu.sync.push_edits(
+            {"id": fakeid("src")},
+            {"id": fakeid("tgt")},
+            MagicMock(),
+            MagicMock(),
+        )
+        pushed = mock_import.call_args[0][0]
+        self.assertEqual(pushed[0]["project_id"], fakeid("tgt"))
+        self.assertEqual(pushed[0]["created_by"], fakeid("tgt-p"))
+
+    @patch("gazu.sync.get_sync_person_id_map", return_value={})
+    @patch("gazu.sync.import_entities")
+    @patch("gazu.sync._get_sync_id_map")
+    @patch("gazu.concept.all_concepts_for_project")
+    @patch("gazu.concept.all_concept_folders_for_project")
+    def test_push_concepts(
+        self,
+        mock_all_folders,
+        mock_all_concepts,
+        mock_type_map,
+        mock_import,
+        _,
+    ):
+        mock_type_map.return_value = {
+            fakeid("src-folder-type"): fakeid("tgt-folder-type"),
+            fakeid("src-concept-type"): fakeid("tgt-concept-type"),
+        }
+        # The child folder comes first, as a name sort can return it.
+        mock_all_folders.return_value = [
+            {
+                "id": fakeid("child"),
+                "parent_id": fakeid("root"),
+                "entity_type_id": fakeid("src-folder-type"),
+            },
+            {
+                "id": fakeid("root"),
+                "parent_id": None,
+                "entity_type_id": fakeid("src-folder-type"),
+            },
+        ]
+        mock_all_concepts.return_value = [
+            {
+                "id": fakeid("concept"),
+                "parent_id": fakeid("child"),
+                "entity_type_id": fakeid("src-concept-type"),
+            },
+            {
+                "id": fakeid("unmapped"),
+                "parent_id": None,
+                "entity_type_id": fakeid("unknown-type"),
+            },
+        ]
+        mock_import.return_value = []
+
+        gazu.sync.push_concepts(
+            {"id": fakeid("src")},
+            {"id": fakeid("tgt")},
+            MagicMock(),
+            MagicMock(),
+        )
+        pushed = mock_import.call_args[0][0]
+        self.assertEqual(
+            [entity["id"] for entity in pushed],
+            [fakeid("root"), fakeid("child"), fakeid("concept")],
+        )
+        self.assertEqual(
+            pushed[0]["entity_type_id"], fakeid("tgt-folder-type")
+        )
+        self.assertEqual(
+            pushed[2]["entity_type_id"], fakeid("tgt-concept-type")
+        )
+        self.assertEqual(pushed[2]["project_id"], fakeid("tgt"))
+
     @patch("gazu.sync.push_entity_links")
+    @patch("gazu.sync.push_concepts")
+    @patch("gazu.sync.push_edits")
     @patch("gazu.sync.push_shots")
     @patch("gazu.sync.push_sequences")
     @patch("gazu.sync.push_episodes")
@@ -333,12 +439,16 @@ class SyncestCase(unittest.TestCase):
         mock_episodes,
         mock_sequences,
         mock_shots,
+        mock_edits,
+        mock_concepts,
         mock_links,
     ):
         mock_assets.return_value = []
         mock_episodes.return_value = []
         mock_sequences.return_value = []
         mock_shots.return_value = []
+        mock_edits.return_value = []
+        mock_concepts.return_value = []
         mock_links.return_value = []
 
         result = gazu.sync.push_project_entities(
@@ -349,7 +459,11 @@ class SyncestCase(unittest.TestCase):
         )
         self.assertIn("assets", result)
         self.assertIn("episodes", result)
+        self.assertIn("edits", result)
+        self.assertIn("concepts", result)
         mock_episodes.assert_called_once()
+        mock_edits.assert_called_once()
+        mock_concepts.assert_called_once()
 
     @patch("gazu.sync.import_tasks")
     @patch("gazu.sync.get_sync_person_id_map")
@@ -434,3 +548,65 @@ class SyncestCase(unittest.TestCase):
             MagicMock(),
         )
         mock_add_comment.assert_called_once()
+
+    @patch("gazu.files.update_preview")
+    @patch("gazu.task.add_preview")
+    @patch("gazu.files.download_preview_file")
+    @patch("gazu.files.get_preview_file")
+    @patch("gazu.task.add_comment")
+    def test_push_task_comment_previews_with_same_name(
+        self,
+        mock_add_comment,
+        mock_get_preview,
+        mock_download,
+        mock_add_preview,
+        mock_update_preview,
+    ):
+        mock_add_comment.return_value = {"id": fakeid("new-comment")}
+        mock_get_preview.side_effect = lambda preview_id, client: {
+            "id": preview_id,
+            "original_name": "chicken",
+            "extension": "png",
+            "annotations": [],
+        }
+        uploaded = []
+
+        def download(preview_file, file_path, client):
+            with open(file_path, "w") as f:
+                f.write(preview_file["id"])
+
+        def add_preview(task, comment, file_path, **kwargs):
+            with open(file_path) as f:
+                uploaded.append((f.read(), kwargs["normalize_movie"]))
+            return {"id": fakeid("new-preview")}
+
+        mock_download.side_effect = download
+        mock_add_preview.side_effect = add_preview
+        comment = {
+            "id": fakeid("c1"),
+            "task_status_id": fakeid("src-status"),
+            "person_id": fakeid("src-person"),
+            "text": "",
+            "created_at": "2023-01-01",
+            "checklist": [],
+            "attachment_files": [],
+            "previews": [fakeid("preview-1"), fakeid("preview-2")],
+        }
+
+        with tempfile.TemporaryDirectory() as tmp_path:
+            gazu.sync.push_task_comment(
+                {fakeid("src-status"): fakeid("tgt-status")},
+                {},
+                {"id": fakeid("task")},
+                comment,
+                MagicMock(),
+                MagicMock(),
+                tmp_path=tmp_path,
+                normalize_movie=False,
+            )
+            self.assertEqual(os.listdir(tmp_path), [])
+
+        self.assertEqual(
+            uploaded,
+            [(fakeid("preview-1"), False), (fakeid("preview-2"), False)],
+        )
