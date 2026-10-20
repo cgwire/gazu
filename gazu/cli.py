@@ -538,7 +538,10 @@ def tasks(ctx, project_opt, task_type, task_status):
             click.echo(f"Task status not found: {task_status}", err=True)
             raise SystemExit(1)
         all_project_tasks = raw.fetch_all(
-            "tasks", {"project_id": proj["id"]}, client=raw.default_client
+            "tasks",
+            {"project_id": proj["id"]},
+            paginated=True,
+            client=raw.default_client,
         )
         data = [
             task
@@ -547,7 +550,10 @@ def tasks(ctx, project_opt, task_type, task_status):
         ]
     else:
         data = raw.fetch_all(
-            "tasks", {"project_id": proj["id"]}, client=raw.default_client
+            "tasks",
+            {"project_id": proj["id"]},
+            paginated=True,
+            client=raw.default_client,
         )
     output(
         ctx,

@@ -43,6 +43,8 @@ DOWNLOAD_ACCEPT_HEADER = "application/json, */*;q=0.1"
 # one that fails.
 DEFAULT_PROCESSING_TIMEOUT = 60
 DEFAULT_RETRY_AFTER = 5
+# Rows requested per page by fetch_all(paginated=True). The API caps it.
+PAGE_SIZE = 1000
 
 if os.getenv("GAZU_DEBUG", "false").lower() == "true":
     # Debug opt-in: only touch the "gazu" logger, never the root logger
@@ -761,34 +763,47 @@ def fetch_all(
         params["fields"] = fields
 
     if paginated:
-        if not params:
-            params = {}
-        params["page"] = 1
-        if limit is not None:
-            params["limit"] = limit
+        params = build_page_params(params, 1, limit)
 
     url = url_path_join("data", path)
 
     response = get(url, params=params, client=client)
 
-    if not paginated:
+    if not paginated or not is_page(response):
         return response
 
-    nb_pages = response.get("nb_pages", 1)
-    current_page = response.get("page", 1)
-    results = response.get("data", [])
-
-    if current_page != nb_pages:
-        for page in range(2, nb_pages + 1):
-            params["page"] = page
-            response = get(
-                url,
-                params=params,
-                client=client,
-            )
-            results.extend(response.get("data", []))
+    results = response["data"]
+    for page in range(2, response.get("nb_pages", 1) + 1):
+        params["page"] = page
+        response = get(url, params=params, client=client)
+        if not is_page(response) or not response["data"]:
+            break
+        results.extend(response["data"])
 
     return results
+
+
+def build_page_params(
+    params: dict | None, page: int, limit: int | None = None
+) -> dict:
+    """
+    Copy of the request parameters asking for a given page, so the
+    caller's dict is left untouched.
+    """
+    params = dict(params or {})
+    params["page"] = page
+    params["limit"] = limit or PAGE_SIZE
+    return params
+
+
+def is_page(response: Any) -> bool:
+    """
+    Tell a paginated envelope from a plain list: a route, or an older
+    API, that ignores the page parameters answers with the whole list.
+    """
+    return isinstance(response, dict) and isinstance(
+        response.get("data"), list
+    )
 
 
 def fetch_first(

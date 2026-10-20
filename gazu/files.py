@@ -195,7 +195,7 @@ def get_all_working_files_for_entity(
     if name is not None:
         params["name"] = name
 
-    return raw.fetch_all(path, params, client=client)
+    return raw.fetch_all(path, params, paginated=True, client=client)
 
 
 @cache
@@ -289,7 +289,7 @@ def get_all_preview_files_for_task(
     """
     task = normalize_model_parameter(task)
     return raw.fetch_all(
-        "preview-files", {"task_id": task["id"]}, client=client
+        "preview-files", {"task_id": task["id"]}, paginated=True, client=client
     )
 
 
@@ -304,7 +304,9 @@ def get_all_attachment_files_for_task(
         task (str / dict): Target task, as ID string or model dict.
     """
     task = normalize_model_parameter(task)
-    return raw.fetch_all(f"tasks/{task['id']}/attachment-files", client=client)
+    return raw.fetch_all(
+        f"tasks/{task['id']}/attachment-files", paginated=True, client=client
+    )
 
 
 def get_all_attachment_files_for_project(
@@ -321,7 +323,9 @@ def get_all_attachment_files_for_project(
     """
     project = normalize_model_parameter(project)
     return raw.fetch_all(
-        f"projects/{project['id']}/attachment-files", client=client
+        f"projects/{project['id']}/attachment-files",
+        paginated=True,
+        client=client,
     )
 
 
@@ -353,7 +357,7 @@ def all_output_files_for_entity(
     params = _output_file_filters(
         output_type, task_type, name, representation, file_status
     )
-    return raw.fetch_all(path, params, client=client)
+    return raw.fetch_all(path, params, paginated=True, client=client)
 
 
 @cache
@@ -391,7 +395,7 @@ def all_output_files_for_asset_instance(
         file_status,
         temporal_entity,
     )
-    return raw.fetch_all(path, params, client=client)
+    return raw.fetch_all(path, params, paginated=True, client=client)
 
 
 def all_output_files_for_project(
@@ -422,7 +426,7 @@ def all_output_files_for_project(
     params = _output_file_filters(
         output_type, task_type, name, representation, file_status
     )
-    return raw.fetch_all(path, params, client=client)
+    return raw.fetch_all(path, params, paginated=True, client=client)
 
 
 @cache
@@ -1003,7 +1007,7 @@ def get_last_output_files_for_entity(
     params = _output_file_filters(
         output_type, task_type, name, representation, file_status
     )
-    return raw.fetch_all(path, params, client=client)
+    return raw.fetch_all(path, params, paginated=True, client=client)
 
 
 @cache
@@ -1037,7 +1041,7 @@ def get_last_output_files_for_asset_instance(
     params = _output_file_filters(
         output_type, task_type, name, representation, file_status
     )
-    return raw.fetch_all(path, params, client=client)
+    return raw.fetch_all(path, params, paginated=True, client=client)
 
 
 @cache
@@ -1052,8 +1056,8 @@ def get_working_files_for_task(
         list: Working files related to given task.
     """
     task = normalize_model_parameter(task)
-    path = f"data/tasks/{task['id']}/working-files"
-    return raw.get(path, client=client)
+    path = f"tasks/{task['id']}/working-files"
+    return raw.fetch_all(path, paginated=True, client=client)
 
 
 @cache

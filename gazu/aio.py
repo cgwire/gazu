@@ -13,7 +13,6 @@ No default client is provided -- always pass an explicit ``client``.
 
 from __future__ import annotations
 
-import json
 import logging
 import os
 from typing import Any, Callable
@@ -22,12 +21,13 @@ import aiohttp
 
 from .__version__ import __version__
 from .client import (
+    build_page_params,
+    is_page,
     url_path_join,
     build_path_with_params,
     get_message_from_data,
     MAX_AUTH_RETRIES,
 )
-from .encoder import CustomJSONEncoder
 from .exception import (
     TooBigFileException,
     NotAuthenticatedException,
@@ -340,27 +340,21 @@ async def fetch_all(
         params["fields"] = fields
 
     if paginated:
-        if not params:
-            params = {}
-        params["page"] = 1
-        if limit is not None:
-            params["limit"] = limit
+        params = build_page_params(params, 1, limit)
 
     url = url_path_join("data", path)
     response = await get(url, params=params, client=client)
 
-    if not paginated:
+    if not paginated or not is_page(response):
         return response
 
-    nb_pages = response.get("nb_pages", 1)
-    current_page = response.get("page", 1)
-    results = response.get("data", [])
-
-    if current_page != nb_pages:
-        for page in range(2, nb_pages + 1):
-            params["page"] = page
-            response = await get(url, params=params, client=client)
-            results.extend(response.get("data", []))
+    results = response["data"]
+    for page in range(2, response.get("nb_pages", 1) + 1):
+        params["page"] = page
+        response = await get(url, params=params, client=client)
+        if not is_page(response) or not response["data"]:
+            break
+        results.extend(response["data"])
 
     return results
 

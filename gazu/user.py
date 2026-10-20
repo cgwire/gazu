@@ -62,7 +62,7 @@ def all_assets_for_asset_type_and_project(
     path = (
         f"user/projects/{project['id']}/asset-types/{asset_type['id']}/assets"
     )
-    assets = raw.fetch_all(path, client=client)
+    assets = raw.fetch_all(path, paginated=True, client=client)
     return sort_by_name(assets)
 
 
@@ -79,7 +79,7 @@ def all_tasks_for_asset(
     """
     asset = normalize_model_parameter(asset)
     path = f"user/assets/{asset['id']}/tasks"
-    tasks = raw.fetch_all(path, client=client)
+    tasks = raw.fetch_all(path, paginated=True, client=client)
     return sort_by_name(tasks)
 
 
@@ -96,7 +96,7 @@ def all_tasks_for_shot(
     """
     shot = normalize_model_parameter(shot)
     path = f"user/shots/{shot['id']}/tasks"
-    tasks = raw.fetch_all(path, client=client)
+    tasks = raw.fetch_all(path, paginated=True, client=client)
     return sort_by_name(tasks)
 
 
@@ -113,7 +113,7 @@ def all_tasks_for_scene(
     """
     scene = normalize_model_parameter(scene)
     path = f"user/scenes/{scene['id']}/tasks"
-    tasks = raw.fetch_all(path, client=client)
+    tasks = raw.fetch_all(path, paginated=True, client=client)
     return sort_by_name(tasks)
 
 
@@ -126,7 +126,7 @@ def all_tasks_for_sequence(
     """
     sequence = normalize_model_parameter(sequence)
     path = f"user/sequences/{sequence['id']}/tasks"
-    tasks = raw.fetch_all(path, client=client)
+    tasks = raw.fetch_all(path, paginated=True, client=client)
     return sort_by_name(tasks)
 
 
@@ -208,7 +208,7 @@ def all_sequences_for_project(
     """
     project = normalize_model_parameter(project)
     path = f"user/projects/{project['id']}/sequences"
-    sequences = raw.fetch_all(path, client=client)
+    sequences = raw.fetch_all(path, paginated=True, client=client)
     return sort_by_name(sequences)
 
 
@@ -242,7 +242,7 @@ def all_shots_for_sequence(
     """
     sequence = normalize_model_parameter(sequence)
     path = f"user/sequences/{sequence['id']}/shots"
-    shots = raw.fetch_all(path, client=client)
+    shots = raw.fetch_all(path, paginated=True, client=client)
     return sort_by_name(shots)
 
 
@@ -259,7 +259,7 @@ def all_scenes_for_sequence(
     """
     sequence = normalize_model_parameter(sequence)
     path = f"user/sequences/{sequence['id']}/scenes"
-    scenes = raw.fetch_all(path, client=client)
+    scenes = raw.fetch_all(path, paginated=True, client=client)
     return sort_by_name(scenes)
 
 
@@ -269,7 +269,7 @@ def all_tasks_to_do(client: KitsuClient = default) -> list[dict]:
     Returns:
         list: Tasks assigned to current user which are not complete.
     """
-    return raw.fetch_all("user/tasks", client=client)
+    return raw.fetch_all("user/tasks", paginated=True, client=client)
 
 
 @cache
@@ -278,7 +278,7 @@ def all_done_tasks(client: KitsuClient = default) -> list[dict]:
     Returns:
         list: Tasks assigned to current user which are done.
     """
-    return raw.fetch_all("user/done-tasks", client=client)
+    return raw.fetch_all("user/done-tasks", paginated=True, client=client)
 
 
 @cache

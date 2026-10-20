@@ -39,7 +39,10 @@ def _all_tasks_for_entity(
     entity = normalize_model_parameter(entity)
     params = {"relations": True} if relations else {}
     tasks = raw.fetch_all(
-        f"{collection}/{entity['id']}/{suffix}", params, client=client
+        f"{collection}/{entity['id']}/{suffix}",
+        params,
+        paginated=True,
+        client=client,
     )
     return sort_by_name(tasks)
 
@@ -292,6 +295,7 @@ def all_tasks_for_task_status(
             "task_type_id": task_type["id"],
             "task_status_id": task_status["id"],
         },
+        paginated=True,
         client=client,
     )
 
@@ -321,7 +325,7 @@ def all_tasks_for_task_type(
     if episode is not None:
         episode = normalize_model_parameter(episode)
         params["episode_id"] = episode["id"]
-    return raw.fetch_all("tasks", params, client=client)
+    return raw.fetch_all("tasks", params, paginated=True, client=client)
 
 
 @cache
@@ -453,7 +457,9 @@ def all_tasks_for_person(
         list: Tasks that are not done for given person (only for open projects).
     """
     person = normalize_model_parameter(person)
-    return raw.fetch_all(f"persons/{person['id']}/tasks", client=client)
+    return raw.fetch_all(
+        f"persons/{person['id']}/tasks", paginated=True, client=client
+    )
 
 
 @cache
@@ -465,7 +471,9 @@ def all_done_tasks_for_person(
         list: Tasks that are done for given person (only for open projects).
     """
     person = normalize_model_parameter(person)
-    return raw.fetch_all(f"persons/{person['id']}/done-tasks", client=client)
+    return raw.fetch_all(
+        f"persons/{person['id']}/done-tasks", paginated=True, client=client
+    )
 
 
 @cache
@@ -1465,7 +1473,9 @@ def all_comments_for_task(
         Comments linked to the given task.
     """
     task = normalize_model_parameter(task)
-    return raw.fetch_all(f"tasks/{task['id']}/comments", client=client)
+    return raw.fetch_all(
+        f"tasks/{task['id']}/comments", paginated=True, client=client
+    )
 
 
 @cache
@@ -1823,7 +1833,9 @@ def all_previews_for_task(
         list: Previews for the task.
     """
     task = normalize_model_parameter(task)
-    return raw.fetch_all(f"tasks/{task['id']}/previews", client=client)
+    return raw.fetch_all(
+        f"tasks/{task['id']}/previews", paginated=True, client=client
+    )
 
 
 @cache
@@ -1844,6 +1856,7 @@ def all_tasks_for_person_and_type(
     task_type = normalize_model_parameter(task_type)
     return raw.fetch_all(
         f"persons/{person['id']}/related-tasks/{task_type['id']}",
+        paginated=True,
         client=client,
     )
 
@@ -1862,7 +1875,9 @@ def all_comments_for_project(
         list: Comments for the project.
     """
     project = normalize_model_parameter(project)
-    return raw.fetch_all(f"projects/{project['id']}/comments", client=client)
+    return raw.fetch_all(
+        f"projects/{project['id']}/comments", paginated=True, client=client
+    )
 
 
 @cache
@@ -1880,7 +1895,9 @@ def all_notifications_for_project(
     """
     project = normalize_model_parameter(project)
     return raw.fetch_all(
-        f"projects/{project['id']}/notifications", client=client
+        f"projects/{project['id']}/notifications",
+        paginated=True,
+        client=client,
     )
 
 
@@ -1899,7 +1916,9 @@ def all_preview_files_for_project(
     """
     project = normalize_model_parameter(project)
     return raw.fetch_all(
-        f"projects/{project['id']}/preview-files", client=client
+        f"projects/{project['id']}/preview-files",
+        paginated=True,
+        client=client,
     )
 
 
@@ -1918,7 +1937,9 @@ def all_subscriptions_for_project(
     """
     project = normalize_model_parameter(project)
     return raw.fetch_all(
-        f"projects/{project['id']}/subscriptions", client=client
+        f"projects/{project['id']}/subscriptions",
+        paginated=True,
+        client=client,
     )
 
 

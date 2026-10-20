@@ -75,7 +75,9 @@ def all_edits_for_project(
         list: Edits from database or for given project.
     """
     project = normalize_model_parameter(project)
-    edits = raw.fetch_all(f"projects/{project['id']}/edits", client=client)
+    edits = raw.fetch_all(
+        f"projects/{project['id']}/edits", paginated=True, client=client
+    )
     return sort_by_name(edits)
 
 

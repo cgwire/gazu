@@ -290,11 +290,11 @@ def all_entity_links_for_project(
     """
     project = normalize_model_parameter(project)
     path = f"projects/{project['id']}/entity-links"
-    params = {}
-    if page is not None:
-        params["page"] = page
-        if limit is not None:
-            params["limit"] = limit
+    if page is None:
+        return raw.fetch_all(path, paginated=True, client=client)
+    params = {"page": page}
+    if limit is not None:
+        params["limit"] = limit
     return raw.fetch_all(path, params=params, client=client)
 
 

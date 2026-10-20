@@ -67,9 +67,10 @@ def get_time_spents_range(
         "start_date": start_date,
         "end_date": end_date,
     }
-    return raw.get(
-        f"/data/persons/{person_id}/time-spents",
+    return raw.fetch_all(
+        f"persons/{person_id}/time-spents",
         params=date_range,
+        paginated=True,
         client=client,
     )
 
@@ -627,7 +628,9 @@ def get_day_offs(
         list: Day offs for the person.
     """
     person = normalize_model_parameter(person)
-    return raw.fetch_all(f"persons/{person['id']}/day-offs", client=client)
+    return raw.fetch_all(
+        f"persons/{person['id']}/day-offs", paginated=True, client=client
+    )
 
 
 @cache

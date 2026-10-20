@@ -19,7 +19,7 @@ def all_concepts(client: KitsuClient = default) -> list[dict]:
     Returns:
         list: All concepts from database.
     """
-    concepts = raw.fetch_all("concepts", client=client)
+    concepts = raw.fetch_all("concepts", paginated=True, client=client)
     return sort_by_name(concepts)
 
 
@@ -36,7 +36,7 @@ def all_concepts_for_project(
     """
     project = normalize_model_parameter(project)
     concepts = raw.fetch_all(
-        f"projects/{project['id']}/concepts", client=client
+        f"projects/{project['id']}/concepts", paginated=True, client=client
     )
     return sort_by_name(concepts)
 
