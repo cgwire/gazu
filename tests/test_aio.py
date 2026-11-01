@@ -1,11 +1,16 @@
 import asyncio
+import os
+import tempfile
 import unittest
+from unittest.mock import patch
 
 import pytest
 
 pytest.importorskip("aiohttp")  # async extra is optional; skip if absent
 
 import gazu.aio
+from aiohttp import web
+from aiohttp.test_utils import TestServer
 from gazu.exception import (
     RouteNotFoundException,
     NotAllowedException,
@@ -121,6 +126,101 @@ class AioClientTestCase(unittest.TestCase):
         client = gazu.aio.AsyncKitsuClient("http://localhost/api")
         headers = client.make_auth_header()
         self.assertNotIn("Authorization", headers)
+
+
+class AioUploadTestCase(unittest.TestCase):
+    def _check_upload(self, expire_token):
+        async def scenario():
+            uploads = []
+
+            async def upload(request):
+                form = await request.post()
+                uploads.append(
+                    (
+                        request.headers["Authorization"],
+                        form["file"].file.read(),
+                        form["file-1"].file.read(),
+                        form["label"],
+                    )
+                )
+                if expire_token and len(uploads) == 1:
+                    return web.json_response(
+                        {"message": "Signature has expired"}, status=401
+                    )
+                return web.json_response({"id": "preview"})
+
+            async def refresh(request):
+                self.assertEqual(
+                    request.headers["Authorization"], "Bearer refresh"
+                )
+                return web.json_response({"access_token": "new"})
+
+            app = web.Application()
+            app.router.add_post("/pictures/preview-files/preview", upload)
+            app.router.add_get("/auth/refresh-token", refresh)
+            async with TestServer(app) as server:
+                client = gazu.aio.AsyncKitsuClient(
+                    str(server.make_url("/")),
+                    access_token="old",
+                    refresh_token="refresh",
+                )
+                try:
+                    with tempfile.TemporaryDirectory() as directory:
+                        paths = [
+                            os.path.join(directory, n) for n in ("a", "b")
+                        ]
+                        for path, content in zip(paths, (b"main", b"extra")):
+                            with open(path, "wb") as target:
+                                target.write(content)
+                        result = await gazu.aio.upload(
+                            "pictures/preview-files/preview",
+                            paths[0],
+                            extra_files=[paths[1]],
+                            data={"label": "review"},
+                            client=client,
+                        )
+                finally:
+                    await client.session.close()
+            self.assertEqual(result, {"id": "preview"})
+            expected = [("Bearer old", b"main", b"extra", "review")]
+            if expire_token:
+                expected.append(("Bearer new", b"main", b"extra", "review"))
+            self.assertEqual(uploads, expected)
+
+        run(scenario())
+
+    def test_upload_returns_successful_response(self):
+        self._check_upload(expire_token=False)
+
+    def test_upload_reopens_all_files_after_token_refresh(self):
+        self._check_upload(expire_token=True)
+
+    def test_upload_closes_main_file_when_extra_file_is_missing(self):
+        opened = []
+        real_open = open
+
+        def track_open(*args, **kwargs):
+            stream = real_open(*args, **kwargs)
+            opened.append(stream)
+            return stream
+
+        with tempfile.TemporaryDirectory() as directory:
+            path = os.path.join(directory, "preview")
+            with open(path, "wb") as target:
+                target.write(b"preview")
+            client = gazu.aio.AsyncKitsuClient("http://localhost/api")
+            with patch("gazu.aio.open", side_effect=track_open, create=True):
+                with self.assertRaises(FileNotFoundError):
+                    run(
+                        gazu.aio.upload(
+                            "pictures/preview-files/preview",
+                            path,
+                            extra_files=[os.path.join(directory, "missing")],
+                            client=client,
+                        )
+                    )
+            self.assertEqual(len(opened), 1)
+            self.assertTrue(opened[0].closed)
 
 
 if __name__ == "__main__":

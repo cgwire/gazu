@@ -16,6 +16,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+from contextlib import ExitStack
 from typing import Any, Callable
 
 import aiohttp
@@ -431,33 +432,29 @@ async def upload(
         extra_files = []
     url = get_full_url(path, client)
 
-    files_to_close = []
     file_fields = []
     if file_path is not None:
-        f = open(file_path, "rb")
-        files_to_close.append(f)
-        file_fields.append(("file", f, os.path.basename(file_path)))
+        file_fields.append(("file", file_path))
     for i, extra_path in enumerate(extra_files, start=1):
-        f = open(extra_path, "rb")
-        files_to_close.append(f)
-        file_fields.append((f"file-{i}", f, os.path.basename(extra_path)))
+        file_fields.append((f"file-{i}", extra_path))
 
-    def build_form():
-        # aiohttp forbids re-sending a processed FormData: rebuild it (and
-        # rewind the file parts) for every attempt.
+    def build_form(stack):
+        # aiohttp consumes FormData and closes its file payloads. Reopen
+        # each file for every attempt rather than seeking a closed handle.
         form = aiohttp.FormData()
         for key, value in data.items():
             form.add_field(key, str(value))
-        for name, f, filename in file_fields:
-            f.seek(0)
-            form.add_field(name, f, filename=filename)
+        for name, file_path in file_fields:
+            f = stack.enter_context(open(file_path, "rb"))
+            form.add_field(name, f, filename=os.path.basename(file_path))
         return form
 
-    try:
-        for _ in range(MAX_AUTH_RETRIES):
+    for _ in range(MAX_AUTH_RETRIES):
+        with ExitStack() as stack:
+            form = build_form(stack)
             async with client.session.post(
                 url,
-                data=build_form(),
+                data=form,
                 headers=client.make_auth_header(),
             ) as response:
                 _, retry = await check_status(response, path, client=client)
@@ -471,13 +468,10 @@ async def upload(
                         )
                         raise
                     break
-        else:
-            raise NotAuthenticatedException(path)
-    finally:
-        for f in files_to_close:
-            f.close()
+    else:
+        raise NotAuthenticatedException(path)
 
-    message = get_message_from_data(result, default="")
+    message = get_message_from_data(result, default_message="")
     if message:
         raise UploadFailedException(message)
 
