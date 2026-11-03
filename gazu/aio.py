@@ -236,7 +236,7 @@ async def check_status(
                 "stacktrace", "No stacktrace sent by the server"
             )
             message = get_message_from_data(
-                data, default="No message sent by the server"
+                data, default_message="No message sent by the server"
             )
             logger.error(
                 "A server error occurred!\n"
