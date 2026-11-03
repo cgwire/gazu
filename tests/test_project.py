@@ -1,1029 +1,564 @@
 import unittest
+
 import requests_mock
+
 import gazu.client
 import gazu.project
-import json
+
 from utils import fakeid, mock_route
 
+PROJECT = fakeid("project-1")
+PERSON = fakeid("person-1")
+TASK_TYPE = fakeid("task-type-1")
+TASK_STATUS = fakeid("task-status-1")
+ASSET_TYPE = fakeid("asset-type-1")
+DEPARTMENT = fakeid("department-1")
+DESCRIPTOR = fakeid("descriptor-1")
+DESCRIPTOR_2 = fakeid("descriptor-2")
+AUTOMATION = fakeid("automation-1")
+BACKGROUND = fakeid("background-1")
+BUDGET = fakeid("budget-1")
+ENTRY = fakeid("entry-1")
+BASE = f"data/projects/{PROJECT}"
+DESCRIPTORS = f"{BASE}/metadata-descriptors"
+BUDGETS = f"{BASE}/budgets"
+ENTRIES = f"{BUDGETS}/{BUDGET}/entries"
+RESULT = {"id": "result"}
 
-class ProjectTestCase(unittest.TestCase):
-    def test_all(self):
-        with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url("data/projects"),
-                text=json.dumps([{"name": "Agent 327", "id": "project-01"}]),
-            )
-            projects = gazu.project.all_projects()
-            project_instance = projects[0]
-            self.assertEqual(project_instance["name"], "Agent 327")
 
-    def test_all_open_projects(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                "data/projects/open",
-                text=[{"name": "Agent 327", "id": "project-01"}],
-            )
-            projects = gazu.project.all_open_projects()
-            project_instance = projects[0]
-            self.assertEqual(project_instance["name"], "Agent 327")
-
-    def test_get_project(self):
-        with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url("data/projects/project-01"),
-                text=json.dumps({"name": "Agent 327", "id": "project-01"}),
-            )
-            project = gazu.project.get_project("project-01")
-            self.assertEqual(project["name"], "Agent 327")
-
-    def test_get_project_by_name(self):
-        with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url("data/projects?name=Test"),
-                text=json.dumps([{"name": "Test", "id": "project-01"}]),
-            )
-            project = gazu.project.get_project_by_name("Test")
-            self.assertEqual(project["name"], "Test")
-
-    def test_remove_project(self):
-        with requests_mock.mock() as mock:
-            mock.delete(
-                gazu.client.get_full_url("data/projects/project-01"),
-                status_code=204,
-            )
-            project = {"id": "project-01", "name": "S02"}
-            gazu.project.remove_project(project)
-
-    def test_get_url(self):
-        url = gazu.project.get_project_url({"id": "project-01"})
-        self.assertEqual(
-            url,
-            f"{gazu.client.get_api_url_from_host()}/productions/project-01/assets/",
-        )
-
-    def test_all_project_status(self):
-        with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url("data/project-status"),
-                text=json.dumps(
-                    [
-                        {
-                            "id": fakeid("project-status-1"),
-                            "name": "project-status-1",
-                        },
-                        {
-                            "id": fakeid("project-status-2"),
-                            "name": "project-status-2",
-                        },
-                    ]
-                ),
-            )
-            project_statuses = gazu.project.all_project_status()
-            self.assertEqual(len(project_statuses), 2)
-            self.assertEqual(
-                project_statuses[0]["id"], fakeid("project-status-1")
-            )
-            self.assertEqual(
-                project_statuses[1]["id"], fakeid("project-status-2")
-            )
-
-    def test_get_project_status_by_name(self):
-        with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url(
-                    "data/project-status?name=project-status-1"
-                ),
-                text=json.dumps(
-                    [
-                        {
-                            "id": fakeid("project-status-1"),
-                            "name": "project-status-1",
-                        },
-                    ]
-                ),
-            )
-            project_status = gazu.project.get_project_status_by_name(
-                "project-status-1"
-            )
-            self.assertEqual(project_status["id"], fakeid("project-status-1"))
-
-    def test_new_project(self):
-        with requests_mock.mock() as mock:
-            mock.post(
-                gazu.client.get_full_url("data/projects"),
-                text=json.dumps(
-                    {"id": fakeid("project-1"), "name": "project-1"}
-                ),
-            )
-            mock.get(
-                gazu.client.get_full_url("data/projects?name=project-1"),
-                text=json.dumps([]),
-            )
-            project = gazu.project.new_project("project-1")
-            self.assertEqual(project["name"], "project-1")
-            self.assertEqual(project["id"], fakeid("project-1"))
-
-    def test_new_project_with_template(self):
-        with requests_mock.mock() as mock:
-            mock.post(
-                gazu.client.get_full_url("data/projects"),
-                text=json.dumps(
-                    {
-                        "id": fakeid("project-1"),
-                        "name": "project-1",
-                        "fps": "30",
-                    }
-                ),
-            )
-            mock.get(
-                gazu.client.get_full_url("data/projects?name=project-1"),
-                text=json.dumps([]),
-            )
-            project = gazu.project.new_project(
-                "project-1",
-                project_template={"id": fakeid("template-1")},
-            )
-            self.assertEqual(project["fps"], "30")
-            # Verify project_template_id was forwarded in the request body
-            request_body = json.loads(mock.request_history[-1].text)
-            self.assertEqual(
-                request_body["project_template_id"], fakeid("template-1")
-            )
-
-    def test_new_project_explicit_field_overrides_template(self):
-        with requests_mock.mock() as mock:
-            mock.post(
-                gazu.client.get_full_url("data/projects"),
-                text=json.dumps(
-                    {
-                        "id": fakeid("project-1"),
-                        "name": "project-1",
-                    }
-                ),
-            )
-            mock.get(
-                gazu.client.get_full_url("data/projects?name=project-1"),
-                text=json.dumps([]),
-            )
-            gazu.project.new_project(
-                "project-1",
-                production_type="featurefilm",
-                project_template={"id": fakeid("template-1")},
-            )
-            # gazu just forwards both — zou enforces the precedence rule
-            request_body = json.loads(mock.request_history[-1].text)
-            self.assertEqual(request_body["production_type"], "featurefilm")
-            self.assertEqual(
-                request_body["project_template_id"], fakeid("template-1")
-            )
-
-    def test_remove_project_with_force(self):
-        with requests_mock.mock() as mock:
-            mock.delete(
-                gazu.client.get_full_url(
-                    f"data/projects/{fakeid('project-1')}?force=true"
-                ),
-                status_code=204,
-            )
-            gazu.project.remove_project(fakeid("project-1"), force=True)
-
-    def test_update_project(self):
-        with requests_mock.mock() as mock:
-            project = {
-                "id": fakeid("project-1"),
-                "name": "project-1",
-                "team": [fakeid("person-1")],
-                "asset_types": [fakeid("asset-type-1")],
-                "task_statuses": [fakeid("task-status-1")],
-                "task_types": [fakeid("task-type-1")],
-            }
-            mock_route(
-                mock,
-                "PUT",
-                f"data/projects/{fakeid('project-1')}",
-                text=project,
-            )
-            self.assertEqual(gazu.project.update_project(project), project)
-
-    def test_update_project_data(self):
-        with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url(
-                    f"data/projects/{fakeid('project-1')}"
-                ),
-                text=json.dumps(
-                    {
-                        "id": fakeid("project-1"),
-                        "name": "project-1",
-                    }
-                ),
-            )
-            mock.put(
-                gazu.client.get_full_url(
-                    f"data/projects/{fakeid('project-1')}"
-                ),
-                text=json.dumps(
-                    {
-                        "id": fakeid("project-1"),
-                        "name": "project-1",
-                        "data": {},
-                    }
-                ),
-            )
-            project = gazu.project.update_project_data(fakeid("project-1"))
-            self.assertEqual(project["id"], fakeid("project-1"))
-            self.assertEqual(project["data"], {})
-
-    def test_close_project(self):
-        with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url("data/project-status"),
-                text=json.dumps(
-                    [
-                        {"id": fakeid("project-status-1"), "name": "closed"},
-                    ]
-                ),
-            )
-
-            mock.put(
-                gazu.client.get_full_url(
-                    f"data/projects/{fakeid('project-1')}"
-                ),
-                text=json.dumps(
-                    {
-                        "id": fakeid("project-1"),
-                        "name": "project-1",
-                        "project_status_id": fakeid("project-status-1"),
-                    }
-                ),
-            )
-
-            project = gazu.project.close_project(fakeid("project-1"))
-            self.assertEqual(
-                project["project_status_id"], fakeid("project-status-1")
-            )
-
-    def test_add_metadata_descriptor(self):
-        result = {
-            "id": fakeid("metadata-descriptor-1"),
-            "name": "metadata-descriptor-1",
-            "departments": [fakeid("department-1")],
-        }
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "POST",
-                f"data/projects/{fakeid('project-1')}/metadata-descriptors",
-                text=result,
-            ),
-            self.assertEqual(
-                gazu.project.add_metadata_descriptor(
-                    fakeid("project-1"),
-                    "metadata-descriptor-1",
-                    "Asset",
-                    departments=fakeid("department-1"),
-                ),
-                result,
-            )
-
-    def test_add_task_metadata_descriptor(self):
-        result = {
-            "id": fakeid("metadata-descriptor-1"),
-            "name": "metadata-descriptor-1",
-            "task_type_id": fakeid("task-type-1"),
-        }
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "POST",
-                f"data/projects/{fakeid('project-1')}/metadata-descriptors",
-                text=result,
-            )
-            self.assertEqual(
-                gazu.project.add_metadata_descriptor(
-                    fakeid("project-1"),
-                    "metadata-descriptor-1",
-                    "Task",
-                    task_type_id=fakeid("task-type-1"),
-                ),
-                result,
-            )
-            self.assertEqual(
-                mock.last_request.json()["task_type_id"],
-                fakeid("task-type-1"),
-            )
-
-    def test_get_metadata_descriptor(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                f"data/projects/{fakeid('project-1')}/metadata-descriptors/{fakeid('metadata-descriptor-1')}",
-                text={
-                    "id": fakeid("metadata-descriptor-1"),
-                    "name": "metadata-descriptor-1",
-                },
-            ),
-            metadata_descriptor = gazu.project.get_metadata_descriptor(
-                fakeid("project-1"), {"id": fakeid("metadata-descriptor-1")}
-            )
-            self.assertEqual(
-                metadata_descriptor["name"], "metadata-descriptor-1"
-            )
-            self.assertEqual(
-                metadata_descriptor["id"], fakeid("metadata-descriptor-1")
-            )
-
-    def test_get_metadata_descriptor_by_field_name(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                f"data/metadata-descriptors?project_id={fakeid('project-1')}&field_name=studio",
-                text=[
-                    {
-                        "id": fakeid("metadata-descriptor-1"),
-                        "name": "metadata-descriptor-1",
-                        "field_name": "studio",
-                    }
-                ],
-            )
-            metadata_descriptor = (
-                gazu.project.get_metadata_descriptor_by_field_name(
-                    fakeid("project-1"), "studio"
+class ProjectReadTestCase(unittest.TestCase):
+    def test_lists_are_sorted_by_name(self):
+        for call, path in (
+            (gazu.project.all_project_status, "data/project-status"),
+            (gazu.project.all_projects, "data/projects"),
+            (gazu.project.all_open_projects, "data/projects/open"),
+        ):
+            with self.subTest(path), requests_mock.mock() as mock:
+                mock_route(
+                    mock, "GET", path, text=[{"name": "b"}, {"name": "A"}]
                 )
-            )
-            self.assertEqual(
-                metadata_descriptor["name"], "metadata-descriptor-1"
-            )
+                self.assertEqual(call(), [{"name": "A"}, {"name": "b"}])
 
-    def test_all_metadata_descriptors(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                f"data/projects/{fakeid('project-1')}/metadata-descriptors",
-                text=[
-                    {
-                        "id": fakeid("metadata-descriptor-1"),
-                    },
-                    {
-                        "id": fakeid("metadata-descriptor-2"),
-                    },
-                ],
+    def test_responses_are_returned_as_they_are(self):
+        project = gazu.project
+        for call, path in (
+            (lambda: project.get_project(PROJECT), BASE),
+            (
+                lambda: project.get_metadata_descriptor(
+                    PROJECT, {"id": DESCRIPTOR}
+                ),
+                f"{DESCRIPTORS}/{DESCRIPTOR}",
             ),
-            metadata_descriptors = gazu.project.all_metadata_descriptors(
-                fakeid("project-1")
-            )
-            self.assertEqual(len(metadata_descriptors), 2)
-            self.assertEqual(
-                metadata_descriptors[0]["id"], fakeid("metadata-descriptor-1")
-            )
-            self.assertEqual(
-                metadata_descriptors[1]["id"], fakeid("metadata-descriptor-2")
-            )
-
-    def test_all_metadata_descriptors_filter_entity_type(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                f"data/projects/{fakeid('project-1')}/metadata-descriptors",
-                text=[
-                    {
-                        "id": fakeid("metadata-descriptor-1"),
-                        "entity_type": "Project",
-                    },
-                    {
-                        "id": fakeid("metadata-descriptor-2"),
-                        "entity_type": "Asset",
-                    },
-                ],
-            )
-            all_desc = gazu.project.all_metadata_descriptors(
-                fakeid("project-1")
-            )
-            self.assertEqual(len(all_desc), 2)
-            project_desc = gazu.project.all_metadata_descriptors(
-                fakeid("project-1"), entity_type="Project"
-            )
-            self.assertEqual(len(project_desc), 1)
-            self.assertEqual(
-                project_desc[0]["id"], fakeid("metadata-descriptor-1")
-            )
-            self.assertEqual(project_desc[0]["entity_type"], "Project")
-            other_filter = gazu.project.all_metadata_descriptors(
-                fakeid("project-1"), entity_type="Sequence"
-            )
-            self.assertEqual(len(other_filter), 0)
-
-    def test_update_metadata_descriptor(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "PUT",
-                f"data/projects/{fakeid('project-1')}/metadata-descriptors/{fakeid('metadata-descriptor-1')}",
-                text={
-                    "id": fakeid("metadata-descriptor-1"),
-                    "departments": [fakeid("department-1")],
-                },
+            (lambda: project.get_team(PROJECT), f"{BASE}/team"),
+            (
+                lambda: project.get_project_task_types(PROJECT),
+                f"{BASE}/task-types",
             ),
-            metadata_descriptor = gazu.project.update_metadata_descriptor(
-                fakeid("project-1"),
+            (
+                lambda: project.get_project_task_statuses(PROJECT),
+                f"{BASE}/settings/task-status",
+            ),
+            (
+                lambda: project.all_status_automations(PROJECT),
+                f"{BASE}/settings/status-automations",
+            ),
+            (
+                lambda: project.get_preview_background_files(PROJECT),
+                f"{BASE}/settings/preview-background-files",
+            ),
+            (lambda: project.get_milestones(PROJECT), f"{BASE}/milestones"),
+            (
+                lambda: project.get_project_quotas(PROJECT, TASK_TYPE),
+                f"{BASE}/quotas/{TASK_TYPE}",
+            ),
+            (
+                lambda: project.get_project_person_quotas(PROJECT, PERSON),
+                f"{BASE}/quotas/persons/{PERSON}",
+            ),
+            (lambda: project.get_budgets(PROJECT), BUDGETS),
+            (
+                lambda: project.get_budget(PROJECT, BUDGET),
+                f"{BUDGETS}/{BUDGET}",
+            ),
+            (lambda: project.get_budget_entries(PROJECT, BUDGET), ENTRIES),
+            (
+                lambda: project.get_budget_entry(PROJECT, BUDGET, ENTRY),
+                f"{ENTRIES}/{ENTRY}",
+            ),
+        ):
+            with self.subTest(path), requests_mock.mock() as mock:
+                mock_route(mock, "GET", path, text=RESULT)
+                self.assertEqual(call(), RESULT)
+
+    def test_lookups_return_the_first_match_or_none(self):
+        project = gazu.project
+        for call, path, query in (
+            (
+                lambda: project.get_project_status_by_name("Open"),
+                "data/project-status",
+                {"name": ["open"]},
+            ),
+            (
+                lambda: project.get_project_by_name("Agent"),
+                "data/projects",
+                {"name": ["agent"]},
+            ),
+            (
+                lambda: project.get_metadata_descriptor_by_field_name(
+                    PROJECT, "studio"
+                ),
+                "data/metadata-descriptors",
+                {"project_id": [PROJECT], "field_name": ["studio"]},
+            ),
+        ):
+            with self.subTest(path), requests_mock.mock() as mock:
+                mock_route(mock, "GET", path, text=[RESULT, {}])
+                self.assertEqual(call(), RESULT)
+                self.assertEqual(mock.last_request.qs, query)
+                mock_route(mock, "GET", path, text=[])
+                self.assertIsNone(call())
+
+    def test_get_project_url(self):
+        host = gazu.client.get_api_url_from_host()
+        for kwargs, section in (
+            ({}, "assets"),
+            ({"section": "shots"}, "shots"),
+        ):
+            self.assertEqual(
+                gazu.project.get_project_url(PROJECT, **kwargs),
+                f"{host}/productions/{PROJECT}/{section}/",
+            )
+
+    def test_all_metadata_descriptors_can_filter_on_the_entity_type(self):
+        descriptors = [
+            {"id": DESCRIPTOR, "entity_type": "Project"},
+            {"id": DESCRIPTOR_2, "entity_type": "Asset"},
+        ]
+        for kwargs, expected in (
+            ({}, descriptors),
+            ({"entity_type": "Project"}, descriptors[:1]),
+            ({"entity_type": "Sequence"}, []),
+        ):
+            with self.subTest(kwargs), requests_mock.mock() as mock:
+                mock_route(mock, "GET", DESCRIPTORS, text=descriptors)
+                self.assertEqual(
+                    gazu.project.all_metadata_descriptors(PROJECT, **kwargs),
+                    expected,
+                )
+
+
+class ProjectWriteTestCase(unittest.TestCase):
+    def test_new_project_sends_the_fields(self):
+        template = fakeid("template-1")
+        with requests_mock.mock() as mock:
+            mock_route(mock, "GET", "data/projects", text=[])
+            mock_route(mock, "POST", "data/projects", text=RESULT)
+            result = gazu.project.new_project(
+                "Agent",
+                production_type="tvshow",
+                team=[PERSON],
+                asset_types=[{"id": ASSET_TYPE}],
+                task_statuses=[TASK_STATUS],
+                task_types=[TASK_TYPE],
+                production_style="3d",
+                project_template={"id": template},
+            )
+            self.assertEqual(result, RESULT)
+            self.assertEqual(
+                mock.last_request.json(),
                 {
-                    "id": fakeid("metadata-descriptor-1"),
-                    "departments": fakeid("department-1"),
+                    "name": "Agent",
+                    "production_type": "tvshow",
+                    "team": [PERSON],
+                    "asset_types": [ASSET_TYPE],
+                    "task_statuses": [TASK_STATUS],
+                    "task_types": [TASK_TYPE],
+                    "production_style": "3d",
+                    "project_template_id": template,
                 },
             )
+
+    def test_new_project_returns_the_existing_project(self):
+        with requests_mock.mock() as mock:
+            mock_route(mock, "GET", "data/projects", text=[RESULT])
+            self.assertEqual(gazu.project.new_project("Agent"), RESULT)
+            self.assertEqual(mock.call_count, 1)
+
+    def test_remove_project_sends_force_only_when_asked(self):
+        for force, query in ((False, {}), (True, {"force": ["true"]})):
+            with self.subTest(force=force), requests_mock.mock() as mock:
+                mock_route(mock, "DELETE", BASE, status_code=204)
+                gazu.project.remove_project(PROJECT, force)
+                self.assertEqual(mock.last_request.qs, query)
+
+    def test_update_project_sends_the_ids_of_the_links(self):
+        with requests_mock.mock() as mock:
+            mock_route(mock, "PUT", BASE, text=RESULT)
             self.assertEqual(
-                metadata_descriptor["id"], fakeid("metadata-descriptor-1")
+                gazu.project.update_project(
+                    {
+                        "id": PROJECT,
+                        "team": [{"id": PERSON}],
+                        "asset_types": [{"id": ASSET_TYPE}],
+                        "task_statuses": [{"id": TASK_STATUS}],
+                        "task_types": [{"id": TASK_TYPE}],
+                    }
+                ),
+                RESULT,
+            )
+            self.assertEqual(
+                mock.last_request.json(),
+                {
+                    "id": PROJECT,
+                    "team": [PERSON],
+                    "asset_types": [ASSET_TYPE],
+                    "task_statuses": [TASK_STATUS],
+                    "task_types": [TASK_TYPE],
+                },
             )
 
-    def test_remove_metadata_descriptor(self):
+    def test_update_project_data_merges_with_the_current_data(self):
+        for current, expected in (
+            ({"kept": 1, "changed": 1}, {"kept": 1, "changed": 2}),
+            (None, {"changed": 2}),
+        ):
+            with self.subTest(current), requests_mock.mock() as mock:
+                mock_route(
+                    mock, "GET", BASE, text={"id": PROJECT, "data": current}
+                )
+                mock_route(mock, "PUT", BASE, text={})
+                gazu.project.update_project_data(PROJECT, {"changed": 2})
+                self.assertEqual(mock.last_request.json()["data"], expected)
+
+    def test_close_project_sends_the_closed_status(self):
+        closed = fakeid("status-closed")
         with requests_mock.mock() as mock:
             mock_route(
                 mock,
-                "DELETE",
-                f"data/projects/{fakeid('project-1')}/metadata-descriptors/{fakeid('metadata-descriptor-1')}",
-                text="",
-            ),
-            response = gazu.project.remove_metadata_descriptor(
-                {"id": fakeid("project-1")},
-                {"id": fakeid("metadata-descriptor-1")},
+                "GET",
+                "data/project-status",
+                text=[
+                    {"id": fakeid("status-open"), "name": "Open"},
+                    {"id": closed, "name": "Closed"},
+                ],
             )
-            self.assertEqual(response, "")
+            mock_route(mock, "PUT", BASE, text={})
+            result = gazu.project.close_project(PROJECT)
+            self.assertEqual(
+                mock.last_request.json()["project_status_id"], closed
+            )
+            self.assertEqual(result["project_status_id"], closed)
+
+    def test_close_project_without_closed_status_raises(self):
+        with requests_mock.mock() as mock:
+            mock_route(mock, "GET", "data/project-status", text=[])
+            with self.assertRaises(ValueError):
+                gazu.project.close_project(PROJECT)
+
+
+class ProjectSettingsTestCase(unittest.TestCase):
+    def test_settings_send_their_body(self):
+        project = gazu.project
+        for call, path, body in (
+            (
+                lambda: project.add_asset_type(PROJECT, ASSET_TYPE),
+                f"{BASE}/settings/asset-types",
+                {"asset_type_id": ASSET_TYPE},
+            ),
+            (
+                lambda: project.add_task_status(PROJECT, TASK_STATUS),
+                f"{BASE}/settings/task-status",
+                {"task_status_id": TASK_STATUS},
+            ),
+            (
+                lambda: project.add_task_type(PROJECT, TASK_TYPE, 2),
+                f"{BASE}/settings/task-types",
+                {"task_type_id": TASK_TYPE, "priority": 2},
+            ),
+            (
+                lambda: project.add_task_type(
+                    PROJECT,
+                    TASK_TYPE,
+                    2,
+                    hd_bitrate_compression=20,
+                    ld_bitrate_compression=4,
+                    is_client_visible=False,
+                ),
+                f"{BASE}/settings/task-types",
+                {
+                    "task_type_id": TASK_TYPE,
+                    "priority": 2,
+                    "hd_bitrate_compression": 20,
+                    "ld_bitrate_compression": 4,
+                    "is_client_visible": False,
+                },
+            ),
+            (
+                lambda: project.add_status_automation(
+                    PROJECT, {"status_automation_id": AUTOMATION}
+                ),
+                f"{BASE}/settings/status-automations",
+                {"status_automation_id": AUTOMATION},
+            ),
+            (
+                lambda: project.add_preview_background_file(
+                    PROJECT, {"preview_background_file_id": BACKGROUND}
+                ),
+                f"{BASE}/settings/preview-background-files",
+                {"preview_background_file_id": BACKGROUND},
+            ),
+            (
+                lambda: project.add_person_to_team(PROJECT, PERSON),
+                f"{BASE}/team",
+                {"person_id": PERSON},
+            ),
+            (
+                lambda: project.add_person_to_team(
+                    PROJECT, PERSON, role="supervisor"
+                ),
+                f"{BASE}/team",
+                {"person_id": PERSON, "role": "supervisor"},
+            ),
+        ):
+            with self.subTest(path, body=body), requests_mock.mock() as mock:
+                mock_route(mock, "POST", path, text=RESULT)
+                self.assertEqual(call(), RESULT)
+                self.assertEqual(mock.last_request.json(), body)
+
+    def test_set_task_status_client_allowed(self):
+        # None sets the project to use the value of the task status.
+        for value in (False, None):
+            with self.subTest(value), requests_mock.mock() as mock:
+                mock_route(
+                    mock,
+                    "PUT",
+                    f"{BASE}/settings/task-status/{TASK_STATUS}",
+                    text=RESULT,
+                )
+                gazu.project.set_task_status_client_allowed(
+                    PROJECT, TASK_STATUS, value
+                )
+                self.assertEqual(
+                    mock.last_request.json(), {"is_client_allowed": value}
+                )
+
+    def test_update_team_member_role(self):
+        with requests_mock.mock() as mock:
+            mock_route(mock, "PUT", f"{BASE}/team/{PERSON}", text=RESULT)
+            self.assertEqual(
+                gazu.project.update_team_member_role(
+                    PROJECT, PERSON, "manager"
+                ),
+                RESULT,
+            )
+            self.assertEqual(mock.last_request.json(), {"role": "manager"})
+
+    def test_deletions_use_their_route(self):
+        project = gazu.project
+        for call, path in (
+            (
+                lambda: project.remove_task_type(PROJECT, TASK_TYPE),
+                f"{BASE}/settings/task-types/{TASK_TYPE}",
+            ),
+            (
+                lambda: project.remove_task_status(PROJECT, TASK_STATUS),
+                f"{BASE}/settings/task-status/{TASK_STATUS}",
+            ),
+            (
+                lambda: project.remove_person_from_team(PROJECT, PERSON),
+                f"{BASE}/team/{PERSON}",
+            ),
+            (
+                lambda: project.remove_status_automation(PROJECT, AUTOMATION),
+                f"{BASE}/settings/status-automations/{AUTOMATION}",
+            ),
+            (
+                lambda: project.remove_preview_background_file(
+                    PROJECT, BACKGROUND
+                ),
+                f"{BASE}/settings/preview-background-files/{BACKGROUND}",
+            ),
+            (
+                lambda: project.remove_budget(PROJECT, BUDGET),
+                f"{BUDGETS}/{BUDGET}",
+            ),
+            (
+                lambda: project.remove_budget_entry(PROJECT, BUDGET, ENTRY),
+                f"{ENTRIES}/{ENTRY}",
+            ),
+        ):
+            with self.subTest(path), requests_mock.mock() as mock:
+                mock_route(mock, "DELETE", path, status_code=204)
+                call()
+                self.assertEqual(mock.call_count, 1)
+
+
+class MetadataDescriptorTestCase(unittest.TestCase):
+    def test_add_metadata_descriptor_sends_the_fields(self):
+        with requests_mock.mock() as mock:
+            mock_route(mock, "POST", DESCRIPTORS, text=RESULT)
+            self.assertEqual(
+                gazu.project.add_metadata_descriptor(
+                    PROJECT, "Studio", "Asset"
+                ),
+                RESULT,
+            )
+            self.assertEqual(
+                mock.last_request.json(),
+                {
+                    "name": "Studio",
+                    "data_type": "string",
+                    "choices": [],
+                    "for_client": False,
+                    "entity_type": "Asset",
+                    "departments": [],
+                },
+            )
+            gazu.project.add_metadata_descriptor(
+                PROJECT,
+                "Studio",
+                "Task",
+                data_type="list",
+                choices=["a"],
+                for_client=True,
+                departments=[DEPARTMENT],
+                task_type_id=TASK_TYPE,
+            )
+            self.assertEqual(
+                mock.last_request.json(),
+                {
+                    "name": "Studio",
+                    "data_type": "list",
+                    "choices": ["a"],
+                    "for_client": True,
+                    "entity_type": "Task",
+                    "departments": [DEPARTMENT],
+                    "task_type_id": TASK_TYPE,
+                },
+            )
+
+    def test_update_metadata_descriptor_sends_department_ids(self):
+        with requests_mock.mock() as mock:
+            mock_route(mock, "PUT", f"{DESCRIPTORS}/{DESCRIPTOR}", text=RESULT)
+            self.assertEqual(
+                gazu.project.update_metadata_descriptor(
+                    PROJECT,
+                    {"id": DESCRIPTOR, "departments": [{"id": DEPARTMENT}]},
+                ),
+                RESULT,
+            )
+            self.assertEqual(
+                mock.last_request.json()["departments"], [DEPARTMENT]
+            )
+
+    def test_remove_metadata_descriptor_warns_that_force_is_ignored(self):
+        with requests_mock.mock() as mock:
+            mock_route(mock, "DELETE", f"{DESCRIPTORS}/{DESCRIPTOR}", text="")
+            self.assertEqual(
+                gazu.project.remove_metadata_descriptor(PROJECT, DESCRIPTOR),
+                "",
+            )
+            with self.assertWarns(DeprecationWarning):
+                gazu.project.remove_metadata_descriptor(
+                    PROJECT, DESCRIPTOR, force=True
+                )
+            self.assertEqual(mock.last_request.qs, {})
 
     def test_reorder_metadata_descriptors(self):
         with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "POST",
-                f"data/projects/{fakeid('project-1')}/metadata-descriptors/reorder",
-                text=[
-                    {
-                        "id": fakeid("metadata-descriptor-1"),
-                        "position": 1,
-                    },
-                    {
-                        "id": fakeid("metadata-descriptor-2"),
-                        "position": 2,
-                    },
-                ],
+            mock_route(mock, "POST", f"{DESCRIPTORS}/reorder", text=[RESULT])
+            self.assertEqual(
+                gazu.project.reorder_metadata_descriptors(
+                    PROJECT, "Shot", [DESCRIPTOR, {"id": DESCRIPTOR_2}]
+                ),
+                [RESULT],
             )
-            result = gazu.project.reorder_metadata_descriptors(
-                fakeid("project-1"),
-                "Shot",
-                [
-                    fakeid("metadata-descriptor-1"),
-                    {"id": fakeid("metadata-descriptor-2")},
-                ],
-            )
-            self.assertEqual(len(result), 2)
             self.assertEqual(
                 mock.last_request.json(),
                 {
                     "entity_type": "Shot",
-                    "descriptor_ids": [
-                        fakeid("metadata-descriptor-1"),
-                        fakeid("metadata-descriptor-2"),
-                    ],
+                    "descriptor_ids": [DESCRIPTOR, DESCRIPTOR_2],
                 },
             )
 
-    def test_add_task_status(self):
+
+class BudgetTestCase(unittest.TestCase):
+    def test_create_budget(self):
         with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "POST",
-                f"data/projects/{fakeid('project-1')}/settings/task-status",
-                text={
-                    "name": "task-status-1",
-                    "id": fakeid("task-status-1"),
-                },
-            )
-            task_status = gazu.project.add_task_status(
-                fakeid("project-1"),
-                {
-                    "name": "task-status-1",
-                    "id": fakeid("task-status-1"),
-                },
-            )
-
+            mock_route(mock, "POST", BUDGETS, text=RESULT)
             self.assertEqual(
-                task_status,
-                {
-                    "name": "task-status-1",
-                    "id": fakeid("task-status-1"),
-                },
-            )
-
-    def test_add_task_type(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "POST",
-                f"data/projects/{fakeid('project-1')}/settings/task-types",
-                text={
-                    "name": "task-types-1",
-                    "id": fakeid("task-types-1"),
-                    "priority": None,
-                },
-            )
-            task_types = gazu.project.add_task_type(
-                fakeid("project-1"),
-                {
-                    "name": "task-types-1",
-                    "id": fakeid("task-types-1"),
-                },
-                priority=None,
-            )
-
-            self.assertEqual(
-                task_types,
-                {
-                    "name": "task-types-1",
-                    "id": fakeid("task-types-1"),
-                    "priority": None,
-                },
-            )
-
-    def test_add_task_type_with_bitrates(self):
-        with requests_mock.mock() as mock:
-            path = f"data/projects/{fakeid('project-1')}/settings/task-types"
-            mock_route(mock, "POST", path, text={"id": fakeid("project-1")})
-            gazu.project.add_task_type(
-                fakeid("project-1"),
-                fakeid("task-types-1"),
-                priority=2,
-                hd_bitrate_compression=20,
-                ld_bitrate_compression=4,
+                gazu.project.create_budget(PROJECT, "Main", currency="EUR"),
+                RESULT,
             )
             self.assertEqual(
-                mock.last_request.json(),
+                mock.last_request.json(), {"name": "Main", "currency": "EUR"}
+            )
+
+    def test_create_budget_warns_about_the_ignored_fields(self):
+        for kwargs in (
+            {"description": "a"},
+            {"start_date": "2026-01-01"},
+            {"end_date": "2026-01-01"},
+            {"amount": 1000},
+        ):
+            with self.subTest(kwargs), requests_mock.mock() as mock:
+                mock_route(mock, "POST", BUDGETS, text=RESULT)
+                with self.assertWarns(DeprecationWarning):
+                    gazu.project.create_budget(PROJECT, "Main", **kwargs)
+                self.assertEqual(mock.last_request.json(), {"name": "Main"})
+
+    def test_create_budget_entry_sends_what_is_given(self):
+        base = {"department_id": DEPARTMENT}
+        for kwargs, extra in (
+            ({}, {}),
+            (
                 {
-                    "task_type_id": fakeid("task-types-1"),
-                    "priority": 2,
-                    "hd_bitrate_compression": 20,
-                    "ld_bitrate_compression": 4,
-                },
-            )
-
-    def test_add_task_type_with_client_visibility(self):
-        with requests_mock.mock() as mock:
-            path = f"data/projects/{fakeid('project-1')}/settings/task-types"
-            mock_route(mock, "POST", path, text={"id": fakeid("project-1")})
-            gazu.project.add_task_type(
-                fakeid("project-1"),
-                fakeid("task-types-1"),
-                priority=2,
-                is_client_visible=False,
-            )
-            self.assertEqual(
-                mock.last_request.json(),
-                {
-                    "task_type_id": fakeid("task-types-1"),
-                    "priority": 2,
-                    "is_client_visible": False,
-                },
-            )
-
-    def test_remove_task_type(self):
-        with requests_mock.mock() as mock:
-            project_id = fakeid("project-1")
-            task_type_id = fakeid("task-type-1")
-            path = f"data/projects/{project_id}/settings/task-types/{task_type_id}"
-            mock_route(mock, "DELETE", path, text="")
-            gazu.project.remove_task_type(project_id, {"id": task_type_id})
-
-    def test_set_task_status_client_allowed(self):
-        with requests_mock.mock() as mock:
-            project_id = fakeid("project-1")
-            task_status_id = fakeid("task-status-1")
-            path = f"data/projects/{project_id}/settings/task-status/{task_status_id}"
-            mock_route(mock, "PUT", path, text={"is_client_allowed": False})
-            link = gazu.project.set_task_status_client_allowed(
-                project_id, {"id": task_status_id}, False
-            )
-            self.assertEqual(link, {"is_client_allowed": False})
-            self.assertEqual(
-                mock.request_history[0].json(), {"is_client_allowed": False}
-            )
-            gazu.project.set_task_status_client_allowed(
-                project_id, task_status_id, None
-            )
-            self.assertEqual(
-                mock.request_history[1].json(), {"is_client_allowed": None}
-            )
-
-    def test_remove_task_status(self):
-        with requests_mock.mock() as mock:
-            project_id = fakeid("project-1")
-            task_status_id = fakeid("task-status-1")
-            path = f"data/projects/{project_id}/settings/task-status/{task_status_id}"
-            mock_route(mock, "DELETE", path, text="")
-            gazu.project.remove_task_status(project_id, {"id": task_status_id})
-
-    def test_add_asset_type(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "POST",
-                f"data/projects/{fakeid('project-1')}/settings/asset-types",
-                text={
-                    "name": "asset-types-1",
-                    "id": fakeid("asset-types-1"),
-                },
-            )
-            asset_type = gazu.project.add_asset_type(
-                fakeid("project-1"),
-                {
-                    "name": "asset-types-1",
-                    "id": fakeid("asset-types-1"),
-                },
-            )
-
-            self.assertEqual(
-                asset_type,
-                {
-                    "name": "asset-types-1",
-                    "id": fakeid("asset-types-1"),
-                },
-            )
-
-    def test_get_team(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                f"data/projects/{fakeid('project-1')}/team",
-                text=[
-                    {
-                        "id": fakeid("person-1"),
-                    },
-                    {
-                        "id": fakeid("person-2"),
-                    },
-                ],
-            ),
-            team = gazu.project.get_team(fakeid("project-1"))
-            self.assertEqual(len(team), 2)
-            self.assertEqual(team[0]["id"], fakeid("person-1"))
-            self.assertEqual(team[1]["id"], fakeid("person-2"))
-
-    def test_add_person_to_team(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "POST",
-                f"data/projects/{fakeid('project-1')}/team",
-                text={
-                    "team": [fakeid("person-1")],
-                },
-            )
-            team = gazu.project.add_person_to_team(
-                fakeid("project-1"),
-                {
-                    "id": fakeid("person-1"),
-                },
-            )
-            self.assertEqual(
-                team,
-                {
-                    "team": [fakeid("person-1")],
-                },
-            )
-
-    def test_add_person_to_team_with_role(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "POST",
-                f"data/projects/{fakeid('project-1')}/team",
-                text={
-                    "team": [fakeid("person-1")],
-                },
-            )
-            gazu.project.add_person_to_team(
-                fakeid("project-1"), fakeid("person-1"), role="supervisor"
-            )
-            self.assertEqual(
-                mock.last_request.json(),
-                {"person_id": fakeid("person-1"), "role": "supervisor"},
-            )
-
-    def test_update_team_member_role(self):
-        with requests_mock.mock() as mock:
-            project_id = fakeid("project-1")
-            person_id = fakeid("person-1")
-            path = f"data/projects/{project_id}/team/{person_id}"
-            mock_route(
-                mock,
-                "PUT",
-                path,
-                text={
-                    "project_id": project_id,
-                    "person_id": person_id,
-                    "role": "manager",
-                },
-            )
-            link = gazu.project.update_team_member_role(
-                project_id, person_id, "manager"
-            )
-            self.assertEqual(link["role"], "manager")
-            self.assertEqual(mock.last_request.json(), {"role": "manager"})
-
-    def test_remove_person_from_team(self):
-        with requests_mock.mock() as mock:
-            project_id = fakeid("project-1")
-            person_id = fakeid("person-1")
-            path = f"data/projects/{project_id}/team/{person_id}"
-            mock_route(mock, "DELETE", path, text="")
-            gazu.project.remove_person_from_team(project_id, person_id)
-
-    def test_get_project_task_types(self):
-        with requests_mock.mock() as mock:
-            project_id = fakeid("project-1")
-            path = f"data/projects/{project_id}/task-types"
-            mock_route(
-                mock,
-                "GET",
-                path,
-                text=[
-                    {"id": fakeid("task-type-1"), "name": "Anim"},
-                    {"id": fakeid("task-type-2"), "name": "Comp"},
-                ],
-            )
-            items = gazu.project.get_project_task_types(project_id)
-            self.assertEqual(len(items), 2)
-            self.assertEqual(items[0]["id"], fakeid("task-type-1"))
-
-    def test_get_project_task_statuses(self):
-        with requests_mock.mock() as mock:
-            project_id = fakeid("project-1")
-            path = f"data/projects/{project_id}/settings/task-status"
-            mock_route(
-                mock,
-                "GET",
-                path,
-                text=[
-                    {"id": fakeid("task-status-1"), "name": "WIP"},
-                    {"id": fakeid("task-status-2"), "name": "Done"},
-                ],
-            )
-            items = gazu.project.get_project_task_statuses(project_id)
-            self.assertEqual(len(items), 2)
-            self.assertEqual(items[1]["name"], "Done")
-
-    def test_status_automations(self):
-        with requests_mock.mock() as mock:
-            project_id = fakeid("project-1")
-            get_path = (
-                f"data/projects/{project_id}/settings/status-automations"
-            )
-            mock_route(
-                mock,
-                "GET",
-                get_path,
-                text=[{"id": fakeid("auto-1")}, {"id": fakeid("auto-2")}],
-            )
-            items = gazu.project.all_status_automations(project_id)
-            self.assertEqual(len(items), 2)
-
-            post_payload = {
-                "from_status_id": fakeid("task-status-1"),
-                "to_status_id": fakeid("task-status-2"),
-            }
-            mock_route(
-                mock,
-                "POST",
-                get_path,
-                text={"id": fakeid("auto-3"), **post_payload},
-            )
-            created = gazu.project.add_status_automation(
-                project_id, post_payload
-            )
-            self.assertEqual(created["id"], fakeid("auto-3"))
-
-            del_path = f"data/projects/{project_id}/settings/status-automations/{fakeid('auto-3')}"
-            mock_route(mock, "DELETE", del_path, text="")
-            gazu.project.remove_status_automation(
-                project_id, {"id": fakeid("auto-3")}
-            )
-
-    def test_preview_background_files(self):
-        with requests_mock.mock() as mock:
-            project_id = fakeid("project-1")
-            base_path = (
-                f"data/projects/{project_id}/settings/preview-background-files"
-            )
-
-            mock_route(
-                mock,
-                "GET",
-                base_path,
-                text=[{"id": fakeid("bg-1")}, {"id": fakeid("bg-2")}],
-            )
-            items = gazu.project.get_preview_background_files(project_id)
-            self.assertEqual(len(items), 2)
-
-            mock_route(
-                mock,
-                "POST",
-                base_path,
-                text={"id": fakeid("bg-3"), "name": "grid"},
-            )
-            created = gazu.project.add_preview_background_file(
-                project_id, {"name": "grid"}
-            )
-            self.assertEqual(created["id"], fakeid("bg-3"))
-
-            del_path = base_path + f"/{fakeid('bg-3')}"
-            mock_route(mock, "DELETE", del_path, text="")
-            gazu.project.remove_preview_background_file(
-                project_id, {"id": fakeid("bg-3")}
-            )
-
-    def test_get_milestones(self):
-        with requests_mock.mock() as mock:
-            project_id = fakeid("project-1")
-            path = f"data/projects/{project_id}/milestones"
-            mock_route(
-                mock,
-                "GET",
-                path,
-                text=[
-                    {"id": fakeid("milestone-1")},
-                    {"id": fakeid("milestone-2")},
-                ],
-            )
-            milestones = gazu.project.get_milestones(project_id)
-            self.assertEqual(len(milestones), 2)
-
-    def test_project_quotas(self):
-        with requests_mock.mock() as mock:
-            project_id = fakeid("project-1")
-            task_type_id = fakeid("task-type-1")
-            quotas_path = f"data/projects/{project_id}/quotas/{task_type_id}"
-            mock_route(
-                mock,
-                "GET",
-                quotas_path,
-                text=[{"id": fakeid("quota-1")}, {"id": fakeid("quota-2")}],
-            )
-            quotas = gazu.project.get_project_quotas(project_id, task_type_id)
-            self.assertEqual(len(quotas), 2)
-
-            person_id = fakeid("person-1")
-            person_path = (
-                f"data/projects/{project_id}/quotas/persons/{person_id}"
-            )
-            mock_route(
-                mock,
-                "GET",
-                person_path,
-                text=[{"id": fakeid("pquota-1")}],
-            )
-            pquotas = gazu.project.get_project_person_quotas(
-                project_id, person_id
-            )
-            self.assertEqual(len(pquotas), 1)
-
-    def test_budgets(self):
-        with requests_mock.mock() as mock:
-            project_id = fakeid("project-1")
-
-            path = f"data/projects/{project_id}/budgets"
-            mock_route(mock, "GET", path, text=[{"id": fakeid("budget-1")}])
-            budgets = gazu.project.get_budgets(project_id)
-            self.assertEqual(len(budgets), 1)
-
-            mock_route(
-                mock,
-                "POST",
-                path,
-                text={"id": fakeid("budget-2"), "name": "Budget 2"},
-            )
-            created = gazu.project.create_budget(
-                project_id, name="Budget 2", currency="EUR"
-            )
-            self.assertEqual(created["id"], fakeid("budget-2"))
-            self.assertEqual(
-                mock.last_request.json(),
-                {"name": "Budget 2", "currency": "EUR"},
-            )
-
-            with self.assertWarns(DeprecationWarning):
-                gazu.project.create_budget(
-                    project_id, name="Budget 2", amount=1000
-                )
-            self.assertEqual(mock.last_request.json(), {"name": "Budget 2"})
-
-            get_one_path = path + f"/{fakeid('budget-2')}"
-            mock_route(
-                mock,
-                "GET",
-                get_one_path,
-                text={"id": fakeid("budget-2"), "name": "Budget 2"},
-            )
-            budget = gazu.project.get_budget(
-                project_id, {"id": fakeid("budget-2")}
-            )
-            self.assertEqual(budget["id"], fakeid("budget-2"))
-
-            mock_route(
-                mock,
-                "PUT",
-                get_one_path,
-                text={"id": fakeid("budget-2"), "name": "Budget 2 Updated"},
-            )
-            updated = gazu.project.update_budget(
-                project_id,
-                {"id": fakeid("budget-2")},
-                {"name": "Budget 2 Updated"},
-            )
-            self.assertEqual(updated["name"], "Budget 2 Updated")
-
-            mock_route(mock, "DELETE", get_one_path, text="")
-            gazu.project.remove_budget(project_id, {"id": fakeid("budget-2")})
-
-    def test_budget_entries(self):
-        with requests_mock.mock() as mock:
-            project_id = fakeid("project-1")
-            budget_id = fakeid("budget-1")
-            base = f"data/projects/{project_id}/budgets/{budget_id}"
-
-            list_path = base + "/entries"
-            mock_route(
-                mock,
-                "GET",
-                list_path,
-                text=[{"id": fakeid("entry-1")}, {"id": fakeid("entry-2")}],
-            )
-            entries = gazu.project.get_budget_entries(
-                project_id, {"id": budget_id}
-            )
-            self.assertEqual(len(entries), 2)
-
-            mock_route(
-                mock,
-                "POST",
-                list_path,
-                text={"id": fakeid("entry-3"), "name": "Rent"},
-            )
-            created = gazu.project.create_budget_entry(
-                project_id,
-                {"id": budget_id},
-                fakeid("department-1"),
-                person={"id": fakeid("person-1")},
-                position="artist",
-                seniority="senior",
-                start_date="2025-02-01",
-                months_duration=3,
-                daily_salary=400,
-            )
-            self.assertEqual(created["id"], fakeid("entry-3"))
-            self.assertEqual(
-                mock.last_request.json(),
-                {
-                    "department_id": fakeid("department-1"),
-                    "person_id": fakeid("person-1"),
+                    "person": {"id": PERSON},
                     "position": "artist",
                     "seniority": "senior",
                     "start_date": "2025-02-01",
                     "months_duration": 3,
                     "daily_salary": 400,
                 },
-            )
+                {
+                    "person_id": PERSON,
+                    "position": "artist",
+                    "seniority": "senior",
+                    "start_date": "2025-02-01",
+                    "months_duration": 3,
+                    "daily_salary": 400,
+                },
+            ),
+        ):
+            with self.subTest(kwargs), requests_mock.mock() as mock:
+                mock_route(mock, "POST", ENTRIES, text=RESULT)
+                self.assertEqual(
+                    gazu.project.create_budget_entry(
+                        PROJECT, BUDGET, DEPARTMENT, **kwargs
+                    ),
+                    RESULT,
+                )
+                self.assertEqual(mock.last_request.json(), {**base, **extra})
 
-            one_path = base + f"/entries/{fakeid('entry-3')}"
-            mock_route(
-                mock,
-                "GET",
-                one_path,
-                text={"id": fakeid("entry-3"), "name": "Rent"},
-            )
-            entry = gazu.project.get_budget_entry(
-                project_id, {"id": budget_id}, {"id": fakeid("entry-3")}
-            )
-            self.assertEqual(entry["id"], fakeid("entry-3"))
+    def test_updates_send_the_data(self):
+        data = {"name": "New"}
+        for call, path in (
+            (
+                lambda: gazu.project.update_budget(PROJECT, BUDGET, data),
+                f"{BUDGETS}/{BUDGET}",
+            ),
+            (
+                lambda: gazu.project.update_budget_entry(
+                    PROJECT, BUDGET, ENTRY, data
+                ),
+                f"{ENTRIES}/{ENTRY}",
+            ),
+        ):
+            with self.subTest(path), requests_mock.mock() as mock:
+                mock_route(mock, "PUT", path, text=RESULT)
+                self.assertEqual(call(), RESULT)
+                self.assertEqual(mock.last_request.json(), data)
 
-            mock_route(
-                mock,
-                "PUT",
-                one_path,
-                text={"id": fakeid("entry-3"), "name": "Rent Updated"},
-            )
-            updated = gazu.project.update_budget_entry(
-                project_id,
-                {"id": budget_id},
-                {"id": fakeid("entry-3")},
-                {"name": "Rent Updated"},
-            )
-            self.assertEqual(updated["name"], "Rent Updated")
 
-            mock_route(mock, "DELETE", one_path, text="")
-            gazu.project.remove_budget_entry(
-                project_id, {"id": budget_id}, {"id": fakeid("entry-3")}
-            )
+if __name__ == "__main__":
+    unittest.main()

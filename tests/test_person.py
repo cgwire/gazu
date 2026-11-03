@@ -1,647 +1,432 @@
+import datetime
 import unittest
+
 import requests_mock
-import json
 
 import gazu.client
 import gazu.person
 
-from utils import fakeid, mock_route
+from utils import fakeid, mock_route, add_verify_file_callback
+
+PERSON = fakeid("person-1")
+BOT = fakeid("bot-1")
+DEPARTMENT = fakeid("department-1")
+DAY_OFF = fakeid("day-off-1")
+FIXTURE = "./tests/fixtures/v1.png"
+RESULT = {"id": "result"}
 
 
-class PersonTestCase(unittest.TestCase):
-    def test_all(self):
-        with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url("data/persons"),
-                text=json.dumps([{"first_name": "John", "id": "person-01"}]),
-            )
-            persons = gazu.person.all_persons()
-            person_instance = persons[0]
-            self.assertEqual(person_instance["first_name"], "John")
+class PersonReadTestCase(unittest.TestCase):
+    def test_lists_are_sorted_by_name(self):
+        for call, path in (
+            (gazu.person.all_organisations, "data/organisations"),
+            (gazu.person.all_departments, "data/departments"),
+            (gazu.person.all_persons, "data/persons"),
+        ):
+            with self.subTest(path), requests_mock.mock() as mock:
+                mock_route(
+                    mock, "GET", path, text=[{"name": "b"}, {"name": "A"}]
+                )
+                self.assertEqual(call(), [{"name": "A"}, {"name": "b"}])
 
-    def test_get_person_by_full_name(self):
+    def test_responses_are_returned_as_they_are(self):
+        person = gazu.person
+        date = datetime.date(2025, 3, 15)
+        persons = f"data/persons/{PERSON}"
+        for call, path in (
+            (
+                lambda: person.get_all_month_time_spents(PERSON, date),
+                f"{persons}/time-spents/month/all/2025/03",
+            ),
+            (
+                lambda: person.get_department(DEPARTMENT),
+                f"data/departments/{DEPARTMENT}",
+            ),
+            (
+                lambda: person.get_time_spents_by_date(PERSON, "2025-01-15"),
+                f"{persons}/time-spents/2025-01-15",
+            ),
+            (
+                lambda: person.get_week_time_spents(PERSON, 2025, 3),
+                f"{persons}/time-spents/week/2025/3",
+            ),
+            (
+                lambda: person.get_year_time_spents(PERSON, 2025),
+                f"{persons}/time-spents/year/2025",
+            ),
+            (lambda: person.get_day_offs(PERSON), f"{persons}/day-offs"),
+            (
+                lambda: person.get_week_day_offs(PERSON, 2025, 3),
+                f"{persons}/day-offs/week/2025/3",
+            ),
+            # The API expects a month with two digits.
+            (
+                lambda: person.get_month_day_offs(PERSON, 2025, 1),
+                f"{persons}/day-offs/month/2025/01",
+            ),
+            (
+                lambda: person.get_year_day_offs(PERSON, 2025),
+                f"{persons}/day-offs/year/2025",
+            ),
+            (
+                lambda: person.get_day_off(DAY_OFF),
+                f"data/day-offs/{DAY_OFF}",
+            ),
+        ):
+            with self.subTest(path), requests_mock.mock() as mock:
+                mock_route(mock, "GET", path, text=RESULT)
+                self.assertEqual(call(), RESULT)
+
+    def test_get_time_spents_range_sends_the_dates(self):
         with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url("data/persons?full_name=John Doe"),
-                text=json.dumps(
-                    [
-                        {
-                            "first_name": "John",
-                            "last_name": "Doe",
-                            "id": "person-1",
-                        },
-                    ]
-                ),
+            mock_route(
+                mock,
+                "GET",
+                f"data/persons/{PERSON}/time-spents",
+                text=[RESULT],
             )
-            person = gazu.person.get_person_by_full_name("John Doe")
-            self.assertEqual(person["id"], "person-1")
-        with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url(
-                    "data/persons?first_name=John&last_name=Doe"
+            self.assertEqual(
+                gazu.person.get_time_spents_range(
+                    PERSON, "2025-01-01", "2025-01-31"
                 ),
-                text=json.dumps(
-                    [
-                        {
-                            "first_name": "John",
-                            "last_name": "Doe",
-                            "id": "person-1",
-                        },
-                    ]
-                ),
+                [RESULT],
             )
-            person = gazu.person.get_person_by_full_name("", "John", "Doe")
-            self.assertEqual(person["id"], "person-1")
+            self.assertEqual(
+                mock.last_request.qs,
+                {"start_date": ["2025-01-01"], "end_date": ["2025-01-31"]},
+            )
+
+    def test_lookups_send_the_filters_and_exclude_bots(self):
+        person = gazu.person
+        for call, query in (
+            (lambda: person.get_person(PERSON), {"id": [PERSON]}),
+            (
+                lambda: person.get_person(PERSON, relations=True),
+                {"id": [PERSON], "relations": ["true"]},
+            ),
+            (
+                lambda: person.get_person_by_desktop_login("john"),
+                {"desktop_login": ["john"], "is_bot": ["false"]},
+            ),
+            (
+                lambda: person.get_person_by_email("a@b.c"),
+                {"email": ["a@b.c"], "is_bot": ["false"]},
+            ),
+            (
+                lambda: person.get_person_by_email("a@b.c", is_bot=True),
+                {"email": ["a@b.c"], "is_bot": ["true"]},
+            ),
+            (
+                lambda: person.get_person_by_full_name("John Doe"),
+                {"full_name": ["john doe"], "is_bot": ["false"]},
+            ),
+            # The first and last names have priority over the full name.
+            (
+                lambda: person.get_person_by_full_name("", "John", "Doe"),
+                {
+                    "first_name": ["john"],
+                    "last_name": ["doe"],
+                    "is_bot": ["false"],
+                },
+            ),
+        ):
+            with self.subTest(query=query), requests_mock.mock() as mock:
+                mock_route(mock, "GET", "data/persons", text=[RESULT, {}])
+                self.assertEqual(call(), RESULT)
+                self.assertEqual(mock.last_request.qs, query)
+                mock_route(mock, "GET", "data/persons", text=[])
+                self.assertIsNone(call())
 
     def test_get_department_by_name(self):
         with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                "data/departments?name=department-1",
-                text=[{"name": "department-1"}],
-            )
-            department = gazu.person.get_department_by_name("department-1")
-            self.assertEqual(department["name"], "department-1")
-
-    def test_get_department(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                f"data/departments/{fakeid('department-1')}",
-                text={"name": "department-1"},
-            )
-            department = gazu.person.get_department(fakeid("department-1"))
-            self.assertEqual(department["name"], "department-1")
-
-    def test_new_department(self):
-        with requests_mock.mock() as mock:
-            result = {"name": "department-1"}
-            mock_route(
-                mock, "GET", "data/departments?name=department-1", text=[]
-            )
-            mock_route(mock, "POST", "data/departments", text=result)
-            self.assertEqual(
-                gazu.person.new_department("department-1"), result
-            )
-
-    def test_update_department(self):
-        result = {
-            "id": fakeid("department-1"),
-            "name": "department-1",
-            "color": "#FF0000",
-            "archived": False,
-        }
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "PUT",
-                f"data/departments/{fakeid('department-1')}",
-                text=result,
-            )
-            department = {
-                "id": fakeid("department-1"),
-                "name": "department-1",
-                "color": "#FF0000",
-            }
-            self.assertEqual(gazu.person.update_department(department), result)
-
-    def test_remove_department(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "DELETE",
-                f"data/departments/{fakeid('department-1')}",
-                status_code=204,
-            )
-            department = {"id": fakeid("department-1"), "name": "department-1"}
-            gazu.person.remove_department(department)
-
-    def test_get_person_by_desktop_login(self):
-        with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url(
-                    "data/persons?desktop_login=john.doe"
-                ),
-                text=json.dumps(
-                    [
-                        {
-                            "first_name": "John",
-                            "last_name": "Doe",
-                            "desktop_login": "john.doe",
-                            "id": "person-01",
-                        }
-                    ]
-                ),
-            )
-            person = gazu.person.get_person_by_desktop_login("john.doe")
-            self.assertEqual(person["id"], "person-01")
-
-    def test_get_person_by_email(self):
-        with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url("data/persons?email=john@gmail.com"),
-                text=json.dumps(
-                    [
-                        {
-                            "first_name": "John",
-                            "last_name": "Doe",
-                            "desktop_login": "john.doe",
-                            "id": "person-01",
-                        }
-                    ]
-                ),
-            )
-            person = gazu.person.get_person_by_email("john@gmail.com")
-            self.assertEqual(person["id"], "person-01")
-
-    def test_get_person_by_email_is_bot(self):
-        with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url(
-                    "data/persons?email=bot@gmail.com&is_bot=True"
-                ),
-                text=json.dumps(
-                    [
-                        {
-                            "first_name": "Bot",
-                            "last_name": "",
-                            "id": "person-02",
-                        }
-                    ]
-                ),
-            )
-            person = gazu.person.get_person_by_email(
-                "bot@gmail.com", is_bot=True
-            )
-            self.assertEqual(person["id"], "person-02")
-
-    def test_new_person(self):
-        with requests_mock.mock() as mock:
-            result = {
-                "first_name": "John",
-                "last_name": "Doe",
-                "email": "john@gmail.com",
-                "desktop_login": "john.doe",
-                "phone": "06 07 07 07 07",
-                "role": "user",
-                "id": "person-01",
-                "departments": [fakeid("department-1")],
-            }
-            mock_route(
-                mock, "GET", "data/persons?email=john@gmail.com", text=[]
-            )
-            mock_route(mock, "POST", "data/persons", text=result)
-            self.assertEqual(
-                gazu.person.new_person(
-                    "Jhon",
-                    "Doe",
-                    "john@gmail.com",
-                    "+33 6 07 07 07 07",
-                    "user",
-                    departments=fakeid("department-1"),
-                ),
-                result,
-            )
-
-    def test_new_bot(self):
-        with requests_mock.mock() as mock:
-            result = {
-                "first_name": "Bot 1",
-                "last_name": "",
-                "is_bot": True,
-                "id": "bot-1",
-                "departments": [fakeid("department-1")],
-            }
-            mock_route(mock, "POST", "data/persons", text=result)
-            self.assertEqual(
-                gazu.person.new_bot(
-                    "Bot 1",
-                    "test@test.com",
-                    "admin",
-                    departments=fakeid("department-1"),
-                ),
-                result,
-            )
-
-    def test_update_person(self):
-        result = {
-            "first_name": "John",
-            "last_name": "Doe",
-            "desktop_login": "john.doe",
-            "id": "person-1",
-            "phone": "+33 6 07 07 07 07",
-            "departments": [fakeid("department-1")],
-        }
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "PUT",
-                f"data/persons/{fakeid('person-1')}",
-                text=result,
-            )
-            person = {
-                "id": fakeid("person-1"),
-                "phone": "+33 6 07 07 07 07",
-                "departments": [{"id": fakeid("department-1")}],
-            }
-            self.assertEqual(gazu.person.update_person(person), result)
-            # The caller's dict must not be normalized in place.
-            self.assertEqual(
-                person["departments"], [{"id": fakeid("department-1")}]
-            )
-
-    def test_update_bot(self):
-        result = {
-            "first_name": "Bot 1",
-            "last_name": "",
-            "is_bot": True,
-            "id": "bot-1",
-            "departments": [fakeid("department-1")],
-        }
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "PUT",
-                f"data/persons/{fakeid('bot-1')}",
-                text=result,
-            )
-            bot = {
-                "id": fakeid("bot-1"),
-                "departments": [fakeid("department-1")],
-            }
-            self.assertEqual(gazu.person.update_bot(bot), result)
-
-    def test_all_organisations(self):
-        result = [{"id": fakeid("organisation-1"), "name": "organisation-1"}]
-        with requests_mock.mock() as mock:
-            mock_route(mock, "GET", "data/organisations", text=result)
-            self.assertEqual(gazu.person.all_organisations(), result)
-
-    def test_all_departments(self):
-        result = [{"id": fakeid("departments-1"), "name": "department-1"}]
-        with requests_mock.mock() as mock:
-            mock_route(mock, "GET", "data/departments", text=result)
-            self.assertEqual(gazu.person.all_departments(), result)
-
-    def test_get_person(self):
-        result = [{"id": fakeid("John Doe"), "full_name": "John Doe"}]
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                f"data/persons?id={fakeid('John Doe')}",
-                text=result,
-            )
-            self.assertEqual(
-                gazu.person.get_person(fakeid("John Doe")), result[0]
-            )
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                f"data/persons?id={fakeid('John Doe')}&relations=True",
-                text=result,
-            )
-            self.assertEqual(
-                gazu.person.get_person(fakeid("John Doe"), relations=True),
-                result[0],
-            )
-
-    def test_remove_person(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock, "DELETE", "data/persons/person-01", status_code=204
-            )
-            person = {"id": "person-01", "name": "Table"}
-            gazu.person.remove_person(person)
-            mock_route(
-                mock,
-                "DELETE",
-                "data/persons/person-01?force=True",
-                status_code=204,
-            )
-            person = {"id": "person-01", "name": "Table"}
-            gazu.person.remove_person(person, True)
-
-    def test_remove_bot(self):
-        with requests_mock.mock() as mock:
-            mock_route(mock, "DELETE", "data/persons/bot-01", status_code=204)
-            bot = {"id": "bot-01", "name": "Table"}
-            gazu.person.remove_bot(bot)
-            mock_route(
-                mock,
-                "DELETE",
-                "data/persons/bot-01?force=True",
-                status_code=204,
-            )
-            bot = {"id": "bot-01", "name": "Table"}
-            gazu.person.remove_bot(bot, True)
+            mock_route(mock, "GET", "data/departments?name=FX", text=[RESULT])
+            self.assertEqual(gazu.person.get_department_by_name("FX"), RESULT)
 
     def test_get_person_url(self):
-        wanted_result = f"{gazu.client.get_api_url_from_host()}/people/{fakeid('person-1')}/"
         self.assertEqual(
-            wanted_result, gazu.person.get_person_url(fakeid("person-1"))
+            gazu.person.get_person_url(PERSON),
+            f"{gazu.client.get_api_url_from_host()}/people/{PERSON}/",
         )
 
     def test_get_organisation(self):
         with requests_mock.mock() as mock:
-            result = {"organisation": "test-organisation"}
-            mock.get(
-                gazu.client.get_full_url("auth/authenticated"),
-                text=json.dumps(result),
+            mock_route(
+                mock,
+                "GET",
+                "auth/authenticated",
+                text={"organisation": RESULT},
+            )
+            self.assertEqual(gazu.person.get_organisation(), RESULT)
+
+    def test_get_presence_log_pads_the_month_and_returns_text(self):
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                "data/persons/presence-logs/2021-08",
+                text="2021;1;2",
+            )
+            self.assertEqual(gazu.person.get_presence_log(2021, 8), "2021;1;2")
+
+
+class PersonWriteTestCase(unittest.TestCase):
+    def test_new_department_creates_it_once(self):
+        with requests_mock.mock() as mock:
+            mock_route(mock, "GET", "data/departments?name=FX", text=[])
+            mock_route(mock, "POST", "data/departments", text=RESULT)
+            self.assertEqual(
+                gazu.person.new_department("FX", "#000", True), RESULT
             )
             self.assertEqual(
-                gazu.person.get_organisation(), "test-organisation"
+                mock.last_request.json(),
+                {"name": "FX", "color": "#000", "archived": True},
             )
-
-    def test_get_presence_log(self):
-        result = """
-        2021;1;2;3;4;5;6;7;8;9;10;11;12;13;14;15;16;17;18;19;20;21;22;23;24;25;26;27;28;29;30;31
-        Super Admin;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"""
         with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url("data/persons/presence-logs/2021-08"),
-                text=result,
+            mock_route(mock, "GET", "data/departments?name=FX", text=[RESULT])
+            self.assertEqual(gazu.person.new_department("FX"), RESULT)
+            self.assertEqual(mock.call_count, 1)
+
+    def test_update_department(self):
+        department = {"id": DEPARTMENT, "name": "FX"}
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock, "PUT", f"data/departments/{DEPARTMENT}", text=RESULT
             )
-            self.assertEqual(gazu.person.get_presence_log("2021", "8"), result)
+            self.assertEqual(gazu.person.update_department(department), RESULT)
+            self.assertEqual(mock.last_request.json(), department)
 
-    def test_set_avatar(self):
+    def test_remove_department_warns_that_force_is_ignored(self):
         with requests_mock.mock() as mock:
-            path = f"/pictures/thumbnails/persons/{fakeid('person-1')}"
-            mock.post(
-                gazu.client.get_full_url(path),
-                text=json.dumps(
-                    {"id": fakeid("person-1"), "name": "test-name"}
+            mock_route(
+                mock,
+                "DELETE",
+                f"data/departments/{DEPARTMENT}",
+                status_code=204,
+            )
+            gazu.person.remove_department(DEPARTMENT)
+            with self.assertWarns(DeprecationWarning):
+                gazu.person.remove_department(DEPARTMENT, force=True)
+            self.assertEqual(mock.last_request.qs, {})
+
+    def test_new_person_sends_the_fields(self):
+        with requests_mock.mock() as mock:
+            mock_route(mock, "GET", "data/persons", text=[])
+            mock_route(mock, "POST", "data/persons", text=RESULT)
+            self.assertEqual(
+                gazu.person.new_person(
+                    "John",
+                    "Doe",
+                    "a@b.c",
+                    "0607",
+                    "manager",
+                    "john",
+                    departments=[DEPARTMENT],
+                    password="pwd",
                 ),
+                RESULT,
             )
-            person_id = gazu.person.set_avatar(
-                fakeid("person-1"), "./tests/fixtures/v1.png"
+            self.assertEqual(
+                mock.last_request.json(),
+                {
+                    "first_name": "John",
+                    "last_name": "Doe",
+                    "email": "a@b.c",
+                    "phone": "0607",
+                    "role": "manager",
+                    "desktop_login": "john",
+                    "departments": [DEPARTMENT],
+                    "password": "pwd",
+                    "active": True,
+                    "contract_type": "open-ended",
+                },
             )
 
-            self.assertEqual(person_id["id"], fakeid("person-1"))
-
-    def test_change_password_for_person(self):
+    def test_new_person_returns_the_existing_person(self):
         with requests_mock.mock() as mock:
-            person_id = fakeid("person-1")
+            mock_route(mock, "GET", "data/persons", text=[RESULT])
+            self.assertEqual(
+                gazu.person.new_person("John", "Doe", "a@b.c"), RESULT
+            )
+            self.assertEqual(mock.call_count, 1)
+
+    def test_new_bot_sends_the_fields(self):
+        with requests_mock.mock() as mock:
+            mock_route(mock, "POST", "data/persons", text=RESULT)
+            self.assertEqual(
+                gazu.person.new_bot(
+                    "Bot",
+                    "bot@b.c",
+                    "admin",
+                    departments=DEPARTMENT,
+                    expiration_date="2030-01-01",
+                ),
+                RESULT,
+            )
+            self.assertEqual(
+                mock.last_request.json(),
+                {
+                    "first_name": "Bot",
+                    "last_name": "",
+                    "email": "bot@b.c",
+                    "role": "admin",
+                    "departments": [DEPARTMENT],
+                    "active": True,
+                    "expiration_date": "2030-01-01",
+                    "is_bot": True,
+                },
+            )
+
+    def test_update_person_and_bot_send_department_ids(self):
+        for call, entity in (
+            (gazu.person.update_person, PERSON),
+            (gazu.person.update_bot, BOT),
+        ):
+            with self.subTest(call.__name__), requests_mock.mock() as mock:
+                mock_route(mock, "PUT", f"data/persons/{entity}", text=RESULT)
+                departments = [{"id": DEPARTMENT}]
+                person = {"id": entity, "departments": departments}
+                self.assertEqual(call(person), RESULT)
+                self.assertEqual(
+                    mock.last_request.json()["departments"], [DEPARTMENT]
+                )
+                # The dict of the caller must not change.
+                self.assertEqual(person["departments"], departments)
+
+    def test_remove_person_and_bot_send_force_only_when_asked(self):
+        for call, entity in (
+            (gazu.person.remove_person, PERSON),
+            (gazu.person.remove_bot, {"id": BOT}),
+        ):
+            for force, query in ((False, {}), (True, {"force": ["true"]})):
+                with self.subTest(call.__name__, force=force):
+                    with requests_mock.mock() as mock:
+                        identifier = (
+                            entity["id"]
+                            if isinstance(entity, dict)
+                            else entity
+                        )
+                        mock_route(
+                            mock,
+                            "DELETE",
+                            f"data/persons/{identifier}",
+                            status_code=204,
+                        )
+                        call(entity, force)
+                        self.assertEqual(mock.last_request.qs, query)
+
+    def test_set_avatar_sends_the_file(self):
+        path = f"pictures/thumbnails/persons/{PERSON}"
+        with open(FIXTURE, "rb") as test_file:
+            content = test_file.read()
+        with requests_mock.Mocker() as mock:
+            mock_route(mock, "POST", path, text=RESULT)
+            add_verify_file_callback(mock, {"file": content}, path)
+            self.assertEqual(gazu.person.set_avatar(PERSON, FIXTURE), RESULT)
+
+    def test_change_password_sends_it_twice(self):
+        with requests_mock.mock() as mock:
             mock_route(
                 mock,
                 "POST",
-                f"actions/persons/{person_id}/change-password",
+                f"actions/persons/{PERSON}/change-password",
                 text={"success": True},
             )
             self.assertEqual(
-                gazu.person.change_password_for_person(person_id, "password"),
+                gazu.person.change_password_for_person(PERSON, "pwd"),
                 {"success": True},
+            )
+            self.assertEqual(
+                mock.last_request.json(),
+                {"password": "pwd", "password_2": "pwd"},
             )
 
     def test_invite_person(self):
         with requests_mock.mock() as mock:
-            person_id = fakeid("person-1")
             mock_route(
                 mock,
                 "GET",
-                f"actions/persons/{person_id}/invite",
+                f"actions/persons/{PERSON}/invite",
                 text={"success": True},
             )
             self.assertEqual(
-                gazu.person.invite_person(person_id),
-                {"success": True},
+                gazu.person.invite_person(PERSON), {"success": True}
             )
 
-    def test_get_time_spents_by_date(self):
-        with requests_mock.mock() as mock:
-            person_id = fakeid("person-1")
-            mock_route(
-                mock,
-                "GET",
-                f"data/persons/{person_id}/time-spents/2025-01-15",
-                text=[{"id": fakeid("ts-1")}, {"id": fakeid("ts-2")}],
-            )
-            time_spents = gazu.person.get_time_spents_by_date(
-                person_id, "2025-01-15"
-            )
-            self.assertEqual(len(time_spents), 2)
-
-    def test_get_week_time_spents(self):
-        with requests_mock.mock() as mock:
-            person_id = fakeid("person-1")
-            mock_route(
-                mock,
-                "GET",
-                f"data/persons/{person_id}/time-spents/week/2025/3",
-                text=[{"id": fakeid("ts-1")}],
-            )
-            time_spents = gazu.person.get_week_time_spents(person_id, 2025, 3)
-            self.assertEqual(len(time_spents), 1)
-
-    def test_get_year_time_spents(self):
-        with requests_mock.mock() as mock:
-            person_id = fakeid("person-1")
-            mock_route(
-                mock,
-                "GET",
-                f"data/persons/{person_id}/time-spents/year/2025",
-                text=[{"id": fakeid("ts-1")}, {"id": fakeid("ts-2")}],
-            )
-            time_spents = gazu.person.get_year_time_spents(person_id, 2025)
-            self.assertEqual(len(time_spents), 2)
-
-    def test_get_day_offs(self):
-        with requests_mock.mock() as mock:
-            person_id = fakeid("person-1")
-            mock_route(
-                mock,
-                "GET",
-                f"data/persons/{person_id}/day-offs",
-                text=[{"id": fakeid("dayoff-1")}, {"id": fakeid("dayoff-2")}],
-            )
-            day_offs = gazu.person.get_day_offs(person_id)
-            self.assertEqual(len(day_offs), 2)
-
-    def test_get_week_day_offs(self):
-        with requests_mock.mock() as mock:
-            person_id = fakeid("person-1")
-            mock_route(
-                mock,
-                "GET",
-                f"data/persons/{person_id}/day-offs/week/2025/3",
-                text=[{"id": fakeid("dayoff-1")}],
-            )
-            day_offs = gazu.person.get_week_day_offs(person_id, 2025, 3)
-            self.assertEqual(len(day_offs), 1)
-
-    def test_get_month_day_offs(self):
-        with requests_mock.mock() as mock:
-            person_id = fakeid("person-1")
-            mock_route(
-                mock,
-                "GET",
-                f"data/persons/{person_id}/day-offs/month/2025/01",
-                text=[{"id": fakeid("dayoff-1")}],
-            )
-            day_offs = gazu.person.get_month_day_offs(person_id, 2025, 1)
-            self.assertEqual(len(day_offs), 1)
-
-    def test_get_year_day_offs(self):
-        with requests_mock.mock() as mock:
-            person_id = fakeid("person-1")
-            mock_route(
-                mock,
-                "GET",
-                f"data/persons/{person_id}/day-offs/year/2025",
-                text=[{"id": fakeid("dayoff-1")}, {"id": fakeid("dayoff-2")}],
-            )
-            day_offs = gazu.person.get_year_day_offs(person_id, 2025)
-            self.assertEqual(len(day_offs), 2)
-
-    def test_get_day_off(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                "data/day-offs/%s" % fakeid("dayoff-1"),
-                text={
-                    "id": fakeid("dayoff-1"),
-                    "date": "2026-04-10",
-                    "end_date": "2026-04-11",
-                    "person_id": fakeid("person-1"),
-                },
-            )
-            day_off = gazu.person.get_day_off(fakeid("dayoff-1"))
-            self.assertEqual(day_off["id"], fakeid("dayoff-1"))
-            self.assertEqual(day_off["date"], "2026-04-10")
-
-    def test_new_day_off(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "POST",
-                "data/day-offs",
-                text={
-                    "id": fakeid("dayoff-1"),
-                    "date": "2026-04-10",
-                    "end_date": "2026-04-11",
-                    "person_id": fakeid("person-1"),
-                    "description": "Vacances",
-                },
-                status_code=201,
-            )
-            day_off = gazu.person.new_day_off(
-                fakeid("person-1"),
-                "2026-04-10",
-                "2026-04-11",
-                description="Vacances",
-            )
-            self.assertEqual(day_off["id"], fakeid("dayoff-1"))
-            self.assertEqual(day_off["description"], "Vacances")
-            request_body = json.loads(mock.request_history[0].text)
-            self.assertEqual(request_body["person_id"], fakeid("person-1"))
-            self.assertEqual(request_body["date"], "2026-04-10")
-            self.assertEqual(request_body["end_date"], "2026-04-11")
-            self.assertEqual(request_body["description"], "Vacances")
-
-    def test_new_day_off_without_description(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "POST",
-                "data/day-offs",
-                text={
-                    "id": fakeid("dayoff-1"),
-                    "date": "2026-04-10",
-                    "end_date": "2026-04-10",
-                    "person_id": fakeid("person-1"),
-                },
-                status_code=201,
-            )
-            day_off = gazu.person.new_day_off(
-                fakeid("person-1"), "2026-04-10", "2026-04-10"
-            )
-            self.assertEqual(day_off["id"], fakeid("dayoff-1"))
-            request_body = json.loads(mock.request_history[0].text)
-            self.assertNotIn("description", request_body)
+    def test_new_day_off_sends_the_description_only_when_given(self):
+        base = {
+            "person_id": PERSON,
+            "date": "2026-04-10",
+            "end_date": "2026-04-11",
+        }
+        for kwargs, body in (
+            ({}, base),
+            (
+                {"description": "Holiday"},
+                {**base, "description": "Holiday"},
+            ),
+        ):
+            with self.subTest(kwargs), requests_mock.mock() as mock:
+                mock_route(mock, "POST", "data/day-offs", text=RESULT)
+                self.assertEqual(
+                    gazu.person.new_day_off(
+                        PERSON, "2026-04-10", "2026-04-11", **kwargs
+                    ),
+                    RESULT,
+                )
+                self.assertEqual(mock.last_request.json(), body)
 
     def test_update_day_off(self):
+        day_off = {"id": DAY_OFF, "date": "2026-04-12"}
         with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "PUT",
-                "data/day-offs/%s" % fakeid("dayoff-1"),
-                text={
-                    "id": fakeid("dayoff-1"),
-                    "date": "2026-04-12",
-                    "end_date": "2026-04-14",
-                    "person_id": fakeid("person-1"),
-                },
-            )
-            day_off = gazu.person.update_day_off(
-                {
-                    "id": fakeid("dayoff-1"),
-                    "date": "2026-04-12",
-                    "end_date": "2026-04-14",
-                }
-            )
-            self.assertEqual(day_off["date"], "2026-04-12")
-
-    def test_remove_day_off(self):
-        with requests_mock.mock() as mock:
-            mock.delete(
-                gazu.client.get_full_url(
-                    "data/day-offs/%s" % fakeid("dayoff-1")
-                ),
-                status_code=204,
-            )
-            gazu.person.remove_day_off(fakeid("dayoff-1"))
+            mock_route(mock, "PUT", f"data/day-offs/{DAY_OFF}", text=RESULT)
+            self.assertEqual(gazu.person.update_day_off(day_off), RESULT)
+            self.assertEqual(mock.last_request.json(), day_off)
 
     def test_add_person_to_department(self):
         with requests_mock.mock() as mock:
-            person_id = fakeid("person-1")
-            dept_id = fakeid("department-1")
             mock_route(
                 mock,
                 "POST",
-                f"actions/persons/{person_id}/departments/add",
-                text={"id": person_id, "departments": [dept_id]},
+                f"actions/persons/{PERSON}/departments/add",
+                text=RESULT,
             )
-            result = gazu.person.add_person_to_department(
-                person_id, {"id": dept_id}
+            self.assertEqual(
+                gazu.person.add_person_to_department(
+                    PERSON, {"id": DEPARTMENT}
+                ),
+                RESULT,
             )
-            self.assertEqual(result["id"], person_id)
-
-    def test_remove_person_from_department(self):
-        with requests_mock.mock() as mock:
-            person_id = fakeid("person-1")
-            dept_id = fakeid("department-1")
-            mock_route(
-                mock,
-                "DELETE",
-                f"actions/persons/{person_id}/departments/{dept_id}",
-                status_code=204,
-            )
-            gazu.person.remove_person_from_department(
-                person_id, {"id": dept_id}
+            self.assertEqual(
+                mock.last_request.json(), {"department_id": DEPARTMENT}
             )
 
-    def test_disable_two_factor_authentication(self):
-        with requests_mock.mock() as mock:
-            person_id = fakeid("person-1")
-            mock_route(
-                mock,
-                "DELETE",
-                f"actions/persons/{person_id}/disable-two-factor-authentication",
-                status_code=204,
-            )
-            gazu.person.disable_two_factor_authentication(person_id)
+    def test_deletions_use_their_route(self):
+        person = gazu.person
+        for call, path in (
+            (
+                lambda: person.remove_day_off(DAY_OFF),
+                f"data/day-offs/{DAY_OFF}",
+            ),
+            (
+                lambda: person.remove_person_from_department(
+                    PERSON, {"id": DEPARTMENT}
+                ),
+                f"actions/persons/{PERSON}/departments/{DEPARTMENT}",
+            ),
+            (
+                lambda: person.disable_two_factor_authentication(PERSON),
+                f"actions/persons/{PERSON}/disable-two-factor-authentication",
+            ),
+            (
+                lambda: person.clear_person_avatar(PERSON),
+                f"actions/persons/{PERSON}/clear-avatar",
+            ),
+        ):
+            with self.subTest(path), requests_mock.mock() as mock:
+                mock_route(mock, "DELETE", path, status_code=204)
+                call()
+                self.assertEqual(mock.call_count, 1)
 
-    def test_clear_person_avatar(self):
-        with requests_mock.mock() as mock:
-            person_id = fakeid("person-1")
-            mock_route(
-                mock,
-                "DELETE",
-                f"actions/persons/{person_id}/clear-avatar",
-                status_code=204,
-            )
-            gazu.person.clear_person_avatar(person_id)
+
+if __name__ == "__main__":
+    unittest.main()

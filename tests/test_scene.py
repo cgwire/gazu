@@ -1,323 +1,196 @@
 import unittest
-import json
+
 import requests_mock
 
-import gazu.client
 import gazu.scene
 
 from utils import fakeid, mock_route
 
+PROJECT = fakeid("project-1")
+SEQUENCE = fakeid("sequence-1")
+SCENE = fakeid("scene-1")
+SHOT = fakeid("shot-1")
+ASSET = fakeid("asset-1")
+INSTANCE = fakeid("asset-instance-1")
+RESULT = {"id": "result"}
+# Zou groups the instances of a scene by asset ID.
+INSTANCES = {ASSET: [{"id": INSTANCE, "number": 1}]}
 
-class SceneTestCase(unittest.TestCase):
-    def test_get_scene(self):
-        with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url("data/scenes/scene-1"),
-                text=json.dumps(
-                    {"name": "Scene 01", "project_id": "project-01"}
-                ),
-            )
-            scene = gazu.scene.get_scene("scene-1")
-            self.assertEqual(scene["name"], "Scene 01")
 
-    def test_get_scene_by_name(self):
-        with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url(
-                    "data/scenes/all?parent_id=sequence-01&name=Scene01"
-                ),
-                text=json.dumps(
-                    [{"name": "Scene01", "project_id": "project-01"}]
-                ),
-            )
-            sequence = {"id": "sequence-01"}
-            scene = gazu.scene.get_scene_by_name(sequence, "Scene01")
-            self.assertEqual(scene["name"], "Scene01")
-
-    def test_all_scenes_for_project(self):
-        with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url("data/projects/project-01/scenes"),
-                text=json.dumps(
-                    [{"name": "Scene 01", "project_id": "project-01"}]
-                ),
-            )
-            project = {"id": "project-01"}
-            scenes = gazu.scene.all_scenes_for_project(project)
-            self.assertEqual(len(scenes), 1)
-            scene_instance = scenes[0]
-            self.assertEqual(scene_instance["name"], "Scene 01")
-            self.assertEqual(scene_instance["project_id"], "project-01")
-
-    def test_all_scenes(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                "data/projects/project-01/scenes",
-                text=[{"name": "Scene 01", "project_id": "project-01"}],
-            )
-            mock_route(
-                mock,
-                "GET",
-                "data/scenes/all",
-                text=[{"name": "Scene 01", "project_id": "project-01"}],
-            )
-            project = {"id": "project-01"}
-            scenes = gazu.scene.all_scenes_for_project(project)
-            self.assertEqual(len(scenes), 1)
-            scene_instance = scenes[0]
-            self.assertEqual(scene_instance["name"], "Scene 01")
-            self.assertEqual(scene_instance["project_id"], "project-01")
-            scenes = gazu.scene.all_scenes()
-            self.assertEqual(len(scenes), 1)
-            scene_instance = scenes[0]
-            self.assertEqual(scene_instance["name"], "Scene 01")
-            self.assertEqual(scene_instance["project_id"], "project-01")
-
-    def test_all_scenes_for_sequence(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                "data/sequences/sequence-01/scenes",
-                text=[
-                    {
-                        "name": "Scene 01",
-                        "project_id": "project-01",
-                        "parent_id": "sequence-01",
-                    }
-                ],
+class SceneReadTestCase(unittest.TestCase):
+    def test_lists_are_sorted_by_name(self):
+        scene = gazu.scene
+        for call, path in (
+            (scene.all_scenes, "data/scenes/all"),
+            (
+                lambda: scene.all_scenes(PROJECT),
+                f"data/projects/{PROJECT}/scenes",
             ),
-            sequence = {"id": "sequence-01"}
-            scenes = gazu.scene.all_scenes_for_sequence(sequence)
-            self.assertEqual(len(scenes), 1)
-            scene_instance = scenes[0]
-            self.assertEqual(scene_instance["name"], "Scene 01")
-            self.assertEqual(scene_instance["project_id"], "project-01")
-            self.assertEqual(scene_instance["parent_id"], "sequence-01")
+            (
+                lambda: scene.all_scenes_for_project({"id": PROJECT}),
+                f"data/projects/{PROJECT}/scenes",
+            ),
+            (
+                lambda: scene.all_scenes_for_sequence(SEQUENCE),
+                f"data/sequences/{SEQUENCE}/scenes",
+            ),
+        ):
+            with self.subTest(path), requests_mock.mock() as mock:
+                mock_route(
+                    mock, "GET", path, text=[{"name": "b"}, {"name": "A"}]
+                )
+                self.assertEqual(call(), [{"name": "A"}, {"name": "b"}])
 
+    def test_responses_are_returned_as_they_are(self):
+        scene = gazu.scene
+        for call, path, result in (
+            (
+                lambda: scene.get_scene(SCENE),
+                f"data/scenes/{SCENE}",
+                RESULT,
+            ),
+            (
+                lambda: scene.all_asset_instances_for_scene(SCENE),
+                f"data/scenes/{SCENE}/asset-instances",
+                INSTANCES,
+            ),
+            (
+                lambda: scene.all_camera_instances_for_scene(SCENE),
+                f"data/scenes/{SCENE}/camera-instances",
+                INSTANCES,
+            ),
+            (
+                lambda: scene.all_shots_for_scene(SCENE),
+                f"data/scenes/{SCENE}/shots",
+                [RESULT],
+            ),
+        ):
+            with self.subTest(path), requests_mock.mock() as mock:
+                mock_route(mock, "GET", path, text=result)
+                self.assertEqual(call(), result)
+
+    def test_lookups_return_the_first_match_or_none(self):
+        for call, path, query in (
+            (
+                lambda: gazu.scene.get_scene_by_name(SEQUENCE, "Scene"),
+                "data/scenes/all",
+                {"parent_id": [SEQUENCE], "name": ["scene"]},
+            ),
+            (
+                lambda: gazu.scene.get_asset_instance_by_name(SCENE, "Inst"),
+                "data/asset-instances",
+                {"name": ["inst"], "scene_id": [SCENE]},
+            ),
+        ):
+            with self.subTest(path), requests_mock.mock() as mock:
+                mock_route(mock, "GET", path, text=[RESULT, {}])
+                self.assertEqual(call(), RESULT)
+                self.assertEqual(mock.last_request.qs, query)
+                mock_route(mock, "GET", path, text=[])
+                self.assertIsNone(call())
+
+    def test_get_sequence_from_scene_fetches_the_scene_of_an_id(self):
+        with requests_mock.mock() as mock:
+            mock_route(mock, "GET", f"data/sequences/{SEQUENCE}", text=RESULT)
+            self.assertEqual(
+                gazu.scene.get_sequence_from_scene(
+                    {"id": SCENE, "parent_id": SEQUENCE}
+                ),
+                RESULT,
+            )
+            self.assertEqual(mock.call_count, 1)
+            mock_route(
+                mock,
+                "GET",
+                f"data/scenes/{SCENE}",
+                text={"id": SCENE, "parent_id": SEQUENCE},
+            )
+            self.assertEqual(gazu.scene.get_sequence_from_scene(SCENE), RESULT)
+
+
+class SceneWriteTestCase(unittest.TestCase):
     def test_new_scene(self):
         with requests_mock.mock() as mock:
-            mock.post(
-                gazu.client.get_full_url("data/projects/project-01/scenes"),
-                text=json.dumps(
-                    {"id": "scene-01", "project_id": "project-01"}
-                ),
-            )
-            project = {"id": "project-01"}
-            sequence = {"id": "sequence-01"}
-            scene = gazu.scene.new_scene(project, sequence, "Scene 01")
-            self.assertEqual(scene["id"], "scene-01")
-
-    def test_update_scene(self):
-        with requests_mock.mock() as mock:
-            mock = mock.put(
-                gazu.client.get_full_url("data/entities/scene-id"),
-                text=json.dumps(
-                    {
-                        "id": "scene-id",
-                        "name": "S02",
-                        "project_id": "project-01",
-                    }
-                ),
-            )
-            scene = {"id": "scene-id", "name": "S02"}
-            scene = gazu.scene.update_scene(scene)
-            self.assertEqual(scene["id"], "scene-id")
-            self.assertEqual(scene["name"], "S02")
-
-    def test_all_camera_instances_for_scene(self):
-        with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url(
-                    "data/scenes/scene-1/camera-instances"
-                ),
-                text=json.dumps(
-                    [
-                        {
-                            "id": "scene-1-camera-instance-1",
-                            "number": "1",
-                            "entity_id": "scene-1",
-                        }
-                    ]
-                ),
-            )
-            scene = {"id": "scene-1"}
-            instances = gazu.scene.all_camera_instances_for_scene(scene)
-            self.assertEqual(len(instances), 1)
-            self.assertEqual(instances[0]["id"], "scene-1-camera-instance-1")
-
-    def test_all_shots_for_scene(self):
-        with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url("data/scenes/scene-1/shots"),
-                text=json.dumps([{"id": "shot-01"}, {"id": "shot-2"}]),
-            )
-            scene = {"id": "scene-1"}
-            shots = gazu.scene.all_shots_for_scene(scene)
-            self.assertEqual(len(shots), 2)
-            self.assertEqual(shots[0]["id"], "shot-01")
-
-    def test_add_shot_to_scene(self):
-        with requests_mock.mock() as mock:
-            mock.post(
-                gazu.client.get_full_url("data/scenes/scene-1/shots"),
-                text=json.dumps({"id": "shot-01"}),
-            )
-            scene = {"id": "scene-1"}
-            shot = {"id": "shot-01"}
-            shot = gazu.scene.add_shot_to_scene(scene, shot)
-            self.assertEqual(shot["id"], "shot-01")
-
-    def test_remove_shot_from_scene(self):
-        with requests_mock.mock() as mock:
-            mock.delete(
-                gazu.client.get_full_url("data/scenes/scene-1/shots/shot-01"),
-                text="",
-            )
-            scene = {"id": "scene-1"}
-            shot = {"id": "shot-01"}
-            gazu.scene.remove_shot_from_scene(scene, shot)
-
-    def test_add_asset_instance(self):
-        with requests_mock.mock() as mock:
-            result = {"id": "asset-instance-01"}
-            mock = mock.post(
-                gazu.client.get_full_url(
-                    "data/scenes/scene-1/asset-instances"
-                ),
-                text=json.dumps(result),
-            )
-            scene = {"id": "scene-1"}
-            asset = {"id": "asset-01"}
-            asset_instance = gazu.scene.new_scene_asset_instance(scene, asset)
-            self.assertEqual(asset_instance, result)
-
-    def test_all_asset_instances_for_scene(self):
-        with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url(
-                    "data/scenes/scene-1/asset-instances"
-                ),
-                text=json.dumps(
-                    [
-                        {
-                            "id": "scene-1-instance-1",
-                            "number": "1",
-                            "entity_id": "scene-1",
-                        }
-                    ]
-                ),
-            )
-            scene = {"id": "scene-1"}
-            instances = gazu.scene.all_asset_instances_for_scene(scene)
-            self.assertEqual(len(instances), 1)
-            self.assertEqual(instances[0]["id"], "scene-1-instance-1")
-
-    def test_get_asset_instance_by_name(self):
-        instance = {
-            "id": "scene-1-instance-1",
-            "number": "1",
-            "entity_id": "scene-1",
-        }
-        with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url(
-                    "data/asset-instances?"
-                    "name=instance_name&scene_id=scene-1"
-                ),
-                text=json.dumps([instance]),
-            )
-            scene = {"id": "scene-1"}
-            result = gazu.scene.get_asset_instance_by_name(
-                scene, "instance_name"
-            )
-            self.assertEqual(instance, result)
-
-    def test_update_asset_instance_name(self):
-        updated_name = "updated_name"
-        instance = {
-            "id": "instance-id",
-            "name": "original",
-            "number": "1",
-            "entity_id": "scene-1",
-        }
-        with requests_mock.mock() as mock:
-            mock = mock.put(
-                gazu.client.get_full_url("data/asset-instances/instance-id"),
-                text=json.dumps(
-                    {
-                        "id": "instance-id",
-                        "name": updated_name,
-                        "number": "1",
-                        "entity_id": "scene-1",
-                    }
-                ),
-            )
-            instance = gazu.scene.update_asset_instance_name(
-                instance, updated_name
-            )
-            self.assertEqual(instance["name"], updated_name)
-
-    def test_update_asset_instance_data(self):
-        with requests_mock.mock() as mock:
-            mock.put(
-                gazu.client.get_full_url(
-                    f"data/asset-instances/{fakeid('asset-instance-1')}"
-                ),
-                text=json.dumps(
-                    {
-                        "id": fakeid("asset-instance-1"),
-                        "name": "asset-instance-1",
-                        "data": {"extra-data": "extra-data"},
-                    }
-                ),
-            )
-            asset_instance = gazu.scene.update_asset_instance_data(
-                fakeid("asset-instance-1"), {"extra-data": "extra-data"}
+            mock_route(
+                mock, "POST", f"data/projects/{PROJECT}/scenes", text=RESULT
             )
             self.assertEqual(
-                asset_instance["data"], {"extra-data": "extra-data"}
+                gazu.scene.new_scene(PROJECT, SEQUENCE, "Scene"), RESULT
+            )
+            self.assertEqual(
+                mock.last_request.json(),
+                {"name": "Scene", "sequence_id": SEQUENCE},
             )
 
-    def test_get_sequence_from_scene(self):
+    def test_update_scene_uses_the_entity_route(self):
+        scene = {"id": SCENE, "name": "New"}
         with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url(
-                    f"data/sequences/{fakeid('sequence-1')}"
-                ),
-                text=json.dumps(
-                    {
-                        "name": "sequence-1",
-                        "project_id": "project-1",
-                        "id": fakeid("sequence-1"),
-                    }
-                ),
-            )
-            scene = {
-                "id": fakeid("scene-1"),
-                "parent_id": fakeid("sequence-1"),
-            }
-            sequence = gazu.scene.get_sequence_from_scene(scene)
-            self.assertEqual(sequence["name"], "sequence-1")
+            mock_route(mock, "PUT", f"data/entities/{SCENE}", text=RESULT)
+            self.assertEqual(gazu.scene.update_scene(scene), RESULT)
+            self.assertEqual(mock.last_request.json(), scene)
 
-    def test_get_sequence_from_scene_by_id(self):
+    def test_new_scene_asset_instance(self):
+        for kwargs, body in (
+            ({}, {"asset_id": ASSET}),
+            (
+                {"description": "Note"},
+                {"asset_id": ASSET, "description": "Note"},
+            ),
+        ):
+            with self.subTest(kwargs), requests_mock.mock() as mock:
+                mock_route(
+                    mock,
+                    "POST",
+                    f"data/scenes/{SCENE}/asset-instances",
+                    text=RESULT,
+                )
+                self.assertEqual(
+                    gazu.scene.new_scene_asset_instance(
+                        SCENE, ASSET, **kwargs
+                    ),
+                    RESULT,
+                )
+                self.assertEqual(mock.last_request.json(), body)
+
+    def test_add_and_remove_shot(self):
         with requests_mock.mock() as mock:
+            mock_route(mock, "POST", f"data/scenes/{SCENE}/shots", text=RESULT)
+            self.assertEqual(gazu.scene.add_shot_to_scene(SCENE, SHOT), RESULT)
+            self.assertEqual(mock.last_request.json(), {"shot_id": SHOT})
             mock_route(
                 mock,
-                "GET",
-                f"data/scenes/{fakeid('scene-1')}",
-                text={
-                    "id": fakeid("scene-1"),
-                    "parent_id": fakeid("sequence-1"),
-                },
+                "DELETE",
+                f"data/scenes/{SCENE}/shots/{SHOT}",
+                status_code=204,
             )
-            mock_route(
-                mock,
-                "GET",
-                f"data/sequences/{fakeid('sequence-1')}",
-                text={"id": fakeid("sequence-1"), "name": "sequence-1"},
-            )
-            sequence = gazu.scene.get_sequence_from_scene(fakeid("scene-1"))
-            self.assertEqual(sequence["name"], "sequence-1")
+            gazu.scene.remove_shot_from_scene(SCENE, SHOT)
+            self.assertEqual(mock.call_count, 2)
+
+    def test_asset_instance_updates_send_their_field(self):
+        for call, body in (
+            (
+                lambda: gazu.scene.update_asset_instance_name(
+                    {"id": INSTANCE}, "New"
+                ),
+                {"name": "New"},
+            ),
+            (
+                lambda: gazu.scene.update_asset_instance_data(
+                    INSTANCE, {"a": 1}
+                ),
+                {"data": {"a": 1}},
+            ),
+        ):
+            with self.subTest(body=body), requests_mock.mock() as mock:
+                mock_route(
+                    mock,
+                    "PUT",
+                    f"data/asset-instances/{INSTANCE}",
+                    text=RESULT,
+                )
+                self.assertEqual(call(), RESULT)
+                self.assertEqual(mock.last_request.json(), body)
+
+
+if __name__ == "__main__":
+    unittest.main()
