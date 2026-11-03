@@ -490,6 +490,7 @@ def new_share_link(
     expiration_date: str | None = None,
     can_comment: bool = True,
     password: str | None = None,
+    can_download: bool = False,
     client: KitsuClient = default,
 ) -> dict:
     """
@@ -501,12 +502,16 @@ def new_share_link(
         expiration_date (str): Optional ISO date for link expiry.
         can_comment (bool): Whether guests can comment (default True).
         password (str): Optional password protection.
+        can_download (bool): Whether guests can download the playlist as a
+            ZIP file (default False).
 
     Returns:
         dict: Created share link with token.
     """
     playlist = normalize_model_parameter(playlist)
     data = {"can_comment": can_comment}
+    if can_download:
+        data["can_download"] = True
     if expiration_date:
         data["expiration_date"] = expiration_date
     if password:
