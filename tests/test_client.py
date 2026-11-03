@@ -1,971 +1,698 @@
-import base64
 import datetime
-import hashlib
 import json
 import os
-import random
-import string
-import threading
+import tempfile
 import time
-import urllib.error
-import urllib.parse
-import urllib.request
-
 import unittest
-from unittest.mock import patch as mock_patch
-import requests_mock
-import gazu
-from gazu.__version__ import __version__
+from unittest.mock import patch
 
+import requests
+import requests_mock
+
+import gazu
 from gazu import client as raw
+from gazu.__version__ import __version__
 from gazu.exception import (
-    RouteNotFoundException,
-    AuthFailedException,
     MethodNotAllowedException,
-    NotAuthenticatedException,
     NotAllowedException,
-    TooBigFileException,
+    NotAuthenticatedException,
+    ParameterException,
+    PreviewFileProcessingException,
+    RouteNotFoundException,
     ServerErrorException,
+    TooBigFileException,
+    UploadFailedException,
     ValidationException,
 )
 
 from utils import add_verify_file_callback, fakeid, mock_route
 
-# Placeholder replaced by the state gazu generates.
-STATE = object()
+EXPIRED = {"status_code": 401, "json": {"message": "Signature has expired"}}
+FIXTURE = "./tests/fixtures/v1.png"
 
 
-class ClientTestCase(unittest.TestCase):
-    def setUp(self):
-        pass
+class FakeResponse:
+    """Expose only what check_status and the message functions read."""
 
-    def tearDown(self):
-        pass
+    text = "Error on server"
+
+    def __init__(self, status_code=200, body=None):
+        self.status_code = status_code
+        self.body = body
+
+    def json(self):
+        if self.body is None:
+            raise ValueError("no json")
+        return self.body
 
 
-class BaseFuncTestCase(ClientTestCase):
+def refreshing_client(**kwargs):
+    client = raw.create_client(
+        "http://second.host/api", use_refresh_token=True, **kwargs
+    )
+    client.tokens = {"access_token": "old", "refresh_token": "refresh"}
+    return client
+
+
+class HostTestCase(unittest.TestCase):
     def test_host_is_up(self):
-        with requests_mock.mock() as mock:
-            mock_route(mock, "HEAD", raw.get_host())
-            self.assertTrue(raw.host_is_up())
-        self.assertFalse(raw.host_is_up())
+        for kwargs, expected in (
+            ({}, True),
+            ({"status_code": 500}, False),
+            ({"exc": requests.exceptions.ConnectTimeout}, False),
+        ):
+            with self.subTest(kwargs), requests_mock.mock() as mock:
+                mock_route(mock, "HEAD", raw.get_host(), **kwargs)
+                self.assertEqual(raw.host_is_up(), expected)
 
     def test_host_is_valid(self):
-        self.assertFalse(raw.host_is_valid())
+        for status_code, expected in (
+            (200, True),
+            (400, True),
+            (401, True),
+            (500, False),
+        ):
+            with self.subTest(status_code), requests_mock.mock() as mock:
+                mock_route(mock, "HEAD", raw.get_host())
+                mock_route(
+                    mock,
+                    "POST",
+                    "auth/login",
+                    text={},
+                    status_code=status_code,
+                )
+                self.assertEqual(raw.host_is_valid(), expected)
+
+    def test_host_is_not_valid_when_it_is_down(self):
         with requests_mock.mock() as mock:
-            mock_route(mock, "HEAD", raw.get_host())
-            mock_route(
-                mock,
-                "POST",
-                "auth/login",
-                text={},
-                status_code=401,
-            )
-            self.assertTrue(raw.host_is_valid())
-
-    def test_set_event_host(self):
-        gazu.set_event_host("newhost")
-        self.assertEqual(raw.default_client.event_host, "newhost")
-        gazu.set_event_host("http://gazu.change.serverhost/api")
-
-    def test_get_host(self):
-        self.assertEqual(raw.get_host(), raw.default_client.host)
-
-    def test_get_event_host(self):
-        self.assertEqual(gazu.get_event_host(), raw.default_client.host)
+            mock_route(mock, "HEAD", raw.get_host(), status_code=500)
+            self.assertFalse(raw.host_is_valid())
 
     def test_set_host(self):
-        raw.set_host("newhost")
-        self.assertEqual(raw.get_host(), "newhost")
-        raw.set_host("http://gazu-server/api")
+        self.assertEqual(raw.set_host("http://a/api"), "http://a/api")
+        self.assertEqual(raw.get_host(), "http://a/api")
 
-    def test_set_tokens(self):
-        pass
+    def test_event_host_falls_back_to_the_host(self):
+        raw.set_host("http://a/api")
+        raw.default_client.event_host = None
+        self.assertEqual(raw.get_event_host(), "http://a/api")
+        raw.set_event_host("http://events")
+        self.assertEqual(raw.get_event_host(), "http://events")
 
-    def test_make_auth_header(self):
-        self.assertEqual(
-            raw.default_client.make_auth_header(),
-            raw.make_auth_header(),
-        )
+    def test_get_api_url_from_host_removes_the_suffix(self):
+        for host, expected in (
+            ("http://a/api", "http://a"),
+            ("http://a", "http://a"),
+        ):
+            raw.set_host(host)
+            self.assertEqual(raw.get_api_url_from_host(), expected)
 
-    def test_url_path_join(self):
-        root = raw.get_host()
-        items = ["data", "persons"]
-        expected_url = "{host}/data/persons".format(host=raw.get_host())
-
-        self.assertEqual(raw.url_path_join(root, *items), expected_url)
+    def test_url_path_join_removes_extra_slashes(self):
+        self.assertEqual(raw.url_path_join("a/", "/b/", "c"), "a/b/c")
 
     def test_get_full_url(self):
-        test_route = "test_route"
-        expected_url = raw.url_path_join(raw.get_host(), test_route)
+        raw.set_host("http://a/api")
+        self.assertEqual(raw.get_full_url("/data/"), "http://a/api/data")
 
-        self.assertEqual(raw.get_full_url(test_route), expected_url)
+    def test_build_path_with_params(self):
+        for path, params, expected in (
+            ("a", None, "a"),
+            ("a", {}, "a"),
+            ("a", {"b": 1}, "a?b=1"),
+            ("a?b=1", {"c": 2}, "a?b=1&c=2"),
+            # Zou reads a list as a repeated parameter.
+            ("a", {"b": ["x", "y"]}, "a?b=x&b=y"),
+        ):
+            with self.subTest(params=params):
+                self.assertEqual(
+                    raw.build_path_with_params(path, params), expected
+                )
 
-    def test_get(self):
+    def test_make_auth_header_sends_the_token_only_when_there_is_one(self):
+        agent = f"CGWire Gazu {__version__}"
+        raw.set_tokens({})
+        self.assertEqual(raw.make_auth_header(), {"User-Agent": agent})
+        self.assertEqual(
+            raw.set_tokens({"access_token": "abc"}), {"access_token": "abc"}
+        )
+        self.assertEqual(
+            raw.make_auth_header(),
+            {"Authorization": "Bearer abc", "User-Agent": agent},
+        )
+
+    def test_clients_are_independent(self):
+        second = raw.create_client("http://second.host/api", access_token="b")
         with requests_mock.mock() as mock:
-            mock_route(
-                mock, "GET", "data/persons", text={"first_name": "John"}
-            )
-            self.assertEqual(raw.get("data/persons"), {"first_name": "John"})
-
-    def test_get_two_clients(self):
-        with requests_mock.mock() as mock:
-            second_client = gazu.raw.create_client("http://second.host/api")
-            mock_route(
-                mock, "GET", "data/persons", text={"first_name": "John"}
-            )
-            self.assertEqual(raw.get("data/persons"), {"first_name": "John"})
-            self.assertRaises(
-                requests_mock.exceptions.NoMockAddress,
-                raw.get,
-                "data/persons",
-                client=second_client,
-            )
+            mock_route(mock, "GET", "data/new-file", text={"from": "default"})
             mock_route(
                 mock,
                 "GET",
-                raw.get_full_url("data/persons", client=second_client),
-                text={"first_name": "John2"},
+                raw.get_full_url("data/new-file", client=second),
+                text={"from": "second"},
+            )
+            self.assertEqual(raw.get("data/new-file"), {"from": "default"})
+            self.assertEqual(
+                raw.get("data/new-file", client=second), {"from": "second"}
             )
             self.assertEqual(
-                raw.get("data/persons", client=second_client),
-                {"first_name": "John2"},
+                mock.last_request.headers["Authorization"], "Bearer b"
             )
 
-    def test_post(self):
+    def test_client_logs_out_at_the_end_of_the_block(self):
+        second = raw.create_client("http://second.host/api", access_token="b")
         with requests_mock.mock() as mock:
             mock_route(
                 mock,
-                "POST",
-                "data/persons",
-                text={"id": "person-01", "first_name": "John"},
+                "GET",
+                raw.get_full_url("auth/logout", client=second),
+                text={},
             )
-            self.assertEqual(
-                raw.post("data/persons", "person-01"),
-                {"id": "person-01", "first_name": "John"},
-            )
+            with second as client:
+                self.assertIs(client, second)
+            self.assertEqual(mock.call_count, 1)
+        self.assertIsNone(second.access_token)
 
-    def test_post_with_a_date_field(self):
-        now = datetime.datetime.now()
+    def test_client_end_of_block_ignores_a_failed_logout(self):
+        second = raw.create_client("http://second.host/api", access_token="b")
         with requests_mock.mock() as mock:
             mock_route(
                 mock,
-                "POST",
-                "data/persons",
-                text={"id": "person-01", "first_name": "John"},
+                "GET",
+                raw.get_full_url("auth/logout", client=second),
+                exc=requests.exceptions.ConnectTimeout,
+            )
+            with second:
+                pass
+        self.assertIsNone(second.access_token)
+
+
+class RequestsTestCase(unittest.TestCase):
+    def test_get(self):
+        with requests_mock.mock() as mock:
+            mock_route(mock, "GET", "data/new-file", text={"b": 1})
+            self.assertEqual(
+                raw.get("data/new-file", params={"c": 2}), {"b": 1}
+            )
+            self.assertEqual(mock.last_request.qs, {"c": ["2"]})
+            self.assertEqual(
+                raw.get("data/new-file", json_response=False), '{"b": 1}'
+            )
+
+    def test_post_encodes_dates_in_iso_format(self):
+        date = datetime.datetime(2026, 1, 2, 3, 4, 5)
+        with requests_mock.mock() as mock:
+            mock_route(mock, "POST", "data/new-file", text={"id": "b"})
+            self.assertEqual(
+                raw.post("data/new-file", {"date": date}), {"id": "b"}
             )
             self.assertEqual(
-                raw.post("data/persons", {"birth_date": now}),
-                {"id": "person-01", "first_name": "John"},
+                mock.last_request.json(), {"date": "2026-01-02T03:04:05"}
             )
+            self.assertEqual(
+                mock.last_request.headers["Content-Type"], "application/json"
+            )
+
+    def test_post_raises_when_the_response_is_not_json(self):
+        with requests_mock.mock() as mock:
+            mock_route(mock, "POST", "data/new-file", text="<html>")
+            with self.assertRaises(json.JSONDecodeError):
+                raw.post("data/new-file", {})
 
     def test_put(self):
         with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "PUT",
-                "data/persons",
-                text={"id": "person-01", "first_name": "John"},
-            )
-            self.assertEqual(
-                raw.put("data/persons", "person-01"),
-                {"id": "person-01", "first_name": "John"},
-            )
-
-    def test_update(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "PUT",
-                "data/persons/person-1",
-                text={
-                    "id": "person-1",
-                    "first_name": "John",
-                    "last_name": "Doe",
-                },
-            )
-            data = {"last_name": "Doe"}
-            self.assertEqual(
-                raw.update("persons", "person-1", data),
-                {"id": "person-1", "first_name": "John", "last_name": "Doe"},
-            )
+            mock_route(mock, "PUT", "data/new-file", text={"id": "b"})
+            self.assertEqual(raw.put("data/new-file", {"c": 1}), {"id": "b"})
+            self.assertEqual(mock.last_request.json(), {"c": 1})
 
     def test_delete(self):
         with requests_mock.mock() as mock:
-            mock_route(mock, "DELETE", "data/persons/person-01", text="")
-            self.assertEqual(raw.delete("data/persons/person-01"), "")
+            mock_route(mock, "DELETE", "data/new-file", text="")
+            self.assertEqual(raw.delete("data/new-file", {"force": True}), "")
+            self.assertEqual(mock.last_request.qs, {"force": ["true"]})
 
-    def test_fetch_all(self):
+    def test_request_body_with_a_secret_is_not_logged(self):
+        for data, logged in (
+            ({"name": "a"}, True),
+            ({"password": "a"}, False),
+            ({"refresh_token": "a"}, False),
+            (1, True),
+        ):
+            with self.subTest(data=data):
+                with patch.object(raw.logger, "debug") as debug:
+                    raw._log_request_body(data)
+                self.assertEqual(debug.called, logged)
+
+    def test_requests_retry_with_a_refreshed_token(self):
+        client = refreshing_client()
         with requests_mock.mock() as mock:
             mock_route(
                 mock,
                 "GET",
-                "data/persons",
-                text=[{"first_name": "John"}],
+                raw.get_full_url("auth/refresh-token", client=client),
+                text={"access_token": "new"},
             )
+            mock.get(
+                raw.get_full_url("data/new-file", client=client),
+                [EXPIRED, {"json": {"b": 1}}],
+            )
+            self.assertEqual(raw.get("data/new-file", client=client), {"b": 1})
             self.assertEqual(
-                raw.fetch_all("persons"), [{"first_name": "John"}]
+                mock.last_request.headers["Authorization"], "Bearer new"
+            )
+        # The server gave no new refresh token: the client keeps its own.
+        self.assertEqual(client.refresh_token, "refresh")
+
+    def test_requests_stop_after_too_many_refused_tokens(self):
+        client = refreshing_client()
+        for name, call in (
+            ("GET", lambda: raw.get("data/new-file", client=client)),
+            ("POST", lambda: raw.post("data/new-file", {}, client=client)),
+            ("PUT", lambda: raw.put("data/new-file", {}, client=client)),
+            ("DELETE", lambda: raw.delete("data/new-file", client=client)),
+            (
+                "GET",
+                lambda: raw.get_file_data_from_url(
+                    "data/new-file", client=client
+                ),
+            ),
+            (
+                "POST",
+                lambda: raw.upload("data/new-file", FIXTURE, client=client),
+            ),
+            (
+                "GET",
+                lambda: raw.download("data/new-file", None, client=client),
+            ),
+        ):
+            with self.subTest(name), requests_mock.mock() as mock:
+                mock_route(
+                    mock,
+                    "GET",
+                    raw.get_full_url("auth/refresh-token", client=client),
+                    text={"access_token": "new"},
+                )
+                mock_route(
+                    mock,
+                    name,
+                    raw.get_full_url("data/new-file", client=client),
+                    **EXPIRED,
+                )
+                with self.assertRaises(NotAuthenticatedException):
+                    call()
+
+    def test_refresh_without_refresh_token_raises(self):
+        client = raw.create_client("http://second.host/api")
+        with self.assertRaises(NotAuthenticatedException):
+            client.refresh_access_token()
+
+    def test_callback_can_authorize_a_retry(self):
+        client = raw.create_client(
+            "http://second.host/api",
+            callback_not_authenticated=lambda client, path: True,
+        )
+        status_code, retry = raw.check_status(
+            FakeResponse(401, {}), "/", client=client
+        )
+        self.assertEqual((status_code, retry), (401, True))
+
+    def test_fetch_all_sends_the_fields(self):
+        for fields in (["a", "b"], "a,b"):
+            with self.subTest(fields=fields), requests_mock.mock() as mock:
+                mock_route(mock, "GET", "data/persons", text=[{"a": 1}])
+                self.assertEqual(
+                    raw.fetch_all("persons", fields=fields), [{"a": 1}]
+                )
+                self.assertEqual(mock.last_request.qs, {"fields": ["a,b"]})
+
+    def test_fetch_all_reads_all_pages(self):
+        def page(request, context):
+            number = int(request.qs["page"][0])
+            return json.dumps(
+                {"nb_pages": 3, "page": number, "data": [{"id": number}]}
             )
 
-    def test_fetch_all_with_fields(self):
         with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                "data/persons",
-                text=[{"first_name": "John"}],
-            )
+            mock.get(raw.get_full_url("data/tasks"), text=page)
             self.assertEqual(
-                raw.fetch_all("persons", fields=["first_name", "last_name"]),
-                [{"first_name": "John"}],
+                raw.fetch_all("tasks", paginated=True, limit=1),
+                [{"id": 1}, {"id": 2}, {"id": 3}],
             )
-            self.assertEqual(
-                mock.last_request.qs, {"fields": ["first_name,last_name"]}
-            )
-            raw.fetch_all("persons", fields="first_name,last_name")
-            self.assertEqual(
-                mock.last_request.qs, {"fields": ["first_name,last_name"]}
-            )
+            self.assertEqual(mock.call_count, 3)
+            self.assertEqual(mock.last_request.qs["limit"], ["1"])
 
     def test_fetch_first(self):
         with requests_mock.mock() as mock:
             mock_route(
-                mock,
-                "GET",
-                "data/persons",
-                text=[{"first_name": "John"}, {"first_name": "Jane"}],
+                mock, "GET", "data/new-file", text=[{"id": 1}, {"id": 2}]
             )
             self.assertEqual(
-                raw.fetch_first("persons"), {"first_name": "John"}
+                raw.fetch_first("new-file", {"b": "c"}), {"id": 1}
             )
+            self.assertEqual(mock.last_request.qs, {"b": ["c"]})
+            mock_route(mock, "GET", "data/new-file", text=[])
+            self.assertIsNone(raw.fetch_first("new-file"))
 
-            mock_route(mock, "GET", "data/persons", text=[])
-            self.assertIsNone(raw.fetch_first("persons"))
-
-    def test_query_string(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
+    def test_model_helpers_use_the_data_routes(self):
+        for call, method, path, body in (
+            (
+                lambda: raw.fetch_one("persons", "b"),
                 "GET",
-                "data/projects?name=Test",
-                text=[{"name": "Project"}],
-            )
-            self.assertEqual(
-                raw.fetch_first("projects", {"name": "Test"}),
-                {"name": "Project"},
-            )
-
-            mock_route(mock, "GET", "data/persons", text=[])
-            self.assertIsNone(raw.fetch_first("persons"))
-
-    def test_fetch_one(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                "data/persons/person-01",
-                text={"id": "person-01", "first_name": "John"},
-            )
-            self.assertEqual(
-                raw.fetch_one("persons", "person-01"),
-                {"id": "person-01", "first_name": "John"},
-            )
-
-    def test_create(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
+                "data/persons/b",
+                None,
+            ),
+            (
+                lambda: raw.create("persons", {"c": 1}),
                 "POST",
                 "data/persons",
-                text={"id": "person-01", "first_name": "John"},
-            )
-            self.assertEqual(
-                raw.create("persons", {"first_name": "John"}),
-                {"id": "person-01", "first_name": "John"},
-            )
+                {"c": 1},
+            ),
+            (
+                lambda: raw.update("persons", "b", {"c": 1}),
+                "PUT",
+                "data/persons/b",
+                {"c": 1},
+            ),
+            (
+                lambda: raw.import_data("entities", {"c": 1}),
+                "POST",
+                "import/kitsu/entities",
+                {"c": 1},
+            ),
+        ):
+            with self.subTest(path), requests_mock.mock() as mock:
+                mock_route(mock, method, path, text={"id": "result"})
+                self.assertEqual(call(), {"id": "result"})
+                if body is not None:
+                    self.assertEqual(mock.last_request.json(), body)
 
-    def test_version(self):
+    def test_get_api_version_and_current_user(self):
         with requests_mock.mock() as mock:
             mock_route(mock, "GET", "/", text={"version": "0.2.0"})
+            mock_route(
+                mock, "GET", "auth/authenticated", text={"user": {"id": "a"}}
+            )
             self.assertEqual(raw.get_api_version(), "0.2.0")
-
-    def test_make_auth_token(self):
-        tokens = {"access_token": "token_test"}
-
-        raw.set_tokens(tokens)
-        self.assertEqual(
-            raw.make_auth_header(),
-            {
-                "Authorization": "Bearer token_test",
-                "User-Agent": f"CGWire Gazu {__version__}",
-            },
-        )
-
-    def test_upload(self):
-        with open("./tests/fixtures/v1.png", "rb") as test_file:
-            with requests_mock.Mocker() as mock:
-                mock_route(
-                    mock,
-                    "POST",
-                    "data/new-file",
-                    text={"id": "person-01", "first_name": "John"},
-                )
-
-                add_verify_file_callback(
-                    mock, {"file": test_file.read(), "test": "True"}
-                )
-
-                raw.upload(
-                    "data/new-file",
-                    "./tests/fixtures/v1.png",
-                    data={"test": True},
-                )
-
-            error_value = "".join(
-                [
-                    random.choice(
-                        string.ascii_uppercase + string.ascii_lowercase
-                    )
-                    for _ in range(10)
-                ]
-            )
-
-            with requests_mock.Mocker() as mock:
-                for field in ["message", "error"]:
-                    mock_route(
-                        mock,
-                        "POST",
-                        "data/new-file",
-                        text={field: error_value},
-                    )
-
-                    with self.assertRaises(
-                        gazu.client.UploadFailedException
-                    ) as context:
-                        raw.upload(
-                            "data/new-file",
-                            "./tests/fixtures/v1.png",
-                            data={"test": True},
-                        )
-
-                    self.assertTrue(str(context.exception) == error_value)
-
-    def test_upload_multiple_files(self):
-        with open("./tests/fixtures/v1.png", "rb") as test_file:
-            with requests_mock.Mocker() as mock:
-                mock_route(
-                    mock,
-                    "POST",
-                    "data/new-file",
-                    text={"id": "person-01", "first_name": "John"},
-                )
-                test_file_read = test_file.read()
-                add_verify_file_callback(
-                    mock,
-                    {
-                        "file": test_file_read,
-                        "file-1": test_file_read,
-                        "test": "True",
-                    },
-                )
-
-                raw.upload(
-                    "data/new-file",
-                    "./tests/fixtures/v1.png",
-                    data={
-                        "test": True,
-                    },
-                    extra_files=["./tests/fixtures/v1.png"],
-                )
-
-    def test_upload_with_progress_callback_and_json_part(self):
-        # Regression: a non-file multipart part (a JSON tuple, as produced for
-        # batch comments) used to make the progress-callback path call
-        # os.fstat() on the tuple and raise AttributeError.
-        progress = []
-        with open("./tests/fixtures/v1.png", "rb") as test_file:
-            files = {
-                "file": test_file,
-                "comments": (
-                    None,
-                    json.dumps([{"x": 1}]),
-                    "application/json",
-                ),
-            }
-            with requests_mock.Mocker() as mock:
-                mock_route(
-                    mock,
-                    "POST",
-                    "data/new-file",
-                    text={"id": "person-01"},
-                )
-                result = raw.upload(
-                    "data/new-file",
-                    files=files,
-                    progress_callback=lambda read, total: progress.append(
-                        (read, total)
-                    ),
-                )
-            self.assertEqual(result["id"], "person-01")
-            self.assertTrue(len(progress) > 0)
-
-    def test_check_status(self):
-        class Request(object):
-            def __init__(self, status_code):
-                self.status_code = status_code
-
-        class RequestText(object):
-            def __init__(self, status_code):
-                self.status_code = status_code
-                self.text = "Error on server"
-
-        class RequestJSON(object):
-            def __init__(self, status_code):
-                self.status_code = status_code
-                self.text = '{"stacktrace": "stacktrace", "message": "error"}'
-
-            def json(self):
-                return json.dumps(self.text)
-
-        self.assertRaises(
-            NotAuthenticatedException, raw.check_status, Request(401), "/"
-        )
-        self.assertRaises(
-            NotAllowedException, raw.check_status, Request(403), "/"
-        )
-        self.assertRaises(
-            RouteNotFoundException, raw.check_status, Request(404), "/"
-        )
-        self.assertRaises(
-            MethodNotAllowedException, raw.check_status, Request(405), "/"
-        )
-
-        self.assertRaises(
-            TooBigFileException, raw.check_status, Request(413), "/"
-        )
-
-        self.assertRaises(
-            ServerErrorException, raw.check_status, RequestText(500), "/"
-        )
-
-        self.assertRaises(
-            ServerErrorException, raw.check_status, RequestText(502), "/"
-        )
-
-        self.assertRaises(
-            ServerErrorException, raw.check_status, RequestJSON(500), "/"
-        )
-
-        self.assertRaises(
-            ServerErrorException, raw.check_status, RequestJSON(502), "/"
-        )
-
-    def test_check_status_422_raises_validation_with_body_message(self):
-        class Request422(object):
-            status_code = 422
-            text = '{"message": "name: missing required field"}'
-
-            def json(self):
-                return {"message": "name: missing required field"}
-
-        with self.assertRaises(ValidationException) as context:
-            raw.check_status(Request422(), "/data/persons")
-        self.assertIn("name: missing required field", str(context.exception))
-
-    def test_check_status_422_non_json_body_raises_validation(self):
-        class Request422(object):
-            status_code = 422
-            text = "<html>502 Bad Gateway</html>"
-
-            def json(self):
-                raise ValueError("no json")
-
-        with self.assertRaises(ValidationException) as context:
-            raw.check_status(Request422(), "/data/persons")
-        self.assertIn("No additional information", str(context.exception))
-
-    def test_get_message_from_response_ignores_error_flag(self):
-        # Zou sends a boolean "error" flag next to the real "message"; the
-        # boolean must not be returned in place of the message.
-        class Response(object):
-            def json(self):
-                return {"error": True, "message": "Validation error."}
-
-        message = raw.get_message_from_response(Response())
-        self.assertEqual(message, "Validation error.")
-
-    def test_get_message_from_response_appends_field_errors(self):
-        class Response(object):
-            def json(self):
-                return {
-                    "error": True,
-                    "message": "Validation error.",
-                    "data": {
-                        "errors": [
-                            {"field": "task_ids", "message": "Tasks required."}
-                        ]
-                    },
-                }
-
-        message = raw.get_message_from_response(Response())
-        self.assertEqual(
-            message, "Validation error. (task_ids: Tasks required.)"
-        )
-
-    def test_get_message_from_response_non_json(self):
-        class Response(object):
-            def json(self):
-                raise ValueError("no json")
-
-        message = raw.get_message_from_response(Response())
-        self.assertEqual(message, "No additional information")
-
-    def test_check_status_422_signature_expired_refreshes_token(self):
-        class Request422(object):
-            status_code = 422
-
-            def json(self):
-                return {"message": "Signature has expired"}
-
-        class FakeClient(object):
-            refresh_token = "a-refresh-token"
-            use_refresh_token = True
-            callback_not_authenticated = None
-
-            def __init__(self):
-                self.refreshed = False
-
-            def refresh_access_token(self):
-                self.refreshed = True
-
-        client = FakeClient()
-        status_code, retry = raw.check_status(
-            Request422(), "/data/persons", client=client
-        )
-        self.assertEqual(status_code, 422)
-        self.assertTrue(retry)
-        self.assertTrue(client.refreshed)
-
-    def test_check_status_422_signature_expired_without_refresh_raises(self):
-        class Request422(object):
-            status_code = 422
-
-            def json(self):
-                return {"message": "Signature has expired"}
-
-        with self.assertRaises(NotAuthenticatedException):
-            raw.check_status(Request422(), "/data/persons")
-
-    def test_init_host(self):
-        gazu.set_host("newhost")
-        self.assertEqual(gazu.get_host(), "newhost")
-        gazu.set_host("http://gazu-server/")
-        self.assertEqual(gazu.get_host(), gazu.raw.default_client.host)
-
-    def test_init_log_in(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "POST",
-                "auth/login",
-                text={"login": True, "tokens": {"access_token": "tokentest"}},
-            )
-            gazu.log_in("frank", "test")
-        self.assertEqual(
-            raw.default_client.tokens["tokens"]["access_token"], "tokentest"
-        )
-
-    def test_init_log_out(self):
-        with requests_mock.mock() as mock:
-            mock_route(mock, "GET", "auth/logout", text={}, status_code=400)
-            gazu.log_out()
-            self.assertEqual(raw.default_client.tokens, {})
-
-    def test_init_log_in_surfaces_server_message(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "POST",
-                "auth/login",
-                text={"message": "Wrong 2FA code"},
-                status_code=400,
-            )
-            with self.assertRaises(AuthFailedException) as context:
-                gazu.log_in("a@b.c", "pw")
-            self.assertIn("Wrong 2FA code", str(context.exception))
-
-    def test_init_send_email_otp(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                "auth/email-otp?email=test@test.com",
-                text={"success": True},
-            )
-            success = gazu.send_email_otp("test@test.com")
-            self.assertEqual(success, {"success": True})
-
-    def test_init_refresh_token(self):
-        with requests_mock.mock() as mock:
-            raw.default_client.tokens["refresh_token"] = "refresh_token1"
-            mock_route(
-                mock,
-                "GET",
-                "auth/refresh-token",
-                text={"access_token": "tokentest1"},
-            )
-            gazu.refresh_access_token()
-        self.assertEqual(
-            raw.default_client.tokens["access_token"], "tokentest1"
-        )
-
-    def test_init_log_in_fail(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "POST",
-                "auth/login",
-                text={"login": False},
-            )
-            self.assertRaises(
-                AuthFailedException, gazu.log_in, "frank", "test"
-            )
-            self.assertRaises(AuthFailedException, gazu.log_in, "", "")
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "POST",
-                "auth/login",
-                text={},
-                status_code=401,
-            )
-            with self.assertRaises(AuthFailedException):
-                gazu.log_in("", "")
-
-    def test_get_current_user(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock, "GET", "auth/authenticated", text={"user": {"id": "123"}}
-            )
-            current_user = raw.get_current_user()
-            self.assertEqual(current_user["id"], "123")
+            self.assertEqual(raw.get_current_user(), {"id": "a"})
 
     def test_get_file_data_from_url(self):
         with requests_mock.mock() as mock:
+            mock_route(mock, "GET", "test_url", text="relative")
+            mock_route(mock, "GET", "http://other/a", text="full")
+            self.assertEqual(
+                raw.get_file_data_from_url("test_url"), b"relative"
+            )
+            self.assertEqual(
+                raw.get_file_data_from_url("http://other/a", full=True),
+                b"full",
+            )
+
+
+class StatusTestCase(unittest.TestCase):
+    def test_error_status_raises_the_matching_exception(self):
+        for status_code, body, exception in (
+            (400, {"message": "bad"}, ParameterException),
+            (401, None, NotAuthenticatedException),
+            (403, None, NotAllowedException),
+            (404, None, RouteNotFoundException),
+            (405, None, MethodNotAllowedException),
+            (413, None, TooBigFileException),
+            (422, {"message": "bad"}, ValidationException),
+            (422, None, ValidationException),
+            (500, None, ServerErrorException),
+            (502, None, ServerErrorException),
+            (500, {"stacktrace": "s", "message": "m"}, ServerErrorException),
+            (
+                422,
+                {"message": "Signature has expired"},
+                NotAuthenticatedException,
+            ),
+        ):
+            with self.subTest(status_code=status_code, body=body):
+                with self.assertRaises(exception):
+                    raw.check_status(FakeResponse(status_code, body), "/")
+
+    def test_success_returns_the_status_and_no_retry(self):
+        self.assertEqual(
+            raw.check_status(FakeResponse(200), "/"), (200, False)
+        )
+
+    def test_422_with_an_expired_signature_refreshes_the_token(self):
+        client = refreshing_client()
+        with requests_mock.mock() as mock:
             mock_route(
                 mock,
                 "GET",
-                "test_url",
-                text="test",
-            )
-            self.assertEqual(raw.get_file_data_from_url("test_url"), b"test")
-
-    def test_download_raises_on_error_without_writing_file(self):
-        import os
-        import tempfile
-
-        target = os.path.join(tempfile.mkdtemp(), "out.bin")
-        with requests_mock.mock() as mock:
-            mock.get(
-                raw.get_full_url("movies/originals/preview-files/x.mp4"),
-                text=json.dumps({"error": "not found"}),
-                status_code=404,
-            )
-            with self.assertRaises(RouteNotFoundException):
-                raw.download("movies/originals/preview-files/x.mp4", target)
-            # The error body must not have been written to the target.
-            self.assertFalse(os.path.exists(target))
-
-
-class DownloadProcessingTestCase(unittest.TestCase):
-    def setUp(self):
-        gazu.client.set_host("http://gazu-server/")
-
-    def path(self):
-        return "pictures/thumbnails/preview-files/{}.png".format(
-            fakeid("preview-1")
-        )
-
-    def test_download_retries_while_the_preview_is_processing(self):
-        with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url(self.path()),
-                [
-                    {
-                        "status_code": 202,
-                        "json": {
-                            "status": "processing",
-                            "preview_file_id": fakeid("preview-1"),
-                        },
-                        "headers": {"Retry-After": "0"},
-                    },
-                    {"status_code": 200, "content": b"PNG-BYTES"},
-                ],
-            )
-            gazu.client.download(self.path(), "./test.png")
-        with open("./test.png", "rb") as downloaded:
-            self.assertEqual(downloaded.read(), b"PNG-BYTES")
-        os.remove("./test.png")
-
-    def test_download_without_file_path_retries_too(self):
-        with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url(self.path()),
-                [
-                    {
-                        "status_code": 202,
-                        "json": {"status": "processing"},
-                        "headers": {"Retry-After": "0"},
-                    },
-                    {"status_code": 200, "content": b"PNG-BYTES"},
-                ],
-            )
-            response = gazu.client.download(self.path(), None)
-        self.assertEqual(response.content, b"PNG-BYTES")
-
-    def test_download_gives_up_after_the_processing_timeout(self):
-        with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url(self.path()),
-                status_code=202,
-                json={"status": "processing"},
-                headers={"Retry-After": "0"},
-            )
-            with self.assertRaises(
-                gazu.exception.PreviewFileProcessingException
-            ):
-                gazu.client.download(
-                    self.path(), "./test.png", processing_timeout=0
-                )
-        self.assertFalse(os.path.exists("./test.png"))
-
-    def test_download_does_not_retry_a_missing_file(self):
-        with requests_mock.mock() as mock:
-            mock.get(gazu.client.get_full_url(self.path()), status_code=404)
-            with self.assertRaises(gazu.exception.RouteNotFoundException):
-                gazu.client.download(self.path(), "./test.png")
-        self.assertFalse(os.path.exists("./test.png"))
-
-    def test_download_asks_for_json_so_the_server_can_answer_202(self):
-        with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url(self.path()), content=b"PNG-BYTES"
-            )
-            gazu.client.download(self.path(), "./test.png")
-            self.assertEqual(
-                mock.last_request.headers["Accept"],
-                gazu.client.DOWNLOAD_ACCEPT_HEADER,
-            )
-        os.remove("./test.png")
-
-    def test_download_retries_with_the_refreshed_token(self):
-        client = raw.create_client(
-            "http://gazu-server/api", use_refresh_token=True
-        )
-        client.tokens = {
-            "access_token": "old-token",
-            "refresh_token": "a-refresh-token",
-        }
-        with requests_mock.mock() as mock:
-            mock.get(
-                raw.get_full_url(self.path(), client=client),
-                [
-                    {
-                        "status_code": 401,
-                        "json": {"message": "Signature has expired"},
-                    },
-                    {"status_code": 200, "content": b"PNG-BYTES"},
-                ],
-            )
-            mock.get(
                 raw.get_full_url("auth/refresh-token", client=client),
-                json={"access_token": "new-token"},
+                text={"access_token": "new", "refresh_token": "new-refresh"},
             )
-            response = raw.download(self.path(), None, client=client)
+            result = raw.check_status(
+                FakeResponse(422, {"message": "Signature has expired"}),
+                "/",
+                client=client,
+            )
+        self.assertEqual(result, (422, True))
+        self.assertEqual(client.access_token, "new")
+        self.assertEqual(client.refresh_token, "new-refresh")
+
+    def test_get_message_from_response(self):
+        for body, expected in (
+            (None, "No additional information"),
+            ([], "No additional information"),
+            ({"error": "Broken"}, "Broken"),
+            # Zou sends a boolean "error" flag next to the real message.
+            ({"error": True, "message": "Bad"}, "Bad"),
+            (
+                {
+                    "message": "Bad",
+                    "data": {"errors": [{"field": "a", "message": "b"}]},
+                },
+                "Bad (a: b)",
+            ),
+        ):
+            with self.subTest(body=body):
+                self.assertEqual(
+                    raw.get_message_from_response(FakeResponse(body=body)),
+                    expected,
+                )
+
+
+class UploadTestCase(unittest.TestCase):
+    def test_upload_sends_the_files_and_the_data(self):
+        with open(FIXTURE, "rb") as test_file:
+            content = test_file.read()
+        with requests_mock.Mocker() as mock:
+            mock_route(mock, "POST", "data/new-file", text={"id": "b"})
+            add_verify_file_callback(
+                mock, {"file": content, "file-1": content, "test": "True"}
+            )
             self.assertEqual(
-                mock.last_request.headers["Authorization"], "Bearer new-token"
+                raw.upload(
+                    "data/new-file",
+                    FIXTURE,
+                    data={"test": True},
+                    extra_files=[FIXTURE],
+                ),
+                {"id": "b"},
             )
+
+    def test_upload_raises_when_the_response_has_a_message(self):
+        for field in ("message", "error"):
+            with self.subTest(field), requests_mock.Mocker() as mock:
+                mock_route(
+                    mock, "POST", "data/new-file", text={field: "Broken"}
+                )
+                with self.assertRaises(UploadFailedException) as context:
+                    raw.upload("data/new-file", FIXTURE)
+                self.assertEqual(str(context.exception), "Broken")
+
+    def test_upload_raises_when_the_response_is_not_json(self):
+        with requests_mock.Mocker() as mock:
+            mock_route(mock, "POST", "data/new-file", text="<html>")
+            with self.assertRaises(json.JSONDecodeError):
+                raw.upload("data/new-file", FIXTURE)
+
+    def test_upload_sends_the_files_again_after_a_token_refresh(self):
+        client = refreshing_client()
+        bodies = []
+
+        def answer(request, context):
+            bodies.append(request.body)
+            if len(bodies) == 1:
+                context.status_code = 401
+                return json.dumps({"message": "Signature has expired"})
+            return "{}"
+
+        with requests_mock.Mocker() as mock:
+            mock_route(
+                mock,
+                "GET",
+                raw.get_full_url("auth/refresh-token", client=client),
+                text={"access_token": "new"},
+            )
+            mock.post(
+                raw.get_full_url("data/new-file", client=client), text=answer
+            )
+            raw.upload("data/new-file", FIXTURE, client=client)
+        with open(FIXTURE, "rb") as test_file:
+            content = test_file.read()
+        self.assertEqual(len(bodies), 2)
+        self.assertIn(content, bodies[1])
+
+    def test_progress_ignores_the_parts_that_are_not_files(self):
+        # A JSON tuple, as batch comments make, has no file descriptor.
+        progress = []
+        with open(FIXTURE, "rb") as test_file:
+            size = os.fstat(test_file.fileno()).st_size
+            files = {
+                "file": test_file,
+                "comments": (None, "[]", "application/json"),
+            }
+            with requests_mock.Mocker() as mock:
+                mock_route(mock, "POST", "data/new-file", text={})
+                raw.upload(
+                    "data/new-file",
+                    files=files,
+                    progress_callback=lambda *args: progress.append(args),
+                )
+        self.assertEqual(progress[-1], (size, size))
+
+    def test_open_files_are_closed_when_an_extra_file_is_missing(self):
+        real_open = open
+        opened = []
+
+        def track_open(*args, **kwargs):
+            stream = real_open(*args, **kwargs)
+            opened.append(stream)
+            return stream
+
+        with patch("gazu.client.open", side_effect=track_open, create=True):
+            with self.assertRaises(FileNotFoundError):
+                raw.upload("data/new-file", FIXTURE, extra_files=["./missing"])
+        self.assertTrue(opened[0].closed)
+
+
+class DownloadTestCase(unittest.TestCase):
+    path = f"pictures/thumbnails/preview-files/{fakeid('preview-1')}.png"
+    processing = {
+        "status_code": 202,
+        "json": {"status": "processing"},
+        "headers": {"Retry-After": "0"},
+    }
+
+    def setUp(self):
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.target = os.path.join(directory.name, "out.png")
+
+    def read_target(self):
+        with open(self.target, "rb") as downloaded:
+            return downloaded.read()
+
+    def test_download_writes_the_file_and_asks_for_json(self):
+        # The JSON answer lets the server say that the file is not ready.
+        with requests_mock.mock() as mock:
+            mock.get(raw.get_full_url(self.path), content=b"PNG")
+            raw.download(self.path, self.target, params={"a": "b"})
             self.assertEqual(
                 mock.last_request.headers["Accept"],
                 raw.DOWNLOAD_ACCEPT_HEADER,
             )
-        self.assertEqual(response.content, b"PNG-BYTES")
+            self.assertEqual(mock.last_request.qs, {"a": ["b"]})
+        self.assertEqual(self.read_target(), b"PNG")
 
+    def test_download_reports_progress(self):
+        calls = []
+        with requests_mock.mock() as mock:
+            mock.get(
+                raw.get_full_url(self.path),
+                content=b"PNG",
+                headers={"content-length": "3"},
+            )
+            raw.download(
+                self.path,
+                self.target,
+                progress_callback=lambda *args: calls.append(args),
+            )
+        self.assertEqual(calls, [(3, 3)])
 
-class _FakeResponse:
-    """
-    A stand-in response exposing only what _retry_after reads.
-    """
+    def test_download_retries_while_the_preview_is_processing(self):
+        for target in (self.target, None):
+            with self.subTest(target=target), requests_mock.mock() as mock:
+                mock.get(
+                    raw.get_full_url(self.path),
+                    [self.processing, {"content": b"PNG"}],
+                )
+                response = raw.download(self.path, target)
+                self.assertEqual(mock.call_count, 2)
+                if target is None:
+                    self.assertEqual(response.content, b"PNG")
+                else:
+                    self.assertEqual(self.read_target(), b"PNG")
 
-    def __init__(self, headers):
-        self.headers = headers
+    def test_download_gives_up_after_the_processing_timeout(self):
+        with requests_mock.mock() as mock:
+            mock.get(raw.get_full_url(self.path), **self.processing)
+            with self.assertRaises(PreviewFileProcessingException):
+                raw.download(self.path, self.target, processing_timeout=0)
+        self.assertFalse(os.path.exists(self.target))
+
+    def test_download_does_not_retry_or_write_a_missing_file(self):
+        with requests_mock.mock() as mock:
+            mock.get(raw.get_full_url(self.path), status_code=404, text="{}")
+            with self.assertRaises(RouteNotFoundException):
+                raw.download(self.path, self.target)
+            self.assertEqual(mock.call_count, 1)
+        self.assertFalse(os.path.exists(self.target))
+
+    def test_download_retries_with_the_refreshed_token(self):
+        client = refreshing_client()
+        with requests_mock.mock() as mock:
+            mock.get(
+                raw.get_full_url(self.path, client=client),
+                [EXPIRED, {"content": b"PNG"}],
+            )
+            mock_route(
+                mock,
+                "GET",
+                raw.get_full_url("auth/refresh-token", client=client),
+                text={"access_token": "new"},
+            )
+            response = raw.download(self.path, None, client=client)
+            self.assertEqual(
+                mock.last_request.headers["Authorization"], "Bearer new"
+            )
+        self.assertEqual(response.content, b"PNG")
 
 
 class RetryAfterTestCase(unittest.TestCase):
-    """
-    The delay _retry_after computes before the next processing retry.
-    """
+    class Response:
+        def __init__(self, headers):
+            self.headers = headers
 
-    def test_falls_back_to_default_when_the_header_is_missing(self):
+    def test_invalid_header_gives_the_default_delay(self):
         deadline = time.monotonic() + 100
-        self.assertEqual(
-            raw._retry_after(_FakeResponse({}), deadline),
-            raw.DEFAULT_RETRY_AFTER,
-        )
+        for headers in ({}, {"Retry-After": "soon"}):
+            self.assertEqual(
+                raw._retry_after(self.Response(headers), deadline),
+                raw.DEFAULT_RETRY_AFTER,
+            )
 
-    def test_falls_back_to_default_when_the_header_is_not_numeric(self):
-        deadline = time.monotonic() + 100
-        self.assertEqual(
-            raw._retry_after(_FakeResponse({"Retry-After": "soon"}), deadline),
-            raw.DEFAULT_RETRY_AFTER,
-        )
-
-    def test_is_bounded_by_the_remaining_budget(self):
-        # A server asking to wait an hour must not make the caller sleep
-        # anywhere near that: the deadline check right after the sleep
-        # would only run once the whole hour has elapsed.
-        deadline = time.monotonic() + 0.05
+    def test_delay_stays_before_the_deadline(self):
+        # An hour of Retry-After must not make the caller sleep that long:
+        # the code checks the deadline only after the delay.
         delay = raw._retry_after(
-            _FakeResponse({"Retry-After": "3600"}), deadline
+            self.Response({"Retry-After": "3600"}), time.monotonic() + 0.05
         )
         self.assertLessEqual(delay, 0.1)
 
-    def test_never_returns_a_negative_delay_past_the_deadline(self):
-        deadline = time.monotonic() - 10
-        delay = raw._retry_after(_FakeResponse({"Retry-After": "5"}), deadline)
-        self.assertEqual(delay, 0)
-
-
-class BrowserLoginTestCase(unittest.TestCase):
-    def fake_browser(self, *queries):
-        """
-        Return a webbrowser.open replacement that sends each query to the
-        loopback listener, the way the Kitsu page would.
-        """
-        self.opened = []
-
-        def visit(port, query):
-            opener = urllib.request.build_opener(
-                urllib.request.ProxyHandler({})
-            )
-            for params in query:
-                try:
-                    opener.open(
-                        "http://127.0.0.1:%s/?%s"
-                        % (port, urllib.parse.urlencode(params)),
-                        timeout=5,
-                    )
-                except urllib.error.HTTPError:
-                    pass
-
-        def open_browser(url):
-            parsed = urllib.parse.urlparse(url)
-            params = dict(urllib.parse.parse_qsl(parsed.query))
-            self.opened.append((parsed, params))
-            query = [
-                {
-                    key: (params["state"] if value is STATE else value)
-                    for key, value in item.items()
-                }
-                for item in queries
-            ]
-            threading.Thread(
-                target=visit, args=(params["port"], query)
-            ).start()
-            return True
-
-        return open_browser
-
-    def mock_server(self, mock, **exchange):
-        mock_route(mock, "POST", "auth/app-login/token", **exchange)
-
-    def test_log_in_with_browser(self):
-        tokens = {
-            "login": True,
-            "access_token": "access",
-            "refresh_token": "refresh",
-        }
-        browser = self.fake_browser({"code": "code1", "state": STATE})
-        with requests_mock.mock() as mock:
-            self.mock_server(mock, text=tokens)
-            with mock_patch("webbrowser.open", browser):
-                result = gazu.log_in_with_browser(app_name="Prism")
-            body = mock.request_history[-1].json()
-
-        self.assertEqual(result, tokens)
-        self.assertEqual(raw.default_client.tokens, tokens)
-        parsed, params = self.opened[0]
-        self.assertEqual(parsed.path, "/app-login")
-        self.assertEqual(params["app_name"], "Prism")
-        self.assertEqual(body["code"], "code1")
-        challenge = (
-            base64.urlsafe_b64encode(
-                hashlib.sha256(body["code_verifier"].encode()).digest()
-            )
-            .decode()
-            .rstrip("=")
+    def test_delay_is_never_negative(self):
+        self.assertEqual(
+            raw._retry_after(
+                self.Response({"Retry-After": "5"}), time.monotonic() - 10
+            ),
+            0,
         )
-        self.assertEqual(params["code_challenge"], challenge)
 
-    def test_log_in_with_browser_refused(self):
-        browser = self.fake_browser({"error": "access_denied", "state": STATE})
-        with requests_mock.mock() as mock:
-            self.mock_server(mock, text={})
-            with mock_patch("webbrowser.open", browser):
-                with self.assertRaises(AuthFailedException) as context:
-                    gazu.log_in_with_browser()
-            self.assertIn("access_denied", str(context.exception))
-            self.assertFalse(
-                any(r.method == "POST" for r in mock.request_history)
-            )
 
-    def test_log_in_with_browser_ignores_wrong_state(self):
-        tokens = {"access_token": "access", "refresh_token": "refresh"}
-        browser = self.fake_browser(
-            {"code": "forged", "state": "wrong"},
-            {},
-            {"code": "code1", "state": STATE},
-        )
-        with requests_mock.mock() as mock:
-            self.mock_server(mock, text=tokens)
-            with mock_patch("webbrowser.open", browser):
-                gazu.log_in_with_browser()
-            body = mock.request_history[-1].json()
-        self.assertEqual(body["code"], "code1")
-
-    def test_log_in_with_browser_wrong_state_then_timeout(self):
-        browser = self.fake_browser({"code": "forged", "state": "wrong"})
-        with requests_mock.mock() as mock:
-            self.mock_server(mock, text={})
-            with mock_patch("webbrowser.open", browser):
-                with self.assertRaises(AuthFailedException) as context:
-                    gazu.log_in_with_browser(timeout=1)
-        self.assertIn("timed out", str(context.exception))
-
-    def test_log_in_with_browser_timeout(self):
-        with requests_mock.mock() as mock:
-            self.mock_server(mock, text={})
-            with mock_patch("webbrowser.open", lambda url: True):
-                with self.assertRaises(AuthFailedException) as context:
-                    gazu.log_in_with_browser(timeout=0.2)
-        self.assertIn("timed out", str(context.exception))
-
-    def test_log_in_with_browser_logs_url_without_browser(self):
-        with requests_mock.mock() as mock:
-            self.mock_server(mock, text={})
-            with mock_patch("webbrowser.open", lambda url: False):
-                with self.assertLogs("gazu", "INFO") as logs:
-                    with self.assertRaises(AuthFailedException):
-                        gazu.log_in_with_browser(timeout=0.2)
-        self.assertIn("/app-login?", logs.output[0])
-
-    def test_log_in_with_browser_exchange_rejected(self):
-        browser = self.fake_browser({"code": "code1", "state": STATE})
-        with requests_mock.mock() as mock:
-            self.mock_server(
-                mock, text={"message": "Invalid code"}, status_code=400
-            )
-            with mock_patch("webbrowser.open", browser):
-                with self.assertRaises(AuthFailedException) as context:
-                    gazu.log_in_with_browser()
-        self.assertIn("rejected", str(context.exception))
+if __name__ == "__main__":
+    unittest.main()

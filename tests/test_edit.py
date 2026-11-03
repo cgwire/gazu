@@ -1,4 +1,5 @@
 import unittest
+
 import requests_mock
 
 import gazu.client
@@ -6,212 +7,124 @@ import gazu.edit
 
 from utils import fakeid, mock_route
 
+PROJECT = fakeid("project-1")
+EPISODE = fakeid("episode-1")
+EDIT = fakeid("edit-1")
+LOOKUP = f"data/edits/all?project_id={PROJECT}&name=Cut"
+EDITS_PATH = f"data/projects/{PROJECT}/edits"
 
-class EditTestCase(unittest.TestCase):
+
+class EditReadTestCase(unittest.TestCase):
     def test_get_edit(self):
         with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                "data/edits/edit-01",
-                text={"name": "Edit 01", "project_id": "project-01"},
-            )
-            self.assertEqual(gazu.edit.get_edit("edit-01")["name"], "Edit 01")
+            mock_route(mock, "GET", f"data/edits/{EDIT}", text={"id": EDIT})
+            self.assertEqual(gazu.edit.get_edit(EDIT), {"id": EDIT})
 
     def test_get_edit_by_name(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                "data/edits/all?project_id=project-01&name=Edit01",
-                text=[{"name": "Edit01", "project_id": "project-01"}],
-            )
-            project = {"id": "project-01"}
-            edit = gazu.edit.get_edit_by_name(project, "Edit01")
-            self.assertEqual(edit["name"], "Edit01")
+        for entries, expected in (([{"id": EDIT}], {"id": EDIT}), ([], None)):
+            with self.subTest(entries), requests_mock.mock() as mock:
+                mock_route(mock, "GET", LOOKUP, text=entries)
+                self.assertEqual(
+                    gazu.edit.get_edit_by_name(PROJECT, "Cut"), expected
+                )
 
-    def test_get_url(self):
+    def test_get_edit_url_contains_the_episode_when_there_is_one(self):
+        base = f"{gazu.client.get_api_url_from_host()}/productions/{PROJECT}"
+        for episode, expected in (
+            (EPISODE, f"{base}/episodes/{EPISODE}/edits/{EDIT}/"),
+            (None, f"{base}/edits/{EDIT}/"),
+        ):
+            with self.subTest(episode), requests_mock.mock() as mock:
+                mock_route(
+                    mock,
+                    "GET",
+                    f"data/edits/{EDIT}",
+                    text={
+                        "id": EDIT,
+                        "project_id": PROJECT,
+                        "episode_id": episode,
+                    },
+                )
+                self.assertEqual(gazu.edit.get_edit_url(EDIT), expected)
+
+    def test_all_edits_for_project_are_sorted_by_name(self):
         with requests_mock.mock() as mock:
-            edit = {
-                "id": "edit-01",
-                "project_id": "project-01",
-                "episode_id": "episode-01",
-            }
-            project = {
-                "id": "project-01",
-                "production_type": "tvshow",
-            }
             mock_route(
-                mock,
-                "GET",
-                "data/projects/project-01",
-                text=project,
+                mock, "GET", EDITS_PATH, text=[{"name": "b"}, {"name": "A"}]
             )
-            mock_route(
-                mock,
-                "GET",
-                f"data/edits/{fakeid('edit-01')}",
-                text=edit,
-            )
-            url = gazu.edit.get_edit_url(fakeid("edit-01"))
             self.assertEqual(
-                url,
-                f"{gazu.client.get_api_url_from_host()}/productions/project-01/"
-                "episodes/episode-01/edits/edit-01/",
+                gazu.edit.all_edits_for_project(PROJECT),
+                [{"name": "A"}, {"name": "b"}],
             )
 
-            edit = {
-                "id": "edit-01",
-                "project_id": "project-01",
-                "episode_id": None,
-            }
-            project = {
-                "id": "project-01",
-                "production_type": "tvshow",
-            }
+    def test_all_previews_keep_the_order_of_the_api(self):
+        previews = [{"name": "b"}, {"name": "A"}]
+        with requests_mock.mock() as mock:
             mock_route(
-                mock,
-                "GET",
-                "data/projects/project-01",
-                text=project,
+                mock, "GET", f"data/edits/{EDIT}/preview-files", text=previews
             )
-            mock_route(
-                mock,
-                "GET",
-                f"data/edits/{fakeid('edit-01')}",
-                text=edit,
+            self.assertEqual(gazu.edit.all_previews_for_edit(EDIT), previews)
+
+
+class EditWriteTestCase(unittest.TestCase):
+    def test_new_edit_sends_the_fields(self):
+        with requests_mock.mock() as mock:
+            mock_route(mock, "GET", LOOKUP, text=[])
+            mock_route(mock, "POST", EDITS_PATH, text={"id": EDIT})
+            result = gazu.edit.new_edit(
+                PROJECT,
+                "Cut",
+                description="A cut",
+                data={"a": 1},
+                episode=EPISODE,
             )
-            url = gazu.edit.get_edit_url(fakeid("edit-01"))
+            self.assertEqual(result, {"id": EDIT})
             self.assertEqual(
-                url,
-                f"{gazu.client.get_api_url_from_host()}/productions/project-01/"
-                "edits/edit-01/",
-            )
-
-    def test_new_edit(self):
-        with requests_mock.mock() as mock:
-            result = {
-                "id": fakeid("edit-1"),
-                "project_id": fakeid("project-1"),
-                "description": "test description",
-            }
-            mock_route(
-                mock,
-                "GET",
-                f"data/edits/all?project_id={fakeid('project-1')}&name=Edit 01",
-                text=[],
-            )
-            mock_route(
-                mock,
-                "POST",
-                f"data/projects/{fakeid('project-1')}/edits",
-                text=result,
-            )
-            edit = gazu.edit.new_edit(
-                fakeid("project-1"),
-                "Edit 01",
-                episode=fakeid("episode-1"),
-                description="test description",
-            )
-            self.assertEqual(edit, result)
-            self.assertEqual(
-                mock.last_request.json()["episode_id"], fakeid("episode-1")
-            )
-
-        with requests_mock.mock() as mock:
-            result = {
-                "id": fakeid("edit-1"),
-                "project_id": fakeid("project-1"),
-            }
-            mock_route(
-                mock,
-                "GET",
-                f"data/edits/all?project_id={fakeid('project-1')}&name=Concept 01",
-                text=[result],
-            )
-
-            edit = gazu.edit.new_edit(
-                fakeid("project-1"),
-                "Concept 01",
-                episode=fakeid("episode-1"),
-            )
-            self.assertEqual(edit, result)
-
-    def test_remove_edit(self):
-        with requests_mock.mock() as mock:
-            mock_route(mock, "DELETE", "data/edits/edit-01", status_code=204)
-            edit = {"id": "edit-01", "name": "S02"}
-            gazu.edit.remove_edit(edit)
-            mock_route(
-                mock,
-                "DELETE",
-                "data/edits/edit-01?force=true",
-                status_code=204,
-            )
-            edit = {"id": "edit-01", "name": "S02"}
-            gazu.edit.remove_edit(edit, True)
-
-    def test_update_edit(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "PUT",
-                "data/entities/edit-01",
-                text={"id": "edit-01", "project_id": "project-01"},
-            )
-            edit = {"id": "edit-01", "name": "S02"}
-            edit = gazu.edit.update_edit(edit)
-            self.assertEqual(edit["id"], "edit-01")
-
-    def test_update_edit_data(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                f"data/edits/{fakeid('edit-1')}",
-                text={"id": fakeid("edit-1"), "data": {}},
-            )
-            mock_route(
-                mock,
-                "PUT",
-                f"data/entities/{fakeid('edit-1')}",
-                text={
-                    "id": fakeid("edit-1"),
-                    "data": {"metadata-1": "metadata-1"},
+                mock.last_request.json(),
+                {
+                    "name": "Cut",
+                    "description": "A cut",
+                    "data": {"a": 1},
+                    "episode_id": EPISODE,
                 },
             )
-            data = {"metadata-1": "metadata-1"}
-            edit = gazu.edit.update_edit_data(fakeid("edit-1"), data)
-            self.assertEqual(edit["data"]["metadata-1"], "metadata-1")
 
-    def test_all_edits_for_project(self):
+    def test_new_edit_returns_the_existing_edit(self):
+        with requests_mock.mock() as mock:
+            mock_route(mock, "GET", LOOKUP, text=[{"id": EDIT}])
+            self.assertEqual(gazu.edit.new_edit(PROJECT, "Cut"), {"id": EDIT})
+            self.assertEqual(mock.call_count, 1)
+
+    def test_remove_edit_sends_force_only_when_asked(self):
+        for force, query in ((False, {}), (True, {"force": ["true"]})):
+            with self.subTest(force=force), requests_mock.mock() as mock:
+                mock_route(
+                    mock, "DELETE", f"data/edits/{EDIT}", status_code=204
+                )
+                gazu.edit.remove_edit(EDIT, force)
+                self.assertEqual(mock.last_request.qs, query)
+
+    def test_update_edit_uses_the_entity_route(self):
+        edit = {"id": EDIT, "name": "Cut"}
+        with requests_mock.mock() as mock:
+            mock_route(mock, "PUT", f"data/entities/{EDIT}", text=edit)
+            self.assertEqual(gazu.edit.update_edit(edit), edit)
+            self.assertEqual(mock.last_request.json(), edit)
+
+    def test_update_edit_data_merges_with_the_current_data(self):
         with requests_mock.mock() as mock:
             mock_route(
                 mock,
                 "GET",
-                "data/projects/project-01/edits",
-                text=[{"name": "Edit 01", "project_id": "project-01"}],
+                f"data/edits/{EDIT}",
+                text={"id": EDIT, "data": {"kept": 1, "changed": 1}},
             )
-            project = {"id": "project-01"}
-            edits = gazu.edit.all_edits_for_project(project)
-            self.assertEqual(len(edits), 1)
-            edit_instance = edits[0]
-            self.assertEqual(edit_instance["name"], "Edit 01")
-            self.assertEqual(edit_instance["project_id"], "project-01")
-
-    def test_all_previews_for_edit(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                f"data/edits/{fakeid('edit-1')}/preview-files",
-                text=[
-                    {"id": fakeid("preview-1"), "name": "preview-1"},
-                    {"id": fakeid("preview-2"), "name": "preview-2"},
-                ],
+            mock_route(mock, "PUT", f"data/entities/{EDIT}", text={})
+            gazu.edit.update_edit_data(EDIT, {"changed": 2})
+            self.assertEqual(
+                mock.last_request.json()["data"], {"kept": 1, "changed": 2}
             )
 
-            previews = gazu.edit.all_previews_for_edit(fakeid("edit-1"))
-            self.assertEqual(len(previews), 2)
-            self.assertEqual(previews[0]["id"], fakeid("preview-1"))
-            self.assertEqual(previews[1]["id"], fakeid("preview-2"))
+
+if __name__ == "__main__":
+    unittest.main()

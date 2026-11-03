@@ -1,614 +1,270 @@
-import datetime
 import unittest
+
 import requests_mock
-import json
-import gazu.client
+
 import gazu.user
 
 from utils import fakeid, mock_route
 
+PROJECT = fakeid("project-1")
+ASSET_TYPE = fakeid("asset-type-1")
+ASSET = fakeid("asset-1")
+SHOT = fakeid("shot-1")
+SCENE = fakeid("scene-1")
+SEQUENCE = fakeid("sequence-1")
+TASK = fakeid("task-1")
+FILTER = fakeid("filter-1")
+GROUP = fakeid("filter-group-1")
+NOTIFICATION = fakeid("notification-1")
+CHAT = fakeid("chat-1")
+RESULT = {"id": "result"}
 
-class ProjectTestCase(unittest.TestCase):
-    def test_all_open_projects(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                "data/user/projects/open",
-                text=[{"name": "Big Buck Bunny", "id": "project-01"}],
-            )
-            projects = gazu.user.all_open_projects()
-            project_instance = projects[0]
-            self.assertEqual(project_instance["name"], "Big Buck Bunny")
 
-    def test_asset_types_for_project(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                "data/user/projects/project-01/asset-types",
-                text=[{"name": "Props", "id": "asset-type-01"}],
-            )
-
-            project = {"id": "project-01"}
-            asset_types = gazu.user.all_asset_types_for_project(project)
-            asset_type = asset_types[0]
-            self.assertEqual(asset_type["name"], "Props")
-
-    def test_asset_for_asset_type_and_project(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                "data/user/projects/project-01/asset-types/asset-type-01"
-                "/assets",
-                text=[{"name": "Chair", "id": "asset-01"}],
-            )
-
-            project = {"id": "project-01"}
-            asset_type = {"id": "asset-type-01"}
-            assets = gazu.user.all_assets_for_asset_type_and_project(
-                project, asset_type
-            )
-            asset = assets[0]
-            self.assertEqual(asset["name"], "Chair")
-
-    def test_tasks_for_asset(self):
-        with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url("data/user/assets/asset-01/tasks"),
-                text=json.dumps([{"name": "main", "id": "task-01"}]),
-            )
-            asset = {"id": "asset-01"}
-            tasks = gazu.user.all_tasks_for_asset(asset)
-            task = tasks[0]
-            self.assertEqual(task["name"], "main")
-
-    def test_tasks_for_shot(self):
-        with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url("data/user/shots/shot-01/tasks"),
-                text=json.dumps([{"name": "main", "id": "task-01"}]),
-            )
-            shot = {"id": "shot-01"}
-            tasks = gazu.user.all_tasks_for_shot(shot)
-            task = tasks[0]
-            self.assertEqual(task["name"], "main")
-
-    def test_tasks_for_sequence(self):
-        with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url(
-                    "data/user/sequences/sequence-1/tasks"
+class UserReadTestCase(unittest.TestCase):
+    def test_lists_are_sorted_by_name(self):
+        user = gazu.user
+        for call, path in (
+            (user.all_open_projects, "projects/open"),
+            (
+                lambda: user.all_asset_types_for_project(PROJECT),
+                f"projects/{PROJECT}/asset-types",
+            ),
+            (
+                lambda: user.all_assets_for_asset_type_and_project(
+                    PROJECT, ASSET_TYPE
                 ),
-                text=json.dumps([{"name": "main", "id": "task-01"}]),
-            )
-            sequence = {"id": "sequence-1"}
-            tasks = gazu.user.all_tasks_for_sequence(sequence)
-            task = tasks[0]
-            self.assertEqual(task["name"], "main")
+                f"projects/{PROJECT}/asset-types/{ASSET_TYPE}/assets",
+            ),
+            (lambda: user.all_tasks_for_asset(ASSET), f"assets/{ASSET}/tasks"),
+            (lambda: user.all_tasks_for_shot(SHOT), f"shots/{SHOT}/tasks"),
+            (lambda: user.all_tasks_for_scene(SCENE), f"scenes/{SCENE}/tasks"),
+            (
+                lambda: user.all_tasks_for_sequence(SEQUENCE),
+                f"sequences/{SEQUENCE}/tasks",
+            ),
+            (
+                lambda: user.all_task_types_for_asset(ASSET),
+                f"assets/{ASSET}/task-types",
+            ),
+            (
+                lambda: user.all_task_types_for_shot(SHOT),
+                f"shots/{SHOT}/task-types",
+            ),
+            (
+                lambda: user.all_task_types_for_scene(SCENE),
+                f"scenes/{SCENE}/task-types",
+            ),
+            (
+                lambda: user.all_task_types_for_sequence(SEQUENCE),
+                f"sequences/{SEQUENCE}/task-types",
+            ),
+            (
+                lambda: user.all_sequences_for_project(PROJECT),
+                f"projects/{PROJECT}/sequences",
+            ),
+            (
+                lambda: user.all_episodes_for_project(PROJECT),
+                f"projects/{PROJECT}/episodes",
+            ),
+            (
+                lambda: user.all_shots_for_sequence(SEQUENCE),
+                f"sequences/{SEQUENCE}/shots",
+            ),
+            (
+                lambda: user.all_scenes_for_sequence(SEQUENCE),
+                f"sequences/{SEQUENCE}/scenes",
+            ),
+        ):
+            with self.subTest(path), requests_mock.mock() as mock:
+                mock_route(
+                    mock,
+                    "GET",
+                    f"data/user/{path}",
+                    text=[{"name": "b"}, {"name": "A"}],
+                )
+                self.assertEqual(call(), [{"name": "A"}, {"name": "b"}])
 
-    def test_task_types_for_asset(self):
+    def test_responses_are_returned_as_they_are(self):
+        user = gazu.user
+        for call, path in (
+            (user.all_tasks_to_do, "tasks"),
+            (user.all_done_tasks, "done-tasks"),
+            (user.all_filters, "filters"),
+            (user.get_context, "context"),
+            (user.all_tasks_requiring_feedback, "tasks-to-check"),
+            (user.all_filter_groups, "filter-groups"),
+            (
+                lambda: user.get_filter_group(GROUP),
+                f"filter-groups/{GROUP}",
+            ),
+            (user.all_desktop_login_logs, "desktop-login-logs"),
+            (
+                lambda: user.get_time_spents_by_date("2025-01-15"),
+                "time-spents/2025-01-15",
+            ),
+            (
+                lambda: user.get_task_time_spent(TASK, "2025-01-15"),
+                f"tasks/{TASK}/time-spents/2025-01-15",
+            ),
+            (lambda: user.get_day_off("2025-01-15"), "day-offs/2025-01-15"),
+            (user.all_notifications, "notifications"),
+            (
+                lambda: user.get_notification(NOTIFICATION),
+                f"notifications/{NOTIFICATION}",
+            ),
+            (user.all_chats, "chats"),
+        ):
+            with self.subTest(path), requests_mock.mock() as mock:
+                mock_route(mock, "GET", f"data/user/{path}", text=RESULT)
+                self.assertEqual(call(), RESULT)
+
+    def test_get_timespents_range_sends_the_dates(self):
         with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                "data/user/assets/asset-01/task-types",
-                text=[{"name": "modeling", "id": "task-type-01"}],
-            )
-            asset = {"id": "asset-01"}
-            task_types = gazu.user.all_task_types_for_asset(asset)
-            task_type = task_types[0]
-            self.assertEqual(task_type["name"], "modeling")
-
-    def test_task_types_for_shot(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                "data/user/shots/shot-01/task-types",
-                text=[{"name": "animation", "id": "task-type-01"}],
-            )
-
-            shot = {"id": "shot-01"}
-            tasks = gazu.user.all_task_types_for_shot(shot)
-            task = tasks[0]
-            self.assertEqual(task["name"], "animation")
-
-    def test_task_types_for_sequence(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                "data/user/sequences/sequence-1/task-types",
-                text=[{"name": "previz", "id": "task-type-01"}],
-            )
-
-            sequence = {"id": "sequence-1"}
-            tasks = gazu.user.all_task_types_for_sequence(sequence)
-            task = tasks[0]
-            self.assertEqual(task["name"], "previz")
-
-    def test_sequences_for_project(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                "data/user/projects/project-01/sequences",
-                text=[{"name": "SEQ01", "id": "sequence-01"}],
-            )
-            project = {"id": "project-01"}
-            sequences = gazu.user.all_sequences_for_project(project)
-            sequence = sequences[0]
-            self.assertEqual(sequence["name"], "SEQ01")
-
-    def test_shot_for_sequences(self):
-        with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url(
-                    "data/user/sequences/sequence-01/shots"
-                ),
-                text=json.dumps([{"name": "SEQ01", "id": "shot-01"}]),
-            )
-            sequence = {"id": "sequence-01"}
-            shots = gazu.user.all_shots_for_sequence(sequence)
-            shot = shots[0]
-            self.assertEqual(shot["name"], "SEQ01")
-
-    def test_all_task_types_for_scene(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                "data/user/scenes/scene-01/task-types",
-                text=[{"name": "scene1", "id": "scene-01"}],
-            )
-            scene = {"id": "scene-01"}
-            tasks = gazu.user.all_task_types_for_scene(scene)
-            task = tasks[0]
-            self.assertEqual(task["name"], "scene1")
-
-    def test_all_shots_for_sequence(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                "data/user/sequences/sequence-01/shots",
-                text=[
-                    {
-                        "name": "Shot 01",
-                        "project_id": "project-01",
-                        "parent_id": "sequence-01",
-                    }
-                ],
-            )
-            sequence = {"id": "sequence-01"}
-            shots = gazu.user.all_shots_for_sequence(sequence)
-            self.assertEqual(len(shots), 1)
-            shot_instance = shots[0]
-            self.assertEqual(shot_instance["name"], "Shot 01")
-            self.assertEqual(shot_instance["project_id"], "project-01")
-            self.assertEqual(shot_instance["parent_id"], "sequence-01")
-
-    def test_all_scenes_for_sequence(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                "data/user/sequences/sequence-01/scenes",
-                text=[
-                    {
-                        "name": "Scene 01",
-                        "project_id": "project-01",
-                        "parent_id": "sequence-01",
-                    }
-                ],
-            )
-            sequence = {"id": "sequence-01"}
-            scenes = gazu.user.all_scenes_for_sequence(sequence)
-            self.assertEqual(len(scenes), 1)
-            scene_instance = scenes[0]
-            self.assertEqual(scene_instance["name"], "Scene 01")
-            self.assertEqual(scene_instance["project_id"], "project-01")
-            self.assertEqual(scene_instance["parent_id"], "sequence-01")
-
-    def test_all_episodes_for_project(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                "data/user/projects/project-01/episodes",
-                text=[{"name": "Episode 01", "project_id": "project-01"}],
-            )
-            project = {"id": "project-01"}
-            episodes = gazu.user.all_episodes_for_project(project)
-            self.assertEqual(len(episodes), 1)
-            episode_instance = episodes[0]
-            self.assertEqual(episode_instance["name"], "Episode 01")
-            self.assertEqual(episode_instance["project_id"], "project-01")
-
-    def test_all_tasks_for_scene(self):
-        with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url(
-                    f"data/user/scenes/{fakeid('scene-1')}/tasks"
-                ),
-                text=json.dumps(
-                    [
-                        {"id": fakeid("task-1"), "name": "task-1"},
-                        {"id": fakeid("task-2"), "name": "task-2"},
-                    ]
-                ),
-            )
-            scene = {"id": fakeid("scene-1")}
-            tasks = gazu.user.all_tasks_for_scene(scene)
-            self.assertEqual(len(tasks), 2)
-            self.assertEqual(tasks[0]["name"], "task-1")
-            self.assertEqual(tasks[1]["name"], "task-2")
-
-    def test_all_tasks_to_do(self):
-        with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url("data/user/tasks"),
-                text=json.dumps(
-                    [
-                        {"id": fakeid("task-1"), "name": "task-1"},
-                        {"id": fakeid("task-2"), "name": "task-2"},
-                    ]
-                ),
-            )
-            tasks = gazu.user.all_tasks_to_do()
-            self.assertEqual(len(tasks), 2)
-            self.assertEqual(tasks[0]["name"], "task-1")
-            self.assertEqual(tasks[1]["name"], "task-2")
-
-    def test_all_done_tasks(self):
-        with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url("data/user/done-tasks"),
-                text=json.dumps(
-                    [
-                        {"id": fakeid("task-1"), "name": "task-1"},
-                        {"id": fakeid("task-2"), "name": "task-2"},
-                    ]
-                ),
-            )
-            tasks = gazu.user.all_done_tasks()
-            self.assertEqual(len(tasks), 2)
-            self.assertEqual(tasks[0]["name"], "task-1")
-            self.assertEqual(tasks[1]["name"], "task-2")
-
-    def test_log_desktop_session_log_in(self):
-        with requests_mock.mock() as mock:
-            date_str = datetime.datetime.now().isoformat()
-            mock.post(
-                gazu.client.get_full_url("data/user/desktop-login-logs"),
-                text=json.dumps(
-                    {"id": fakeid("user-1"), "date": date_str},
-                ),
-            )
-
-            log_desktop_session_log_in = gazu.user.log_desktop_session_log_in()
+            mock_route(mock, "GET", "data/user/time-spents", text=[RESULT])
             self.assertEqual(
-                log_desktop_session_log_in["id"], fakeid("user-1")
+                gazu.user.get_timespents_range("2025-01-01", "2025-01-31"),
+                [RESULT],
             )
-            self.assertEqual(log_desktop_session_log_in["date"], date_str)
+            self.assertEqual(
+                mock.last_request.qs,
+                {"start_date": ["2025-01-01"], "end_date": ["2025-01-31"]},
+            )
 
     def test_is_authenticated(self):
+        for kwargs, expected in (
+            ({"text": {"authenticated": True}}, True),
+            ({"text": {"authenticated": False}}, False),
+            ({"text": {}, "status_code": 401}, False),
+        ):
+            with self.subTest(kwargs), requests_mock.mock() as mock:
+                mock_route(mock, "GET", "auth/authenticated", **kwargs)
+                self.assertEqual(gazu.user.is_authenticated(), expected)
+
+    def test_check_task_subscription_returns_a_boolean(self):
+        for subscribed in (True, False):
+            with self.subTest(subscribed), requests_mock.mock() as mock:
+                mock_route(
+                    mock,
+                    "GET",
+                    f"data/user/tasks/{TASK}/subscribed",
+                    text=str(subscribed).lower(),
+                )
+                self.assertIs(
+                    gazu.user.check_task_subscription(TASK), subscribed
+                )
+
+
+class UserWriteTestCase(unittest.TestCase):
+    def test_log_desktop_session_sends_the_date(self):
         with requests_mock.mock() as mock:
             mock_route(
-                mock,
-                "GET",
-                "auth/authenticated",
-                text={"authenticated": True},
+                mock, "POST", "data/user/desktop-login-logs", text=RESULT
             )
-            self.assertTrue(gazu.user.is_authenticated())
+            self.assertEqual(gazu.user.log_desktop_session_log_in(), RESULT)
+            self.assertIn("date", mock.last_request.json())
 
-            mock_route(
-                mock,
-                "GET",
-                "auth/authenticated",
-                status_code=401,
-            )
-            self.assertFalse(gazu.user.is_authenticated())
+    def test_new_filter_sends_the_fields(self):
+        base = {
+            "name": "Mine",
+            "query": "wip",
+            "list_type": "asset",
+            "project_id": None,
+            "entity_type": None,
+        }
+        for kwargs, extra in (
+            ({}, {}),
+            (
+                {"project": {"id": PROJECT}, "entity_type": "Asset"},
+                {"project_id": PROJECT, "entity_type": "Asset"},
+            ),
+        ):
+            with self.subTest(kwargs), requests_mock.mock() as mock:
+                mock_route(mock, "POST", "data/user/filters", text=RESULT)
+                self.assertEqual(
+                    gazu.user.new_filter("Mine", "wip", "asset", **kwargs),
+                    RESULT,
+                )
+                self.assertEqual(mock.last_request.json(), {**base, **extra})
 
-    def test_get_context(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                "data/user/context",
-                text={"user": {"id": fakeid("user-1")}},
-            )
-            context = gazu.user.get_context()
-            self.assertEqual(context["user"]["id"], fakeid("user-1"))
+    def test_new_filter_group_sends_the_fields(self):
+        for project, expected in ((None, None), ({"id": PROJECT}, PROJECT)):
+            with self.subTest(project), requests_mock.mock() as mock:
+                mock_route(
+                    mock, "POST", "data/user/filter-groups", text=RESULT
+                )
+                self.assertEqual(
+                    gazu.user.new_filter_group("Mine", project), RESULT
+                )
+                self.assertEqual(
+                    mock.last_request.json(),
+                    {"name": "Mine", "project_id": expected},
+                )
 
-    def test_all_tasks_requiring_feedback(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                "data/user/tasks-to-check",
-                text=[{"id": fakeid("task-1")}, {"id": fakeid("task-2")}],
-            )
-            tasks = gazu.user.all_tasks_requiring_feedback()
-            self.assertEqual(len(tasks), 2)
+    def test_updates_send_the_dict(self):
+        for call, path, entity in (
+            (gazu.user.update_filter, f"filters/{FILTER}", FILTER),
+            (gazu.user.update_filter_group, f"filter-groups/{GROUP}", GROUP),
+            (
+                gazu.user.update_notification,
+                f"notifications/{NOTIFICATION}",
+                NOTIFICATION,
+            ),
+        ):
+            with self.subTest(path), requests_mock.mock() as mock:
+                mock_route(mock, "PUT", f"data/user/{path}", text=RESULT)
+                data = {"id": entity, "name": "New"}
+                self.assertEqual(call(data), RESULT)
+                self.assertEqual(mock.last_request.json(), data)
 
-    def test_filter_groups(self):
-        with requests_mock.mock() as mock:
-            # get all filter groups
-            mock_route(
-                mock,
-                "GET",
-                "data/user/filter-groups",
-                text=[{"id": fakeid("fg-1")}, {"id": fakeid("fg-2")}],
-            )
-            groups = gazu.user.all_filter_groups()
-            self.assertEqual(len(groups), 2)
+    def test_deletions_use_their_route(self):
+        user = gazu.user
+        for call, path in (
+            (
+                lambda: user.remove_filter(FILTER),
+                f"data/user/filters/{FILTER}",
+            ),
+            (
+                lambda: user.remove_filter_group({"id": GROUP}),
+                f"data/user/filter-groups/{GROUP}",
+            ),
+            (
+                lambda: user.unsubscribe_from_task(TASK),
+                f"actions/user/tasks/{TASK}/unsubscribe",
+            ),
+            (
+                lambda: user.leave_chat(CHAT),
+                f"actions/user/chats/{CHAT}/join",
+            ),
+            (user.clear_avatar, "actions/user/clear-avatar"),
+        ):
+            with self.subTest(path), requests_mock.mock() as mock:
+                mock_route(mock, "DELETE", path, status_code=204)
+                call()
+                self.assertEqual(mock.call_count, 1)
 
-            # create filter group
-            mock_route(
-                mock,
-                "POST",
-                "data/user/filter-groups",
-                text={"id": fakeid("fg-3"), "name": "My Group"},
-            )
-            created = gazu.user.new_filter_group(
-                "My Group", {"id": fakeid("project-1")}
-            )
-            self.assertEqual(created["id"], fakeid("fg-3"))
-
-            # get filter group
-            mock_route(
-                mock,
-                "GET",
-                f"data/user/filter-groups/{fakeid('fg-3')}",
-                text={"id": fakeid("fg-3"), "name": "My Group"},
-            )
-            group = gazu.user.get_filter_group(fakeid("fg-3"))
-            self.assertEqual(group["id"], fakeid("fg-3"))
-
-            # update filter group
-            mock_route(
-                mock,
-                "PUT",
-                f"data/user/filter-groups/{fakeid('fg-3')}",
-                text={"id": fakeid("fg-3"), "name": "Updated Group"},
-            )
-            updated = gazu.user.update_filter_group(
-                {"id": fakeid("fg-3"), "name": "Updated Group"}
-            )
-            self.assertEqual(updated["name"], "Updated Group")
-
-            # remove filter group
-            mock_route(
-                mock,
-                "DELETE",
-                f"data/user/filter-groups/{fakeid('fg-3')}",
-                status_code=204,
-            )
-            gazu.user.remove_filter_group(fakeid("fg-3"))
-
-    def test_all_desktop_login_logs(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                "data/user/desktop-login-logs",
-                text=[{"id": fakeid("log-1")}, {"id": fakeid("log-2")}],
-            )
-            logs = gazu.user.all_desktop_login_logs()
-            self.assertEqual(len(logs), 2)
-
-    def test_get_time_spents_by_date(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                "data/user/time-spents/2025-01-15",
-                text=[{"id": fakeid("ts-1")}, {"id": fakeid("ts-2")}],
-            )
-            time_spents = gazu.user.get_time_spents_by_date("2025-01-15")
-            self.assertEqual(len(time_spents), 2)
-
-    def test_get_task_time_spent(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                f"data/user/tasks/{fakeid('task-1')}/time-spents/2025-01-15",
-                text={"id": fakeid("ts-1"), "duration": 3600},
-            )
-            time_spent = gazu.user.get_task_time_spent(
-                fakeid("task-1"), "2025-01-15"
-            )
-            self.assertEqual(time_spent["duration"], 3600)
-
-    def test_get_day_off(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                "data/user/day-offs/2025-01-15",
-                text={"days": 5},
-            )
-            day_off = gazu.user.get_day_off("2025-01-15")
-            self.assertEqual(day_off["days"], 5)
-
-    def test_notifications(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                "data/user/notifications",
-                text=[{"id": fakeid("notif-1")}, {"id": fakeid("notif-2")}],
-            )
-            notifications = gazu.user.all_notifications()
-            self.assertEqual(len(notifications), 2)
-
-            mock_route(
-                mock,
-                "GET",
-                f"data/user/notifications/{fakeid('notif-1')}",
-                text={"id": fakeid("notif-1"), "read": False},
-            )
-            notif = gazu.user.get_notification(fakeid("notif-1"))
-            self.assertFalse(notif["read"])
-
-            mock_route(
-                mock,
-                "PUT",
-                f"data/user/notifications/{fakeid('notif-1')}",
-                text={"id": fakeid("notif-1"), "read": True},
-            )
-            updated = gazu.user.update_notification(
-                {"id": fakeid("notif-1"), "read": True}
-            )
-            self.assertTrue(updated["read"])
-
-            mock_route(
-                mock,
-                "POST",
+    def test_actions_return_the_response(self):
+        user = gazu.user
+        for call, path, result in (
+            (
+                lambda: user.subscribe_to_task(TASK),
+                f"actions/user/tasks/{TASK}/subscribe",
+                RESULT,
+            ),
+            (
+                lambda: user.join_chat(CHAT),
+                f"actions/user/chats/{CHAT}/join",
+                RESULT,
+            ),
+            (
+                user.mark_all_notifications_as_read,
                 "actions/user/notifications/mark-all-as-read",
-                text={"status": "ok"},
-            )
-            result = gazu.user.mark_all_notifications_as_read()
-            self.assertEqual(result["status"], "ok")
+                {"success": True},
+            ),
+        ):
+            with self.subTest(path), requests_mock.mock() as mock:
+                mock_route(mock, "POST", path, text=result)
+                self.assertEqual(call(), result)
 
-    def test_task_subscriptions(self):
-        with requests_mock.mock() as mock:
 
-            mock_route(
-                mock,
-                "GET",
-                f"data/user/tasks/{fakeid('task-1')}/subscribed",
-                text={"subscribed": True},
-            )
-            sub = gazu.user.check_task_subscription(fakeid("task-1"))
-            self.assertTrue(sub["subscribed"])
-
-            mock_route(
-                mock,
-                "POST",
-                f"actions/user/tasks/{fakeid('task-1')}/subscribe",
-                text={"subscribed": True},
-            )
-            result = gazu.user.subscribe_to_task(fakeid("task-1"))
-            self.assertTrue(result["subscribed"])
-
-            mock_route(
-                mock,
-                "DELETE",
-                f"actions/user/tasks/{fakeid('task-1')}/unsubscribe",
-                status_code=204,
-            )
-            gazu.user.unsubscribe_from_task(fakeid("task-1"))
-
-    def test_chats(self):
-        with requests_mock.mock() as mock:
-
-            mock_route(
-                mock,
-                "GET",
-                "data/user/chats",
-                text=[{"id": fakeid("chat-1")}, {"id": fakeid("chat-2")}],
-            )
-            chats = gazu.user.all_chats()
-            self.assertEqual(len(chats), 2)
-
-            mock_route(
-                mock,
-                "POST",
-                f"actions/user/chats/{fakeid('chat-1')}/join",
-                text={"id": fakeid("chat-1"), "joined": True},
-            )
-            chat = gazu.user.join_chat(fakeid("chat-1"))
-            self.assertTrue(chat["joined"])
-
-            mock_route(
-                mock,
-                "DELETE",
-                f"actions/user/chats/{fakeid('chat-1')}/join",
-                status_code=204,
-            )
-            gazu.user.leave_chat(fakeid("chat-1"))
-
-    def test_clear_avatar(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "DELETE",
-                "actions/user/clear-avatar",
-                status_code=204,
-            )
-            gazu.user.clear_avatar()
-
-    def test_get_timespents_range(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                "data/user/time-spents?start_date=2025-01-01&end_date=2025-01-31",
-                text=[
-                    {"id": fakeid("ts-1"), "duration": 3600},
-                    {"id": fakeid("ts-2"), "duration": 7200},
-                ],
-            )
-            time_spents = gazu.user.get_timespents_range(
-                "2025-01-01", "2025-01-31"
-            )
-            self.assertEqual(len(time_spents), 2)
-            self.assertEqual(time_spents[0]["duration"], 3600)
-
-    def test_filters(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "GET",
-                "data/user/filters",
-                text=[{"id": fakeid("filter-1")}, {"id": fakeid("filter-2")}],
-            )
-            filters = gazu.user.all_filters()
-            self.assertEqual(len(filters), 2)
-
-            mock_route(
-                mock,
-                "POST",
-                "data/user/filters",
-                text={
-                    "id": fakeid("filter-3"),
-                    "name": "My Filter",
-                    "query": "status=wip",
-                },
-            )
-            created = gazu.user.new_filter(
-                "My Filter",
-                "status=wip",
-                "asset",
-                project={"id": fakeid("project-1")},
-                entity_type="Asset",
-            )
-            self.assertEqual(created["id"], fakeid("filter-3"))
-
-            mock_route(
-                mock,
-                "PUT",
-                f"data/user/filters/{fakeid('filter-3')}",
-                text={
-                    "id": fakeid("filter-3"),
-                    "name": "Updated Filter",
-                    "query": "status=done",
-                },
-            )
-            updated = gazu.user.update_filter(
-                {"id": fakeid("filter-3"), "name": "Updated Filter"}
-            )
-            self.assertEqual(updated["name"], "Updated Filter")
-
-            mock_route(
-                mock,
-                "DELETE",
-                f"data/user/filters/{fakeid('filter-3')}",
-                status_code=204,
-            )
-            gazu.user.remove_filter(fakeid("filter-3"))
+if __name__ == "__main__":
+    unittest.main()

@@ -1,209 +1,212 @@
+import datetime
 import unittest
-import requests_mock
-import json
-import time
+from unittest.mock import patch
 
+import gazu.cache
 import gazu.client
-import gazu.project
+
+
+class Counted:
+    """A function that returns a new list on each call and counts the calls."""
+
+    def __init__(self):
+        self.calls = 0
+
+    def __call__(self, *args, **kwargs):
+        self.calls += 1
+        return [self.calls]
+
+
+def cached(**kwargs):
+    function = Counted()
+    # wraps() needs a name, which a callable instance does not have.
+    function.__name__ = "counted"
+    return function, gazu.cache.cache(function, **kwargs)
 
 
 class CacheTestCase(unittest.TestCase):
-    def test_enable_disable(self):
-        with requests_mock.mock() as mock:
-            mock_open = mock.get(
-                gazu.client.get_full_url("data/projects/open"),
-                text=json.dumps([{"name": "Agent 327", "id": "project-01"}]),
-            )
-            mock_all = mock.get(
-                gazu.client.get_full_url("data/projects"),
-                text=json.dumps(
-                    [
-                        {"name": "Agent 327", "id": "project-01"},
-                        {"name": "Big Buck Bunny", "id": "project_2"},
-                    ]
-                ),
-            )
+    def setUp(self):
+        gazu.cache.enable()
 
-            gazu.project.all_open_projects()
-            gazu.project.all_open_projects()
-            gazu.project.all_projects()
-            gazu.project.all_projects()
-            gazu.project.all_projects()
-            gazu.project.all_projects()
-            self.assertEqual(mock_open.call_count, 2)
-            self.assertEqual(mock_all.call_count, 4)
+    def tearDown(self):
+        gazu.cache.disable()
 
-            gazu.cache.enable()
-            gazu.project.all_projects()
-            gazu.project.all_projects()
-            gazu.project.all_open_projects()
-            gazu.project.all_open_projects()
-            self.assertEqual(mock_open.call_count, 3)
-            self.assertEqual(mock_all.call_count, 5)
+    def test_values_are_cached_by_arguments(self):
+        function, wrapper = cached()
+        self.assertEqual(wrapper("a"), wrapper("a"))
+        self.assertEqual(function.calls, 1)
+        wrapper("b")
+        wrapper("a", key=1)
+        self.assertEqual(function.calls, 3)
 
-            gazu.project.all_open_projects.disable_cache()
-            gazu.project.all_projects()
-            gazu.project.all_open_projects()
-            self.assertEqual(mock_open.call_count, 4)
-            self.assertEqual(mock_all.call_count, 5)
-            gazu.project.all_open_projects.enable_cache()
-            gazu.project.all_open_projects.clear_cache()
+    def test_global_switch_bypasses_the_cache(self):
+        function, wrapper = cached()
+        gazu.cache.disable()
+        wrapper()
+        wrapper()
+        self.assertEqual(function.calls, 2)
+        gazu.cache.enable()
+        wrapper()
+        wrapper()
+        self.assertEqual(function.calls, 3)
 
-    def test_max_size(self):
-        with requests_mock.mock() as mock:
-            mock_1 = mock.get(
-                gazu.client.get_full_url("data/projects/project-01"),
-                text=json.dumps({"name": "Agent 327", "id": "project-01"}),
-            )
-            mock_2 = mock.get(
-                gazu.client.get_full_url("data/projects/project-02"),
-                text=json.dumps({"name": "Agent 327 02", "id": "project_2"}),
-            )
-            mock_3 = mock.get(
-                gazu.client.get_full_url("data/projects/project-3"),
-                text=json.dumps({"name": "Agent 327 03", "id": "project_3"}),
-            )
+    def test_function_switch_bypasses_the_cache(self):
+        function, wrapper = cached()
+        wrapper.disable_cache()
+        wrapper()
+        wrapper()
+        self.assertEqual(function.calls, 2)
+        wrapper.enable_cache()
+        wrapper()
+        wrapper()
+        self.assertEqual(function.calls, 3)
 
-            gazu.cache.enable()
-            gazu.project.get_project.set_cache_max_size(2)
-            gazu.project.get_project("project-01")
-            gazu.project.get_project("project-01")
-            gazu.project.get_project("project-01")
-            self.assertEqual(mock_1.call_count, 1)
-            gazu.project.get_project("project-02")
-            gazu.project.get_project("project-02")
-            gazu.project.get_project("project-01")
-            self.assertEqual(mock_2.call_count, 1)
-            self.assertEqual(mock_1.call_count, 1)
+    def test_caller_cannot_change_a_cached_value(self):
+        _, wrapper = cached()
+        wrapper().append("changed")
+        self.assertEqual(wrapper(), [1])
 
-            gazu.project.get_project("project-3")
-            gazu.project.get_project("project-3")
-            gazu.project.get_project("project-01")
-            self.assertEqual(mock_3.call_count, 1)
-            self.assertEqual(mock_1.call_count, 2)
-            gazu.cache.disable()
+    def test_max_size_removes_the_oldest_entry(self):
+        function, wrapper = cached(maxsize=2)
+        wrapper("a")
+        wrapper("b")
+        wrapper("c")
+        wrapper("c")
+        self.assertEqual(function.calls, 3)
+        wrapper("a")
+        self.assertEqual(function.calls, 4)
+
+    def test_set_cache_max_size(self):
+        function, wrapper = cached()
+        wrapper.set_cache_max_size(1)
+        wrapper("a")
+        wrapper("b")
+        wrapper("a")
+        self.assertEqual(function.calls, 3)
 
     def test_cache_infos(self):
-        with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url("data/projects/project-08"),
-                text=json.dumps({"name": "Agent 327", "id": "project-08"}),
-            )
-            mock.get(
-                gazu.client.get_full_url("data/projects/project-09"),
-                text=json.dumps({"name": "Agent 327 09", "id": "project_09"}),
-            )
+        _, wrapper = cached()
+        wrapper("a")
+        wrapper("a")
+        wrapper("a")
+        wrapper("b")
+        infos = wrapper.get_cache_infos()
+        self.assertEqual(infos["misses"], 2)
+        self.assertEqual(infos["hits"], 2)
+        self.assertEqual(infos["current_size"], 2)
 
-            gazu.cache.enable()
+    def test_expired_value_is_computed_again(self):
+        function, wrapper = cached()
+        wrapper()
+        with patch("gazu.cache.is_cache_expired", return_value=True):
+            self.assertEqual(wrapper(), [2])
+        self.assertEqual(wrapper.get_cache_infos()["expired_hits"], 1)
 
-            gazu.project.get_project.set_cache_max_size(2)
-            gazu.project.get_project("project-08")
-            gazu.project.get_project("project-08")
-            gazu.project.get_project("project-08")
-            cache_infos = gazu.project.get_project.get_cache_infos()
-            self.assertEqual(cache_infos["misses"], 1)
-            self.assertEqual(cache_infos["hits"], 2)
-            self.assertEqual(cache_infos["current_size"], 1)
+    def test_set_cache_expire(self):
+        _, wrapper = cached()
+        wrapper.set_cache_expire(7)
+        self.assertEqual(wrapper.get_cache_infos()["expire"], 7)
 
-            gazu.project.get_project("project-09")
-            cache_infos = gazu.project.get_project.get_cache_infos()
-            self.assertEqual(cache_infos["current_size"], 2)
+    def test_clear_cache_and_clear_all(self):
+        for clear in (
+            lambda wrapper: wrapper.clear_cache(),
+            lambda wrapper: gazu.cache.clear_all(),
+        ):
+            function, wrapper = cached()
+            wrapper()
+            clear(wrapper)
+            wrapper()
+            self.assertEqual(function.calls, 2)
 
-            gazu.project.get_project.set_cache_expire(1)
-            time.sleep(1.1)
-            gazu.project.get_project("project-09")
-            cache_infos = gazu.project.get_project.get_cache_infos()
-            self.assertEqual(cache_infos["expired_hits"], 1)
-
-            gazu.cache.disable()
-
-    def test_clear_all(self):
-        with requests_mock.mock() as mock:
-            mock.get(
-                gazu.client.get_full_url("data/projects/project-10"),
-                text=json.dumps({"name": "Project 10", "id": "project-10"}),
-            )
-            gazu.cache.enable()
-            gazu.project.get_project("project-10")
-            infos = gazu.project.get_project.get_cache_infos()
-            self.assertGreater(infos["current_size"], 0)
-
-            gazu.cache.clear_all()
-            infos = gazu.project.get_project.get_cache_infos()
-            self.assertEqual(infos["current_size"], 0)
-            gazu.cache.disable()
-
-    def test_get_cache_key(self):
-        key = gazu.cache.get_cache_key((), {})
-        self.assertEqual(key, "")
-
-        key = gazu.cache.get_cache_key(("arg1", "arg2"), {})
-        self.assertEqual(key, '["arg1", "arg2"]')
-
-        key = gazu.cache.get_cache_key((), {"a": 1, "b": 2})
-        self.assertIn('"a": 1', key)
-
-        key = gazu.cache.get_cache_key(("arg1",), {"a": 1})
-        self.assertIn("arg1", key)
-        self.assertIn('"a": 1', key)
-
-    def test_get_cache_key_isolates_clients_by_token(self):
+    def test_positional_client_is_accepted_and_isolated_by_token(self):
+        function, wrapper = cached()
         client_a = gazu.client.create_client("http://host/api")
         client_a.access_token = "token-a"
         client_b = gazu.client.create_client("http://host/api")
         client_b.access_token = "token-b"
-        key_a = gazu.cache.get_cache_key((), {"client": client_a})
-        key_b = gazu.cache.get_cache_key((), {"client": client_b})
-        # Same host, different credentials must not collide.
-        self.assertNotEqual(key_a, key_b)
-        # Same client is stable.
+        wrapper("a", client_a)
+        wrapper("a", client_a)
+        self.assertEqual(function.calls, 1)
+        wrapper("a", client_b)
+        self.assertEqual(function.calls, 2)
+
+
+class CacheHelpersTestCase(unittest.TestCase):
+    def test_get_cache_key(self):
+        for args, kwargs, expected in (
+            ((), {}, ""),
+            (("a", "b"), {}, '["a", "b"]'),
+            ((), {"a": 1}, '{"a": 1}'),
+            (("a",), {"b": 1}, '[["a"], {"b": 1}]'),
+        ):
+            with self.subTest(args=args, kwargs=kwargs):
+                self.assertEqual(
+                    gazu.cache.get_cache_key(args, kwargs), expected
+                )
+
+    def test_get_cache_key_isolates_keyword_clients_by_token(self):
+        client = gazu.client.create_client("http://host/api")
+        client.access_token = "token-a"
+        key_a = gazu.cache.get_cache_key((), {"client": client})
         self.assertEqual(
-            key_a, gazu.cache.get_cache_key((), {"client": client_a})
+            key_a, gazu.cache.get_cache_key((), {"client": client})
+        )
+        client.access_token = "token-b"
+        self.assertNotEqual(
+            key_a, gazu.cache.get_cache_key((), {"client": client})
         )
 
     def test_remove_oldest_entry(self):
-        import datetime
+        def memo():
+            return {
+                f"key{day}": {
+                    "date_accessed": datetime.datetime(2020, 1, day),
+                    "value": day,
+                }
+                for day in (1, 2, 3)
+            }
 
-        memo = {
-            "key1": {
-                "date_accessed": datetime.datetime(2020, 1, 1),
-                "value": 1,
-            },
-            "key2": {
-                "date_accessed": datetime.datetime(2020, 1, 2),
-                "value": 2,
-            },
-            "key3": {
-                "date_accessed": datetime.datetime(2020, 1, 3),
-                "value": 3,
-            },
-        }
-        gazu.cache.remove_oldest_entry(memo, 2)
-        self.assertNotIn("key1", memo)
-        self.assertIn("key2", memo)
-        self.assertIn("key3", memo)
+        entries = memo()
+        self.assertEqual(gazu.cache.remove_oldest_entry(entries, 2), "key1")
+        self.assertEqual(sorted(entries), ["key2", "key3"])
+        for maxsize in (0, 3):
+            entries = memo()
+            self.assertIsNone(gazu.cache.remove_oldest_entry(entries, maxsize))
+            self.assertEqual(len(entries), 3)
 
-    def test_is_cache_enabled(self):
-        gazu.cache.cache_settings["enabled"] = True
-        self.assertTrue(gazu.cache.is_cache_enabled({"enabled": True}))
-        self.assertFalse(gazu.cache.is_cache_enabled({"enabled": False}))
-
-        gazu.cache.cache_settings["enabled"] = False
-        self.assertFalse(gazu.cache.is_cache_enabled({"enabled": True}))
+    def test_is_cache_enabled_needs_both_switches(self):
+        for setting, state, expected in (
+            (True, True, True),
+            (True, False, False),
+            (False, True, False),
+        ):
+            with self.subTest(setting=setting, state=state):
+                with patch.dict(gazu.cache.cache_settings, enabled=setting):
+                    self.assertEqual(
+                        gazu.cache.is_cache_enabled({"enabled": state}),
+                        expected,
+                    )
 
     def test_is_cache_expired(self):
-        import datetime
+        now = datetime.datetime.now()
+        for age, expire, expected in (
+            (0, 3600, False),
+            (7200, 3600, True),
+            (7200, 0, False),
+        ):
+            with self.subTest(age=age, expire=expire):
+                memo = {
+                    "key": {
+                        "date_accessed": now - datetime.timedelta(seconds=age)
+                    }
+                }
+                self.assertEqual(
+                    gazu.cache.is_cache_expired(
+                        memo, {"expire": expire}, "key"
+                    ),
+                    expected,
+                )
 
-        memo = {
-            "key1": {"date_accessed": datetime.datetime.now(), "value": 1},
-        }
-        state = {"expire": 3600}
-        self.assertFalse(gazu.cache.is_cache_expired(memo, state, "key1"))
 
-        memo["key1"][
-            "date_accessed"
-        ] = datetime.datetime.now() - datetime.timedelta(seconds=7200)
-        self.assertTrue(gazu.cache.is_cache_expired(memo, state, "key1"))
-
-        state["expire"] = 0
-        self.assertFalse(gazu.cache.is_cache_expired(memo, state, "key1"))
+if __name__ == "__main__":
+    unittest.main()

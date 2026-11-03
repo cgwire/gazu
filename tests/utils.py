@@ -34,6 +34,9 @@ def mock_route(mock, request_type, path="", **kwargs):
 
 
 def add_verify_file_callback(mock, dict_assert={}, url=None):
+    if url is not None and not url.startswith(("http://", "https://")):
+        url = gazu.client.get_full_url(url)
+
     def verify_file_callback(request):
         if url is None or url == request.url:
             body_file = io.BytesIO(request.body)
@@ -65,7 +68,12 @@ def add_verify_file_callback(mock, dict_assert={}, url=None):
                         parsed[key][0] = parsed[key][0].decode("utf-8")
                     except UnicodeDecodeError:
                         pass
-                assert dict_assert[key] == parsed[key][0]
+                expected = dict_assert[key]
+                if isinstance(parsed[key][0], str) and isinstance(
+                    expected, bytes
+                ):
+                    expected = expected.decode("utf-8")
+                assert expected == parsed[key][0]
         return None
 
     mock.add_matcher(verify_file_callback)
