@@ -91,7 +91,6 @@ def update_episode_casting(
     return raw.put(path, casting, client=client)
 
 
-@cache
 def cast_asset(
     project: str | dict,
     entities: list[str | dict] | str | dict,
