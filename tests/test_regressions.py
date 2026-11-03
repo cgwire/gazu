@@ -140,5 +140,45 @@ class SearchTestCase(unittest.TestCase):
             self.assertEqual(mock.last_request.json(), {"query": "test"})
 
 
+class FileParametersTestCase(unittest.TestCase):
+    def test_new_entity_output_file_sends_mode(self):
+        entity = fakeid("shot-1")
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "POST",
+                f"data/entities/{entity}/output-files/new",
+                text={},
+            )
+            gazu.files.new_entity_output_file(
+                entity,
+                fakeid("output-type-1"),
+                fakeid("task-type-1"),
+                "comment",
+                mode="cache",
+            )
+            self.assertEqual(mock.last_request.json()["mode"], "cache")
+
+    def test_new_asset_instance_output_file_sends_mode(self):
+        instance, shot = fakeid("instance-1"), fakeid("shot-1")
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "POST",
+                f"data/asset-instances/{instance}/entities/{shot}"
+                "/output-files/new",
+                text={},
+            )
+            gazu.files.new_asset_instance_output_file(
+                instance,
+                shot,
+                fakeid("output-type-1"),
+                fakeid("task-type-1"),
+                "comment",
+                mode="cache",
+            )
+            self.assertEqual(mock.last_request.json()["mode"], "cache")
+
+
 if __name__ == "__main__":
     unittest.main()

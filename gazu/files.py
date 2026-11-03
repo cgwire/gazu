@@ -766,8 +766,7 @@ def new_entity_output_file(
             output file.
         person (str / dict): The author of the file.
         name (str): The suffix of the file name.
-        mode (str): This function does not send this value to the API. The
-            API uses "output".
+        mode (str): The value that selects a part of the template.
         revision (int): The file revision.
         nb_elements (int): The number of files of an image sequence.
         representation (str): The file extension group. You can use it to
@@ -791,6 +790,7 @@ def new_entity_output_file(
         "revision": revision,
         "representation": representation,
         "name": name,
+        "mode": mode,
         "nb_elements": nb_elements,
         "sep": sep,
     }
@@ -841,8 +841,7 @@ def new_asset_instance_output_file(
             output file.
         person (str / dict): The author of the file.
         name (str): The suffix of the file name.
-        mode (str): This function does not send this value to the API. The
-            API uses "output".
+        mode (str): The value that selects a part of the template.
         revision (int): The file revision.
         nb_elements (int): The number of files of an image sequence.
         representation (str): The file extension group. You can use it to
@@ -865,6 +864,7 @@ def new_asset_instance_output_file(
         "task_type_id": task_type["id"],
         "comment": comment,
         "name": name,
+        "mode": mode,
         "revision": revision,
         "representation": representation,
         "nb_elements": nb_elements,
