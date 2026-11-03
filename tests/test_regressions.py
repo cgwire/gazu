@@ -189,5 +189,24 @@ class FileParametersTestCase(unittest.TestCase):
             self.assertEqual(mock.last_request.json()["sep"], "\\")
 
 
+class NewTaskTestCase(unittest.TestCase):
+    def test_new_task_accepts_ids(self):
+        entity, project = fakeid("asset-1"), fakeid("project-1")
+        task_type, task_status = fakeid("task-type-1"), fakeid("task-status-1")
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock,
+                "GET",
+                f"data/entities/{entity}",
+                text={"id": entity, "project_id": project},
+            )
+            mock_route(mock, "GET", "data/tasks", text=[])
+            mock_route(mock, "POST", "data/tasks", text={"id": "created"})
+            gazu.task.new_task(entity, task_type, task_status=task_status)
+            body = mock.last_request.json()
+            self.assertEqual(body["project_id"], project)
+            self.assertEqual(body["task_status_id"], task_status)
+
+
 if __name__ == "__main__":
     unittest.main()

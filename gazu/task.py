@@ -774,7 +774,7 @@ def new_task(
     entity: str | dict,
     task_type: str | dict,
     name: str = "main",
-    task_status: dict | None = None,
+    task_status: str | dict | None = None,
     assigner: str | dict | None = None,
     assignees: list[str | dict] | None = None,
     client: KitsuClient = default,
@@ -783,11 +783,10 @@ def new_task(
     Create a task for the given entity and task type.
 
     Args:
-        entity (dict): The entity of the task. The dict must have the
-            ``project_id`` key.
-        task_type (dict): The task type of the task.
+        entity (str / dict): The entity dict or ID of the task.
+        task_type (str / dict): The task type dict or ID of the task.
         name (str): The name of the task ("main" by default).
-        task_status (dict): The task status to set. By default, this function
+        task_status (str / dict): The task status to set. By default, this function
             uses the default task status.
         assigner (dict): The person who assigns the task.
         assignees (list): The persons assigned to the task.
@@ -798,9 +797,12 @@ def new_task(
         not apply the given task status and assignees.
     """
     entity = normalize_model_parameter(entity)
+    if "project_id" not in entity:
+        entity = raw.fetch_one("entities", entity["id"], client=client)
     task_type = normalize_model_parameter(task_type)
     if task_status is None:
         task_status = get_default_task_status(client=client)
+    task_status = normalize_model_parameter(task_status)
 
     data = {
         "project_id": entity["project_id"],
