@@ -13,6 +13,7 @@ This module has no default client. Always give an explicit ``client``.
 
 from __future__ import annotations
 
+import io
 import json
 import logging
 import os
@@ -559,6 +560,27 @@ async def update(
     )
 
 
+class _ProgressFile(io.FileIO):
+    """
+    Open a file for reading and call a function each time the code reads data.
+
+    The function can run in a worker thread of aiohttp.
+    """
+
+    def __init__(self, path, callback, offset, total):
+        super().__init__(path, "rb")
+        self._callback = callback
+        self._offset = offset
+        self._total = total
+
+    def read(self, size=-1):
+        data = super().read(size)
+        if data:
+            self._offset += len(data)
+            self._callback(self._offset, self._total)
+        return data
+
+
 async def upload(
     path: str,
     file_path: str = None,
@@ -569,6 +591,10 @@ async def upload(
 ) -> Any:
     """
     Upload a file asynchronously.
+
+    The ``progress_callback`` function has the form ``(bytes_read, total)``.
+    It can run in a worker thread. The value of ``total`` is the sum of all
+    file sizes.
 
     Example::
 
@@ -590,14 +616,24 @@ async def upload(
     for i, extra_path in enumerate(extra_files, start=1):
         file_fields.append((f"file-{i}", extra_path))
 
+    total = 0
+    if progress_callback is not None:
+        total = sum(os.path.getsize(field[1]) for field in file_fields)
+
     def build_form(stack):
         # aiohttp consumes FormData and closes its file payloads. Reopen
         # each file for every attempt rather than seeking a closed handle.
         form = aiohttp.FormData()
         for key, value in data.items():
             form.add_field(key, str(value))
+        offset = 0
         for name, file_path in file_fields:
-            f = stack.enter_context(open(file_path, "rb"))
+            if progress_callback is None:
+                f = open(file_path, "rb")
+            else:
+                f = _ProgressFile(file_path, progress_callback, offset, total)
+                offset += os.path.getsize(file_path)
+            stack.enter_context(f)
             form.add_field(name, f, filename=os.path.basename(file_path))
         return form
 

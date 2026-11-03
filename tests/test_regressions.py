@@ -263,5 +263,42 @@ class PushTaskCommentTestCase(unittest.TestCase):
             self.assertEqual(os.listdir(root), [])
 
 
+class AsyncUploadProgressTestCase(unittest.TestCase):
+    def test_upload_reports_progress(self):
+        aiohttp_web = __import__("pytest").importorskip("aiohttp.web")
+        from aiohttp.test_utils import TestServer
+        import gazu.aio
+
+        calls = []
+
+        async def scenario(path):
+            async def upload(request):
+                await request.post()
+                return aiohttp_web.json_response({})
+
+            app = aiohttp_web.Application()
+            app.router.add_post("/upload", upload)
+            server = TestServer(app)
+            await server.start_server()
+            try:
+                client = gazu.aio.AsyncKitsuClient(str(server.make_url("/")))
+                await gazu.aio.upload(
+                    "upload",
+                    path,
+                    client=client,
+                    progress_callback=lambda *args: calls.append(args),
+                )
+                await client.session.close()
+            finally:
+                await server.close()
+
+        with tempfile.TemporaryDirectory() as root:
+            path = os.path.join(root, "file.bin")
+            with open(path, "wb") as f:
+                f.write(b"x" * 100000)
+            asyncio.run(scenario(path))
+        self.assertEqual(calls[-1], (100000, 100000))
+
+
 if __name__ == "__main__":
     unittest.main()
