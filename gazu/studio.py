@@ -5,7 +5,7 @@ from . import client as raw
 from .sorting import sort_by_name
 from .cache import cache
 from .client import KitsuClient
-from .helpers import normalize_model_parameter
+from .helpers import normalize_model_parameter, warn_ignored_force
 
 default = raw.default_client
 
@@ -68,12 +68,12 @@ def remove_studio(
 
     Args:
         studio (dict / str): The studio to remove.
-        force (bool): The API does not use this value on this route.
+        force (bool): Do not use. The API ignores this value on this route.
 
     Returns:
         str: The response of the API.
     """
+    if force:
+        warn_ignored_force("remove_studio")
     studio = normalize_model_parameter(studio)
-    path = f"data/studios/{studio['id']}"
-    params = {"force": True} if force else {}
-    return raw.delete(path, params=params, client=client)
+    return raw.delete(f"data/studios/{studio['id']}", client=client)

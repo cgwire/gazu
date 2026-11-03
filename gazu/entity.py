@@ -8,6 +8,7 @@ from .sorting import sort_by_name
 from .helpers import (
     normalize_model_parameter,
     normalize_list_of_models_for_links,
+    warn_ignored_force,
 )
 
 default = raw.default_client
@@ -175,7 +176,7 @@ def remove_entity(
 
     Args:
         entity (str / dict): The entity to remove.
-        force (bool): This route of the API does not use this value.
+        force (bool): Do not use. The API ignores this value on this route.
 
     Returns:
         str: The response of the API.
@@ -184,12 +185,10 @@ def remove_entity(
         gazu.exception.ParameterException: If the database refuses the
             deletion.
     """
-    entity = normalize_model_parameter(entity)
-    path = f"data/entities/{entity['id']}"
-    params = {}
     if force:
-        params = {"force": True}
-    return raw.delete(path, params, client=client)
+        warn_ignored_force("remove_entity")
+    entity = normalize_model_parameter(entity)
+    return raw.delete(f"data/entities/{entity['id']}", client=client)
 
 
 def remove_entities(

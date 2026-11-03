@@ -208,5 +208,44 @@ class NewTaskTestCase(unittest.TestCase):
             self.assertEqual(body["task_status_id"], task_status)
 
 
+class IgnoredForceTestCase(unittest.TestCase):
+    def check(self, path, remove):
+        with requests_mock.mock() as mock:
+            mock_route(mock, "DELETE", path, text="")
+            with self.assertWarns(DeprecationWarning):
+                remove()
+            self.assertNotIn("force", mock.last_request.url)
+
+    def test_remove_entity(self):
+        entity = fakeid("entity-1")
+        self.check(
+            f"data/entities/{entity}",
+            lambda: gazu.entity.remove_entity(entity, force=True),
+        )
+
+    def test_remove_department(self):
+        department = fakeid("department-1")
+        self.check(
+            f"data/departments/{department}",
+            lambda: gazu.person.remove_department(department, force=True),
+        )
+
+    def test_remove_studio(self):
+        studio = fakeid("studio-1")
+        self.check(
+            f"data/studios/{studio}",
+            lambda: gazu.studio.remove_studio(studio, force=True),
+        )
+
+    def test_remove_metadata_descriptor(self):
+        project, descriptor = fakeid("project-1"), fakeid("descriptor-1")
+        self.check(
+            f"data/projects/{project}/metadata-descriptors/{descriptor}",
+            lambda: gazu.project.remove_metadata_descriptor(
+                project, descriptor, force=True
+            ),
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

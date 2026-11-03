@@ -452,7 +452,6 @@ class ProjectTestCase(unittest.TestCase):
             response = gazu.project.remove_metadata_descriptor(
                 {"id": fakeid("project-1")},
                 {"id": fakeid("metadata-descriptor-1")},
-                force=True,
             )
             self.assertEqual(response, "")
 

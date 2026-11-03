@@ -9,6 +9,7 @@ from .sorting import sort_by_name
 from .helpers import (
     normalize_model_parameter,
     normalize_list_of_models_for_links,
+    warn_ignored_force,
 )
 from .cache import cache
 from .client import KitsuClient
@@ -293,17 +294,15 @@ def remove_department(department, force=False, client=default):
 
     Args:
         department (dict / ID): The department to remove.
-        force (bool): The API does not use this value on this route.
+        force (bool): Do not use. The API ignores this value on this route.
 
     Returns:
         str: The response of the API.
     """
-    department = normalize_model_parameter(department)
-    path = f"data/departments/{department['id']}"
-    params = {}
     if force:
-        params = {"force": True}
-    return raw.delete(path, params, client=client)
+        warn_ignored_force("remove_department")
+    department = normalize_model_parameter(department)
+    return raw.delete(f"data/departments/{department['id']}", client=client)
 
 
 def new_person(

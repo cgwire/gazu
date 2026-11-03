@@ -117,14 +117,6 @@ class PersonTestCase(unittest.TestCase):
             )
             department = {"id": fakeid("department-1"), "name": "department-1"}
             gazu.person.remove_department(department)
-            mock_route(
-                mock,
-                "DELETE",
-                f"data/departments/{fakeid('department-1')}?force=True",
-                status_code=204,
-            )
-            department = {"id": fakeid("department-1"), "name": "department-1"}
-            gazu.person.remove_department(department, True)
 
     def test_get_person_by_desktop_login(self):
         with requests_mock.mock() as mock:

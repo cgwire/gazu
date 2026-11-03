@@ -123,13 +123,6 @@ class AssetTestCase(unittest.TestCase):
                 status_code=204,
             )
             gazu.entity.remove_entity(fakeid("entity-1"))
-            mock.delete(
-                gazu.client.get_full_url(
-                    f"data/entities/{fakeid('entity-1')}?force=true"
-                ),
-                status_code=204,
-            )
-            gazu.entity.remove_entity(fakeid("entity-1"), True)
 
     def test_remove_entities(self):
         with requests_mock.mock() as mock:

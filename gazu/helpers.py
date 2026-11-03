@@ -11,6 +11,7 @@ import shutil
 import requests
 import tempfile
 import mimetypes
+import warnings
 
 from gazu.exception import DownloadFileException
 
@@ -69,6 +70,20 @@ def normalize_list_of_models_for_links(
         models = [models]
 
     return [normalize_model_parameter(model)["id"] for model in models]
+
+
+def warn_ignored_force(function_name: str) -> None:
+    """
+    Warn the caller that the route of the given function ignores ``force``.
+
+    Args:
+        function_name (str): The name of the function.
+    """
+    warnings.warn(
+        f"{function_name}: force is ignored by the API",
+        DeprecationWarning,
+        stacklevel=3,
+    )
 
 
 def validate_date_format(date_text: str) -> str:

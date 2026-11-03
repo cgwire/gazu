@@ -12,6 +12,7 @@ from .client import KitsuClient
 from .helpers import (
     normalize_model_parameter,
     normalize_list_of_models_for_links,
+    warn_ignored_force,
 )
 
 default = raw.default_client
@@ -618,19 +619,17 @@ def remove_metadata_descriptor(
     Args:
         project (dict / ID): The project dict or ID.
         metadata_descriptor_id (dict / ID): The metadata descriptor dict or ID.
-        force (bool): The API does not use this value on this route.
+        force (bool): Do not use. The API ignores this value on this route.
 
     Returns:
         str: The response of the API.
     """
+    if force:
+        warn_ignored_force("remove_metadata_descriptor")
     project = normalize_model_parameter(project)
     metadata_descriptor = normalize_model_parameter(metadata_descriptor_id)
-    params = {}
-    if force:
-        params = {"force": True}
     return raw.delete(
         f"data/projects/{project['id']}/metadata-descriptors/{metadata_descriptor['id']}",
-        params,
         client=client,
     )
 
