@@ -113,5 +113,32 @@ class PlaylistPagesTestCase(unittest.TestCase):
             self.assertEqual([p["name"] for p in result], ["b"])
 
 
+class SearchTestCase(unittest.TestCase):
+    def test_search_sends_the_parameters_zou_reads(self):
+        with requests_mock.mock() as mock:
+            mock_route(mock, "POST", "data/search", text={})
+            gazu.search.search_entities(
+                "test", index_names=["assets"], limit=10, offset=20
+            )
+            self.assertEqual(
+                mock.last_request.json(),
+                {
+                    "query": "test",
+                    "index_names": ["assets"],
+                    "limit": 10,
+                    "offset": 20,
+                },
+            )
+
+    def test_entity_types_warns_and_is_not_sent(self):
+        with requests_mock.mock() as mock:
+            mock_route(mock, "POST", "data/search", text={})
+            with self.assertWarns(DeprecationWarning):
+                gazu.search.search_entities(
+                    "test", entity_types=[fakeid("asset-type-1")]
+                )
+            self.assertEqual(mock.last_request.json(), {"query": "test"})
+
+
 if __name__ == "__main__":
     unittest.main()
