@@ -1,3 +1,7 @@
+"""
+Listen to the Kitsu events in real time with Socket.IO.
+"""
+
 from __future__ import annotations
 
 import socketio
@@ -38,6 +42,10 @@ if os.name == "nt":
 
 
 class EventsNamespace(socketio.ClientNamespace):
+    """
+    The Socket.IO namespace of the Kitsu events (``/events``).
+    """
+
     def on_connect(self) -> None:
         pass
 
@@ -56,10 +64,18 @@ def init(
     **kwargs: Any,
 ) -> socketio.Client:
     """
-    Init configuration for SocketIO client.
+    Create a SocketIO client and connect it to the event host.
+
+    Args:
+        client (KitsuClient): The client that gives the host and the tokens.
+        ssl_verify (bool): If True, verify SSL certificates. If the value is
+            None, use the SSL setting of ``client``.
+        reconnection (bool): If True, connect again after a connection loss.
+        logger (bool): If True, log the SocketIO messages.
+        **kwargs: The other parameters of ``socketio.Client``.
 
     Returns:
-        Event client that will be able to set listeners.
+        socketio.Client: The connected event client. Add listeners to it.
     """
     if ssl_verify is None:
         # Inherit the client's TLS setting instead of always verifying.
@@ -107,20 +123,22 @@ def get_last_login_logs(
     client: KitsuClient = default_client,
 ) -> list[dict]:
     """
-    Get last login logs. Requires admin permissions (login logs carry the IP
-    address of every person and cover the whole studio).
+    Get the last login logs.
+
+    Only administrators can do this. The login logs contain the IP address
+    of each person and include the full studio.
 
     Args:
-        after (str): Get only logins occuring after given date.
-        before (str): Get only logins occuring before given date.
-        limit (int): Number of login logs to retrieve (server caps at 1000).
-        cursor_login_log_id (str): ID of the last login log from previous
-            page, for cursor-based pagination.
-        person_ids (list[str / dict]): Get only logins of given persons.
+        after (str): Get only the logins after the given date.
+        before (str): Get only the logins before the given date.
+        limit (int): The number of login logs to get (1000 at maximum).
+        cursor_login_log_id (str): The ID of the last login log of the
+            previous page. Use this value for cursor pagination.
+        person_ids (list[str / dict]): Get only the logins of these persons.
 
     Returns:
-        list[dict]: Last login logs (person id, date, IP address and origin)
-        matching criterions, most recent first.
+        list[dict]: The login logs (person ID, date, IP address and origin)
+        that match the criteria. The most recent log is first.
     """
     params = {"limit": limit}
     if after is not None:
@@ -137,6 +155,9 @@ def get_last_login_logs(
 
 
 def connect_error(data: str) -> str:
+    """
+    Write the connection error to the log and return it.
+    """
     logger.error("The connection failed! %s", data)
     return data
 
@@ -145,7 +166,7 @@ def add_listener(
     event_client: socketio.Client, event_name: str, event_handler: Callable
 ) -> socketio.Client:
     """
-    Set a listener that reacts to a given event.
+    Set a listener for the given event.
     """
     event_client.on(event_name, event_handler, "/events")
     return event_client
@@ -153,8 +174,9 @@ def add_listener(
 
 def run_client(event_client: socketio.Client) -> socketio.Client:
     """
-    Run event client (it blocks current thread). It listens to all events
-    configured.
+    Run the event client. The client listens to all configured events.
+
+    The current thread waits until the client stops.
     """
     try:
         logger.info("Listening to Kitsu events...")

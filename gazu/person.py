@@ -20,7 +20,7 @@ default = raw.default_client
 def all_organisations(client: KitsuClient = default) -> list[dict]:
     """
     Returns:
-        list: Organisations listed in database.
+        list: The organisations in the database.
     """
     return sort_by_name(raw.fetch_all("organisations", client=client))
 
@@ -29,7 +29,7 @@ def all_organisations(client: KitsuClient = default) -> list[dict]:
 def all_departments(client: KitsuClient = default) -> list[dict]:
     """
     Returns:
-        list: Departments listed in database.
+        list: The departments in the database.
     """
     return sort_by_name(raw.fetch_all("departments", client=client))
 
@@ -38,7 +38,7 @@ def all_departments(client: KitsuClient = default) -> list[dict]:
 def all_persons(client: KitsuClient = default) -> list[dict]:
     """
     Returns:
-        list: Persons listed in database.
+        list: The persons in the database.
     """
     return sort_by_name(raw.fetch_all("persons", client=client))
 
@@ -51,17 +51,17 @@ def get_time_spents_range(
     client: KitsuClient = default,
 ) -> list:
     """
-    Gets the time spents of the given person for the given date range.
+    Get the time spents of the given person for the given date range.
 
     Args:
-        person_id (str): An uuid identifying a person.
-        start_date (str): The first day of the date range as a date string with
-                          the following format: YYYY-MM-DD
-        end_date (str): The last day of the date range as a date string with
-                        the following format: YYYY-MM-DD
+        person_id (str): The UUID of the person.
+        start_date (str): The first day of the date range, with the format
+            YYYY-MM-DD.
+        end_date (str): The last day of the date range, with the format
+            YYYY-MM-DD.
 
     Returns:
-        list: All of the person's time spents
+        list: The time spents of the person in this date range.
     """
     date_range = {
         "start_date": start_date,
@@ -79,11 +79,11 @@ def get_all_month_time_spents(
 ) -> list:
     """
     Args:
-        id (str): An uuid identifying a person.
-        date (datetime.date): The date of the month to query.
+        id (str): The UUID of the person.
+        date (datetime.date): A date in the month to query.
 
     Returns:
-        list: All of the person's time spents for the given month.
+        list: The time spents of the person for the given month.
     """
     date = date.strftime("%Y/%m")
     return raw.get(
@@ -98,10 +98,11 @@ def get_department_by_name(
 ) -> dict | None:
     """
     Args:
-        name (str): Department name.
+        name (str): The department name.
 
     Returns:
-        dict: Department corresponding to given name.
+        dict: The department with the given name, or None if no department
+        matches.
     """
     return raw.fetch_first(
         "departments",
@@ -114,10 +115,10 @@ def get_department_by_name(
 def get_department(department_id: str, client: KitsuClient = default) -> dict:
     """
     Args:
-        department_id (str): An uuid identifying a department.
+        department_id (str): The UUID of the department.
 
     Returns:
-        dict: Department corresponding to given department_id.
+        dict: The department with the given ID.
     """
     return raw.fetch_one("departments", department_id, client=client)
 
@@ -128,12 +129,11 @@ def get_person(
 ) -> dict | None:
     """
     Args:
-        id (str): An uuid identifying a person.
-        relations (bool): Whether to get the relations for the given person.
+        id (str): The UUID of the person.
+        relations (bool): If True, also get the relations of the person.
 
     Returns:
-        dict: Person corresponding to given id, or None if no Person exists
-            with that ID.
+        dict: The person with the given ID, or None if no person has this ID.
     """
     params = {"id": id}
     if relations:
@@ -148,10 +148,11 @@ def get_person_by_desktop_login(
 ) -> dict | None:
     """
     Args:
-        desktop_login (str): Login used to sign in on the desktop computer.
+        desktop_login (str): The login of the person on the desktop computer.
 
     Returns:
-        dict: Person corresponding to given desktop computer login.
+        dict: The person with the given desktop computer login, or None if no
+        person matches. This function does not return bots.
     """
     return raw.fetch_first(
         "persons",
@@ -166,12 +167,12 @@ def get_person_by_email(
 ) -> dict | None:
     """
     Args:
-        email (str): User's email.
-        is_bot (bool): Whether to look up a bot account instead of a
-            regular person.
+        email (str): The email of the user.
+        is_bot (bool): If True, search for a bot account. If False, search for
+            a regular person.
 
     Returns:
-        dict:  Person corresponding to given email.
+        dict: The person with the given email, or None if no person matches.
     """
     return raw.fetch_first(
         "persons", {"email": email, "is_bot": is_bot}, client=client
@@ -187,12 +188,14 @@ def get_person_by_full_name(
 ) -> dict | None:
     """
     Args:
-        full_name (str): User's full name
-        first_name (str): User's first name
-        last_name (str): User's last name
+        full_name (str): The full name of the user.
+        first_name (str): The first name of the user.
+        last_name (str): The last name of the user. If you give the first
+            name and the last name, this function does not use the full name.
 
     Returns:
-        dict: Person corresponding to given name, or None if not found.
+        dict: The person with the given name, or None if no person matches.
+        This function does not return bots.
     """
     if first_name is not None and last_name is not None:
         return raw.fetch_first(
@@ -219,7 +222,7 @@ def get_person_url(person: str | dict, client: KitsuClient = default) -> str:
         person (str / dict): The person dict or the person ID.
 
     Returns:
-        url (str): Web url associated to the given person
+        url (str): The web URL of the given person.
     """
     person = normalize_model_parameter(person)
     host = raw.get_api_url_from_host(client=client)
@@ -231,7 +234,7 @@ def get_person_url(person: str | dict, client: KitsuClient = default) -> str:
 def get_organisation(client: KitsuClient = default) -> dict:
     """
     Returns:
-        dict: Database information for organisation linked to auth tokens.
+        dict: The data of the organisation of the authentication tokens.
     """
     return raw.get("auth/authenticated", client=client)["organisation"]
 
@@ -243,15 +246,18 @@ def new_department(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Create a new department based on given parameters.
+    Create a department with the given parameters.
+
+    If a department with this name exists, return this department.
 
     Args:
-        name (str): the name of the department.
-        color (str): the color of the department as a Hex string, e.g "#00FF00".
-        archived (bool): Whether the department is archived or not.
+        name (str): The name of the department.
+        color (str): The color of the department as a hex string (for example,
+            "#00FF00").
+        archived (bool): If True, the department is archived.
 
     Returns:
-        dict: Created department.
+        dict: The created or existing department.
     """
     department = get_department_by_name(name, client=client)
     if department is None:
@@ -268,7 +274,7 @@ def update_department(department, client=default):
     Update a department.
 
     Args:
-        department (dict): The department dict that needs to be updated.
+        department (dict): The department dict to update.
 
     Returns:
         dict: The updated department.
@@ -283,11 +289,14 @@ def update_department(department, client=default):
 
 def remove_department(department, force=False, client=default):
     """
-    Remove given department from database.
+    Remove the given department from the database.
 
     Args:
-        department (dict / ID): Department to remove.
-        force (bool): Whether to force deletion of the department.
+        department (dict / ID): The department to remove.
+        force (bool): The API does not use this value on this route.
+
+    Returns:
+        str: The response of the API.
     """
     department = normalize_model_parameter(department)
     path = f"data/departments/{department['id']}"
@@ -311,23 +320,26 @@ def new_person(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Create a new person based on given parameters. His/her password will is
-    set automatically to default.
+    Create a person with the given parameters.
+
+    If a person with this email exists, return this person.
 
     Args:
-        first_name (str): the first name of the person.
-        last_name (str): the last name of the person.
-        email (str): the email of the person.
-        phone (str): the phone number of the person.
-        role (str): user, manager, admin (which match CG artist, Supervisor
-                    and studio manager)
-        desktop_login (str): The login the users uses to log on its computer.
-        departments (list): The departments for the person.
-        password (str): The password for the person.
-        active (bool): Whether the person is active or not.
+        first_name (str): The first name of the person.
+        last_name (str): The last name of the person.
+        email (str): The email of the person.
+        phone (str): The phone number of the person.
+        role (str): The role of the person: user (Artist), supervisor, manager
+            (Production Manager), admin (Studio Manager), client or vendor.
+        desktop_login (str): The login of the person on the computer.
+        departments (list): The departments of the person.
+        password (str): The password of the person. If the value is None, the
+            API does not set a password.
+        active (bool): If True, the person is active.
+        contract_type (str): The contract type of the person.
 
     Returns:
-        dict: Created person.
+        dict: The created or existing person.
     """
     if departments is None:
         departments = []
@@ -357,7 +369,7 @@ def update_person(person: dict, client: KitsuClient = default) -> dict:
     Update a person.
 
     Args:
-        person (dict): The person dict that needs to be upgraded.
+        person (dict): The person dict to update.
 
     Returns:
         dict: The updated person.
@@ -384,10 +396,18 @@ def remove_person(
     person: str | dict, force: bool = False, client: KitsuClient = default
 ) -> str:
     """
-    Remove given person from database.
+    Remove the given person from the database.
+
+    The API refuses to remove a protected account.
 
     Args:
-        person (str / dict): Person to remove.
+        person (str / dict): The person to remove.
+        force (bool): If True, the API first removes or detaches the data of
+            the person: comments, notifications, logs, subscriptions, time
+            spents, team memberships and task assignments.
+
+    Returns:
+        str: The response of the API.
     """
     person = normalize_model_parameter(person)
     path = f"data/persons/{person['id']}"
@@ -407,20 +427,21 @@ def new_bot(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Create a new bot based on given parameters. His access token will be in the
-    return dict.
+    Create a bot with the given parameters.
+
+    The returned dict contains the access token of the bot.
 
     Args:
-        name (str): the name of the bot.
-        email (str): the email of the bot.
-        role (str): user, manager, admin (which match CG artist, Supervisor
-                    and studio manager)
-        departments (list): The departments for the person.
-        active (bool): Whether the person is active or not.
-        expiration_date (str): The expiration date for the bot.
+        name (str): The name of the bot.
+        email (str): The email of the bot.
+        role (str): The role of the bot: user (Artist), supervisor, manager
+            (Production Manager), admin (Studio Manager), client or vendor.
+        departments (list): The departments of the bot.
+        active (bool): If True, the bot is active.
+        expiration_date (str): The expiration date of the bot.
 
     Returns:
-        dict: Created bot.
+        dict: The created bot.
     """
     if departments is None:
         departments = []
@@ -446,7 +467,7 @@ def update_bot(bot: dict, client: KitsuClient = default) -> dict:
     Update a bot.
 
     Args:
-        bot (dict): The bot dict that needs to be upgraded.
+        bot (dict): The bot dict to update.
 
     Returns:
         dict: The updated bot.
@@ -458,10 +479,15 @@ def remove_bot(
     bot: dict, force: bool = False, client: KitsuClient = default
 ) -> str:
     """
-    Remove given bot from database.
+    Remove the given bot from the database.
 
     Args:
-        bot (dict): Bot to remove.
+        bot (dict): The bot to remove.
+        force (bool): If True, the API first removes or detaches the data of
+            the bot.
+
+    Returns:
+        str: The response of the API.
     """
     return remove_person(bot, force=force, client=client)
 
@@ -473,16 +499,17 @@ def set_avatar(
     progress_callback=None,
 ) -> dict[Literal["thumbnail_path"], str]:
     """
-    Upload picture and set it as avatar for given person.
+    Upload a picture and set it as the avatar of the given person.
 
     Args:
         person (str / dict): The person dict or the person ID.
-        file_path (str): Path where the avatar file is located on the hard
-                         drive.
+        file_path (str): The path of the avatar file on the hard drive.
+        progress_callback (Callable): The function ``(bytes_read, total)``
+            to call during the upload.
 
     Returns:
-        dict: Dictionary with a key of 'thumbnail_path' and a value of the
-            path to the static image file, relative to the host url.
+        dict: A dict with the 'thumbnail_path' key. The value is the path of
+            the static image file, relative to the host URL.
     """
     person = normalize_model_parameter(person)
     return raw.upload(
@@ -498,12 +525,12 @@ def get_presence_log(
 ) -> str:
     """
     Args:
-        year (int): The number of the year to fetch logs during.
-        month (int): The index of the month to get presence logs for. Indexed
-            from 1, e.g 1 = January, 2 = February, ...
+        year (int): The year of the logs.
+        month (int): The number of the month of the logs. January is 1,
+            February is 2 and so on.
 
     Returns:
-        str: The presence log table (in CSV) for given month and year.
+        str: The presence log table (in CSV) of the given month and year.
     """
     path = f"data/persons/presence-logs/{year}-{str(month).zfill(2)}"
     return raw.get(path, json_response=False, client=client)
@@ -513,14 +540,16 @@ def change_password_for_person(
     person: str | dict, password: str, client: KitsuClient = default
 ) -> dict[Literal["success"], bool]:
     """
-    Change the password for given person.
+    Change the password of the given person.
+
+    Only an administrator can do this. The API refuses this request for a bot.
 
     Args:
         person (str / dict): The person dict or the person ID.
         password (str): The new password.
 
     Returns:
-        dict: success or not.
+        dict: A dict with the 'success' key.
     """
     person = normalize_model_parameter(person)
     return raw.post(
@@ -534,13 +563,15 @@ def invite_person(
     person: str | dict, client: KitsuClient = default
 ) -> dict[str, str]:
     """
-    Sends an email to given person to invite him/her to connect to Kitsu.
+    Send an email to the given person. The email invites the person to Kitsu.
+
+    Only an administrator can do this. The API refuses this request for a bot.
 
     Args:
         person (str / dict): The person to invite.
 
     Returns:
-        dict: Response dict with 'success' and 'message' keys.
+        dict: A dict with the 'success' and 'message' keys.
     """
     person = normalize_model_parameter(person)
     return raw.get(
@@ -554,14 +585,14 @@ def get_time_spents_by_date(
     person: str | dict, date: str, client: KitsuClient = default
 ) -> list[dict]:
     """
-    Get time spents for a person on a specific date.
+    Get the time spents of a person on the given date.
 
     Args:
-        person (str / dict): The person dict or id.
-        date (str): Date in YYYY-MM-DD format.
+        person (str / dict): The person dict or ID.
+        date (str): The date with the format YYYY-MM-DD.
 
     Returns:
-        list: Time spents for the date.
+        list: The time spents on the date.
     """
     person = normalize_model_parameter(person)
     return raw.get(
@@ -575,15 +606,15 @@ def get_week_time_spents(
     person: str | dict, year: int, week: int, client: KitsuClient = default
 ) -> list[dict]:
     """
-    Get time spents for a person for a specific week.
+    Get the time spents of a person for the given week.
 
     Args:
-        person (str / dict): The person dict or id.
-        year (int): Year.
-        week (int): Week number.
+        person (str / dict): The person dict or ID.
+        year (int): The year.
+        week (int): The week number.
 
     Returns:
-        list: Time spents for the week.
+        list: The time spents of the week.
     """
     person = normalize_model_parameter(person)
     return raw.get(
@@ -597,14 +628,14 @@ def get_year_time_spents(
     person: str | dict, year: int, client: KitsuClient = default
 ) -> list[dict]:
     """
-    Get time spents for a person for a specific year.
+    Get the time spents of a person for the given year.
 
     Args:
-        person (str / dict): The person dict or id.
-        year (int): Year.
+        person (str / dict): The person dict or ID.
+        year (int): The year.
 
     Returns:
-        list: Time spents for the year.
+        list: The time spents of the year.
     """
     person = normalize_model_parameter(person)
     return raw.get(
@@ -618,13 +649,13 @@ def get_day_offs(
     person: str | dict, client: KitsuClient = default
 ) -> list[dict]:
     """
-    Get day offs for a person.
+    Get the day offs of a person.
 
     Args:
-        person (str / dict): The person dict or id.
+        person (str / dict): The person dict or ID.
 
     Returns:
-        list: Day offs for the person.
+        list: The day offs of the person.
     """
     person = normalize_model_parameter(person)
     return raw.fetch_all(f"persons/{person['id']}/day-offs", client=client)
@@ -635,15 +666,15 @@ def get_week_day_offs(
     person: str | dict, year: int, week: int, client: KitsuClient = default
 ) -> list[dict]:
     """
-    Get day offs for a person for a specific week.
+    Get the day offs of a person for the given week.
 
     Args:
-        person (str / dict): The person dict or id.
-        year (int): Year.
-        week (int): Week number.
+        person (str / dict): The person dict or ID.
+        year (int): The year.
+        week (int): The week number.
 
     Returns:
-        list: Day offs for the week.
+        list: The day offs of the week.
     """
     person = normalize_model_parameter(person)
     return raw.get(
@@ -657,15 +688,15 @@ def get_month_day_offs(
     person: str | dict, year: int, month: int, client: KitsuClient = default
 ) -> list[dict]:
     """
-    Get day offs for a person for a specific month.
+    Get the day offs of a person for the given month.
 
     Args:
-        person (str / dict): The person dict or id.
-        year (int): Year.
-        month (int): Month number.
+        person (str / dict): The person dict or ID.
+        year (int): The year.
+        month (int): The month number.
 
     Returns:
-        list: Day offs for the month.
+        list: The day offs of the month.
     """
     person = normalize_model_parameter(person)
     return raw.get(
@@ -679,14 +710,14 @@ def get_year_day_offs(
     person: str | dict, year: int, client: KitsuClient = default
 ) -> list[dict]:
     """
-    Get day offs for a person for a specific year.
+    Get the day offs of a person for the given year.
 
     Args:
-        person (str / dict): The person dict or id.
-        year (int): Year.
+        person (str / dict): The person dict or ID.
+        year (int): The year.
 
     Returns:
-        list: Day offs for the year.
+        list: The day offs of the year.
     """
     person = normalize_model_parameter(person)
     return raw.get(
@@ -698,13 +729,13 @@ def get_year_day_offs(
 @cache
 def get_day_off(day_off_id: str, client: KitsuClient = default) -> dict:
     """
-    Get a day off by its ID.
+    Get a day off with its ID.
 
     Args:
-        day_off_id (str): ID of the day off.
+        day_off_id (str): The ID of the day off.
 
     Returns:
-        dict: Day off matching the given ID.
+        dict: The day off with the given ID.
     """
     return raw.fetch_one("day-offs", day_off_id, client=client)
 
@@ -717,18 +748,20 @@ def new_day_off(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Create a new day off for the given person. The server rejects the
-    request if the period overlaps with an existing day off. Time-spent
-    entries that fall within the period are automatically removed by zou.
+    Create a day off for the given person.
+
+    The server refuses the request if a different day off exists in this
+    period. Zou automatically removes the time spents of this period.
 
     Args:
-        person (str / dict): The person dict or id.
-        date (str): Start date (ISO format, e.g. ``"2026-04-10"``).
-        end_date (str): End date (ISO format, inclusive).
-        description (str): Optional description.
+        person (str / dict): The person dict or ID.
+        date (str): The start date (ISO format, for example ``"2026-04-10"``).
+        end_date (str): The end date (ISO format). This date is part of the
+            period.
+        description (str): The optional description.
 
     Returns:
-        dict: Created day off.
+        dict: The created day off.
     """
     person = normalize_model_parameter(person)
     data = {
@@ -746,25 +779,25 @@ def update_day_off(day_off: dict, client: KitsuClient = default) -> dict:
     Update a day off.
 
     Args:
-        day_off (dict): The day off dict to update. Must include the
-            ``id`` key. Fields that can be changed: ``date``,
-            ``end_date``, ``description``, ``person_id``.
+        day_off (dict): The day off dict to update. It must have the ``id``
+            key. You can change these fields: ``date``, ``end_date``,
+            ``description`` and ``person_id``.
 
     Returns:
-        dict: Updated day off.
+        dict: The updated day off.
     """
     return raw.put(f"data/day-offs/{day_off['id']}", day_off, client=client)
 
 
 def remove_day_off(day_off: str | dict, client: KitsuClient = default) -> str:
     """
-    Delete a day off.
+    Remove a day off.
 
     Args:
-        day_off (dict / ID): The day off dict or id.
+        day_off (dict / ID): The day off dict or ID.
 
     Returns:
-        str: Empty response.
+        str: An empty response.
     """
     day_off = normalize_model_parameter(day_off)
     return raw.delete(f"data/day-offs/{day_off['id']}", client=client)
@@ -777,11 +810,11 @@ def add_person_to_department(
     Add a person to a department.
 
     Args:
-        person (str / dict): The person dict or id.
-        department (str / dict): The department dict or id.
+        person (str / dict): The person dict or ID.
+        department (str / dict): The department dict or ID.
 
     Returns:
-        dict: Response information.
+        dict: The updated person.
     """
     person = normalize_model_parameter(person)
     department = normalize_model_parameter(department)
@@ -799,11 +832,11 @@ def remove_person_from_department(
     Remove a person from a department.
 
     Args:
-        person (str / dict): The person dict or id.
-        department (str / dict): The department dict or id.
+        person (str / dict): The person dict or ID.
+        department (str / dict): The department dict or ID.
 
     Returns:
-        Response: Request response object.
+        str: The response text of the API.
     """
     person = normalize_model_parameter(person)
     department = normalize_model_parameter(department)
@@ -817,13 +850,15 @@ def disable_two_factor_authentication(
     person: str | dict, client: KitsuClient = default
 ) -> str:
     """
-    Disable two factor authentication for a person.
+    Disable the two factor authentication of a person.
+
+    Only an administrator can do this. The API refuses this request for a bot.
 
     Args:
-        person (str / dict): The person dict or id.
+        person (str / dict): The person dict or ID.
 
     Returns:
-        Response: Request response object.
+        str: The response text of the API.
     """
     person = normalize_model_parameter(person)
     return raw.delete(
@@ -836,13 +871,13 @@ def clear_person_avatar(
     person: str | dict, client: KitsuClient = default
 ) -> str:
     """
-    Clear avatar for a person.
+    Remove the avatar of a person.
 
     Args:
-        person (str / dict): The person dict or id.
+        person (str / dict): The person dict or ID.
 
     Returns:
-        Response: Request response object.
+        str: The response text of the API.
     """
     person = normalize_model_parameter(person)
     return raw.delete(

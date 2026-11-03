@@ -1,111 +1,116 @@
 class GazuException(Exception):
     """
-    Base class for every exception raised by gazu. Catch this to handle any
-    gazu error at once. Every specific exception below inherits from it, so
-    existing ``except Exception`` handlers keep working.
+    The base class of all gazu exceptions.
+
+    Catch this class to process all gazu errors. All exceptions below inherit
+    from this class. Thus, ``except Exception`` handlers continue to work.
     """
 
 
 class HostException(GazuException):
     """
-    Error raised when host is not valid.
+    This error occurs if the host is not valid.
     """
 
 
 class AuthFailedException(GazuException):
     """
-    Error raised when user credentials are wrong.
+    This error occurs if the authentication fails. For example, the user
+    credentials are wrong.
     """
 
 
 class NotAuthenticatedException(GazuException):
     """
-    Error raised when a 401 error (not authenticated) is sent by the API.
+    This error occurs if the API sends a 401 status (not authenticated) or if
+    the access token is expired and cannot be refreshed.
     """
 
 
 class NotAllowedException(GazuException):
     """
-    Error raised when a 403 error (not authorized) is sent by the API.
+    This error occurs if the API sends a 403 status (not authorized).
     """
 
 
 class MethodNotAllowedException(GazuException):
     """
-    Error raised when a 405 error (method not handled) is sent by the API.
+    This error occurs if the API sends a 405 status (method not allowed).
     """
 
 
 class RouteNotFoundException(GazuException):
     """
-    Error raised when a 404 error (not found) is sent by the API.
+    This error occurs if the API sends a 404 status (not found).
     """
 
 
 class ServerErrorException(GazuException):
     """
-    Error raised when a 500 error (server error) is sent by the API.
+    This error occurs if the API sends a 500 or 502 status (server error).
     """
 
 
 class ParameterException(GazuException):
     """
-    Error raised when a 400 error (argument error) is sent by the API.
+    This error occurs if the API sends a 400 status (argument error).
     """
 
 
 class ValidationException(GazuException):
     """
-    Error raised when a 422 error (unprocessable entity) is sent by the API.
-    Carries the validation message returned in the response body.
+    This error occurs if the API sends a 422 status (unprocessable entity).
+
+    The error contains the validation message of the response body.
     """
 
 
 class UploadFailedException(GazuException):
     """
-    Error raised when an error while uploading a file, mainly to handle cases
-    where processing that occurs on the remote server fails.
+    This error occurs if a file upload fails.
+
+    Usually, the processing of the file on the remote server failed.
     """
 
 
 class TooBigFileException(GazuException):
     """
-    Error raised when a 413 error (payload too big error) is sent by the API.
+    This error occurs if the API sends a 413 status (payload too large).
     """
 
 
 class TaskStatusNotFoundException(GazuException):
     """
-    Error raised when a task status is not found.
+    This error occurs if a task status does not exist.
     """
 
 
 class DownloadFileException(GazuException):
     """
-    Error raised when a file can't be downloaded.
+    This error occurs if a file download fails.
     """
 
 
 class TaskMustBeADictException(GazuException):
     """
-    Error raised when a task should be a dict.
+    This error occurs if a task is not a dict.
     """
 
 
 class FileDoesntExistException(GazuException):
     """
-    Error raised when a file should exist when we submit a preview.
+    This error occurs if the file of a preview does not exist.
     """
 
 
 class ProjectDoesntExistException(GazuException):
     """
-    Error raised when a project isn't available.
+    This error occurs if a project is not available.
     """
 
 
 class PreviewFileProcessingException(GazuException):
     """
-    The preview file exists but its files are still being built by the
-    server, and they did not arrive within the allotted time.
+    This error occurs if the server does not finish the files of an existing
+    preview file before the timeout.
     """

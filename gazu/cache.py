@@ -1,3 +1,9 @@
+"""
+Decorator and functions for the cache of the read functions.
+
+The cache is disabled by default. Use ``gazu.cache.enable()`` to enable it.
+"""
+
 from __future__ import annotations
 
 import copy
@@ -15,7 +21,7 @@ cached_functions = []
 
 def enable() -> Literal[True]:
     """
-    Enable caching on all decorated functions.
+    Enable the cache on all decorated functions.
     """
     cache_settings["enabled"] = True
     return cache_settings["enabled"]
@@ -23,7 +29,7 @@ def enable() -> Literal[True]:
 
 def disable() -> Literal[False]:
     """
-    Disable caching on all decorated functions.
+    Disable the cache on all decorated functions.
     """
     cache_settings["enabled"] = False
     return cache_settings["enabled"]
@@ -31,7 +37,7 @@ def disable() -> Literal[False]:
 
 def clear_all() -> None:
     """
-    Clear all cached functions.
+    Remove all values from the cache of all decorated functions.
     """
     for function in cached_functions:
         function.clear_cache()
@@ -39,14 +45,15 @@ def clear_all() -> None:
 
 def remove_oldest_entry(memo: dict, maxsize: int) -> Any:
     """
-    Remove the oldest cache entry if there is more value stored than allowed.
+    Remove the oldest cache entry if the cache has too many entries.
 
-    Params:
-        memo (dict): Cache used for function memoization.
-        maxsize (int): Maximum number of entries for the cache.
+    Args:
+        memo (dict): The cache of the function.
+        maxsize (int): The maximum number of entries in the cache. If the
+            value is 0, the cache has no limit.
 
     Returns:
-        The removed entry key, or None if nothing was removed.
+        The key of the removed entry, or None if no entry was removed.
     """
     if maxsize > 0 and len(memo) > maxsize:
         oldest_key = min(memo, key=lambda key: memo[key]["date_accessed"])
@@ -57,8 +64,10 @@ def remove_oldest_entry(memo: dict, maxsize: int) -> Any:
 
 def _client_cache_identity(client: Any) -> list:
     """
-    Identify a client by host AND credentials, so two clients pointing at the
-    same host with different tokens never share cache entries.
+    Identify a client by its host and its access token.
+
+    Two clients with the same host and different tokens do not share cache
+    entries.
     """
     token = getattr(client, "access_token", None)
     token_hash = hashlib.sha256(token.encode()).hexdigest() if token else None
@@ -67,11 +76,12 @@ def _client_cache_identity(client: Any) -> list:
 
 def get_cache_key(args: Any, kwargs: Any) -> str:
     """
-    Serialize arguments to get a cache key. It will be used to store function
-    results.
+    Serialize the arguments to get a cache key.
+
+    The cache uses this key to store the function results.
 
     Returns:
-        str: generated key
+        str: The cache key.
     """
     kwargscopy = kwargs.copy()
     if "client" in kwargscopy:
@@ -89,16 +99,15 @@ def insert_value(
     function: Callable, cache_store: dict, args: Any, kwargs: Any
 ) -> Any:
     """
-    Serialize function call arguments and store function result in given cache
-    store.
+    Call the function and store its result in the given cache store.
 
     Args:
-        function (func): The function to cache value for.
-        cache_store (dict): The cache which will contain the value to cache.
-        args, kwargs: The arguments for which a cache must be set.
+        function (func): The function to call.
+        cache_store (dict): The cache that stores the value.
+        args, kwargs: The arguments of the function call.
 
     Returns:
-        The cached value.
+        A copy of the stored value.
     """
     returned_value = function(*args, **kwargs)
     key = get_cache_key(args, kwargs)
@@ -111,12 +120,13 @@ def insert_value(
 
 def get_value(cache_store: dict, key: str) -> Any:
     """
-    It generates a deep copy of the requested value. It's needed because if a
-    pointer is returned, the value can be changed. Which leads to a modified
-    cache and unexpected results.
+    Return a deep copy of the value.
+
+    If this function returned the stored object, a caller could change it.
+    The cache would then return incorrect results.
 
     Returns:
-        Value matching given key inside given cache store
+        A copy of the value with the given key in the given cache store.
     """
     value = cache_store[key]["value"]
     return copy.deepcopy(value)
@@ -125,26 +135,26 @@ def get_value(cache_store: dict, key: str) -> Any:
 def is_cache_enabled(state: dict) -> bool:
     """
     Args:
-        state: The state describing the cache state.
+        state (dict): The parameters of the function cache.
 
     Returns:
-        True if cache is enabled for given state.
+        True if the cache is enabled globally and for the given state.
     """
     return cache_settings["enabled"] and state["enabled"]
 
 
 def is_cache_expired(memo: dict, state: dict, key: str) -> bool:
     """
-    Check if cache is expired (outdated) for given wrapper state and cache key.
+    Check if the cache value with the given key is expired.
 
     Args:
-        memo (dict): The function cache
-        state (dict): The parameters of the cache (enabled, expire, maxsize)
-        key: The key to check
+        memo (dict): The cache of the function.
+        state (dict): The parameters of the cache (enabled, expire, maxsize).
+        key: The key to check.
 
     Returns:
-        True if cache value is expired.
-
+        True if the cache value is expired. If ``expire`` is 0, the value
+        does not expire.
     """
     date = memo[key]["date_accessed"]
     expire = state["expire"]
@@ -156,14 +166,20 @@ def cache(
     function: Callable, maxsize: int = 300, expire: int = 120
 ) -> Callable:
     """
-    Decorator that generate cache wrapper and that adds cache feature to
-    target function. A max cache size and and expiration time (in seconds) can
-    be set too.
+    Add a cache to the target function.
+
+    This decorator wraps the function. You can also set the maximum cache
+    size and the expiration time.
 
     Args:
-        function (func): Decorated function:
-        maxsize: Number of value stored in cache (300 by default).
-        expire: Time to live in seconds of stored value (disabled by default)
+        function (func): The function to decorate.
+        maxsize (int): The maximum number of values in the cache (300 by
+            default). If the value is 0, the cache has no limit.
+        expire (int): The time in seconds before a value expires (120 by
+            default). If the value is 0, the values do not expire.
+
+    Returns:
+        The wrapped function.
     """
     cache_store = {}
     state = {"enabled": True, "expire": expire, "maxsize": maxsize}

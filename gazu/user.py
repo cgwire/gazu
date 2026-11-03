@@ -1,3 +1,7 @@
+"""
+Functions for the data of the current user.
+"""
+
 from __future__ import annotations
 
 from typing_extensions import Literal
@@ -19,8 +23,8 @@ default = raw.default_client
 def all_open_projects(client: KitsuClient = default) -> list[dict]:
     """
     Returns:
-        list: Projects for which the user is part of the team. Admins see all
-        projects
+        list: The open projects where the user is in the team. Administrators
+        see all open projects.
     """
     projects = raw.fetch_all("user/projects/open", client=client)
     return sort_by_name(projects)
@@ -35,8 +39,8 @@ def all_asset_types_for_project(
         project (str / dict): The project dict or the project ID.
 
     Returns:
-        list: Asset types for which the user has a task assigned for given
-        project.
+        list: The asset types of the given project where the user has an
+        assigned task.
     """
     project = normalize_model_parameter(project)
     path = f"user/projects/{project['id']}/asset-types"
@@ -54,8 +58,8 @@ def all_assets_for_asset_type_and_project(
         asset_type (str / dict): The asset type dict or ID.
 
     Returns:
-        list: Assets for given project and asset type and for which the user has
-        a task assigned.
+        list: The assets of the given project and asset type where the user has
+        an assigned task.
     """
     project = normalize_model_parameter(project)
     asset_type = normalize_model_parameter(asset_type)
@@ -75,7 +79,7 @@ def all_tasks_for_asset(
         asset (str / dict): The asset dict or the asset ID.
 
     Returns:
-        list: Tasks for given asset and current user.
+        list: The tasks of the given asset and the current user.
     """
     asset = normalize_model_parameter(asset)
     path = f"user/assets/{asset['id']}/tasks"
@@ -92,7 +96,7 @@ def all_tasks_for_shot(
         shot (str / dict): The shot dict or the shot ID.
 
     Returns:
-        list: Tasks assigned to current user for given shot.
+        list: The tasks of the given shot assigned to the current user.
     """
     shot = normalize_model_parameter(shot)
     path = f"user/shots/{shot['id']}/tasks"
@@ -109,7 +113,7 @@ def all_tasks_for_scene(
         scene (str / dict): The scene dict or the scene ID.
 
     Returns:
-        list: Tasks assigned to current user for given scene.
+        list: The tasks of the given scene assigned to the current user.
     """
     scene = normalize_model_parameter(scene)
     path = f"user/scenes/{scene['id']}/tasks"
@@ -122,7 +126,13 @@ def all_tasks_for_sequence(
     sequence: str | dict, client: KitsuClient = default
 ) -> list[dict]:
     """
-    Return the list of tasks for given sequence and current user.
+    Return the tasks of the given sequence and the current user.
+
+    Args:
+        sequence (str / dict): The sequence dict or the sequence ID.
+
+    Returns:
+        list: The tasks.
     """
     sequence = normalize_model_parameter(sequence)
     path = f"user/sequences/{sequence['id']}/tasks"
@@ -139,7 +149,8 @@ def all_task_types_for_asset(
         asset (str / dict): The asset dict or the asset ID.
 
     Returns:
-        list: Task Types of tasks assigned to current user for given asset.
+        list: The task types of the tasks of the given asset assigned to the
+        current user.
     """
     asset = normalize_model_parameter(asset)
     path = f"user/assets/{asset['id']}/task-types"
@@ -156,7 +167,8 @@ def all_task_types_for_shot(
         shot (str / dict): The shot dict or the shot ID.
 
     Returns:
-        list: Task Types of tasks assigned to current user for given shot.
+        list: The task types of the tasks of the given shot assigned to the
+        current user.
     """
     shot = normalize_model_parameter(shot)
     path = f"user/shots/{shot['id']}/task-types"
@@ -173,7 +185,8 @@ def all_task_types_for_scene(
         scene (str / dict): The scene dict or the scene ID.
 
     Returns:
-        list: Task types of tasks assigned to current user for given scene.
+        list: The task types of the tasks of the given scene assigned to the
+        current user.
     """
     scene = normalize_model_parameter(scene)
     path = f"user/scenes/{scene['id']}/task-types"
@@ -186,8 +199,11 @@ def all_task_types_for_sequence(
     sequence: str | dict, client: KitsuClient = default
 ) -> list[dict]:
     """
+    Args:
+        sequence (str / dict): The sequence dict or the sequence ID.
+
     Returns:
-        list: Task types for given sequence and current user.
+        list: The task types of the given sequence and the current user.
     """
     sequence = normalize_model_parameter(sequence)
     path = f"user/sequences/{sequence['id']}/task-types"
@@ -204,7 +220,8 @@ def all_sequences_for_project(
         project (str / dict): The project dict or the project ID.
 
     Returns:
-        list: Sequences for which user has tasks assigned for given project.
+        list: The sequences of the given project where the user has assigned
+        tasks.
     """
     project = normalize_model_parameter(project)
     path = f"user/projects/{project['id']}/sequences"
@@ -221,7 +238,8 @@ def all_episodes_for_project(
         project (str / dict): The project dict or the project ID.
 
     Returns:
-        list: Episodes for which user has tasks assigned for given project.
+        list: The episodes of the given project where the user has assigned
+        tasks.
     """
     project = normalize_model_parameter(project)
     path = f"user/projects/{project['id']}/episodes"
@@ -238,7 +256,8 @@ def all_shots_for_sequence(
         sequence (str / dict): The sequence dict or the sequence ID.
 
     Returns:
-        list: Shots for which user has tasks assigned for given sequence.
+        list: The shots of the given sequence where the user has assigned
+        tasks.
     """
     sequence = normalize_model_parameter(sequence)
     path = f"user/sequences/{sequence['id']}/shots"
@@ -255,7 +274,8 @@ def all_scenes_for_sequence(
         sequence (str / dict): The sequence dict or the sequence ID.
 
     Returns:
-        list: Scenes for which user has tasks assigned for given sequence.
+        list: The scenes of the given sequence where the user has assigned
+        tasks.
     """
     sequence = normalize_model_parameter(sequence)
     path = f"user/sequences/{sequence['id']}/scenes"
@@ -267,7 +287,7 @@ def all_scenes_for_sequence(
 def all_tasks_to_do(client: KitsuClient = default) -> list[dict]:
     """
     Returns:
-        list: Tasks assigned to current user which are not complete.
+        list: The tasks assigned to the current user that are not complete.
     """
     return raw.fetch_all("user/tasks", client=client)
 
@@ -276,7 +296,7 @@ def all_tasks_to_do(client: KitsuClient = default) -> list[dict]:
 def all_done_tasks(client: KitsuClient = default) -> list[dict]:
     """
     Returns:
-        list: Tasks assigned to current user which are done.
+        list: The tasks assigned to the current user that are done.
     """
     return raw.fetch_all("user/done-tasks", client=client)
 
@@ -286,16 +306,16 @@ def get_timespents_range(
     start_date: str, end_date: str, client: KitsuClient = default
 ) -> list[dict]:
     """
-    Gets the timespents of the current user for the given date range.
+    Get the time spents of the current user for the given date range.
 
     Args:
-        start_date (str): The first day of the date range as a date string with
-                          the following format: YYYY-MM-DD
-        end_date (str): The last day of the date range as a date string with
-                        the following format: YYYY-MM-DD
+        start_date (str): The first day of the date range, with the format
+            YYYY-MM-DD.
+        end_date (str): The last day of the date range, with the format
+            YYYY-MM-DD.
 
     Returns:
-        list: All of the person's time spents
+        list: The time spents of the user in this date range.
     """
     date_range = {
         "start_date": start_date,
@@ -306,10 +326,10 @@ def get_timespents_range(
 
 def log_desktop_session_log_in(client: KitsuClient = default) -> dict:
     """
-    Add a log entry to mention that the user logged in his computer.
+    Add a log entry that shows that the user logged in on the computer.
 
     Returns:
-        dict: Desktop session log entry.
+        dict: The desktop session log entry.
     """
     path = "/data/user/desktop-login-logs"
     data = {"date": datetime.datetime.now().isoformat()}
@@ -319,7 +339,7 @@ def log_desktop_session_log_in(client: KitsuClient = default) -> dict:
 def is_authenticated(client: KitsuClient = default) -> bool:
     """
     Returns:
-        bool: Current user authenticated or not
+        bool: True if the current user is authenticated.
     """
     try:
         return raw.get("auth/authenticated", client=client)["authenticated"]
@@ -331,7 +351,7 @@ def is_authenticated(client: KitsuClient = default) -> bool:
 def all_filters(client: KitsuClient = default) -> list[dict]:
     """
     Returns:
-        list: all filters for current user.
+        list: The filters of the current user.
     """
     return raw.fetch_all("user/filters", client=client)
 
@@ -345,7 +365,7 @@ def new_filter(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Create a new filter for current user.
+    Create a filter for the current user.
 
     Args:
         name (str): The filter name.
@@ -355,7 +375,7 @@ def new_filter(
         entity_type (str): "Asset", "Shot" or "Edit".
 
     Returns:
-        dict: Created filter.
+        dict: The created filter.
     """
     project_id = (
         normalize_model_parameter(project)["id"]
@@ -378,10 +398,13 @@ def new_filter(
 
 def remove_filter(filter: str | dict, client: KitsuClient = default) -> str:
     """
-    Remove given filter from database.
+    Remove the given filter from the database.
 
     Args:
         filter (str / dict): The filter dict or the filter ID.
+
+    Returns:
+        str: The response of the API.
     """
     filter = normalize_model_parameter(filter)
     return raw.delete(f"data/user/filters/{filter['id']}", client=client)
@@ -389,10 +412,13 @@ def remove_filter(filter: str | dict, client: KitsuClient = default) -> str:
 
 def update_filter(filter: dict, client: KitsuClient = default) -> dict:
     """
-    Save given filter data into the API.
+    Save the given filter data to the API.
 
     Args:
-        filter (dict): Filter to save.
+        filter (dict): The filter to save.
+
+    Returns:
+        dict: The updated filter.
     """
     return raw.put(f"data/user/filters/{filter['id']}", filter, client=client)
 
@@ -400,10 +426,10 @@ def update_filter(filter: dict, client: KitsuClient = default) -> dict:
 @cache
 def get_context(client: KitsuClient = default) -> dict:
     """
-    Get user context.
+    Get the context of the user.
 
     Returns:
-        dict: User context information.
+        dict: The context data of the user.
     """
     return raw.get("data/user/context", client=client)
 
@@ -411,10 +437,10 @@ def get_context(client: KitsuClient = default) -> dict:
 @cache
 def all_tasks_requiring_feedback(client: KitsuClient = default) -> list[dict]:
     """
-    Get tasks requiring feedback from the current user.
+    Get the tasks that need feedback from the current user.
 
     Returns:
-        list: Tasks requiring feedback.
+        list: The tasks that need feedback.
     """
     return raw.fetch_all("user/tasks-to-check", client=client)
 
@@ -422,10 +448,10 @@ def all_tasks_requiring_feedback(client: KitsuClient = default) -> list[dict]:
 @cache
 def all_filter_groups(client: KitsuClient = default) -> list[dict]:
     """
-    Get all filter groups for current user.
+    Get all filter groups of the current user.
 
     Returns:
-        list: Filter groups.
+        list: The filter groups.
     """
     return raw.fetch_all("user/filter-groups", client=client)
 
@@ -434,14 +460,14 @@ def new_filter_group(
     name: str, project: str | dict | None = None, client: KitsuClient = default
 ) -> dict:
     """
-    Create a new filter group for current user.
+    Create a filter group for the current user.
 
     Args:
         name (str): The filter group name.
-        project (str / dict): The project dict or id.
+        project (str / dict): The project dict or ID.
 
     Returns:
-        dict: Created filter group.
+        dict: The created filter group.
     """
     project_id = (
         normalize_model_parameter(project)["id"]
@@ -463,10 +489,10 @@ def get_filter_group(
     Get a filter group.
 
     Args:
-        filter_group (str / dict): The filter group dict or id.
+        filter_group (str / dict): The filter group dict or ID.
 
     Returns:
-        dict: Filter group.
+        dict: The filter group.
     """
     filter_group = normalize_model_parameter(filter_group)
     return raw.fetch_one(
@@ -481,10 +507,10 @@ def update_filter_group(
     Update a filter group.
 
     Args:
-        filter_group (dict): Filter group to save.
+        filter_group (dict): The filter group to save.
 
     Returns:
-        dict: Updated filter group.
+        dict: The updated filter group.
     """
     return raw.put(
         f"data/user/filter-groups/{filter_group['id']}",
@@ -497,10 +523,13 @@ def remove_filter_group(
     filter_group: str | dict, client: KitsuClient = default
 ) -> str:
     """
-    Remove given filter group from database.
+    Remove the given filter group from the database.
 
     Args:
-        filter_group (str / dict): The filter group dict or id.
+        filter_group (str / dict): The filter group dict or ID.
+
+    Returns:
+        str: The response of the API.
     """
     filter_group = normalize_model_parameter(filter_group)
     return raw.delete(
@@ -511,10 +540,10 @@ def remove_filter_group(
 @cache
 def all_desktop_login_logs(client: KitsuClient = default) -> list:
     """
-    Get desktop login logs for current user.
+    Get the desktop login logs of the current user.
 
     Returns:
-        list: Desktop login logs.
+        list: The desktop login logs.
     """
     return raw.fetch_all("user/desktop-login-logs", client=client)
 
@@ -522,13 +551,13 @@ def all_desktop_login_logs(client: KitsuClient = default) -> list:
 @cache
 def get_time_spents_by_date(date: str, client: KitsuClient = default) -> list:
     """
-    Get time spents for a specific date.
+    Get the time spents of the current user on the given date.
 
     Args:
-        date (str): Date in YYYY-MM-DD format.
+        date (str): The date with the format YYYY-MM-DD.
 
     Returns:
-        list: Time spents for the date.
+        list: The time spents on the date.
     """
     return raw.get(f"data/user/time-spents/{date}", client=client)
 
@@ -538,14 +567,14 @@ def get_task_time_spent(
     task: str | dict, date: str, client: KitsuClient = default
 ) -> dict:
     """
-    Get time spent by the current user on a task for a given date.
+    Get the time that the current user spent on a task on the given date.
 
     Args:
-        task (str / dict): The task dict or id.
-        date (str): Date in YYYY-MM-DD format.
+        task (str / dict): The task dict or ID.
+        date (str): The date with the format YYYY-MM-DD.
 
     Returns:
-        dict: Time spent information for the task on that date.
+        dict: The time spent on the task on this date.
     """
     task = normalize_model_parameter(task)
     path = f"data/user/tasks/{task['id']}/time-spents/{date}"
@@ -555,13 +584,13 @@ def get_task_time_spent(
 @cache
 def get_day_off(date: str, client: KitsuClient = default) -> dict:
     """
-    Get day off information for the current user on a given date.
+    Get the day off of the current user on the given date.
 
     Args:
-        date (str): Date in YYYY-MM-DD format.
+        date (str): The date with the format YYYY-MM-DD.
 
     Returns:
-        dict: Day off information.
+        dict: The day off.
     """
     return raw.get(f"data/user/day-offs/{date}", client=client)
 
@@ -569,10 +598,10 @@ def get_day_off(date: str, client: KitsuClient = default) -> dict:
 @cache
 def all_notifications(client: KitsuClient = default) -> list[dict]:
     """
-    Get all notifications for current user.
+    Get all notifications of the current user.
 
     Returns:
-        list: Notifications.
+        list: The notifications.
     """
     return raw.fetch_all("user/notifications", client=client)
 
@@ -582,13 +611,13 @@ def get_notification(
     notification: str | dict, client: KitsuClient = default
 ) -> dict:
     """
-    Get a specific notification.
+    Get a notification.
 
     Args:
-        notification (str / dict): The notification dict or id.
+        notification (str / dict): The notification dict or ID.
 
     Returns:
-        dict: Notification.
+        dict: The notification.
     """
     notification = normalize_model_parameter(notification)
     return raw.fetch_one(
@@ -603,10 +632,10 @@ def update_notification(
     Update a notification.
 
     Args:
-        notification (dict): Notification to save.
+        notification (dict): The notification to save.
 
     Returns:
-        dict: Updated notification.
+        dict: The updated notification.
     """
     return raw.put(
         f"data/user/notifications/{notification['id']}",
@@ -620,13 +649,13 @@ def check_task_subscription(
     task: str | dict, client: KitsuClient = default
 ) -> dict:
     """
-    Check if user is subscribed to a task.
+    Check if the user is subscribed to a task.
 
     Args:
-        task (str / dict): The task dict or id.
+        task (str / dict): The task dict or ID.
 
     Returns:
-        dict: Subscription status.
+        bool: True if the user is subscribed to the task.
     """
     task = normalize_model_parameter(task)
     path = f"data/user/tasks/{task['id']}/subscribed"
@@ -638,10 +667,10 @@ def subscribe_to_task(task: str | dict, client: KitsuClient = default) -> dict:
     Subscribe to a task.
 
     Args:
-        task (str / dict): The task dict or id.
+        task (str / dict): The task dict or ID.
 
     Returns:
-        dict: Subscription information.
+        dict: The subscription.
     """
     task = normalize_model_parameter(task)
     path = f"actions/user/tasks/{task['id']}/subscribe"
@@ -655,7 +684,10 @@ def unsubscribe_from_task(
     Unsubscribe from a task.
 
     Args:
-        task (str / dict): The task dict or id.
+        task (str / dict): The task dict or ID.
+
+    Returns:
+        str: The response of the API.
     """
     task = normalize_model_parameter(task)
     path = f"actions/user/tasks/{task['id']}/unsubscribe"
@@ -665,10 +697,10 @@ def unsubscribe_from_task(
 @cache
 def all_chats(client: KitsuClient = default) -> list[dict]:
     """
-    Get all chats for current user.
+    Get all chats of the current user.
 
     Returns:
-        list: Chats.
+        list: The chats.
     """
     return raw.fetch_all("user/chats", client=client)
 
@@ -678,10 +710,10 @@ def join_chat(chat: str | dict, client: KitsuClient = default) -> dict:
     Join a chat.
 
     Args:
-        chat (str / dict): The chat dict or id.
+        chat (str / dict): The dict or ID of the entity of the chat.
 
     Returns:
-        dict: Chat information.
+        dict: The chat.
     """
     chat = normalize_model_parameter(chat)
     path = f"actions/user/chats/{chat['id']}/join"
@@ -693,7 +725,10 @@ def leave_chat(chat: str | dict, client: KitsuClient = default) -> str:
     Leave a chat.
 
     Args:
-        chat (str / dict): The chat dict or id.
+        chat (str / dict): The dict or ID of the entity of the chat.
+
+    Returns:
+        str: The response of the API.
     """
     chat = normalize_model_parameter(chat)
     # Leaving is a DELETE on the same join route.
@@ -703,7 +738,10 @@ def leave_chat(chat: str | dict, client: KitsuClient = default) -> str:
 
 def clear_avatar(client: KitsuClient = default) -> str:
     """
-    Clear user avatar.
+    Remove the avatar of the user.
+
+    Returns:
+        str: The response of the API.
     """
     return raw.delete("actions/user/clear-avatar", client=client)
 
@@ -712,10 +750,10 @@ def mark_all_notifications_as_read(
     client: KitsuClient = default,
 ) -> dict[Literal["success"], bool]:
     """
-    Mark all notifications as read for current user.
+    Mark all notifications of the current user as read.
 
     Returns:
-        dict: Response information.
+        dict: A dict with the 'success' key.
     """
     return raw.post(
         "actions/user/notifications/mark-all-as-read", {}, client=client

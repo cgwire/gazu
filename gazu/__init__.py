@@ -56,14 +56,14 @@ from .__version__ import __version__
 
 def get_host(client=raw.default_client):
     """
-    Return the API host currently configured on the client.
+    Return the API host that the client uses.
     """
     return raw.get_host(client=client)
 
 
 def set_host(url, client=raw.default_client):
     """
-    Set the API host to query (e.g. "https://kitsu.example.com/api").
+    Set the API host (for example, "https://kitsu.example.com/api").
     """
     raw.set_host(url, client=client)
 
@@ -78,7 +78,9 @@ def log_in(
     client=raw.default_client,
 ):
     """
-    Log in and store the returned tokens on the client for later requests.
+    Log in and store the tokens on the client.
+
+    The client uses these tokens for subsequent requests.
 
     Args:
         email (str): User email.
@@ -89,10 +91,10 @@ def log_in(
         recovery_code (str): Recovery code.
 
     Returns:
-        dict: The authentication tokens returned by the API.
+        dict: The authentication tokens that the API returns.
 
     Raises:
-        AuthFailedException: when the credentials are rejected.
+        AuthFailedException: If the API rejects the credentials.
     """
     tokens = {}
     login_error = None
@@ -129,22 +131,23 @@ def log_in_with_browser(
     client=raw.default_client,
 ):
     """
-    Log in through the Kitsu web page and store the returned tokens on the
-    client. Works with every login method Kitsu supports (password, 2FA,
-    SAML, OIDC). The browser must run on the same machine as the script.
-    This call blocks until the user answers or the timeout expires.
-    Requires Zou 1.0.95 and Kitsu 1.0.71 or later.
+    Log in through the Kitsu web page and store the tokens on the client.
+
+    This function works with all Kitsu login methods (password, 2FA, SAML,
+    OIDC). The browser must run on the same machine as the script.
+    The script stops until the user answers or the timeout expires.
+    This function requires Zou 1.0.95 and Kitsu 1.0.71 or later.
 
     Args:
-        app_name (str): Name shown to the user on the Kitsu consent page.
-        timeout (int): Seconds to wait for the user to answer.
+        app_name (str): The name that the Kitsu consent page shows to the user.
+        timeout (int): The time in seconds to wait for the user to answer.
 
     Returns:
-        dict: The authentication tokens returned by the API.
+        dict: The authentication tokens that the API returns.
 
     Raises:
-        AuthFailedException: when the user refuses, the timeout expires or
-            the exchange is rejected.
+        AuthFailedException: If the user refuses, the timeout expires or
+            the API rejects the code exchange.
     """
     with open(
         os.path.join(os.path.dirname(__file__), "browser_login.html"),
@@ -244,14 +247,16 @@ def log_in_with_browser(
 
 def send_email_otp(email, client=raw.default_client):
     """
-    Ask the API to send a one-time password to the given email.
+    Make a request for a one-time password.
+
+    The API sends the password to the given email address.
     """
     return raw.get("auth/email-otp", params={"email": email}, client=client)
 
 
 def log_out(client=raw.default_client):
     """
-    Log out and clear the tokens stored on the client.
+    Log out and remove the tokens from the client.
     """
     tokens = {}
     try:
@@ -266,21 +271,23 @@ def log_out(client=raw.default_client):
 
 def refresh_access_token(client=raw.default_client):
     """
-    Refresh the access token using the stored refresh token.
+    Refresh the access token with the stored refresh token.
     """
     return client.refresh_access_token()
 
 
 def get_event_host(client=raw.default_client):
     """
-    Return the event (websocket) host configured on the client.
+    Return the event (websocket) host that the client uses.
     """
     return raw.get_event_host(client=client)
 
 
 def set_event_host(url, client=raw.default_client):
     """
-    Set the event (websocket) host used to listen to Kitsu events.
+    Set the event (websocket) host.
+
+    The client uses this host to receive Kitsu events.
     """
     raw.set_event_host(url, client=client)
 
@@ -299,29 +306,33 @@ def create_session(
     callback_not_authenticated=None,
 ):
     """
-    Create a logged-in KitsuClient for use as a context manager.
+    Create a KitsuClient and log in.
+
+    Use the client as a context manager.
 
     Usage::
 
         with gazu.create_session(host, email, password) as client:
             assets = gazu.asset.all_assets(client=client)
-        # auto logout + session close
+        # The client logs out and closes the session.
 
     Args:
-        host (str): The host URL (e.g. "https://kitsu.example.com/api").
+        host (str): The host URL (for example,
+            "https://kitsu.example.com/api").
         email (str): User email.
         password (str): User password.
         totp (str): TOTP code for 2FA.
         email_otp (str): Email OTP code.
         fido_authentication_response: FIDO authentication response.
         recovery_code (str): Recovery code.
-        ssl_verify (bool): Whether to verify SSL certificates.
+        ssl_verify (bool): If True, verify SSL certificates.
         cert (str): Path to a client certificate.
-        use_refresh_token (bool): Whether to automatically refresh tokens.
-        callback_not_authenticated (function): Callback when not authenticated.
+        use_refresh_token (bool): If True, refresh tokens automatically.
+        callback_not_authenticated (function): The function to call if the
+            user is not authenticated.
 
     Returns:
-        KitsuClient: A logged-in client usable as a context manager.
+        KitsuClient: A client that is logged in. Use it as a context manager.
     """
     client = raw.create_client(
         host,
@@ -349,10 +360,13 @@ def create_session(
 
 def set_token(token, client=raw.default_client):
     """
-    Store authentication token to reuse them for all requests.
+    Store the authentication tokens.
+
+    The client uses these tokens for all requests.
 
     Args:
-        token (dict / str): Tokens to use for authentication.
+        token (dict / str): The tokens for authentication. A string is an
+            access token.
     """
 
     if isinstance(token, dict):

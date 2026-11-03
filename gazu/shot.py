@@ -23,7 +23,7 @@ def all_previews_for_shot(
         shot (str / dict): The shot dict or the shot ID.
 
     Returns:
-        list: Previews from database for given shot.
+        list: The previews of the given shot.
     """
     shot = normalize_model_parameter(shot)
     return raw.fetch_all(f"shots/{shot['id']}/preview-files", client=client)
@@ -38,7 +38,7 @@ def all_shots_for_project(
         project (str / dict): The project dict or the project ID.
 
     Returns:
-        list: Shots from database or for given project.
+        list: The shots of the given project.
     """
     project = normalize_model_parameter(project)
     shots = raw.fetch_all(f"projects/{project['id']}/shots", client=client)
@@ -54,7 +54,7 @@ def all_shots_for_episode(
         episode (str / dict): The episode dict or the episode ID.
 
     Returns:
-        list: Shots which are children of given episode.
+        list: The shots of the given episode.
     """
     episode = normalize_model_parameter(episode)
     return sort_by_name(
@@ -71,7 +71,7 @@ def all_shots_for_sequence(
         sequence (str / dict): The sequence dict or the sequence ID.
 
     Returns:
-        list: Shots which are children of given sequence.
+        list: The shots of the given sequence.
     """
     sequence = normalize_model_parameter(sequence)
     return sort_by_name(
@@ -88,7 +88,7 @@ def all_sequences_for_project(
         project (str / dict): The project dict or the project ID.
 
     Returns:
-        list: Sequences from database for given project.
+        list: The sequences of the given project.
     """
     project = normalize_model_parameter(project)
     path = f"projects/{project['id']}/sequences"
@@ -105,7 +105,7 @@ def all_sequences_for_episode(
         episode (str / dict): The episode dict or the episode ID.
 
     Returns:
-        list: Sequences which are children of given episode.
+        list: The sequences of the given episode.
     """
     episode = normalize_model_parameter(episode)
     path = f"episodes/{episode['id']}/sequences"
@@ -122,7 +122,7 @@ def all_episodes_for_project(
         project (str / dict): The project dict or the project ID.
 
     Returns:
-        list: Episodes from database for given project.
+        list: The episodes of the given project.
     """
     project = normalize_model_parameter(project)
     path = f"projects/{project['id']}/episodes"
@@ -134,10 +134,10 @@ def all_episodes_for_project(
 def get_episode(episode_id: str, client: KitsuClient = default) -> dict:
     """
     Args:
-        episode_id (str): ID of claimed episode.
+        episode_id (str): The ID of the episode.
 
     Returns:
-        dict: Episode corresponding to given episode ID.
+        dict: The episode with the given ID.
     """
     return raw.fetch_one("episodes", episode_id, client=client)
 
@@ -149,10 +149,11 @@ def get_episode_by_name(
     """
     Args:
         project (str / dict): The project dict or the project ID.
-        episode_name (str): Name of claimed episode.
+        episode_name (str): The name of the episode.
 
     Returns:
-        dict: Episode corresponding to given name and project.
+        dict: The episode with the given name in the given project, or None if
+        no episode matches.
     """
     project = normalize_model_parameter(project)
     return raw.fetch_first(
@@ -171,7 +172,8 @@ def get_episode_from_sequence(
         sequence (dict): The sequence dict.
 
     Returns:
-        dict: Episode which is parent of given sequence.
+        dict: The parent episode of the given sequence, or None if the sequence
+        has no parent.
     """
     if sequence["parent_id"] is None:
         return None
@@ -183,10 +185,10 @@ def get_episode_from_sequence(
 def get_sequence(sequence_id: str, client: KitsuClient = default) -> dict:
     """
     Args:
-        sequence_id (str): ID of claimed sequence.
+        sequence_id (str): The ID of the sequence.
 
     Returns:
-        dict: Sequence corresponding to given sequence ID.
+        dict: The sequence with the given ID.
     """
     return raw.fetch_one("sequences", sequence_id, client=client)
 
@@ -201,12 +203,12 @@ def get_sequence_by_name(
     """
     Args:
         project (str / dict): The project dict or the project ID.
-        sequence_name (str): Name of claimed sequence.
+        sequence_name (str): The name of the sequence.
         episode (str / dict): The episode dict or the episode ID (optional).
 
     Returns:
-        dict: Seqence corresponding to given name and project (and episode in
-        case of TV Show).
+        dict: The sequence with the given name in the given project, or in the
+        given episode for a TV show. None if no sequence matches.
     """
     project = normalize_model_parameter(project)
     if episode is None:
@@ -221,10 +223,10 @@ def get_sequence_by_name(
 def get_sequence_from_shot(shot: dict, client: KitsuClient = default) -> dict:
     """
     Args:
-        shot (dict): The shot dict.
+        shot (str / dict): The shot dict or the shot ID.
 
     Returns:
-        dict: Sequence which is parent of given shot.
+        dict: The parent sequence of the given shot.
     """
     shot = normalize_model_parameter(shot)
     if "parent_id" not in shot:
@@ -237,10 +239,10 @@ def get_sequence_from_shot(shot: dict, client: KitsuClient = default) -> dict:
 def get_shot(shot_id: str, client: KitsuClient = default) -> dict:
     """
     Args:
-        shot_id (str): ID of claimed shot.
+        shot_id (str): The ID of the shot.
 
     Returns:
-        dict: Shot corresponding to given shot ID.
+        dict: The shot with the given ID.
     """
     return raw.fetch_one("shots", shot_id, client=client)
 
@@ -252,10 +254,11 @@ def get_shot_by_name(
     """
     Args:
         sequence (str / dict): The sequence dict or the sequence ID.
-        shot_name (str): Name of claimed shot.
+        shot_name (str): The name of the shot.
 
     Returns:
-        dict: Shot corresponding to given name and sequence.
+        dict: The shot with the given name in the given sequence, or None if no
+        shot matches.
     """
     sequence = normalize_model_parameter(sequence)
     return raw.fetch_first(
@@ -272,7 +275,7 @@ def get_episode_url(episode: str | dict, client: KitsuClient = default) -> str:
         episode (str / dict): The episode dict or the episode ID.
 
     Returns:
-        url (str): Web url associated to the given episode
+        url (str): The web URL of the given episode.
     """
     episode = normalize_model_parameter(episode)
     episode = get_episode(episode["id"], client=client)
@@ -289,7 +292,7 @@ def get_shot_url(shot: str | dict, client: KitsuClient = default) -> str:
         shot (str / dict): The shot dict or the shot ID.
 
     Returns:
-        url (str): Web url associated to the given shot
+        url (str): The web URL of the given shot.
     """
     shot = normalize_model_parameter(shot)
     shot = get_shot(shot["id"], client=client)
@@ -312,9 +315,9 @@ def get_all_episodes_url(
         project (str / dict): The project dict or the project ID.
 
     Returns:
-        url (str): Web url of the episodes list page for the given project.
-        Only meaningful for TV show productions; for other production types
-        the page exists in the UI but will be empty.
+        url (str): The web URL of the episodes list page of the given project.
+        Use this function only for TV shows. For other production types, the
+        page exists in the user interface but it is empty.
     """
     project = normalize_model_parameter(project)
     host = raw.get_api_url_from_host(client=client)
@@ -330,7 +333,7 @@ def get_all_sequences_url(
         project (str / dict): The project dict or the project ID.
 
     Returns:
-        url (str): Web url of the sequences list page for the given project.
+        url (str): The web URL of the sequences list page of the given project.
     """
     project = normalize_model_parameter(project)
     host = raw.get_api_url_from_host(client=client)
@@ -346,9 +349,8 @@ def get_sequence_url(
         sequence (str / dict): The sequence dict or the sequence ID.
 
     Returns:
-        url (str): Web url associated to the given sequence. The URL shape
-        depends on whether the sequence belongs to an episode (TV show) or
-        to the project root (non-episodic).
+        url (str): The web URL of the given sequence. The URL is different if
+        the sequence is in an episode (TV show) or at the project root.
     """
     sequence = normalize_model_parameter(sequence)
     sequence = get_sequence(sequence["id"], client=client)
@@ -372,15 +374,17 @@ def new_sequence(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Create a sequence for given project and episode.
+    Create a sequence for the given project and episode.
+
+    If this sequence exists, return it.
 
     Args:
         project (str / dict): The project dict or the project ID.
-        episode (str / dict): The episode dict or the episode ID.
         name (str): The name of the sequence to create.
+        episode (str / dict): The episode dict or the episode ID.
 
     Returns:
-        dict: Created sequence.
+        dict: The created or existing sequence.
     """
     project = normalize_model_parameter(project)
     data = {"name": name}
@@ -411,21 +415,24 @@ def new_shot(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Create a shot for given sequence and project. Add frame in and frame out
-    parameters to shot extra data. Allow to set metadata too.
+    Create a shot for the given sequence and project.
+
+    This function adds the frame in and frame out values to the extra data of
+    the shot. You can also set metadata. If a shot with this name exists in
+    the sequence, return this shot.
 
     Args:
         project (str / dict): The project dict or the project ID.
         sequence (str / dict): The sequence dict or the sequence ID.
         name (str): The name of the shot to create.
-        nb_frames (int): Number of frames of the shot.
-        frame_in (int): Frame in value for the shot.
-        frame_out (int): Frame out value for the shot.
-        description (str): Description of the shot.
-        data (dict): Free field to set metadata of any kind.
+        nb_frames (int): The number of frames of the shot.
+        frame_in (int): The frame in value of the shot.
+        frame_out (int): The frame out value of the shot.
+        description (str): The description of the shot.
+        data (dict): A free field for metadata of all types.
 
     Returns:
-        dict: Created shot.
+        dict: The created or existing shot.
     """
     # Copy to avoid mutating the dict provided by the caller.
     data = dict(data) if data else {}
@@ -454,28 +461,32 @@ def new_shot(
 
 def update_shot(shot: dict, client: KitsuClient = default) -> dict:
     """
-    Save given shot data into the API. Metadata are fully replaced by the ones
-    set on given shot.
+    Save the given shot data to the API.
+
+    The API merges the given metadata with the current metadata. It does not
+    remove the other metadata keys.
 
     Args:
         shot (dict): The shot dict to update.
 
     Returns:
-        dict: Updated shot.
+        dict: The updated shot.
     """
     return raw.put(f"data/entities/{shot['id']}", shot, client=client)
 
 
 def update_sequence(sequence: dict, client: KitsuClient = default) -> dict:
     """
-    Save given sequence data into the API. Metadata are fully replaced by the
-    ones set on given sequence.
+    Save the given sequence data to the API.
+
+    The API merges the given metadata with the current metadata. It does not
+    remove the other metadata keys.
 
     Args:
         sequence (dict): The sequence dict to update.
 
     Returns:
-        dict: Updated sequence.
+        dict: The updated sequence.
     """
     return raw.put(f"data/entities/{sequence['id']}", sequence, client=client)
 
@@ -485,7 +496,13 @@ def get_asset_instances_for_shot(
     shot: str | dict, client: KitsuClient = default
 ) -> list[dict]:
     """
-    Return the list of asset instances linked to given shot.
+    Return the asset instances of the given shot.
+
+    Args:
+        shot (str / dict): The shot dict or the shot ID.
+
+    Returns:
+        dict: The keys are asset IDs. The values are lists of asset instances.
     """
     shot = normalize_model_parameter(shot)
     return raw.get(f"data/shots/{shot['id']}/asset-instances", client=client)
@@ -497,15 +514,16 @@ def update_shot_data(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Update the metadata for the provided shot. Keys that are not provided are
-    not changed.
+    Update the metadata of the given shot.
+
+    This function does not change the keys that are not in ``data``.
 
     Args:
-        shot (str / dict): The shot dict or ID to save in database.
-        data (dict): Free field to set metadata of any kind.
+        shot (str / dict): The shot dict or the shot ID.
+        data (dict): The metadata keys and values to set.
 
     Returns:
-        dict: Updated shot.
+        dict: The updated shot.
     """
     if data is None:
         data = {}
@@ -530,15 +548,16 @@ def update_sequence_data(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Update the metadata for the provided sequence. Keys that are not provided
-    are not changed.
+    Update the metadata of the given sequence.
+
+    This function does not change the keys that are not in ``data``.
 
     Args:
-        sequence (str / dict): The sequence dict or ID to save in database.
-        data (dict): Free field to set metadata of any kind.
+        sequence (str / dict): The sequence dict or the sequence ID.
+        data (dict): The metadata keys and values to set.
 
     Returns:
-        dict: Updated sequence.
+        dict: The updated sequence.
     """
     if data is None:
         data = {}
@@ -555,16 +574,18 @@ def remove_shot(
     shot: str | dict, force: bool = False, client: KitsuClient = default
 ) -> str:
     """
-    Remove given shot from database.
+    Remove the given shot from the database.
 
-    If the Shot has tasks linked to it, this will by default mark the
-    Shot as canceled. Deletion can be forced regardless of task links
-    with the `force` parameter.
+    If tasks are linked to the shot, the API sets the shot to canceled and
+    does not remove it. To remove the shot and its tasks, set ``force`` to
+    True.
 
     Args:
-        shot (str / dict): Shot to remove.
-        force (bool): Whether to force deletion of the shot regardless of
-            whether it has links to tasks.
+        shot (str / dict): The shot to remove.
+        force (bool): If True, remove the shot and its tasks.
+
+    Returns:
+        str: The response of the API.
     """
     shot = normalize_model_parameter(shot)
     path = f"data/shots/{shot['id']}"
@@ -576,10 +597,13 @@ def remove_shot(
 
 def restore_shot(shot: str | dict, client: KitsuClient = default) -> dict:
     """
-    Restore given shot into database (uncancel it).
+    Restore the given shot. The shot is not canceled after this operation.
 
     Args:
-        shot (str / dict): Shot to restore.
+        shot (str / dict): The shot to restore.
+
+    Returns:
+        dict: The updated shot.
     """
     shot = normalize_model_parameter(shot)
     path = f"data/shots/{shot['id']}"
@@ -591,14 +615,16 @@ def new_episode(
     project: str | dict, name: str, client: KitsuClient = default
 ) -> dict:
     """
-    Create an episode for given project.
+    Create an episode for the given project.
+
+    If an episode with this name exists in the project, return this episode.
 
     Args:
         project (str / dict): The project dict or the project ID.
         name (str): The name of the episode to create.
 
     Returns:
-        dict: Created episode.
+        dict: The created or existing episode.
     """
     project = normalize_model_parameter(project)
     data = {"name": name}
@@ -613,14 +639,16 @@ def new_episode(
 
 def update_episode(episode: dict, client: KitsuClient = default) -> dict:
     """
-    Save given episode data into the API. Metadata are fully replaced by the
-    ones set on given episode.
+    Save the given episode data to the API.
+
+    The API merges the given metadata with the current metadata. It does not
+    remove the other metadata keys.
 
     Args:
         episode (dict): The episode dict to update.
 
     Returns:
-        dict: Updated episode.
+        dict: The updated episode.
     """
     return raw.put(f"data/entities/{episode['id']}", episode, client=client)
 
@@ -631,15 +659,16 @@ def update_episode_data(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Update the metadata for the provided episode. Keys that are not provided
-    are not changed.
+    Update the metadata of the given episode.
+
+    This function does not change the keys that are not in ``data``.
 
     Args:
-        episode (str / dict): The episode dict or ID to save in database.
-        data (dict): Free field to set metadata of any kind.
+        episode (str / dict): The episode dict or the episode ID.
+        data (dict): The metadata keys and values to set.
 
     Returns:
-        dict: Updated episode.
+        dict: The updated episode.
     """
     if data is None:
         data = {}
@@ -656,23 +685,24 @@ def remove_episode(
     episode: str | dict, force: bool = False, client: KitsuClient = default
 ) -> str:
     """
-    Remove given episode and related from database.
+    Remove the given episode from the database.
 
-    If the `force` paramter is True, all records linked to the Episode will
-    also be deleted - including all linked Sequences, Shots, Assets, Playlists
-    and Tasks.
+    If ``force`` is True, the API also removes all records linked to the
+    episode: sequences, shots, assets, playlists and tasks.
 
-    Otherwise, it will attempt to only delete the Episode entity. If the
-    Episode has any linked records the operation will fail.
+    If ``force`` is False, the API removes only the episode. If records are
+    linked to the episode, the operation fails.
 
     Args:
-        episode (str / dict): Episode to remove.
-        force (bool): Whether to delete all data linked to the Episode as well.
+        episode (str / dict): The episode to remove.
+        force (bool): If True, also remove all data linked to the episode.
+
+    Returns:
+        str: The response of the API.
 
     Raises:
         ParameterException:
-            If the Episode has linked entities and the force=True parameter
-            has not been provided.
+            If entities are linked to the episode and ``force`` is False.
     """
     episode = normalize_model_parameter(episode)
     path = f"data/episodes/{episode['id']}"
@@ -686,22 +716,24 @@ def remove_sequence(
     sequence: str | dict, force: bool = False, client: KitsuClient = default
 ) -> str:
     """
-    Remove given sequence and related from database.
+    Remove the given sequence from the database.
 
-    If the `force` paramter is True, all records linked to the Sequence will
-    also be deleted - including all linked Shots and Tasks.
+    If ``force`` is True, the API also removes all records linked to the
+    sequence: shots, scenes and tasks.
 
-    Otherwise, it will attempt to only delete the Sequence entity. If the
-    Sequence has any linked records the operation will fail.
+    If ``force`` is False, the API removes only the sequence. If records are
+    linked to the sequence, the operation fails.
 
     Args:
-        sequence (str / dict): Sequence to remove.
-        force (bool): Whether to delete all data linked to the Sequence as well.
+        sequence (str / dict): The sequence to remove.
+        force (bool): If True, also remove all data linked to the sequence.
+
+    Returns:
+        str: The response of the API.
 
     Raises:
         ParameterException:
-            If the Sequence has linked entities and the force=True parameter
-            has not been provided.
+            If entities are linked to the sequence and ``force`` is False.
     """
     sequence = normalize_model_parameter(sequence)
     path = f"data/sequences/{sequence['id']}"
@@ -719,7 +751,7 @@ def all_asset_instances_for_shot(
         shot (str / dict): The shot dict or the shot ID.
 
     Returns:
-        list: Asset instances linked to given shot.
+        dict: The keys are asset IDs. The values are lists of asset instances.
     """
     # Kept as an alias of get_asset_instances_for_shot for backward compat.
     # No @cache here: the delegate already caches.
@@ -730,14 +762,14 @@ def add_asset_instance_to_shot(
     shot: str | dict, asset_instance: str | dict, client: KitsuClient = default
 ) -> dict:
     """
-    Link a new asset instance to given shot.
+    Link a new asset instance to the given shot.
 
     Args:
         shot (str / dict): The shot dict or the shot ID.
         asset_instance (str / dict): The asset instance dict or ID.
 
     Returns:
-        dict: Related shot.
+        dict: The related shot.
     """
     shot = normalize_model_parameter(shot)
     asset_instance = normalize_model_parameter(asset_instance)
@@ -750,11 +782,14 @@ def remove_asset_instance_from_shot(
     shot: str | dict, asset_instance: str | dict, client: KitsuClient = default
 ) -> str:
     """
-    Remove link between an asset instance and given shot.
+    Remove the link between an asset instance and the given shot.
 
     Args:
         shot (str / dict): The shot dict or the shot ID.
         asset_instance (str / dict): The asset instance dict or ID.
+
+    Returns:
+        str: The response of the API.
     """
     shot = normalize_model_parameter(shot)
     asset_instance = normalize_model_parameter(asset_instance)
@@ -769,16 +804,16 @@ def import_shots_with_csv(
     progress_callback=None,
 ) -> list[dict]:
     """
-    Import the Shots from a previously exported CSV file into the given
-    project.
+    Import the shots from an exported CSV file into the given project.
 
     Args:
-        project (str / dict): The project to import the Shots into, as an ID
-            string or model dict.
-        csv_file_path (str): The path on disk to the CSV file.
+        project (str / dict): The ID or dict of the target project.
+        csv_file_path (str): The path of the CSV file on the disk.
+        progress_callback (Callable): The function ``(bytes_read, total)``
+            that this function calls during the upload.
 
     Returns:
-        list[dict]: the Shot dicts created by the import.
+        list[dict]: The shots that the import created.
     """
     project = normalize_model_parameter(project)
     return raw.upload(
@@ -799,19 +834,24 @@ def import_otio(
     progress_callback=None,
 ) -> dict[Literal["created_shots", "updated_shots"], list[dict]]:
     """
-    Import shots from an OpenTimelineIO file (works also for every OTIO
-    adapters).
+    Import shots from an OpenTimelineIO file.
+
+    This function also works with the formats of all OTIO adapters.
 
     Args:
         project (str / dict): The project dict or the project ID.
         otio_file_path (str): The OTIO file path.
         episode (str / dict): The episode dict or the episode ID.
-        naming_convention (str): Template for matching shot names from the file.
-        match_case (bool): Whether to match shot names case-sensitively.
+        naming_convention (str): The template that finds the shot names in the
+            file. If the value is None, this function uses a default template.
+        match_case (bool): If True, the letter case of the shot names must
+            match.
+        progress_callback (Callable): The function ``(bytes_read, total)``
+            that this function calls during the upload.
 
     Returns:
-        dict: A dictionary with keys "created_shots" and "updated_shots", each
-            mapping to a list of altered entity records from the import.
+        dict: A dict with the "created_shots" and "updated_shots" keys. Each
+            value is the list of the records that the import changed.
     """
     if naming_convention is None:
         if episode is not None:
@@ -847,28 +887,30 @@ def export_shots_with_csv(
     assigned_to: str | dict | bool | None = None,
 ) -> requests.Response:
     """
-    Export the Shots data for a project to a CSV file on disk.
+    Export the shot data of a project to a CSV file on the disk.
 
     Args:
         project (str / dict):
-            The ID or dict for the project to export.
+            The ID or dict of the project to export.
         csv_file_path (str):
-            The path on disk to write the CSV file to. If the path already
-            exists it will be overwritten.
+            The path of the CSV file on the disk. If the file exists, this
+            function replaces it.
         episode (str | dict | None):
-            Only export Shots that are linked to the given Episode, which can
-            be provided as an ID string or model dict. If None, all shots will
-            be exported.
+            The ID or dict of an episode. This function exports only the
+            shots of this episode. If the value is None, this function exports
+            all shots.
         assigned_to_me (bool):
-            Only export Shots that have one or more Tasks assigned to the
-            logged-in user. Zou does not support filtering on another
-            person.
+            If True, export only the shots with one or more tasks assigned to
+            the current user. Zou cannot filter on a different person.
+        progress_callback (Callable):
+            The function ``(bytes_read, total)`` that this function calls
+            during the download. The value of ``total`` is 0 if it is unknown.
         assigned_to:
-            Deprecated alias of ``assigned_to_me``: any truthy value enables
-            the filter, the person passed is ignored by Zou.
+            Do not use this parameter. Use ``assigned_to_me``. A true value
+            sets the filter on the current user. Zou ignores the given person.
 
     Returns:
-        (requests.Response): the response from the API server.
+        requests.Response: The response of the API server.
     """
     project = normalize_model_parameter(project)
     episode = normalize_model_parameter(episode)

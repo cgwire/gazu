@@ -6,8 +6,9 @@ from typing import Any
 
 class CustomJSONEncoder(json.JSONEncoder):
     """
-    This JSON encoder is here to handle dates which are not handled by default.
-    The standard does not want to assum how you handle dates.
+    Encode dates as ISO 8601 text.
+
+    The standard JSON encoder cannot encode dates.
     """
 
     def default(self, obj: Any) -> Any:

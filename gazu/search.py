@@ -15,16 +15,19 @@ def search_entities(
     client: KitsuClient = default,
 ) -> dict[str, list]:
     """
-    Search for entities matching the given query.
+    Search for entities that match the given query.
+
+    If the query has less than 3 characters, the API returns an empty dict.
+    The API returns a maximum of 3 entities of each type.
 
     Args:
-        query (str): Search query string.
-        project (str / dict): Optional project to limit search to.
-        entity_types (list): Optional list of entity type dicts or IDs to filter by.
+        query (str): The search text.
+        project (str / dict): The optional project to search in.
+        entity_types (list): The API ignores this value.
 
     Returns:
-        dict: Dictionary with entity type keys ("persons", "assets", "shots")
-              containing lists of matching entities for each type.
+        dict: The keys are "persons", "assets" and "shots". The values are the
+            lists of the entities that match.
     """
     data = {"query": query}
 

@@ -19,7 +19,7 @@ default = raw.default_client
 def all_project_templates(client: KitsuClient = default) -> list[dict]:
     """
     Returns:
-        list: All project templates stored in the database, ordered by name.
+        list: The project templates in the database, sorted by name.
     """
     return sort_by_name(raw.fetch_all("project-templates", client=client))
 
@@ -30,10 +30,10 @@ def get_project_template(
 ) -> dict:
     """
     Args:
-        project_template_id (str): ID of the claimed project template.
+        project_template_id (str): The ID of the project template.
 
     Returns:
-        dict: Project template corresponding to given id.
+        dict: The project template with the given ID.
     """
     return raw.fetch_one(
         "project-templates", project_template_id, client=client
@@ -46,10 +46,11 @@ def get_project_template_by_name(
 ) -> dict | None:
     """
     Args:
-        name (str): Name of the project template.
+        name (str): The name of the project template.
 
     Returns:
-        dict: Project template matching the given name, or None.
+        dict: The project template with the given name, or None if no template
+        matches.
     """
     return raw.fetch_first("project-templates", {"name": name}, client=client)
 
@@ -70,22 +71,22 @@ def new_project_template(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Create a new empty project template.
+    Create an empty project template.
 
     Args:
-        name (str): Name of the template (must be unique).
-        description (str): Optional description.
-        fps (str): Default frames per second for projects created from this
-            template.
-        ratio (str): Default aspect ratio.
-        resolution (str): Default resolution.
-        production_type (str): Default production type (short, featurefilm,
-            tvshow, etc.).
-        production_style (str): Default production style (2d, 3d, 2d3d, vfx,
-            etc.).
+        name (str): The name of the template. The name must be unique.
+        description (str): The optional description.
+        fps (str): The default frames per second of the projects made from
+            this template.
+        ratio (str): The default aspect ratio.
+        resolution (str): The default resolution.
+        production_type (str): The default production type (short,
+            featurefilm, tvshow and more).
+        production_style (str): The default production style (2d, 3d, 2d3d,
+            vfx and more).
 
     Returns:
-        dict: Created project template.
+        dict: The created project template.
     """
     data = {"name": name, "description": description}
     for key, value in {
@@ -104,14 +105,14 @@ def update_project_template(
     project_template: dict, client: KitsuClient = default
 ) -> dict:
     """
-    Save the given project template's fields back to the API.
+    Save the fields of the given project template to the API.
 
     Args:
-        project_template (dict): The project template dict to update. Must
-            include the ``id`` key.
+        project_template (dict): The project template dict to update. It must
+            have the ``id`` key.
 
     Returns:
-        dict: Updated project template.
+        dict: The updated project template.
     """
     return raw.put(
         f"data/project-templates/{project_template['id']}",
@@ -124,13 +125,13 @@ def remove_project_template(
     project_template: str | dict, client: KitsuClient = default
 ) -> str:
     """
-    Delete the given project template.
+    Remove the given project template.
 
     Args:
-        project_template (dict / ID): The template dict or id to remove.
+        project_template (dict / ID): The template dict or ID to remove.
 
     Returns:
-        str: API response.
+        str: The response of the API.
     """
     project_template = normalize_model_parameter(project_template)
     return raw.delete(
@@ -150,18 +151,19 @@ def new_project_template_from_project(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Create a new project template by snapshotting an existing project's
-    configuration (task types, task statuses, asset types, status
-    automations, metadata descriptors and production settings). Production
-    data (tasks, entities, team, dates) is not copied.
+    Create a project template from the configuration of an existing project.
+
+    The template contains the task types, task statuses, asset types, status
+    automations, metadata descriptors and production settings. The API does
+    not copy the production data (tasks, entities, team and dates).
 
     Args:
         project (dict / ID): The source project.
-        name (str): Name to give to the new template.
-        description (str): Optional description.
+        name (str): The name of the new template.
+        description (str): The optional description.
 
     Returns:
-        dict: Created project template.
+        dict: The created project template.
     """
     project = normalize_model_parameter(project)
     data = {"name": name, "description": description}
@@ -178,15 +180,16 @@ def apply_project_template(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Apply the given template to an existing project. The strategy is
-    additive: existing links are kept and duplicates are skipped.
+    Apply the given template to an existing project.
+
+    The API keeps the existing links and does not add duplicates.
 
     Args:
         project (dict / ID): The target project.
         project_template (dict / ID): The template to apply.
 
     Returns:
-        dict: Updated project.
+        dict: The updated project.
     """
     project = normalize_model_parameter(project)
     project_template = normalize_model_parameter(project_template)
@@ -207,7 +210,13 @@ def all_task_types_for_project_template(
     project_template: str | dict, client: KitsuClient = default
 ) -> list[dict]:
     """
-    List the task types attached to a project template.
+    List the task types of a project template.
+
+    Args:
+        project_template (dict / ID): The template dict or ID.
+
+    Returns:
+        list: The task types of the template.
     """
     project_template = normalize_model_parameter(project_template)
     return raw.fetch_all(
@@ -224,17 +233,20 @@ def add_task_type_to_project_template(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Attach a task type to a project template.
+    Add a task type to a project template.
 
     Args:
-        project_template (dict / ID): The template.
-        task_type (dict / ID): The task type to attach.
-        priority (int): Optional priority for the task type within the
+        project_template (dict / ID): The template dict or ID.
+        task_type (dict / ID): The task type to add.
+        priority (int): The optional priority of the task type in the
             template.
-        hd_bitrate_compression (int): Optional high definition movie
-            bitrate in Mbit/s for that task type.
-        ld_bitrate_compression (int): Optional low definition movie
-            bitrate in Mbit/s for that task type.
+        hd_bitrate_compression (int): The optional high definition movie
+            bitrate of this task type, in Mbit/s.
+        ld_bitrate_compression (int): The optional low definition movie
+            bitrate of this task type, in Mbit/s.
+
+    Returns:
+        dict: The link between the template and the task type.
     """
     project_template = normalize_model_parameter(project_template)
     task_type = normalize_model_parameter(task_type)
@@ -258,7 +270,14 @@ def remove_task_type_from_project_template(
     client: KitsuClient = default,
 ) -> str:
     """
-    Detach a task type from a project template.
+    Remove a task type from a project template.
+
+    Args:
+        project_template (dict / ID): The template dict or ID.
+        task_type (dict / ID): The task type dict or ID.
+
+    Returns:
+        str: The response of the API.
     """
     project_template = normalize_model_parameter(project_template)
     task_type = normalize_model_parameter(task_type)
@@ -273,7 +292,13 @@ def all_task_statuses_for_project_template(
     project_template: str | dict, client: KitsuClient = default
 ) -> list[dict]:
     """
-    List the task statuses attached to a project template.
+    List the task statuses of a project template.
+
+    Args:
+        project_template (dict / ID): The template dict or ID.
+
+    Returns:
+        list: The task statuses of the template.
     """
     project_template = normalize_model_parameter(project_template)
     return raw.fetch_all(
@@ -290,14 +315,17 @@ def add_task_status_to_project_template(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Attach a task status to a project template.
+    Add a task status to a project template.
 
     Args:
-        project_template (dict / ID): The template.
-        task_status (dict / ID): The task status to attach.
-        priority (int): Optional priority.
-        roles_for_board (list): Optional list of roles allowed to view this
-            status on the board.
+        project_template (dict / ID): The template dict or ID.
+        task_status (dict / ID): The task status to add.
+        priority (int): The optional priority.
+        roles_for_board (list): The optional roles that can see this status
+            on the board.
+
+    Returns:
+        dict: The link between the template and the task status.
     """
     project_template = normalize_model_parameter(project_template)
     task_status = normalize_model_parameter(task_status)
@@ -319,7 +347,14 @@ def remove_task_status_from_project_template(
     client: KitsuClient = default,
 ) -> str:
     """
-    Detach a task status from a project template.
+    Remove a task status from a project template.
+
+    Args:
+        project_template (dict / ID): The template dict or ID.
+        task_status (dict / ID): The task status dict or ID.
+
+    Returns:
+        str: The response of the API.
     """
     project_template = normalize_model_parameter(project_template)
     task_status = normalize_model_parameter(task_status)
@@ -334,7 +369,13 @@ def all_asset_types_for_project_template(
     project_template: str | dict, client: KitsuClient = default
 ) -> list[dict]:
     """
-    List the asset types attached to a project template.
+    List the asset types of a project template.
+
+    Args:
+        project_template (dict / ID): The template dict or ID.
+
+    Returns:
+        list: The asset types of the template.
     """
     project_template = normalize_model_parameter(project_template)
     return raw.fetch_all(
@@ -349,7 +390,14 @@ def add_asset_type_to_project_template(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Attach an asset type to a project template.
+    Add an asset type to a project template.
+
+    Args:
+        project_template (dict / ID): The template dict or ID.
+        asset_type (dict / ID): The asset type dict or ID.
+
+    Returns:
+        dict: The link between the template and the asset type.
     """
     project_template = normalize_model_parameter(project_template)
     asset_type = normalize_model_parameter(asset_type)
@@ -366,7 +414,14 @@ def remove_asset_type_from_project_template(
     client: KitsuClient = default,
 ) -> str:
     """
-    Detach an asset type from a project template.
+    Remove an asset type from a project template.
+
+    Args:
+        project_template (dict / ID): The template dict or ID.
+        asset_type (dict / ID): The asset type dict or ID.
+
+    Returns:
+        str: The response of the API.
     """
     project_template = normalize_model_parameter(project_template)
     asset_type = normalize_model_parameter(asset_type)
@@ -381,7 +436,13 @@ def all_status_automations_for_project_template(
     project_template: str | dict, client: KitsuClient = default
 ) -> list[dict]:
     """
-    List the status automations attached to a project template.
+    List the status automations of a project template.
+
+    Args:
+        project_template (dict / ID): The template dict or ID.
+
+    Returns:
+        list: The status automations of the template.
     """
     project_template = normalize_model_parameter(project_template)
     return raw.fetch_all(
@@ -396,7 +457,14 @@ def add_status_automation_to_project_template(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Attach a status automation to a project template.
+    Add a status automation to a project template.
+
+    Args:
+        project_template (dict / ID): The template dict or ID.
+        status_automation (dict / ID): The status automation dict or ID.
+
+    Returns:
+        dict: The link between the template and the status automation.
     """
     project_template = normalize_model_parameter(project_template)
     status_automation = normalize_model_parameter(status_automation)
@@ -413,7 +481,14 @@ def remove_status_automation_from_project_template(
     client: KitsuClient = default,
 ) -> str:
     """
-    Detach a status automation from a project template.
+    Remove a status automation from a project template.
+
+    Args:
+        project_template (dict / ID): The template dict or ID.
+        status_automation (dict / ID): The status automation dict or ID.
+
+    Returns:
+        str: The response of the API.
     """
     project_template = normalize_model_parameter(project_template)
     status_automation = normalize_model_parameter(status_automation)
@@ -428,7 +503,13 @@ def all_preview_background_files_for_project_template(
     project_template: str | dict, client: KitsuClient = default
 ) -> list[dict]:
     """
-    List the preview background files attached to a project template.
+    List the preview background files of a project template.
+
+    Args:
+        project_template (dict / ID): The template dict or ID.
+
+    Returns:
+        list: The preview background files of the template.
     """
     project_template = normalize_model_parameter(project_template)
     return raw.fetch_all(
@@ -443,7 +524,14 @@ def add_preview_background_file_to_project_template(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Attach a preview background file to a project template.
+    Add a preview background file to a project template.
+
+    Args:
+        project_template (dict / ID): The template dict or ID.
+        preview_background_file (dict / ID): The file dict or ID.
+
+    Returns:
+        dict: The link between the template and the preview background file.
     """
     project_template = normalize_model_parameter(project_template)
     preview_background_file = normalize_model_parameter(
@@ -462,7 +550,14 @@ def remove_preview_background_file_from_project_template(
     client: KitsuClient = default,
 ) -> str:
     """
-    Detach a preview background file from a project template.
+    Remove a preview background file from a project template.
+
+    Args:
+        project_template (dict / ID): The template dict or ID.
+        preview_background_file (dict / ID): The file dict or ID.
+
+    Returns:
+        str: The response of the API.
     """
     project_template = normalize_model_parameter(project_template)
     preview_background_file = normalize_model_parameter(
@@ -480,8 +575,16 @@ def set_project_template_default_preview_background_file(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Set (or unset) the default preview background file for a project
-    template. Pass ``None`` to clear the default.
+    Set the default preview background file of a project template.
+
+    Give ``None`` to remove the default file.
+
+    Args:
+        project_template (dict / ID): The template dict or ID.
+        preview_background_file (dict / ID / None): The file dict or ID.
+
+    Returns:
+        dict: The updated project template.
     """
     project_template = normalize_model_parameter(project_template)
     background_id = None
@@ -502,28 +605,28 @@ def set_project_template_metadata_descriptors(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Replace the metadata descriptor snapshot stored on a project template.
+    Replace the metadata descriptors stored on a project template.
 
-    Each descriptor is a dict with the following keys (the same shape that
-    will be materialized into MetadataDescriptor rows when the template is
-    applied to a project):
+    Each descriptor is a dict with the keys below. The API uses the same form
+    to make the MetadataDescriptor rows when you apply the template to a
+    project:
 
         - name (str)
         - entity_type (str): "Asset", "Shot", "Edit", ...
         - data_type (str): "string", "number", "list", "taglist", "boolean",
           "checklist"
-        - choices (list[str]): only used for list/taglist/checklist types
+        - choices (list[str]): only for the list, taglist and checklist types
         - for_client (bool)
         - departments (list[str]): department IDs
-        - position (int): optional ordering hint
+        - position (int): optional position in the order
 
     Args:
-        project_template (dict / ID): The template.
-        descriptors (list[dict]): The full descriptor snapshot. The previous
-            snapshot is replaced (not merged).
+        project_template (dict / ID): The template dict or ID.
+        descriptors (list[dict]): All the descriptors. They replace the
+            previous descriptors. The API does not merge them.
 
     Returns:
-        dict: Updated project template.
+        dict: The updated project template.
     """
     project_template = normalize_model_parameter(project_template)
     return raw.put(

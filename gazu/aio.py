@@ -1,5 +1,5 @@
 """
-Async primitives for the Kitsu API using aiohttp.
+Async functions for the Kitsu API. These functions use aiohttp.
 
 Usage::
 
@@ -8,7 +8,7 @@ Usage::
     async with await gazu.aio.create_session(host, email, password) as client:
         data = await gazu.aio.get("data/projects", client=client)
 
-No default client is provided -- always pass an explicit ``client``.
+This module has no default client. Always give an explicit ``client``.
 """
 
 from __future__ import annotations
@@ -104,12 +104,28 @@ class AsyncKitsuClient:
         self.tokens["refresh_token"] = token
 
     def make_auth_header(self) -> dict[str, str]:
+        """
+        Make the request headers for authentication.
+
+        Returns:
+            dict: The User-Agent header and, if the client has an access token,
+                the Authorization header.
+        """
         headers = {"User-Agent": "CGWire Gazu " + __version__}
         if self.access_token:
             headers["Authorization"] = "Bearer " + self.access_token
         return headers
 
     async def refresh_access_token(self) -> dict[str, str]:
+        """
+        Refresh the access token of this client.
+
+        Returns:
+            dict: The tokens that the API returns.
+
+        Raises:
+            NotAuthenticatedException: If the client has no refresh token.
+        """
         if not self.refresh_token:
             raise NotAuthenticatedException("auth/refresh-token")
         url = get_full_url("auth/refresh-token", client=self)
@@ -141,6 +157,16 @@ class AsyncKitsuClient:
 
 
 def get_full_url(path: str, client: AsyncKitsuClient) -> str:
+    """
+    Join the host URL of the client and the given path.
+
+    Args:
+        path (str): The path to add to the host URL.
+        client (AsyncKitsuClient): The client to use for the request.
+
+    Returns:
+        str: The full URL.
+    """
     return url_path_join(client.host, path)
 
 
@@ -148,17 +174,20 @@ async def _handle_auth_expiry(
     client: AsyncKitsuClient | None, path: str, can_refresh: bool
 ) -> bool:
     """
-    Handle an expired/invalid JWT: refresh the access token when possible,
-    otherwise fall back to the not-authenticated callback.
+    Process an expired or invalid JWT.
 
-    Async mirror of ``client._handle_auth_expiry``.
+    If a refresh is possible, this function refreshes the access token.
+    If the refresh is not possible or fails, this function calls the
+    not-authenticated callback.
+
+    This function is the async version of ``client._handle_auth_expiry``.
 
     Returns:
-        bool: True when the request should be retried.
+        bool: True if the caller must send the request again.
 
     Raises:
-        NotAuthenticatedException: when the token can't be refreshed and no
-            callback authorizes a retry.
+        NotAuthenticatedException: If the refresh is not possible or fails,
+            and no callback gives permission to send the request again.
     """
     try:
         if (
@@ -183,6 +212,20 @@ async def check_status(
     path: str,
     client: AsyncKitsuClient | None = None,
 ) -> tuple[int, bool]:
+    """
+    Raise an exception if the status code shows an error.
+
+    This function is the async version of ``client.check_status``.
+
+    Args:
+        response (aiohttp.ClientResponse): The response to check.
+        path (str): The path of the request.
+        client (AsyncKitsuClient): The client to use for the request.
+
+    Returns:
+        tuple[int, bool]: The status code, and True if the caller must send
+            the request again.
+    """
     status_code = response.status
     if status_code == 404:
         raise RouteNotFoundException(path)
@@ -258,6 +301,19 @@ async def get(
     params: dict | None = None,
     client: AsyncKitsuClient = None,
 ) -> Any:
+    """
+    Send a GET request to the given path.
+
+    Args:
+        path (str): The path to query.
+        json_response (bool): If True, return the decoded JSON response.
+            If False, return the response text.
+        params (dict): The parameters of the request.
+        client (AsyncKitsuClient): The client to use for the request.
+
+    Returns:
+        The decoded JSON response or the response text.
+    """
     logger.debug("GET %s", get_full_url(path, client))
     path = build_path_with_params(path, params)
     for _ in range(MAX_AUTH_RETRIES):
@@ -275,6 +331,17 @@ async def get(
 
 
 async def post(path: str, data: Any, client: AsyncKitsuClient = None) -> Any:
+    """
+    Send a POST request to the given path.
+
+    Args:
+        path (str): The path to query.
+        data (Any): The data to send.
+        client (AsyncKitsuClient): The client to use for the request.
+
+    Returns:
+        The decoded JSON response.
+    """
     logger.debug("POST %s", get_full_url(path, client))
     for _ in range(MAX_AUTH_RETRIES):
         async with client.session.post(
@@ -294,6 +361,17 @@ async def post(path: str, data: Any, client: AsyncKitsuClient = None) -> Any:
 
 
 async def put(path: str, data: dict, client: AsyncKitsuClient = None) -> Any:
+    """
+    Send a PUT request to the given path.
+
+    Args:
+        path (str): The path to query.
+        data (dict): The data to send.
+        client (AsyncKitsuClient): The client to use for the request.
+
+    Returns:
+        The decoded JSON response.
+    """
     logger.debug("PUT %s", get_full_url(path, client))
     for _ in range(MAX_AUTH_RETRIES):
         async with client.session.put(
@@ -312,6 +390,17 @@ async def delete(
     params: dict | None = None,
     client: AsyncKitsuClient = None,
 ) -> str:
+    """
+    Send a DELETE request to the given path.
+
+    Args:
+        path (str): The path to query.
+        params (dict): The parameters of the request.
+        client (AsyncKitsuClient): The client to use for the request.
+
+    Returns:
+        str: The response text.
+    """
     logger.debug("DELETE %s", get_full_url(path, client))
     path = build_path_with_params(path, params)
     for _ in range(MAX_AUTH_RETRIES):
@@ -333,6 +422,23 @@ async def fetch_all(
     limit: int | None = None,
     fields: list[str] | str | None = None,
 ) -> list[dict]:
+    """
+    Get all the entries of the given path.
+
+    Args:
+        path (str): The path of the entries to get, without the ``data``
+            prefix.
+        params (dict): The parameters of the request.
+        client (AsyncKitsuClient): The client to use for the request.
+        paginated (bool): If True, get the entries page by page.
+        limit (int): The maximum number of entries on each page. This
+            function uses this value only if ``paginated`` is True.
+        fields (list / str): The names of the attributes to return for each
+            entry.
+
+    Returns:
+        list: The entries.
+    """
     if fields is not None:
         if not params:
             params = {}
@@ -371,6 +477,17 @@ async def fetch_first(
     params: dict | None = None,
     client: AsyncKitsuClient = None,
 ) -> dict | None:
+    """
+    Get the first entry of the given path.
+
+    Args:
+        path (str): The path of the entries, without the ``data`` prefix.
+        params (dict): The parameters of the request.
+        client (AsyncKitsuClient): The client to use for the request.
+
+    Returns:
+        dict: The first entry, or None if there is no entry.
+    """
     entries = await get(
         url_path_join("data", path), params=params, client=client
     )
@@ -383,6 +500,18 @@ async def fetch_one(
     params: dict | None = None,
     client: AsyncKitsuClient = None,
 ) -> dict:
+    """
+    Get one model instance.
+
+    Args:
+        model_name (str): The name of the model type.
+        id (str): The ID of the model instance.
+        params (dict): The parameters of the request.
+        client (AsyncKitsuClient): The client to use for the request.
+
+    Returns:
+        dict: The model instance.
+    """
     return await get(
         url_path_join("data", model_name, id),
         params=params,
@@ -393,6 +522,17 @@ async def fetch_one(
 async def create(
     model_name: str, data: dict, client: AsyncKitsuClient = None
 ) -> dict:
+    """
+    Create an entry for the given model and data.
+
+    Args:
+        model_name (str): The model type.
+        data (dict): The data of the entry.
+        client (AsyncKitsuClient): The client to use for the request.
+
+    Returns:
+        dict: The created entry.
+    """
     return await post(url_path_join("data", model_name), data, client=client)
 
 
@@ -402,6 +542,18 @@ async def update(
     data: dict,
     client: AsyncKitsuClient = None,
 ) -> dict:
+    """
+    Update an entry for the given model, ID and data.
+
+    Args:
+        model_name (str): The model type.
+        model_id (str): The ID of the target model.
+        data (dict): The data to update.
+        client (AsyncKitsuClient): The client to use for the request.
+
+    Returns:
+        dict: The updated entry.
+    """
     return await put(
         url_path_join("data", model_name, model_id), data, client=client
     )
@@ -528,6 +680,24 @@ async def log_in(
     recovery_code: str | None = None,
     client: AsyncKitsuClient = None,
 ) -> dict:
+    """
+    Log in and store the tokens on the client.
+
+    Args:
+        email (str): The email of the user.
+        password (str): The password of the user.
+        totp (str): The TOTP code for 2FA.
+        email_otp (str): The email OTP code.
+        fido_authentication_response: The FIDO authentication response.
+        recovery_code (str): The recovery code.
+        client (AsyncKitsuClient): The client to use for the request.
+
+    Returns:
+        dict: The authentication tokens that the API returns.
+
+    Raises:
+        AuthFailedException: If the API refuses the credentials.
+    """
     from .exception import AuthFailedException
 
     tokens = {}
@@ -555,6 +725,15 @@ async def log_in(
 
 
 async def log_out(client: AsyncKitsuClient) -> dict:
+    """
+    Log out and remove the tokens from the client.
+
+    Args:
+        client (AsyncKitsuClient): The client to use for the request.
+
+    Returns:
+        dict: The tokens of the client after the log out, with None values.
+    """
     try:
         await get("auth/logout", client=client)
     except ParameterException:
@@ -564,6 +743,15 @@ async def log_out(client: AsyncKitsuClient) -> dict:
 
 
 async def check_server_status(client: AsyncKitsuClient) -> bool:
+    """
+    Check if the host is up.
+
+    Args:
+        client (AsyncKitsuClient): The client to use for the request.
+
+    Returns:
+        bool: True if the host returns the status 200.
+    """
     try:
         async with client.session.head(client.host) as response:
             return response.status == 200
@@ -584,7 +772,9 @@ async def create_session(
     callback_not_authenticated: Callable | None = None,
 ) -> AsyncKitsuClient:
     """
-    Create a logged-in AsyncKitsuClient for use as an async context manager.
+    Create an AsyncKitsuClient and log in.
+
+    Use the client as an async context manager.
 
     Usage::
 
@@ -592,7 +782,7 @@ async def create_session(
             data = await gazu.aio.get("data/projects", client=client)
 
     Returns:
-        AsyncKitsuClient: A logged-in async client.
+        AsyncKitsuClient: An async client that is logged in.
     """
     client = AsyncKitsuClient(
         host,
