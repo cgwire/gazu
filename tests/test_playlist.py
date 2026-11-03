@@ -543,6 +543,22 @@ class TaskTestCase(unittest.TestCase):
             self.assertEqual(response["token"], "abc-123")
             self.assertEqual(mock.last_request.json(), {"can_comment": True})
 
+    def test_new_share_link_with_download(self):
+        with requests_mock.mock() as mock:
+            mock.post(
+                gazu.client.get_full_url(
+                    f"data/playlists/{fakeid('playlist-1')}/share"
+                ),
+                text=json.dumps({"id": fakeid("share-1"), "token": "x"}),
+            )
+            gazu.playlist.new_share_link(
+                fakeid("playlist-1"), can_download=True
+            )
+            self.assertEqual(
+                mock.last_request.json(),
+                {"can_comment": True, "can_download": True},
+            )
+
     def test_new_share_link_with_expiration_and_password(self):
         with requests_mock.mock() as mock:
             mock.post(
