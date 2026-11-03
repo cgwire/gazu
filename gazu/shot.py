@@ -494,7 +494,7 @@ def update_sequence(sequence: dict, client: KitsuClient = default) -> dict:
 @cache
 def get_asset_instances_for_shot(
     shot: str | dict, client: KitsuClient = default
-) -> list[dict]:
+) -> dict:
     """
     Return the asset instances of the given shot.
 
@@ -745,7 +745,7 @@ def remove_sequence(
 
 def all_asset_instances_for_shot(
     shot: str | dict, client: KitsuClient = default
-) -> list[dict]:
+) -> dict:
     """
     Args:
         shot (str / dict): The shot dict or the shot ID.

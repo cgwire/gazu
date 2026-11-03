@@ -501,7 +501,7 @@ def download_playlist_zip(
 
 def generate_temp_playlist(
     project: str | dict, data: dict, client: KitsuClient = default
-) -> dict:
+) -> list[dict]:
     """
     Make a temporary playlist.
 

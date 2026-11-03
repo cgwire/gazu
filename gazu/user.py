@@ -647,7 +647,7 @@ def update_notification(
 @cache
 def check_task_subscription(
     task: str | dict, client: KitsuClient = default
-) -> dict:
+) -> bool:
     """
     Check if the user is subscribed to a task.
 

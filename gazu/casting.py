@@ -16,9 +16,9 @@ default = raw.default_client
 def update_shot_casting(
     project: str | dict,
     shot: str | dict,
-    casting: dict,
+    casting: list[dict],
     client: KitsuClient = default,
-) -> dict:
+) -> list[dict]:
     """
     Replace the casting of the given shot.
 
@@ -42,9 +42,9 @@ def update_shot_casting(
 def update_asset_casting(
     project: str | dict,
     asset: str | dict,
-    casting: dict,
+    casting: list[dict],
     client: KitsuClient = default,
-) -> dict:
+) -> list[dict]:
     """
     Replace the casting of the given asset.
 
@@ -68,9 +68,9 @@ def update_asset_casting(
 def update_episode_casting(
     project: str | dict,
     episode: str | dict,
-    casting: dict,
+    casting: list[dict],
     client: KitsuClient = default,
-) -> dict:
+) -> list[dict]:
     """
     Replace the casting of the given episode.
 
@@ -262,7 +262,7 @@ def get_episode_casting(
 @cache
 def get_asset_cast_in(
     asset: str | dict, client: KitsuClient = default
-) -> dict:
+) -> list[dict]:
     """
     Return the shots and the assets where the given asset is cast.
 

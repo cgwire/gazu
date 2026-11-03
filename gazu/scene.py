@@ -181,7 +181,7 @@ def new_scene_asset_instance(
 @cache
 def all_asset_instances_for_scene(
     scene: str | dict, client: KitsuClient = default
-) -> list[dict]:
+) -> dict:
     """
     Return the asset instances of a scene.
 
@@ -220,7 +220,7 @@ def get_asset_instance_by_name(
 @cache
 def all_camera_instances_for_scene(
     scene: str | dict, client: KitsuClient = default
-) -> list[dict]:
+) -> dict:
     """
     Return the camera instances of a scene.
 

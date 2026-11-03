@@ -494,7 +494,7 @@ def get_asset_instance(
 @cache
 def all_shot_asset_instances_for_asset(
     asset: str | dict, client: KitsuClient = default
-) -> list[dict]:
+) -> dict:
     """
     Args:
         asset (str / dict): The asset dict or the asset ID.
@@ -541,7 +541,7 @@ def disable_asset_instance(
 @cache
 def all_scene_asset_instances_for_asset(
     asset: str | dict, client: KitsuClient = default
-) -> list[str]:
+) -> dict:
     """
     Args:
         asset (str / dict): The asset dict or the asset ID.
@@ -557,7 +557,7 @@ def all_scene_asset_instances_for_asset(
 
 def all_asset_instances_for_shot(
     shot: str | dict, client: KitsuClient = default
-) -> list[dict]:
+) -> dict:
     """
     Args:
         shot (str / dict): The shot dict or the shot ID.
@@ -574,7 +574,7 @@ def all_asset_instances_for_shot(
 @cache
 def all_asset_instances_for_asset(
     asset: str | dict, client: KitsuClient = default
-) -> list[str]:
+) -> dict:
     """
     Args:
         asset (str / dict): The asset dict or the asset ID.

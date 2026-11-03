@@ -4,8 +4,6 @@ import json
 import os
 import string
 
-import requests
-
 from gazu.exception import (
     TaskStatusNotFoundException,
     TaskMustBeADictException,
@@ -1606,7 +1604,7 @@ def get_last_comment_for_task(
 
 def assign_task(
     task: str | dict, person: str | dict, client: KitsuClient = default
-) -> dict:
+) -> list[dict]:
     """
     Assign one person to a task.
 
@@ -2057,7 +2055,7 @@ def all_subscriptions_for_project(
 
 
 @cache
-def get_persons_tasks_dates(client: KitsuClient = default) -> dict:
+def get_persons_tasks_dates(client: KitsuClient = default) -> list[dict]:
     """
     Get the first start date and the last due date of the tasks of each person.
 
@@ -2096,7 +2094,7 @@ def remove_tasks_batch(
     project: str | dict,
     tasks: list[str | dict],
     client: KitsuClient = default,
-) -> requests.Response:
+) -> list[str]:
     """
     Remove more than one task of a project in one request.
 
@@ -2120,7 +2118,7 @@ def remove_tasks_batch(
 
 def assign_tasks_to_person(
     tasks: list[str | dict], person: str | dict, client: KitsuClient = default
-) -> dict:
+) -> list[dict]:
     """
     Assign more than one task to a person.
 
