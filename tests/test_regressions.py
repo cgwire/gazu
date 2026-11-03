@@ -59,5 +59,59 @@ class CastAssetCacheTestCase(unittest.TestCase):
             self.assertEqual(mock.call_count, 1)
 
 
+class PlaylistPagesTestCase(unittest.TestCase):
+    pages = [
+        [{"id": fakeid("playlist-1"), "name": "a"}],
+        [{"id": fakeid("playlist-2"), "name": "b"}],
+    ]
+    project = fakeid("project-1")
+    episode = {"id": fakeid("episode-1"), "project_id": project}
+
+    def mock_project(self, mock):
+        mock.get(
+            gazu.client.get_full_url(
+                f"data/projects/{self.project}/playlists"
+            ),
+            text=all_pages(self.pages),
+        )
+
+    def mock_episode(self, mock):
+        mock.get(
+            gazu.client.get_full_url(
+                f"data/projects/{self.project}"
+                f"/episodes/{self.episode['id']}/playlists"
+            ),
+            text=all_pages(self.pages),
+        )
+
+    def test_project_playlists_cover_all_pages(self):
+        with requests_mock.mock() as mock:
+            self.mock_project(mock)
+            result = gazu.playlist.all_playlists_for_project(self.project)
+            self.assertEqual([p["name"] for p in result], ["a", "b"])
+
+    def test_project_playlists_can_return_one_page(self):
+        with requests_mock.mock() as mock:
+            self.mock_project(mock)
+            result = gazu.playlist.all_playlists_for_project(
+                self.project, page=2
+            )
+            self.assertEqual([p["name"] for p in result], ["b"])
+
+    def test_episode_playlists_cover_all_pages(self):
+        with requests_mock.mock() as mock:
+            self.mock_episode(mock)
+            result = gazu.playlist.all_playlists_for_episode(self.episode)
+            self.assertEqual([p["name"] for p in result], ["a", "b"])
+
+    def test_episode_playlists_can_return_one_page(self):
+        with requests_mock.mock() as mock:
+            self.mock_episode(mock)
+            result = gazu.playlist.all_playlists_for_episode(
+                self.episode, page=2
+            )
+            self.assertEqual([p["name"] for p in result], ["b"])
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -15,6 +15,35 @@ from .client import KitsuClient
 default = raw.default_client
 
 
+def _fetch_playlist_pages(
+    path: str, page: int | None, client: KitsuClient
+) -> list[dict]:
+    """
+    Return the playlists of the given page, or of all pages if page is None.
+
+    Args:
+        path (str): The path of the playlists.
+        page (int): The page number, or None for all pages.
+        client (KitsuClient): The client to use for the request.
+
+    Returns:
+        list: The playlists.
+    """
+    if page is not None:
+        return raw.fetch_all(path, params={"page": page}, client=client)
+    playlists = {}
+    page = 1
+    while True:
+        entries = raw.fetch_all(path, params={"page": page}, client=client)
+        # Stop on a page with no new playlist: older Zou versions may ignore
+        # the page parameter and then always return the same list.
+        new_entries = [e for e in entries if e["id"] not in playlists]
+        if not new_entries:
+            return list(playlists.values())
+        playlists.update((entry["id"], entry) for entry in new_entries)
+        page += 1
+
+
 @cache
 def all_playlists(client: KitsuClient = default) -> list[dict]:
     """
@@ -42,36 +71,41 @@ def all_shots_for_playlist(
 
 @cache
 def all_playlists_for_project(
-    project: str | dict, client: KitsuClient = default, page: int = 1
+    project: str | dict,
+    client: KitsuClient = default,
+    page: int | None = None,
 ) -> list[dict]:
     """
     Args:
         project (str / dict): The project dict or the project ID.
-        page (int): The page number. Zou returns the playlists page by page.
+        page (int): The page number. If the value is None, return the playlists
+            of all pages.
 
     Returns:
-        list: The playlists of this page for the given project.
+        list: The playlists of the given project.
     """
     project = normalize_model_parameter(project)
     return sort_by_name(
-        raw.fetch_all(
-            f"projects/{project['id']}/playlists",
-            params={"page": page},
-            client=client,
+        _fetch_playlist_pages(
+            f"projects/{project['id']}/playlists", page, client
         )
     )
 
 
 @cache
 def all_playlists_for_episode(
-    episode: str | dict, client: KitsuClient = default
+    episode: str | dict,
+    client: KitsuClient = default,
+    page: int | None = None,
 ) -> list[dict]:
     """
     Args:
         episode (str / dict): The episode dict or the episode ID.
+        page (int): The page number. If the value is None, return the playlists
+            of all pages.
 
     Returns:
-        list: The playlists of the first page for the given episode.
+        list: The playlists of the given episode.
     """
     episode = normalize_model_parameter(episode)
     # Fetch the episode when only an ID was given, to get its project_id.
@@ -79,9 +113,10 @@ def all_playlists_for_episode(
         episode = raw.fetch_one("episodes", episode["id"], client=client)
     project = normalize_model_parameter(episode["project_id"])
     return sort_by_name(
-        raw.fetch_all(
+        _fetch_playlist_pages(
             f"projects/{project['id']}/episodes/{episode['id']}/playlists",
-            client=client,
+            page,
+            client,
         )
     )
 
