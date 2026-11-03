@@ -88,11 +88,12 @@ def get_cache_key(args: Any, kwargs: Any) -> str:
         kwargscopy["client"] = _client_cache_identity(kwargscopy["client"])
     if not args and not kwargscopy:
         return ""
+    # default: a client given as a positional argument is not serializable.
     if not kwargscopy:
-        return json.dumps(args)
+        return json.dumps(args, default=_client_cache_identity)
     if not args:
         return json.dumps(kwargscopy)
-    return json.dumps([args, kwargscopy])
+    return json.dumps([args, kwargscopy], default=_client_cache_identity)
 
 
 def insert_value(

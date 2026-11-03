@@ -49,6 +49,15 @@ class CastAssetCacheTestCase(unittest.TestCase):
             gazu.casting.cast_asset(project, [shot], asset)
             self.assertEqual(mock.call_count, 3)
 
+    def test_cached_function_accepts_a_positional_client(self):
+        project = fakeid("project-1")
+        with requests_mock.mock() as mock:
+            mock_route(mock, "GET", f"data/projects/{project}/assets", text=[])
+            client = gazu.client.default_client
+            gazu.asset.all_assets_for_project(project, client)
+            gazu.asset.all_assets_for_project(project, client)
+            self.assertEqual(mock.call_count, 1)
+
 
 if __name__ == "__main__":
     unittest.main()
