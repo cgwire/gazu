@@ -709,8 +709,7 @@ def new_working_file(
         comment (str): The comment of the new revision.
         person (str / dict): The author of the file.
         revision (int): The file revision.
-        sep (str): This function does not send this value to the API. The API
-            uses "/".
+        sep (str): The path separator of the OS.
 
     Returns:
         dict: The created working file.
@@ -724,6 +723,7 @@ def new_working_file(
         "task_id": task["id"],
         "revision": revision,
         "mode": mode,
+        "sep": sep,
     }
     if person is not None:
         data["person_id"] = person["id"]

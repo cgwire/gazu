@@ -179,6 +179,15 @@ class FileParametersTestCase(unittest.TestCase):
             )
             self.assertEqual(mock.last_request.json()["mode"], "cache")
 
+    def test_new_working_file_sends_sep(self):
+        task = fakeid("task-1")
+        with requests_mock.mock() as mock:
+            mock_route(
+                mock, "POST", f"data/tasks/{task}/working-files/new", text={}
+            )
+            gazu.files.new_working_file(task, sep="\\")
+            self.assertEqual(mock.last_request.json()["sep"], "\\")
+
 
 if __name__ == "__main__":
     unittest.main()
