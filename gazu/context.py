@@ -1,3 +1,9 @@
+"""
+Read functions that return all data, or only the data of the current user.
+
+The ``user_context`` parameter selects the data.
+"""
+
 from __future__ import annotations
 
 from . import user as gazu_user
@@ -16,7 +22,10 @@ def all_open_projects(
     user_context: bool = False, client: KitsuClient = default
 ) -> list[dict]:
     """
-    Return open projects (only the current user's when user_context is True).
+    Return the open projects.
+
+    If ``user_context`` is True, return only the projects of the current
+    user.
     """
     if user_context:
         return gazu_user.all_open_projects(client=client)
@@ -29,7 +38,7 @@ def all_assets_for_project(
     client: KitsuClient = default,
 ) -> list[dict]:
     """
-    Return the project's assets.
+    Return the assets of the project.
     """
     return gazu_asset.all_assets_for_project(project, client=client)
 
@@ -40,8 +49,10 @@ def all_asset_types_for_project(
     client: KitsuClient = default,
 ) -> list[dict]:
     """
-    Return the project's asset types (only the current user's when
-    user_context is True).
+    Return the asset types of the project.
+
+    If ``user_context`` is True, return only the asset types of the current
+    user.
     """
     if user_context:
         return gazu_user.all_asset_types_for_project(project, client=client)
@@ -56,8 +67,10 @@ def all_assets_for_asset_type_and_project(
     client: KitsuClient = default,
 ) -> list[dict]:
     """
-    Return the assets for given project and asset type (only the current
-    user's when user_context is True).
+    Return the assets of the given project and asset type.
+
+    If ``user_context`` is True, return only the assets of the current
+    user.
     """
     if user_context:
         return gazu_user.all_assets_for_asset_type_and_project(
@@ -75,8 +88,10 @@ def all_task_types_for_asset(
     client: KitsuClient = default,
 ) -> list[dict]:
     """
-    Return the task types for given asset (only the current user's when
-    user_context is True).
+    Return the task types of the given asset.
+
+    If ``user_context`` is True, return only the task types of the current
+    user.
     """
     if user_context:
         return gazu_user.all_task_types_for_asset(asset, client=client)
@@ -90,8 +105,10 @@ def all_task_types_for_shot(
     client: KitsuClient = default,
 ) -> list[dict]:
     """
-    Return the task types for given shot (only the current user's when
-    user_context is True).
+    Return the task types of the given shot.
+
+    If ``user_context`` is True, return only the task types of the current
+    user.
     """
     if user_context:
         return gazu_user.all_task_types_for_shot(shot, client=client)
@@ -105,8 +122,10 @@ def all_task_types_for_scene(
     client: KitsuClient = default,
 ) -> list[dict]:
     """
-    Return the task types for given scene (only the current user's when
-    user_context is True).
+    Return the task types of the given scene.
+
+    If ``user_context`` is True, return only the task types of the current
+    user.
     """
     if user_context:
         return gazu_user.all_task_types_for_scene(scene, client=client)
@@ -120,8 +139,10 @@ def all_task_types_for_sequence(
     client: KitsuClient = default,
 ) -> list[dict]:
     """
-    Return the task types for given sequence (only the current user's when
-    user_context is True).
+    Return the task types of the given sequence.
+
+    If ``user_context`` is True, return only the task types of the current
+    user.
     """
     if user_context:
         return gazu_user.all_task_types_for_sequence(sequence, client=client)
@@ -135,8 +156,10 @@ def all_sequences_for_project(
     client: KitsuClient = default,
 ) -> list[dict]:
     """
-    Return the project's sequences (only the current user's when user_context
-    is True).
+    Return the sequences of the project.
+
+    If ``user_context`` is True, return only the sequences of the current
+    user.
     """
     if user_context:
         return gazu_user.all_sequences_for_project(project, client=client)
@@ -149,7 +172,7 @@ def all_scenes_for_project(
     client: KitsuClient = default,
 ) -> list[dict]:
     """
-    Return the project's scenes.
+    Return the scenes of the project.
     """
     return gazu_scene.all_scenes(project, client=client)
 
@@ -160,8 +183,10 @@ def all_shots_for_sequence(
     client: KitsuClient = default,
 ) -> list[dict]:
     """
-    Return the sequence's shots (only the current user's when user_context is
-    True).
+    Return the shots of the sequence.
+
+    If ``user_context`` is True, return only the shots of the current
+    user.
     """
     if user_context:
         return gazu_user.all_shots_for_sequence(sequence, client=client)
@@ -175,8 +200,10 @@ def all_scenes_for_sequence(
     client: KitsuClient = default,
 ) -> list[dict]:
     """
-    Return the sequence's scenes (only the current user's when user_context is
-    True).
+    Return the scenes of the sequence.
+
+    If ``user_context`` is True, return only the scenes of the current
+    user.
     """
     if user_context:
         return gazu_user.all_scenes_for_sequence(sequence, client=client)
@@ -189,7 +216,7 @@ def all_sequences_for_episode(
     client: KitsuClient = default,
 ) -> list[dict]:
     """
-    Return the episode's sequences.
+    Return the sequences of the episode.
     """
     return gazu_shot.all_sequences_for_episode(episode, client=client)
 
@@ -200,8 +227,10 @@ def all_episodes_for_project(
     client: KitsuClient = default,
 ) -> list[dict]:
     """
-    Return the project's episodes (only the current user's when user_context
-    is True).
+    Return the episodes of the project.
+
+    If ``user_context`` is True, return only the episodes of the current
+    user.
     """
     if user_context:
         return gazu_user.all_episodes_for_project(project, client=client)

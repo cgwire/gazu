@@ -18,7 +18,7 @@ default = raw.default_client
 
 def _format_path(folder: str, name: str, sep: str) -> str:
     """
-    Join a folder and file name, replacing spaces with underscores.
+    Join a folder and a file name. Replace the spaces with underscores.
     """
     return f"{folder.replace(' ', '_')}{sep}{name.replace(' ', '_')}"
 
@@ -32,7 +32,7 @@ def _output_file_filters(
     temporal_entity: str | dict | None = None,
 ) -> dict:
     """
-    Build the query params shared by all the ``*output_files_for_*`` helpers.
+    Make the query parameters of the ``*output_files_for_*`` functions.
     """
     output_type = normalize_model_parameter(output_type)
     task_type = normalize_model_parameter(task_type)
@@ -59,7 +59,7 @@ def _output_file_filters(
 def all_output_types(client: KitsuClient = default) -> list[dict]:
     """
     Returns:
-        list: Output types listed in database.
+        list: The output types in the database.
     """
     return raw.fetch_all("output-types", client=client)
 
@@ -73,7 +73,7 @@ def all_output_types_for_entity(
         entity (str / dict): The entity dict or the entity ID.
 
     Returns:
-        list: All output types linked to output files for given entity.
+        list: The output types of the output files of the given entity.
     """
     entity = normalize_model_parameter(entity)
     return raw.fetch_all(
@@ -87,7 +87,8 @@ def all_output_types_for_asset_instance(
 ) -> list[dict]:
     """
     Returns:
-        list: Output types for given asset instance and entity (shot or scene).
+        list: The output types of the given asset instance and entity (shot or
+        scene).
     """
     return raw.fetch_all(
         f"asset-instances/{asset_instance['id']}/entities/{temporal_entity['id']}/output-types",
@@ -101,10 +102,10 @@ def get_output_type(
 ) -> dict:
     """
     Args:
-        output_type_id (str): ID of claimed output type.
+        output_type_id (str): The ID of the output type.
 
     Returns:
-        dict: Output type matching given ID.
+        dict: The output type with the given ID.
     """
     return raw.fetch_one("output-types", output_type_id, client=client)
 
@@ -115,10 +116,11 @@ def get_output_type_by_name(
 ) -> dict | None:
     """
     Args:
-        output_type_name (str): name of claimed output type.
+        output_type_name (str): The name of the output type.
 
     Returns:
-        dict: Output type matching given name.
+        dict: The output type with the given name, or None if no output type
+        matches.
     """
     return raw.fetch_first(
         "output-types", {"name": output_type_name}, client=client
@@ -129,14 +131,16 @@ def new_output_type(
     name: str, short_name: str, client: KitsuClient = default
 ) -> dict:
     """
-    Create a new output type in database.
+    Create an output type in the database.
+
+    If an output type with this name exists, return this output type.
 
     Args:
-        name (str): Name of created output type.
-        short_name (str): Name shorten to represente the type in UIs.
+        name (str): The name of the output type.
+        short_name (str): The short name that the user interfaces show.
 
     Returns:
-        dict: Created output type.
+        dict: The created or existing output type.
     """
     data = {"name": name, "short_name": short_name}
     output_type = get_output_type_by_name(name, client=client)
@@ -152,10 +156,10 @@ def get_output_file(
 ) -> dict:
     """
     Args:
-        output_file_id (str): ID of claimed output file.
+        output_file_id (str): The ID of the output file.
 
     Returns:
-        dict: Output file matching given ID.
+        dict: The output file with the given ID.
     """
     path = f"data/output-files/{output_file_id}"
     return raw.get(path, client=client)
@@ -167,10 +171,10 @@ def get_output_file_by_path(
 ) -> dict | None:
     """
     Args:
-        path (str): Path of claimed output file.
+        path (str): The path of the output file.
 
     Returns:
-        dict: Output file matching given path, or None if there are no matches.
+        dict: The output file with the given path, or None if no file matches.
     """
     return raw.fetch_first("output-files", {"path": path}, client=client)
 
@@ -183,7 +187,15 @@ def get_all_working_files_for_entity(
     client: KitsuClient = default,
 ) -> list[dict]:
     """
-    Retrieves all the working files of a given entity and specied parameters
+    Return the working files of the given entity.
+
+    Args:
+        entity (str / dict): The entity dict or the entity ID.
+        task (str / dict): If given, return only the files of this task.
+        name (str): If given, return only the files with this name.
+
+    Returns:
+        list: The working files that match.
     """
     entity = normalize_model_parameter(entity)
     task = normalize_model_parameter(task)
@@ -204,10 +216,10 @@ def get_preview_file(
 ) -> dict:
     """
     Args:
-        preview_file_id (str): ID of claimed preview file.
+        preview_file_id (str): The ID of the preview file.
 
     Returns:
-        dict: Preview file corresponding to given ID.
+        dict: The preview file with the given ID.
     """
     return raw.fetch_one("preview-files", preview_file_id, client=client)
 
@@ -219,21 +231,22 @@ def wait_for_preview_file(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Wait for a preview file to leave the "processing" status and return
-    it. Useful after an upload, when a script wants to know whether the
-    server could build the preview before going on.
+    Wait until the status of a preview file is not "processing".
+
+    Use this function after an upload. It tells a script if the server made
+    the preview.
 
     Args:
         preview_file (str / dict): The preview file dict or ID.
-        timeout (float): Seconds to wait before giving up.
-        poll_interval (float): Seconds between two checks.
+        timeout (float): The time in seconds to wait.
+        poll_interval (float): The time in seconds between two checks.
 
     Returns:
-        dict: The preview file, ready or broken.
+        dict: The preview file, with a status that is not "processing".
 
     Raises:
-        PreviewFileProcessingException: the preview file was still being
-            processed when the timeout elapsed.
+        PreviewFileProcessingException: If the status is still "processing"
+            after the timeout.
     """
     preview_file = normalize_model_parameter(preview_file)
     deadline = time.monotonic() + timeout
@@ -254,17 +267,18 @@ def remove_preview_file(
     client: KitsuClient = default,
 ) -> str:
     """
-    Remove given preview file from database.
+    Remove the given preview file from the database.
 
-    Depending on the configuration of the Kitsu server, the stored files linked
-    to the preview file may or may not be removed on deletion of a preview file.
-    The `force=True` parameter can be used to force deletion of the files
-    regardless of server config.
+    The configuration of the Kitsu server sets if the API also removes the
+    stored files of the preview file. To always remove these files, set
+    ``force`` to True.
 
     Args:
-        preview_file (str / dict): The preview_file dict or ID.
-        force (bool): Whether to force deletion of the files linked to the
-            preview file in storage.
+        preview_file (str / dict): The preview file dict or ID.
+        force (bool): If True, also remove the stored files.
+
+    Returns:
+        str: The response of the API.
     """
     preview_file = normalize_model_parameter(preview_file)
     params = {}
@@ -282,10 +296,13 @@ def get_all_preview_files_for_task(
     task: str | dict, client: KitsuClient = default
 ) -> list[dict]:
     """
-    Retrieves all the preview files for a given task.
+    Return the preview files of the given task.
 
     Args:
-        task (str / dict): Target task, as ID string or model dict.
+        task (str / dict): The target task, as ID string or model dict.
+
+    Returns:
+        list: The preview files of the task.
     """
     task = normalize_model_parameter(task)
     return raw.fetch_all(
@@ -298,10 +315,13 @@ def get_all_attachment_files_for_task(
     task: str | dict, client: KitsuClient = default
 ) -> list[dict]:
     """
-    Retrieves all the attachment files for a given task.
+    Return the attachment files of the given task.
 
     Args:
-        task (str / dict): Target task, as ID string or model dict.
+        task (str / dict): The target task, as ID string or model dict.
+
+    Returns:
+        list: The attachment files of the task.
     """
     task = normalize_model_parameter(task)
     return raw.fetch_all(f"tasks/{task['id']}/attachment-files", client=client)
@@ -311,13 +331,13 @@ def get_all_attachment_files_for_project(
     project: str | dict, client: KitsuClient = default
 ) -> list[dict]:
     """
-    Retrieves all the attachment files for a given project.
+    Return the attachment files of the given project.
 
     Args:
-        project (str / dict): Target project, as ID string or model dict.
+        project (str / dict): The target project, as ID string or model dict.
 
     Returns:
-        list: Attachment files for the project.
+        list: The attachment files of the project.
     """
     project = normalize_model_parameter(project)
     return raw.fetch_all(
@@ -339,14 +359,14 @@ def all_output_files_for_entity(
         entity (str / dict): The entity dict or ID.
         output_type (str / dict): The output type dict or ID.
         task_type (str / dict): The task type dict or ID.
-        name (str): The file name
-        representation (str): The file representation
-        file_status (str / dict): The file status
+        name (str): The file name.
+        representation (str): The file representation.
+        file_status (str / dict): The file status dict or ID.
 
     Returns:
         list:
-            Output files for a given entity (asset or shot), output type,
-            task_type, name and representation
+            The output files of the given entity (asset or shot), output type,
+            task type, name and representation.
     """
     entity = normalize_model_parameter(entity)
     path = f"entities/{entity['id']}/output-files"
@@ -370,16 +390,16 @@ def all_output_files_for_asset_instance(
     """
     Args:
         asset_instance (str / dict): The instance dict or ID.
-        temporal_entity (str / dict): Shot dict or ID (or scene or sequence).
+        temporal_entity (str / dict): The shot, scene or sequence dict or ID.
         task_type (str / dict): The task type dict or ID.
-        output_type (str / dict): The output_type dict or ID.
-        name (str): The file name
-        representation (str): The file representation
-        file_status (str / dict): The file status
+        output_type (str / dict): The output type dict or ID.
+        name (str): The file name.
+        representation (str): The file representation.
+        file_status (str / dict): The file status dict or ID.
 
     Returns:
-        list: Output files for a given asset instance, temporal entity,
-        output type, task_type, name and representation
+        list: The output files of the given asset instance, temporal entity,
+        output type, task type, name and representation.
     """
     asset_instance = normalize_model_parameter(asset_instance)
     path = f"asset-instances/{asset_instance['id']}/output-files"
@@ -408,14 +428,14 @@ def all_output_files_for_project(
         project (str / dict): The project dict or ID.
         output_type (str / dict): The output type dict or ID.
         task_type (str / dict): The task type dict or ID.
-        name (str): The file name
-        representation (str): The file representation
-        file_status (str / dict): The file status
+        name (str): The file name.
+        representation (str): The file representation.
+        file_status (str / dict): The file status dict or ID.
 
     Returns:
         list:
-            Output files for a given project (asset or shot), output type,
-            task_type, name and representation
+            The output files of the given project, output type, task type,
+            name and representation.
     """
     project = normalize_model_parameter(project)
     path = f"projects/{project['id']}/output-files"
@@ -429,7 +449,7 @@ def all_output_files_for_project(
 def all_softwares(client: KitsuClient = default) -> list[dict]:
     """
     Returns:
-        list[dict]: Software versions listed in database.
+        list[dict]: The software versions in the database.
     """
     return raw.fetch_all("softwares", client=client)
 
@@ -438,10 +458,10 @@ def all_softwares(client: KitsuClient = default) -> list[dict]:
 def get_software(software_id: str, client: KitsuClient = default) -> dict:
     """
     Args:
-        software_id (str): ID of claimed software.
+        software_id (str): The ID of the software.
 
     Returns:
-        dict: Software object corresponding to given ID.
+        dict: The software with the given ID.
     """
     return raw.fetch_one("softwares", software_id, client=client)
 
@@ -452,10 +472,10 @@ def get_software_by_name(
 ) -> dict | None:
     """
     Args:
-        software_name (str): Name of claimed software.
+        software_name (str): The name of the software.
 
     Returns:
-        dict: Software object corresponding to given name.
+        dict: The software with the given name, or None if no software matches.
     """
     return raw.fetch_first("softwares", {"name": software_name}, client=client)
 
@@ -468,17 +488,19 @@ def new_software(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Create a new software in datatabase.
+    Create a software in the database.
+
+    If a software with this name exists, return this software.
 
     Args:
-        name (str): Name of created software.
-        short_name (str): Short representation of software name (for UIs).
-        file_extension (str): Main file extension generated by given software.
-        secondary_extensions (list[str] | None): Optional list of secondary
-            file extensions (e.g. ["ma", "mb"] for Maya).
+        name (str): The name of the software.
+        short_name (str): The short name that the user interfaces show.
+        file_extension (str): The main file extension of the software.
+        secondary_extensions (list[str] | None): The optional secondary file
+            extensions (for example, ["ma", "mb"] for Maya).
 
     Returns:
-        dict: Created software.
+        dict: The created or existing software.
     """
     data = {
         "name": name,
@@ -496,14 +518,16 @@ def new_software(
 
 def update_software(software: dict, client: KitsuClient = default) -> dict:
     """
-    Save given software data into the API. Use this to set or change
-    secondary_extensions and other fields.
+    Save the given software data to the API.
+
+    Use this function to set or change secondary_extensions and other fields.
 
     Args:
-        software (dict): The software dict to update (must include "id").
+        software (dict): The software dict to update. It must have the "id"
+            key.
 
     Returns:
-        dict: Updated software.
+        dict: The updated software.
     """
     return raw.put(f"data/softwares/{software['id']}", software, client=client)
 
@@ -519,19 +543,21 @@ def build_working_file_path(
     client: KitsuClient = default,
 ) -> str:
     """
-    From the file path template configured at the project level and arguments,
-    it builds a file path location where to store related DCC file.
+    Make the path of a DCC file.
+
+    This function uses the arguments and the file path template of the
+    project.
 
     Args:
-        task (str / dict): Task related to working file.
-        name (str): Additional suffix for the working file name.
-        mode (str): Allow to select a template inside the template.
-        software (str / dict): Software at the origin of the file.
-        revision (int): File revision.
-        sep (str): OS separator.
+        task (str / dict): The task of the working file.
+        name (str): The suffix of the file name.
+        mode (str): The value that selects a part of the template.
+        software (str / dict): The software that made the file.
+        revision (int): The file revision.
+        sep (str): The path separator of the OS.
 
     Returns:
-        Generated working file path for given task (without extension).
+        str: The working file path of the given task (without extension).
     """
     data = {
         "mode": mode,
@@ -563,24 +589,25 @@ def build_entity_output_file_path(
     client: KitsuClient = default,
 ) -> str:
     """
-    From the file path template configured at the project level and arguments,
-    it builds a file path location where to store related DCC output file.
+    Make the path of a DCC output file.
+
+    This function uses the arguments and the file path template of the
+    project.
 
     Args:
-        entity (str / dict): Entity for which an output file is needed.
-        output_type (str / dict): Output type of the generated file.
-        task_type (str / dict): Task type related to output file.
-        name (str): Additional suffix for the working file name.
-        mode (str): Allow to select a template inside the template.
-        representation (str): Allow to select a template inside the template.
-        revision (int): File revision.
-        nb_elements (int): To represent an image sequence, the amount of file is
-                           needed.
-        sep (str): OS separator.
+        entity (str / dict): The entity of the output file.
+        output_type (str / dict): The output type of the file.
+        task_type (str / dict): The task type of the output file.
+        name (str): The suffix of the file name.
+        mode (str): The value that selects a part of the template.
+        representation (str): The value that selects a part of the template.
+        revision (int): The file revision.
+        nb_elements (int): The number of files of an image sequence.
+        sep (str): The path separator of the OS.
 
     Returns:
-        Generated output file path for given entity, task type and output type
-        (without extension).
+        str: The output file path of the given entity, task type and output
+        type (without extension).
     """
     entity = normalize_model_parameter(entity)
     output_type = normalize_model_parameter(output_type)
@@ -616,26 +643,26 @@ def build_asset_instance_output_file_path(
     client: KitsuClient = default,
 ) -> str:
     """
-    From the file path template configured at the project level and arguments,
-    it builds a file path location where to store related DCC output file.
+    Make the path of a DCC output file.
+
+    This function uses the arguments and the file path template of the
+    project.
 
     Args:
-        asset_instance_id entity (str / dict): Asset instance for which a file
-        is required.
-        temporal entity (str / dict): Temporal entity scene or shot in which
-        the asset instance appeared.
-        output_type (str / dict): Output type of the generated file.
-        task_type (str / dict): Task type related to output file.
-        name (str): Additional suffix for the working file name.
-        representation (str): Allow to select a template inside the template.
-        mode (str): Allow to select a template inside the template.
-        revision (int): File revision.
-        nb_elements (str): To represent an image sequence, the amount of file is
-                           needed.
-        sep (str): OS separator.
+        asset_instance (str / dict): The asset instance of the file.
+        temporal_entity (str / dict): The scene or the shot of the asset
+            instance.
+        output_type (str / dict): The output type of the file.
+        task_type (str / dict): The task type of the output file.
+        name (str): The suffix of the file name.
+        representation (str): The value that selects a part of the template.
+        mode (str): The value that selects a part of the template.
+        revision (int): The file revision.
+        nb_elements (int): The number of files of an image sequence.
+        sep (str): The path separator of the OS.
 
     Returns:
-        Generated output file path for given asset instance, task type and
+        str: The output file path of the given asset instance, task type and
         output type (without extension).
     """
     asset_instance = normalize_model_parameter(asset_instance)
@@ -669,22 +696,23 @@ def new_working_file(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Create a new working_file for given task. It generates and store the
-    expected path for given task and options. It sets a revision number
-    (last revision + 1).
+    Create a working file for the given task.
+
+    The API makes and stores the path for the given task and options.
+    If ``revision`` is 0, the API sets the revision number (last revision + 1).
 
     Args:
-        task (str / dict): Task related to working file.
-        name (str): Additional suffix for the working file name.
-        mode (str): Allow to select a template inside the template.
-        software (str / dict): Software at the origin of the file.
-        comment (str): Comment related to created revision.
-        person (str / dict): Author of the file.
-        revision (int): File revision.
-        sep (str): OS separator.
+        task (str / dict): The task of the working file.
+        name (str): The suffix of the file name.
+        mode (str): The value that selects a part of the template.
+        software (str / dict): The software that made the file.
+        comment (str): The comment of the new revision.
+        person (str / dict): The author of the file.
+        revision (int): The file revision.
+        sep (str): The path separator of the OS.
 
     Returns:
-        Created working file.
+        dict: The created working file.
     """
     task = normalize_model_parameter(task)
     software = normalize_model_parameter(software)
@@ -695,6 +723,7 @@ def new_working_file(
         "task_id": task["id"],
         "revision": revision,
         "mode": mode,
+        "sep": sep,
     }
     if person is not None:
         data["person_id"] = person["id"]
@@ -723,30 +752,30 @@ def new_entity_output_file(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Create a new output file for given entity, task type and output type.
-    It generates and store the expected path and sets a revision number
-    (last revision + 1).
+    Create an output file for the given entity, task type and output type.
+
+    The API makes and stores the path. If ``revision`` is 0, the API sets the
+    revision number (last revision + 1).
 
     Args:
-        entity (str / dict): Entity for which an output file is needed.
-        output_type (str / dict): Output type of the generated file.
-        task_type (str / dict): Task type related to output file.
-        comment (str): Comment related to created revision.
-        working_file (str / dict): Working file which is the source of the
-        generated file.
-        person (str / dict): Author of the file.
-        name (str): Additional suffix for the working file name.
-        mode (str): Allow to select a template inside the template.
-        revision (int): File revision.
-        nb_elements (int): To represent an image sequence, the amount of file is
-                           needed.
-        representation (str): Differientate file extensions. It can be useful
-        to build folders based on extensions like abc, jpg, etc.
-        sep (str): OS separator.
-        file_status_id (id): The id of the file status to set at creation
+        entity (str / dict): The entity of the output file.
+        output_type (str / dict): The output type of the file.
+        task_type (str / dict): The task type of the output file.
+        comment (str): The comment of the new revision.
+        working_file (str / dict): The working file that is the source of the
+            output file.
+        person (str / dict): The author of the file.
+        name (str): The suffix of the file name.
+        mode (str): The value that selects a part of the template.
+        revision (int): The file revision.
+        nb_elements (int): The number of files of an image sequence.
+        representation (str): The file extension group. You can use it to
+            make folders for extensions such as abc or jpg.
+        sep (str): The path separator of the OS.
+        file_status_id (str): The ID of the file status of the new file.
 
     Returns:
-        dict: Created output file.
+        dict: The created output file.
     """
     entity = normalize_model_parameter(entity)
     output_type = normalize_model_parameter(output_type)
@@ -761,6 +790,7 @@ def new_entity_output_file(
         "revision": revision,
         "representation": representation,
         "name": name,
+        "mode": mode,
         "nb_elements": nb_elements,
         "sep": sep,
     }
@@ -795,33 +825,32 @@ def new_asset_instance_output_file(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Create a new output file for given asset instance, temporal entity, task
-    type and output type.  It generates and store the expected path and sets a
-    revision number (last revision + 1).
+    Create an output file for the given asset instance and temporal entity.
+
+    The file has the given task type and output type. The API makes and stores
+    the path. If ``revision`` is 0, the API sets the revision number (last
+    revision + 1).
 
     Args:
-        asset_instance (str / dict): Asset instance for which an output file
-            is needed.
-        temporal_entity (str / dict): Temporal entity for which an output file
-            is needed.
-        output_type (str / dict): Output type of the generated file.
-        task_type (str / dict): Task type related to output file.
-        comment (str): Comment related to created revision.
-        working_file (str / dict): Working file which is the source of the
-            generated file.
-        person (str / dict): Author of the file.
-        name (str): Additional suffix for the working file name.
-        mode (str): Allow to select a template inside the template.
-        revision (int): File revision.
-        nb_elements (int): To represent an image sequence, the amount of file
-            needed.
-        representation (str): Differentiate file extensions. It can be useful
-            to build folders based on extensions like abc, jpg, cetc.
-        sep (str): OS separator.
-        file_status_id (id): The id of the file status to set at creation
+        asset_instance (str / dict): The asset instance of the output file.
+        temporal_entity (str / dict): The temporal entity of the output file.
+        output_type (str / dict): The output type of the file.
+        task_type (str / dict): The task type of the output file.
+        comment (str): The comment of the new revision.
+        working_file (str / dict): The working file that is the source of the
+            output file.
+        person (str / dict): The author of the file.
+        name (str): The suffix of the file name.
+        mode (str): The value that selects a part of the template.
+        revision (int): The file revision.
+        nb_elements (int): The number of files of an image sequence.
+        representation (str): The file extension group. You can use it to
+            make folders for extensions such as abc or jpg.
+        sep (str): The path separator of the OS.
+        file_status_id (str): The ID of the file status of the new file.
 
     Returns:
-        Created output file.
+        dict: The created output file.
     """
     asset_instance = normalize_model_parameter(asset_instance)
     temporal_entity = normalize_model_parameter(temporal_entity)
@@ -835,6 +864,7 @@ def new_asset_instance_output_file(
         "task_type_id": task_type["id"],
         "comment": comment,
         "name": name,
+        "mode": mode,
         "revision": revision,
         "representation": representation,
         "nb_elements": nb_elements,
@@ -865,10 +895,10 @@ def get_next_entity_output_revision(
         entity (str / dict): The entity dict or ID.
         output_type (str / dict): The output type dict or ID.
         task_type (str / dict): The task type dict or ID.
-        name (str): Get version for output file with the given name.
+        name (str): The name of the output file.
 
     Returns:
-        int: Next revision of output files available for given entity, output
+        int: The next revision of the output files of the given entity, output
         type and task type.
     """
     entity = normalize_model_parameter(entity)
@@ -897,9 +927,10 @@ def get_next_asset_instance_output_revision(
         temporal_entity (str / dict): The temporal entity dict or ID.
         output_type (str / dict): The output type dict or ID.
         task_type (str / dict): The task type dict or ID.
+        name (str): The name of the output file.
 
     Returns:
-        int: Next revision of ouput files available for given asset insance
+        int: The next revision of the output files of the given asset instance,
         temporal entity, output type and task type.
     """
     asset_instance = normalize_model_parameter(asset_instance)
@@ -927,11 +958,11 @@ def get_last_entity_output_revision(
         entity (str / dict): The entity dict or ID.
         output_type (str / dict): The output type dict or ID.
         task_type (str / dict): The task type dict or ID.
-        name (str): The output name
+        name (str): The output name.
 
     Returns:
-        int: Last revision of output files for given entity, output type and
-        task type. 0 when no output file exists yet.
+        int: The last revision of the output files of the given entity, output
+        type and task type. The value is 0 if no output file exists.
     """
     entity = normalize_model_parameter(entity)
     output_type = normalize_model_parameter(output_type)
@@ -952,11 +983,11 @@ def get_last_asset_instance_output_revision(
     client: KitsuClient = default,
 ) -> int:
     """
-    Generate last output revision for given asset instance.
+    Return the last output revision of the given asset instance.
 
     Returns:
-        int: Last revision of output files for given asset instance.
-        0 when no output file exists yet.
+        int: The last revision of the output files of the given asset
+        instance. The value is 0 if no output file exists.
     """
     asset_instance = normalize_model_parameter(asset_instance)
     temporal_entity = normalize_model_parameter(temporal_entity)
@@ -989,14 +1020,14 @@ def get_last_output_files_for_entity(
         entity (str / dict): The entity dict or ID.
         output_type (str / dict): The output type dict or ID.
         task_type (str / dict): The task type dict or ID.
-        name (str): The file name
-        representation (str): The file representation
-        file_status (str / dict): The file status
+        name (str): The file name.
+        representation (str): The file representation.
+        file_status (str / dict): The file status dict or ID.
 
     Returns:
         list:
-            Last output files for a given entity (asset or shot), output type,
-            task_type, name and representation
+            The last output files of the given entity (asset or shot), output
+            type, task type, name and representation.
     """
     entity = normalize_model_parameter(entity)
     path = f"entities/{entity['id']}/output-files/last-revisions"
@@ -1023,13 +1054,13 @@ def get_last_output_files_for_asset_instance(
         temporal_entity (str / dict): The temporal entity dict or ID.
         output_type (str / dict): The output type dict or ID.
         task_type (str / dict): The task type dict or ID.
-        name (str): The file name
-        representation (str): The file representation
-        file_status (str / dict): The file status
+        name (str): The file name.
+        representation (str): The file representation.
+        file_status (str / dict): The file status dict or ID.
 
     Returns:
-        list: last output files for given asset instance and
-        temporal entity where it appears.
+        list: The last output files of the given asset instance and temporal
+        entity.
     """
     asset_instance = normalize_model_parameter(asset_instance)
     temporal_entity = normalize_model_parameter(temporal_entity)
@@ -1049,7 +1080,7 @@ def get_working_files_for_task(
         task (str / dict): The task dict or the task ID.
 
     Returns:
-        list: Working files related to given task.
+        list: The working files of the given task.
     """
     task = normalize_model_parameter(task)
     path = f"data/tasks/{task['id']}/working-files"
@@ -1065,8 +1096,8 @@ def get_last_working_files(
         task (str / dict): The task dict or the task ID.
 
     Returns:
-        dict: Keys are working file names and values are last working file
-        availbable for given name.
+        dict: The keys are working file names. The values are the last working
+        files with these names.
     """
     task = normalize_model_parameter(task)
     path = f"data/tasks/{task['id']}/working-files/last-revisions"
@@ -1080,11 +1111,11 @@ def get_last_working_file_revision(
     """
     Args:
         task (str / dict): The task dict or the task ID.
-        name (str): File name suffix (optional)
+        name (str): The file name suffix (optional).
 
     Returns:
-        dict: Last revisions stored in the API for given task and given file
-        name suffix.
+        dict: The last working file of the given task and file name suffix,
+        or None if no file matches.
     """
     task = normalize_model_parameter(task)
     path = f"data/tasks/{task['id']}/working-files/last-revisions"
@@ -1098,10 +1129,10 @@ def get_working_file(
 ) -> dict:
     """
     Args:
-        working_file_id (str): ID of claimed working file.
+        working_file_id (str): The ID of the working file.
 
     Returns:
-        dict: Working file corresponding to given ID.
+        dict: The working file with the given ID.
     """
     return raw.fetch_one("working-files", working_file_id, client=client)
 
@@ -1110,13 +1141,14 @@ def update_comment(
     working_file: str | dict, comment: str, client: KitsuClient = default
 ) -> dict:
     """
-    Update the file comment in database for given working file.
+    Update the comment of the given working file in the database.
 
     Args:
         working_file (str / dict): The working file dict or ID.
+        comment (str): The new comment.
 
     Returns:
-        dict: Modified working file
+        dict: The modified working file.
     """
     working_file = normalize_model_parameter(working_file)
     return raw.put(
@@ -1130,13 +1162,13 @@ def update_modification_date(
     working_file: str | dict, client: KitsuClient = default
 ) -> dict:
     """
-    Update modification date of given working file with current time (now).
+    Set the modification date of the given working file to the current time.
 
     Args:
         working_file (str / dict): The working file dict or ID.
 
     Returns:
-        dict: Modified working file
+        dict: The modified working file.
     """
     working_file = normalize_model_parameter(working_file)
     return raw.put(
@@ -1150,14 +1182,14 @@ def update_output_file(
     output_file: str | dict, data: dict, client: KitsuClient = default
 ) -> dict:
     """
-    Update the data of given output file.
+    Update the data of the given output file.
 
     Args:
         output_file (str / dict): The output file dict or ID.
-        data (dict): Data to update on the output file.
+        data (dict): The data to update on the output file.
 
     Returns:
-        dict: Modified output file
+        dict: The modified output file.
     """
     output_file = normalize_model_parameter(output_file)
     path = f"/data/output-files/{output_file['id']}"
@@ -1168,14 +1200,14 @@ def update_working_file(
     working_file: str | dict, data: dict, client: KitsuClient = default
 ) -> dict:
     """
-    Update the data of given working file.
+    Update the data of the given working file.
 
     Args:
         working_file (str / dict): The working file dict or ID.
-        data (dict): Data to update on the working file.
+        data (dict): The data to update on the working file.
 
     Returns:
-        dict: Modified working file
+        dict: The modified working file.
     """
     working_file = normalize_model_parameter(working_file)
     path = f"/data/working-files/{working_file['id']}"
@@ -1186,15 +1218,16 @@ def update_project_file_tree(
     project: str | dict, file_tree: dict, client: KitsuClient = default
 ) -> dict:
     """
-    Set given dict as file tree template on given project. This template
-    will be used to generate file paths.
+    Set the given dict as the file tree template of the given project.
+
+    The API uses this template to make file paths.
 
     Args:
         project (str / dict): The project dict or ID.
         file_tree (dict): The file tree template to set on project.
 
     Returns:
-        dict: Modified project.
+        dict: The modified project.
     """
     project = normalize_model_parameter(project)
     data = {"file_tree": file_tree}
@@ -1209,14 +1242,16 @@ def upload_working_file(
     progress_callback=None,
 ) -> dict:
     """
-    Save given file in working file storage.
+    Save the given file in the working file storage.
 
     Args:
         working_file (str / dict): The working file dict or ID.
-        file_path (str): Location on hard drive where to save the file.
+        file_path (str): The location of the file to upload on the hard drive.
+        progress_callback (Callable): The function ``(bytes_read, total)``
+            to call during the upload.
 
     Returns:
-        (dict): the working file model dictionary.
+        dict: The working file.
     """
     working_file = normalize_model_parameter(working_file)
     url_path = f"/data/working-files/{working_file['id']}/file"
@@ -1232,11 +1267,17 @@ def download_working_file(
     progress_callback=None,
 ) -> requests.Response:
     """
-    Download given working file and save it at given location.
+    Download the given working file and save it at the given location.
 
     Args:
         working_file (str / dict): The working file dict or ID.
-        file_path (str): Location on hard drive where to save the file.
+        file_path (str): The location of the file on the hard drive. If the
+            value is None, this function uses the path of the working file.
+        progress_callback (Callable): The function ``(bytes_read, total)``
+            to call during the download.
+
+    Returns:
+        requests.Response: The response object of the download request.
     """
     working_file = normalize_model_parameter(working_file)
     if file_path is None:
@@ -1259,11 +1300,16 @@ def download_preview_file(
     progress_callback=None,
 ) -> requests.Response:
     """
-    Download given preview file and save it at given location.
+    Download the given preview file and save it at the given location.
 
     Args:
         preview_file (str / dict): The preview file dict or ID.
-        file_path (str): Location on hard drive where to save the file.
+        file_path (str): The location of the file on the hard drive.
+        progress_callback (Callable): The function ``(bytes_read, total)``
+            to call during the download.
+
+    Returns:
+        requests.Response: The response object of the download request.
     """
     return raw.download(
         get_preview_file_url(preview_file, client=client),
@@ -1277,10 +1323,15 @@ def get_preview_file_url(
     preview_file: str | dict, client: KitsuClient = default
 ) -> str:
     """
-    Return given preview file URL
+    Return the URL path of the given preview file.
+
+    The path is relative to the API host.
 
     Args:
         preview_file (str / dict): The preview file dict or ID.
+
+    Returns:
+        str: The URL path of the preview file.
     """
     preview_file = normalize_model_parameter(preview_file)
     preview_file = raw.fetch_one(
@@ -1294,10 +1345,13 @@ def get_attachment_file(
     attachment_file_id: str, client: KitsuClient = default
 ) -> dict:
     """
-    Return attachment file object corresponding to given ID.
+    Return the attachment file with the given ID.
 
     Args:
         attachment_file_id (str): The attachment file ID.
+
+    Returns:
+        dict: The attachment file.
     """
     return raw.fetch_one("attachment-files", attachment_file_id, client=client)
 
@@ -1309,11 +1363,16 @@ def download_attachment_file(
     progress_callback=None,
 ) -> requests.Response:
     """
-    Download given attachment file and save it at given location.
+    Download the given attachment file and save it at the given location.
 
     Args:
         attachment_file (str / dict): The attachment file dict or ID.
-        file_path (str): Location on hard drive where to save the file.
+        file_path (str): The location of the file on the hard drive.
+        progress_callback (Callable): The function ``(bytes_read, total)``
+            to call during the download.
+
+    Returns:
+        requests.Response: The response object of the download request.
     """
     attachment_file = normalize_model_parameter(attachment_file)
     attachment_file = get_attachment_file(attachment_file["id"], client=client)
@@ -1332,12 +1391,16 @@ def download_preview_file_thumbnail(
     progress_callback=None,
 ) -> requests.Response:
     """
-    Download given preview file thumbnail and save it at given location.
+    Download the thumbnail of the preview file and save it at the location.
 
     Args:
         preview_file (str / dict): The preview file dict or ID.
-        file_path (str): Location on hard drive where to save the file.
+        file_path (str): The location of the file on the hard drive.
+        progress_callback (Callable): The function ``(bytes_read, total)``
+            to call during the download.
 
+    Returns:
+        requests.Response: The response object of the download request.
     """
     preview_file = normalize_model_parameter(preview_file)
     return raw.download(
@@ -1355,10 +1418,16 @@ def download_preview_file_cover(
     progress_callback=None,
 ) -> requests.Response:
     """
-    Download given preview file cover and save it at given location.
+    Download the cover of the preview file and save it at the location.
+
     Args:
         preview_file (str / dict): The preview file dict or ID.
-        file_path (str): Location on hard drive where to save the file.
+        file_path (str): The location of the file on the hard drive.
+        progress_callback (Callable): The function ``(bytes_read, total)``
+            to call during the download.
+
+    Returns:
+        requests.Response: The response object of the download request.
     """
     preview_file = normalize_model_parameter(preview_file)
     return raw.download(
@@ -1377,7 +1446,7 @@ def _download_avatar(
     progress_callback=None,
 ) -> requests.Response:
     """
-    Download the avatar of given model kind (persons/projects/...).
+    Download the avatar of the given model kind (persons, projects and more).
     """
     model = normalize_model_parameter(model)
     return raw.download(
@@ -1396,7 +1465,7 @@ def _upload_avatar(
     progress_callback=None,
 ) -> dict[Literal["thumbnail_path"], str]:
     """
-    Upload given file as the avatar of given model kind.
+    Upload the given file as the avatar of the given model kind.
     """
     path = (
         f"/pictures/thumbnails/{kind}/{normalize_model_parameter(model)['id']}"
@@ -1413,11 +1482,16 @@ def download_person_avatar(
     progress_callback=None,
 ) -> requests.Response:
     """
-    Download given person's avatar and save it at given location.
+    Download the avatar of the given person and save it at the location.
 
     Args:
         person (str / dict): The person dict or ID.
-        file_path (str): Location on hard drive where to save the file.
+        file_path (str): The location of the file on the hard drive.
+        progress_callback (Callable): The function ``(bytes_read, total)``
+            to call during the download.
+
+    Returns:
+        requests.Response: The response object of the download request.
     """
     return _download_avatar(
         "persons", person, file_path, client, progress_callback
@@ -1431,15 +1505,17 @@ def upload_person_avatar(
     progress_callback=None,
 ) -> dict[Literal["thumbnail_path"], str]:
     """
-    Upload given file as person avatar.
+    Upload the given file as the avatar of the person.
 
     Args:
         person (str / dict): The person dict or the person ID.
-        file_path (str): Path of the file to upload as avatar.
+        file_path (str): The path of the file to upload as the avatar.
+        progress_callback (Callable): The function ``(bytes_read, total)``
+            to call during the upload.
 
     Returns:
-        dict: Dictionary with a key of 'thumbnail_path' and a value of the
-            path to the static image file, relative to the host url.
+        dict: A dict with the 'thumbnail_path' key. The value is the path of
+            the static image file, relative to the host URL.
     """
     return _upload_avatar(
         "persons", person, file_path, client, progress_callback
@@ -1453,11 +1529,16 @@ def download_project_avatar(
     progress_callback=None,
 ) -> requests.Response:
     """
-    Download given project's avatar and save it at given location.
+    Download the avatar of the given project and save it at the location.
 
     Args:
         project (str / dict): The project dict or ID.
-        file_path (str): Location on hard drive where to save the file.
+        file_path (str): The location of the file on the hard drive.
+        progress_callback (Callable): The function ``(bytes_read, total)``
+            to call during the download.
+
+    Returns:
+        requests.Response: The response object of the download request.
     """
     return _download_avatar(
         "projects", project, file_path, client, progress_callback
@@ -1471,15 +1552,17 @@ def upload_project_avatar(
     progress_callback=None,
 ) -> dict[Literal["thumbnail_path"], str]:
     """
-    Upload given file as project avatar.
+    Upload the given file as the avatar of the project.
 
     Args:
         project (str / dict): The project dict or ID.
-        file_path (str): Path of the file to upload as avatar.
+        file_path (str): The path of the file to upload as the avatar.
+        progress_callback (Callable): The function ``(bytes_read, total)``
+            to call during the upload.
 
     Returns:
-        dict: Dictionary with a key of 'thumbnail_path' and a value of the
-            path to the static image file, relative to the host url.
+        dict: A dict with the 'thumbnail_path' key. The value is the path of
+            the static image file, relative to the host URL.
     """
     return _upload_avatar(
         "projects", project, file_path, client, progress_callback
@@ -1493,11 +1576,16 @@ def download_organisation_avatar(
     progress_callback=None,
 ) -> requests.Response:
     """
-    Download given organisation's avatar and save it at given location.
+    Download the avatar of the organisation and save it at the location.
 
     Args:
         organisation (str / dict): The organisation dict or ID.
-        file_path (str): Location on hard drive where to save the file.
+        file_path (str): The location of the file on the hard drive.
+        progress_callback (Callable): The function ``(bytes_read, total)``
+            to call during the download.
+
+    Returns:
+        requests.Response: The response object of the download request.
     """
     return _download_avatar(
         "organisations", organisation, file_path, client, progress_callback
@@ -1511,15 +1599,17 @@ def upload_organisation_avatar(
     progress_callback=None,
 ) -> dict[Literal["thumbnail_path"], str]:
     """
-    Upload given file as organisation avatar.
+    Upload the given file as the avatar of the organisation.
 
     Args:
         organisation (str / dict): The organisation dict or ID.
-        file_path (str): Path of the file to upload as avatar.
+        file_path (str): The path of the file to upload as the avatar.
+        progress_callback (Callable): The function ``(bytes_read, total)``
+            to call during the upload.
 
     Returns:
-        dict: Dictionary with a key of 'thumbnail_path' and a value of the
-            path to the static image file, relative to the host url.
+        dict: A dict with the 'thumbnail_path' key. The value is the path of
+            the static image file, relative to the host URL.
     """
     return _upload_avatar(
         "organisations", organisation, file_path, client, progress_callback
@@ -1530,14 +1620,14 @@ def update_preview(
     preview_file: str | dict, data: dict, client: KitsuClient = default
 ) -> dict:
     """
-    Update the data of given preview file.
+    Update the data of the given preview file.
 
     Args:
         preview_file (str / dict): The preview file dict or ID.
-        data (dict): Data to update on the prevew file.
+        data (dict): The data to update on the preview file.
 
     Returns:
-        dict: Modified preview file
+        dict: The modified preview file.
     """
     preview_file = normalize_model_parameter(preview_file)
     path = f"/data/preview-files/{preview_file['id']}"
@@ -1547,10 +1637,10 @@ def update_preview(
 @cache
 def get_running_preview_files(client: KitsuClient = default) -> list[dict]:
     """
-    Get all preview files currently being processed.
+    Get all preview files that the server is processing now.
 
     Returns:
-        list: Preview files that are currently running/processing.
+        list: The preview files that are processing.
     """
     return raw.fetch_all("playlists/preview-files/running", client=client)
 
@@ -1561,15 +1651,17 @@ def get_preview_movie_url(
     client: KitsuClient = default,
 ) -> str:
     """
-    Get the URL for the preview movie file.
+    Get the URL path of the preview movie file.
+
+    The path is relative to the API host.
 
     Args:
         preview_file (str / dict): The preview file dict or ID.
-        lowdef (bool): If True, returns the low-definition version URL.
-                       If False, returns the original/high-definition version URL.
+        lowdef (bool): If True, return the path of the low-definition version.
+            If False, return the path of the original version.
 
     Returns:
-        str: URL to the preview movie file.
+        str: The URL path of the preview movie file.
     """
     preview_file = normalize_model_parameter(preview_file)
     preview_file = raw.fetch_one(
@@ -1595,10 +1687,12 @@ def download_preview_movie(
 
     Args:
         preview_file (str / dict): The preview file dict or ID.
-        file_path (str): Location on hard drive where to save the file.
+        file_path (str): The location of the file on the hard drive.
+        progress_callback (Callable): The function ``(bytes_read, total)``
+            to call during the download.
 
     Returns:
-        requests.Response: Response object from the download request.
+        requests.Response: The response object of the download request.
     """
     preview_file = normalize_model_parameter(preview_file)
     url = get_preview_movie_url(preview_file, lowdef=False, client=client)
@@ -1611,13 +1705,15 @@ def get_preview_lowdef_movie_url(
     preview_file: str | dict, client: KitsuClient = default
 ) -> str:
     """
-    Get the URL for the low-definition preview movie file.
+    Get the URL path of the low-definition preview movie file.
+
+    The path is relative to the API host.
 
     Args:
         preview_file (str / dict): The preview file dict or ID.
 
     Returns:
-        str: URL to the low-definition preview movie file.
+        str: The URL path of the low-definition preview movie file.
     """
     return get_preview_movie_url(preview_file, lowdef=True, client=client)
 
@@ -1633,10 +1729,12 @@ def download_preview_lowdef_movie(
 
     Args:
         preview_file (str / dict): The preview file dict or ID.
-        file_path (str): Location on hard drive where to save the file.
+        file_path (str): The location of the file on the hard drive.
+        progress_callback (Callable): The function ``(bytes_read, total)``
+            to call during the download.
 
     Returns:
-        requests.Response: Response object from the download request.
+        requests.Response: The response object of the download request.
     """
     preview_file = normalize_model_parameter(preview_file)
     url = get_preview_movie_url(preview_file, lowdef=True, client=client)
@@ -1649,13 +1747,15 @@ def get_attachment_thumbnail_url(
     attachment_file: str | dict, client: KitsuClient = default
 ) -> str:
     """
-    Get the URL for the attachment file thumbnail.
+    Get the URL path of the attachment file thumbnail.
+
+    The path is relative to the API host.
 
     Args:
         attachment_file (str / dict): The attachment file dict or ID.
 
     Returns:
-        str: URL to the attachment thumbnail.
+        str: The URL path of the attachment thumbnail.
     """
     attachment_file = normalize_model_parameter(attachment_file)
     return f"pictures/thumbnails/attachment-files/{attachment_file['id']}.png"
@@ -1672,10 +1772,12 @@ def download_attachment_thumbnail(
 
     Args:
         attachment_file (str / dict): The attachment file dict or ID.
-        file_path (str): Location on hard drive where to save the file.
+        file_path (str): The location of the file on the hard drive.
+        progress_callback (Callable): The function ``(bytes_read, total)``
+            to call during the download.
 
     Returns:
-        requests.Response: Response object from the download request.
+        requests.Response: The response object of the download request.
     """
     attachment_file = normalize_model_parameter(attachment_file)
     url = get_attachment_thumbnail_url(attachment_file, client=client)
@@ -1692,16 +1794,18 @@ def extract_frame_from_preview(
     progress_callback=None,
 ) -> requests.Response:
     """
-    Extract a specific frame from a preview file.
+    Extract one frame from a preview file.
 
     Args:
         preview_file (str / dict): The preview file dict or ID.
         frame_number (int): The frame number to extract.
-        file_path (str): Optional location on hard drive where to save the frame.
-                        If not provided, returns the response without saving.
+        file_path (str): The optional location of the frame on the hard drive.
+            If the value is None, this function does not write a file.
+        progress_callback (Callable): The function ``(bytes_read, total)``
+            to call during the download.
 
     Returns:
-        requests.Response: Response object containing the extracted frame.
+        requests.Response: The response object with the extracted frame.
     """
     preview_file = normalize_model_parameter(preview_file)
     url = f"actions/preview-files/{preview_file['id']}/extract-frame"
@@ -1720,15 +1824,16 @@ def update_preview_position(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Update the position of a preview file (the displayed order for a single
-    revision).
+    Update the position of a preview file.
+
+    The position is the display order in one revision.
 
     Args:
         preview_file (str / dict): The preview file dict or ID.
         position (float): The new position value.
 
     Returns:
-        dict: Updated preview file.
+        dict: The updated preview file.
     """
     preview_file = normalize_model_parameter(preview_file)
     path = f"actions/preview-files/{preview_file['id']}/update-position"
@@ -1743,26 +1848,26 @@ def update_preview_annotations(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Update annotations on a preview file.
+    Update the annotations of a preview file.
 
-    Allow to modify the annotations stored at the preview level. Modifications
-    are applied via three fields: additions to give all the annotations that
-    need to be added, updates that list annotations that need to be modified,
-    and deletions to list the IDs of annotations that need to be removed.
+    Use this function to change the annotations of the preview. This function
+    has three parameters. ``additions`` gives the annotations to add.
+    ``updates`` gives the annotations to change. ``deletions`` gives the IDs
+    of the annotations to remove.
 
     Args:
         preview_file (str / dict): The preview file dict or ID.
-        additions (list[dict]): Annotations to add. Each annotation should be
-            a dict with properties like 'x', 'y', 'type', etc.
+        additions (list[dict]): The annotations to add. Each annotation is a
+            dict with keys such as 'x', 'y' and 'type'.
             Example: [{"x": 100, "y": 200, "type": "drawing"}]
-        updates (list[dict]): Annotations to update. Each annotation should
-            include an 'id' field along with the fields to update.
+        updates (list[dict]): The annotations to update. Each annotation has
+            an 'id' key and the keys to update.
             Example: [{"id": "uuid", "x": 150, "y": 250}]
-        deletions (list[str]): Annotation IDs to remove.
+        deletions (list[str]): The annotation IDs to remove.
             Example: ["a24a6ea4-ce75-4665-a070-57453082c25"]
 
     Returns:
-        dict: Updated preview file with the updated annotations array.
+        dict: The updated preview file with its updated annotations.
     """
     preview_file = normalize_model_parameter(preview_file)
     path = f"actions/preview-files/{preview_file['id']}/update-annotations"
@@ -1787,11 +1892,13 @@ def extract_tile_from_preview(
 
     Args:
         preview_file (str / dict): The preview file dict or ID.
-        file_path (str): Optional location on hard drive where to save the tile.
-                        If not provided, returns the response without saving.
+        file_path (str): The optional location of the tile on the hard drive.
+            If the value is None, this function does not write a file.
+        progress_callback (Callable): The function ``(bytes_read, total)``
+            to call during the download.
 
     Returns:
-        requests.Response: Response object containing the extracted tile.
+        requests.Response: The response object with the extracted tile.
     """
     preview_file = normalize_model_parameter(preview_file)
     url = f"actions/preview-files/{preview_file['id']}/extract-tile"
@@ -1804,13 +1911,17 @@ def new_file_status(
     name: str, color: str, client: KitsuClient = default
 ) -> dict:
     """
-    Create a new file status if not existing yet.
+    Create a file status.
 
-    If the file status already exists, the existing record will be returned.
+    If a file status with this name exists, return this file status.
 
     Args:
-        name (str): the name of the status to create.
-        color (str): The color for the status as a Hex string, e.g "#00FF00".
+        name (str): The name of the status to create.
+        color (str): The color of the status as a hex string (for example,
+            "#00FF00").
+
+    Returns:
+        dict: The created or existing file status.
     """
     data = {"name": name, "color": color}
     status = get_file_status_by_name(name, client=client)
@@ -1823,10 +1934,13 @@ def new_file_status(
 @cache
 def get_file_status(status_id: str, client: KitsuClient = default) -> dict:
     """
-    Return file status object corresponding to given ID.
+    Return the file status with the given ID.
 
     Args:
-        status_id (str): The files status ID.
+        status_id (str): The file status ID.
+
+    Returns:
+        dict: The file status.
     """
     return raw.fetch_one("file-status", status_id, client=client)
 
@@ -1836,9 +1950,12 @@ def get_file_status_by_name(
     name: str, client: KitsuClient = default
 ) -> dict | None:
     """
-    Return file status object corresponding to given name
+    Return the file status with the given name.
 
     Args:
-        name (str): The files status name.
+        name (str): The file status name.
+
+    Returns:
+        dict: The file status, or None if no file status matches.
     """
     return raw.fetch_first("file-status", {"name": name}, client=client)

@@ -14,10 +14,10 @@ default = raw.default_client
 def get_edit(edit_id: str, client: KitsuClient = default) -> dict:
     """
     Args:
-        edit_id (str): ID of claimed edit.
+        edit_id (str): The ID of the edit.
 
     Returns:
-        dict: Edit corresponding to given edit ID.
+        dict: The edit with the given ID.
     """
     return raw.fetch_one("edits", edit_id, client=client)
 
@@ -29,10 +29,11 @@ def get_edit_by_name(
     """
     Args:
         project (str / dict): The project dict or the project ID.
-        edit_name (str): Name of claimed edit.
+        edit_name (str): The name of the edit.
 
     Returns:
-        dict: Edit corresponding to given name and project.
+        dict: The edit with the given name in the given project, or None if no
+            edit matches.
     """
     project = normalize_model_parameter(project)
     return raw.fetch_first(
@@ -49,7 +50,7 @@ def get_edit_url(edit: str | dict, client: KitsuClient = default) -> str:
         edit (str / dict): The edit dict or the edit ID.
 
     Returns:
-        url (str): Web url associated to the given edit
+        url (str): The web URL of the given edit.
     """
     edit = normalize_model_parameter(edit)
     edit = get_edit(edit["id"], client=client)
@@ -72,7 +73,7 @@ def all_edits_for_project(
         project (str / dict): The project dict or the project ID.
 
     Returns:
-        list: Edits from database or for given project.
+        list: The edits of the given project.
     """
     project = normalize_model_parameter(project)
     edits = raw.fetch_all(f"projects/{project['id']}/edits", client=client)
@@ -88,7 +89,7 @@ def all_previews_for_edit(
         edit (str / dict): The edit dict or the edit ID.
 
     Returns:
-        list: Previews from database for given edit.
+        list: The previews of the given edit.
     """
     edit = normalize_model_parameter(edit)
     return raw.fetch_all(f"edits/{edit['id']}/preview-files", client=client)
@@ -103,18 +104,20 @@ def new_edit(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Create an edit for given project (and episode if given).
-    Allow to set metadata too.
+    Create an edit for the given project and, if given, the given episode.
+
+    You can also set metadata. If an edit with this name exists in the
+    project, this function returns this edit and does not change it.
 
     Args:
         project (str / dict): The project dict or the project ID.
         name (str): The name of the edit to create.
         description (str): The description of the edit to create.
-        data (dict): Free field to set metadata of any kind.
+        data (dict): A free field for metadata of all types.
         episode (str / dict): The episode dict or the episode ID.
 
     Returns:
-        Created edit.
+        dict: The created or existing edit.
     """
     if data is None:
         data = {}
@@ -140,16 +143,18 @@ def remove_edit(
     edit: str | dict, force: bool = False, client: KitsuClient = default
 ) -> str:
     """
-    Remove given edit from database.
+    Remove the given edit from the database.
 
-    If the Edit has tasks linked to it, this will by default mark the
-    Edit as canceled. Deletion can be forced regardless of task links
-    with the `force` parameter.
+    If tasks are linked to the edit, the API sets the edit to canceled and
+    does not remove it. To remove the edit and its tasks, set ``force`` to
+    True.
 
     Args:
-        edit (str / dict): Edit to remove.
-        force (bool): Whether to force deletion of the edit regardless of
-            whether it has links to tasks.
+        edit (str / dict): The edit to remove.
+        force (bool): If True, remove the edit and its tasks.
+
+    Returns:
+        str: The response of the API.
     """
     edit = normalize_model_parameter(edit)
     path = f"data/edits/{edit['id']}"
@@ -161,14 +166,16 @@ def remove_edit(
 
 def update_edit(edit: dict, client: KitsuClient = default) -> dict:
     """
-    Save given edit data into the API. Metadata are fully replaced by the ones
-    set on given edit.
+    Save the given edit data to the API.
+
+    The API merges the given metadata with the current metadata. It does not
+    remove the other metadata keys.
 
     Args:
         edit (dict): The edit dict to update.
 
     Returns:
-        dict: Updated edit.
+        dict: The updated edit.
     """
     return raw.put(f"data/entities/{edit['id']}", edit, client=client)
 
@@ -177,15 +184,16 @@ def update_edit_data(
     edit: str | dict, data: dict | None = None, client: KitsuClient = default
 ) -> dict:
     """
-    Update the metadata for the provided edit. Keys that are not provided are
-    not changed.
+    Update the metadata of the given edit.
+
+    This function does not change the keys that are not in ``data``.
 
     Args:
-        edit (str / dict): The edit dict or ID to save in database.
-        data (dict): Free field to set metadata of any kind.
+        edit (str / dict): The edit dict or the edit ID.
+        data (dict): The metadata keys and values to set.
 
     Returns:
-        dict: Updated edit.
+        dict: The updated edit.
     """
     if data is None:
         data = {}

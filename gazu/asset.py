@@ -24,7 +24,7 @@ default = raw.default_client
 def all_assets_for_open_projects(client: KitsuClient = default) -> list[dict]:
     """
     Returns:
-        list: Assets stored in the database for open projects.
+        list: The assets of all open projects.
     """
     all_assets = []
     for project in gazu_project.all_open_projects(client=client):
@@ -38,10 +38,11 @@ def all_assets_for_project(
 ) -> list[dict]:
     """
     Args:
-        project (str / dict): The project dict or the project ID.
+        project (str / dict): The project dict or the project ID. If the
+            value is None, this function returns the assets of all projects.
 
     Returns:
-        list: Assets stored in the database for given project.
+        list: The assets of the given project.
     """
     project = normalize_model_parameter(project)
 
@@ -61,7 +62,7 @@ def all_assets_for_episode(
         episode (str / dict): The episode dict or the episode ID.
 
     Returns:
-        list: Assets stored in the database for given episode.
+        list: The assets of the given episode.
     """
     episode = normalize_model_parameter(episode)
 
@@ -79,7 +80,7 @@ def all_assets_for_shot(
         shot (str / dict): The shot dict or the shot ID.
 
     Returns:
-        list: Assets stored in the database for given shot.
+        list: The assets of the given shot.
     """
     shot = normalize_model_parameter(shot)
     path = f"shots/{shot['id']}/assets"
@@ -96,7 +97,7 @@ def all_assets_for_project_and_type(
         asset_type (str / dict): The asset type dict or the asset type ID.
 
     Returns:
-        list: Assets stored in the database for given project and asset type.
+        list: The assets of the given project and asset type.
     """
     project = normalize_model_parameter(project)
     asset_type = normalize_model_parameter(asset_type)
@@ -119,11 +120,12 @@ def get_asset_by_name(
     """
     Args:
         project (str / dict): The project dict or the project ID.
-        name (str): The asset name
-        asset_type (str / dict): Asset type dict or ID (optional).
+        name (str): The asset name.
+        asset_type (str / dict): The asset type dict or ID (optional).
 
     Returns:
-        dict: Asset matching given name for given project and asset type.
+        dict: The asset with the given name in the given project and asset
+            type, or None if no asset matches.
     """
     project = normalize_model_parameter(project)
 
@@ -137,10 +139,10 @@ def get_asset_by_name(
 def get_asset(asset_id: str, client: KitsuClient = default) -> dict:
     """
     Args:
-        asset_id (str): ID of claimed asset.
+        asset_id (str): The ID of the asset.
 
     Returns:
-        dict: Asset matching given ID.
+        dict: The asset with the given ID.
     """
     return raw.fetch_one("assets", asset_id, client=client)
 
@@ -152,7 +154,7 @@ def get_asset_url(asset: str | dict, client: KitsuClient = default) -> str:
         asset (str / dict): The asset dict or the asset ID.
 
     Returns:
-        url (str): Web url associated to the given asset
+        url (str): The web URL of the given asset.
     """
     asset = normalize_model_parameter(asset)
     asset = get_asset(asset["id"], client=client)
@@ -178,9 +180,9 @@ def get_all_assets_url(
         project (str / dict): The project dict or the project ID.
 
     Returns:
-        url (str): Web url of the assets list page for the given project.
-        For TV shows the URL targets the "main" episode (where shared
-        assets live), mirroring the convention used by ``get_asset_url``.
+        url (str): The web URL of the assets list page of the given project.
+        For TV shows, the URL goes to the "main" episode. This episode
+        contains the shared assets. ``get_asset_url`` uses the same rule.
     """
     project = normalize_model_parameter(project)
     project = gazu_project.get_project(project["id"], client=client)
@@ -199,17 +201,18 @@ def get_asset_type_url(
     client: KitsuClient = default,
 ) -> str:
     """
-    Build a URL pointing at the assets list page of the given project,
-    pre-filtered by the given asset type's name (e.g. ``Character``,
-    ``Prop``).
+    Make a URL to the assets list page of the given project.
+
+    The page shows only the assets of the given asset type (for example,
+    ``Character`` or ``Prop``).
 
     Args:
         project (str / dict): The project dict or the project ID.
         asset_type (str / dict): The asset type dict or the asset type ID.
 
     Returns:
-        url (str): Web url of the project's assets list, with the search
-        field pre-populated with ``type=[Asset-Type-Name]``.
+        url (str): The web URL of the assets list of the project. The search
+        field of the page contains ``type=[Asset-Type-Name]``.
     """
     project = normalize_model_parameter(project)
     project = gazu_project.get_project(project["id"], client=client)
@@ -236,19 +239,21 @@ def new_asset(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Create a new asset in the database for given project and asset type.
+    Create an asset in the database for the given project and asset type.
+
+    If an asset with this name already exists, return this asset.
 
     Args:
         project (str / dict): The project dict or the project ID.
         asset_type (str / dict): The asset type dict or the asset type ID.
-        name (str): Asset name.
-        description (str): Additional information.
-        extra_data (dict): Free field to add any kind of metadata.
-        episode (str / dict): The episode this asset is linked to.
-        is_shared (bool): True if asset is shared between multiple projects.
+        name (str): The asset name.
+        description (str): The description of the asset.
+        extra_data (dict): A free field for metadata of all types.
+        episode (str / dict): The episode that the asset is linked to.
+        is_shared (bool): True to share the asset between projects.
 
     Returns:
-        dict: Created asset.
+        dict: The created or existing asset.
     """
     project = normalize_model_parameter(project)
     asset_type = normalize_model_parameter(asset_type)
@@ -276,11 +281,13 @@ def new_asset(
 
 def update_asset(asset: dict, client: KitsuClient = default) -> dict:
     """
-    Save given asset data into the API. It assumes that the asset already
-    exists.
+    Save the given asset data to the API. The asset must exist.
 
     Args:
-        asset (dict): Asset to save.
+        asset (dict): The asset to save.
+
+    Returns:
+        dict: The updated asset.
     """
     if "episode_id" in asset:
         # Copy before rewriting the key so the caller's dict is left intact.
@@ -292,15 +299,16 @@ def update_asset_data(
     asset: str | dict, data: dict | None = None, client: KitsuClient = default
 ) -> dict:
     """
-    Update the metadata for the provided asset. Keys that are not provided are
-    not changed.
+    Update the metadata of the given asset.
+
+    This function does not change the keys that are not in ``data``.
 
     Args:
-        asset (str / dict): The asset dict or ID to save in database.
-        data (dict): Free field to set metadata of any kind.
+        asset (str / dict): The asset dict or the asset ID.
+        data (dict): The metadata keys and values to set.
 
     Returns:
-        dict: Updated asset.
+        dict: The updated asset.
     """
     if data is None:
         data = {}
@@ -322,16 +330,18 @@ def remove_asset(
     asset: str | dict, force: bool = False, client: KitsuClient = default
 ) -> str:
     """
-    Remove given asset from database.
+    Remove the given asset from the database.
 
-    If the Asset has tasks linked to it, this will by default mark the
-    Asset as canceled. Deletion can be forced regardless of task links
-    with the `force` parameter.
+    If tasks are linked to the asset, the API sets the asset to canceled
+    and does not remove it. To remove the asset and its tasks, set ``force``
+    to True.
 
     Args:
-        asset (str / dict): Asset to remove.
-        force (bool): Whether to force deletion of the asset regardless of
-            whether it has links to tasks.
+        asset (str / dict): The asset to remove.
+        force (bool): If True, remove the asset and its tasks.
+
+    Returns:
+        str: The response of the API.
     """
     asset = normalize_model_parameter(asset)
     path = f"data/assets/{asset['id']}"
@@ -345,7 +355,7 @@ def remove_asset(
 def all_asset_types(client: KitsuClient = default) -> list[dict]:
     """
     Returns:
-        list: Asset types stored in the database.
+        list: The asset types in the database.
     """
     return sort_by_name(raw.fetch_all("asset-types", client=client))
 
@@ -359,7 +369,7 @@ def all_asset_types_for_project(
         project (str / dict): The project dict or the project ID.
 
     Returns:
-        list: Asset types from assets listed in given project.
+        list: The asset types of the assets in the given project.
     """
     project = normalize_model_parameter(project)
     path = f"projects/{project['id']}/asset-types"
@@ -375,7 +385,7 @@ def all_asset_types_for_shot(
         shot (str / dict): The shot dict or the shot ID.
 
     Returns:
-        list: Asset types from assets casted in given shot.
+        list: The asset types of the assets cast in the given shot.
     """
     shot = normalize_model_parameter(shot)
     path = f"shots/{shot['id']}/asset-types"
@@ -389,7 +399,7 @@ def get_asset_type(asset_type_id: str, client: KitsuClient = default) -> dict:
         asset_type_id (str / dict): The asset type dict or its ID.
 
     Returns:
-        dict: Asset Type matching given ID.
+        dict: The asset type with the given ID.
     """
     asset_type_id = normalize_model_parameter(asset_type_id)["id"]
     return raw.fetch_one("asset-types", asset_type_id, client=client)
@@ -401,25 +411,26 @@ def get_asset_type_by_name(
 ) -> dict | None:
     """
     Args:
-        name (str): name of asset type.
+        name (str): The name of the asset type.
 
     Returns:
-        dict | None: Asset Type matching given name, or None if no asset type
-            exists with that name.
+        dict | None: The asset type with the given name, or None if no asset
+            type has this name.
     """
     return raw.fetch_first("entity-types", {"name": name}, client=client)
 
 
 def new_asset_type(name: str, client: KitsuClient = default) -> dict:
     """
-    Create a new asset type in the database, or return the existing asset
-    type if one already exists with that name.
+    Create an asset type in the database.
+
+    If an asset type with this name already exists, return this asset type.
 
     Args:
-        name (str): The name of asset type to create.
+        name (str): The name of the asset type to create.
 
     Returns:
-        (dict): The created (or already existing) asset type.
+        dict: The created or existing asset type.
     """
     data = {"name": name}
     asset_type = raw.fetch_first("entity-types", {"name": name}, client=client)
@@ -430,11 +441,15 @@ def new_asset_type(name: str, client: KitsuClient = default) -> dict:
 
 def update_asset_type(asset_type: dict, client: KitsuClient = default) -> dict:
     """
-    Save given asset type data into the API. It assumes that the asset type
-    already exists.
+    Save the name of the given asset type to the API.
+
+    The asset type must exist. This function does not save other fields.
 
     Args:
-        asset_type (dict): Asset Type to save.
+        asset_type (dict): The asset type to save.
+
+    Returns:
+        dict: The updated asset type.
     """
     data = {"name": asset_type["name"]}
     # Asset types are entity types in Zou; the data/asset-types route is
@@ -447,10 +462,13 @@ def remove_asset_type(
     asset_type: str | dict, client: KitsuClient = default
 ) -> str:
     """
-    Remove given asset type from database.
+    Remove the given asset type from the database.
 
     Args:
-        asset_type (str / dict): Asset type to remove.
+        asset_type (str / dict): The asset type to remove.
+
+    Returns:
+        str: The response of the API.
     """
     asset_type = normalize_model_parameter(asset_type)
     # Asset types are entity types in Zou; the data/asset-types route is
@@ -465,10 +483,10 @@ def get_asset_instance(
 ) -> dict:
     """
     Args:
-        asset_instance_id (str): ID of claimed asset instance.
+        asset_instance_id (str): The ID of the asset instance.
 
     Returns:
-        dict: Asset Instance matching given ID.
+        dict: The asset instance with the given ID.
     """
     return raw.fetch_one("asset-instances", asset_instance_id, client=client)
 
@@ -476,13 +494,14 @@ def get_asset_instance(
 @cache
 def all_shot_asset_instances_for_asset(
     asset: str | dict, client: KitsuClient = default
-) -> list[dict]:
+) -> dict:
     """
     Args:
         asset (str / dict): The asset dict or the asset ID.
 
     Returns:
-        list: Asset instances existing for a given asset.
+        dict: The asset instances of the given asset. The keys are shot IDs.
+        The values are lists of asset instances.
     """
     asset = normalize_model_parameter(asset)
     path = f"assets/{asset['id']}/shot-asset-instances"
@@ -493,7 +512,7 @@ def enable_asset_instance(
     asset_instance: str | dict, client: KitsuClient = default
 ) -> dict:
     """
-    Set active flag of given asset instance to True.
+    Set the active flag of the given asset instance to True.
 
     Args:
         asset_instance (str / dict): The asset instance dict or ID.
@@ -508,7 +527,7 @@ def disable_asset_instance(
     asset_instance: str | dict, client: KitsuClient = default
 ) -> dict:
     """
-    Set active flag of given asset instance to False.
+    Set the active flag of the given asset instance to False.
 
     Args:
         asset_instance (str / dict): The asset instance dict or ID.
@@ -522,13 +541,14 @@ def disable_asset_instance(
 @cache
 def all_scene_asset_instances_for_asset(
     asset: str | dict, client: KitsuClient = default
-) -> list[str]:
+) -> dict:
     """
     Args:
         asset (str / dict): The asset dict or the asset ID.
 
     Returns:
-        list: Scene asset instances existing for a given asset.
+        dict: The asset instances of the given asset in scenes. The keys are
+        scene IDs. The values are lists of asset instances.
     """
     asset = normalize_model_parameter(asset)
     path = f"assets/{asset['id']}/scene-asset-instances"
@@ -537,13 +557,14 @@ def all_scene_asset_instances_for_asset(
 
 def all_asset_instances_for_shot(
     shot: str | dict, client: KitsuClient = default
-) -> list[dict]:
+) -> dict:
     """
     Args:
         shot (str / dict): The shot dict or the shot ID.
 
     Returns:
-        list: Asset instances existing for a given shot.
+        dict: The asset instances of the given shot. The keys are asset IDs.
+        The values are lists of asset instances.
     """
     # Single source of truth: shot.get_asset_instances_for_shot hits the same
     # route and already caches; no @cache here to avoid a redundant layer.
@@ -553,13 +574,14 @@ def all_asset_instances_for_shot(
 @cache
 def all_asset_instances_for_asset(
     asset: str | dict, client: KitsuClient = default
-) -> list[str]:
+) -> dict:
     """
     Args:
         asset (str / dict): The asset dict or the asset ID.
 
     Returns:
-        list: Asset instances existing for a given asset.
+        dict: The asset instances in the given asset. The keys are the IDs of
+        the instantiated assets. The values are lists of asset instances.
     """
     asset = normalize_model_parameter(asset)
     path = f"assets/{asset['id']}/asset-asset-instances"
@@ -573,16 +595,18 @@ def new_asset_asset_instance(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Creates a new asset instance for given asset. The instance number is
-    automatically generated (increment highest number).
+    Create an asset instance for the given asset.
+
+    The API sets the instance number. It adds 1 to the highest number.
 
     Args:
         asset (str / dict): The asset dict or the asset ID.
-        asset_to_instantiate (str / dict): The asset dict or ID to instantiate.
-        description (str): Additional information (optional)
+        asset_to_instantiate (str / dict): The dict or ID of the asset to
+            instantiate.
+        description (str): The description of the instance (optional).
 
     Returns:
-        (dict): Created asset instance.
+        dict: The created asset instance.
     """
     asset = normalize_model_parameter(asset)
     asset_to_instantiate = normalize_model_parameter(asset_to_instantiate)
@@ -605,16 +629,16 @@ def import_assets_with_csv(
     progress_callback=None,
 ) -> list[dict]:
     """
-    Import the Assets from a previously exported CSV file into the given
-    project.
+    Import the assets from an exported CSV file into the given project.
 
     Args:
-        project (str | dict): The project to import the Assets into, as an ID
-            string or model dict.
-        csv_file_path (str): The path on disk to the CSV file.
+        project (str | dict): The ID or dict of the target project.
+        csv_file_path (str): The path of the CSV file on the disk.
+        progress_callback (Callable): The function ``(bytes_read, total)``
+            that this function calls during the upload.
 
     Returns:
-        list[dict]: the Asset dicts created by the import.
+        list[dict]: The assets that the import created.
     """
     project = normalize_model_parameter(project)
     return raw.upload(
@@ -635,28 +659,30 @@ def export_assets_with_csv(
     assigned_to: str | dict | bool | None = None,
 ) -> requests.Response:
     """
-    Export the Assets data for a project to a CSV file on disk.
+    Export the asset data of a project to a CSV file on the disk.
 
     Args:
         project (str | dict):
-            The ID or dict for the project to export.
+            The ID or dict of the project to export.
         csv_file_path (str):
-            The path on disk to write the file to. If the path already exists
-            it will be overwritten.
+            The path of the file on the disk. If the file exists, this
+            function replaces it.
         episode (str | dict | None):
-            Only export Assets that are linked to the given Episode, which can
-            be provided as an ID string or model dict. If None, all assets will
-            be exported.
+            The ID or dict of an episode. This function exports only the
+            assets of this episode. If the value is None, this function
+            exports all assets.
         assigned_to_me (bool):
-            Only export Assets that have one or more Tasks assigned to the
-            logged-in user. Zou does not support filtering on another
-            person.
+            If True, export only the assets with one or more tasks assigned
+            to the current user. Zou cannot filter on a different person.
+        progress_callback (Callable):
+            The function ``(bytes_read, total)`` that this function calls
+            during the download. The value of ``total`` is 0 if it is unknown.
         assigned_to:
-            Deprecated alias of ``assigned_to_me``: any truthy value enables
-            the filter, the person passed is ignored by Zou.
+            Do not use this parameter. Use ``assigned_to_me``. A true value
+            sets the filter on the current user. Zou ignores the given person.
 
     Returns:
-        (requests.Response): the response from the API server.
+        requests.Response: The response of the API server.
     """
     project = normalize_model_parameter(project)
     episode = normalize_model_parameter(episode)
@@ -679,17 +705,17 @@ def get_episode_from_asset(
     asset: dict, client: KitsuClient = default
 ) -> dict | None:
     """
-    Return the Episode that the given Asset is linked to.
+    Return the episode that the given asset is linked to.
 
-    If the Asset isn't linked to a particular Episode (i.e it's part of the
-    "Main Pack"), None will be returned.
+    If the asset is not linked to an episode (it is part of the "Main Pack"),
+    this function returns None.
 
     Args:
         asset (dict): The asset dict.
 
     Returns:
-        dict: Episode which is parent of given asset, or None if not part of
-            an episode.
+        dict: The episode of the given asset, or None if the asset is not
+            linked to an episode.
     """
     # Assets link to their episode through source_id (serialized as
     # episode_id in API listings); parent_id is the asset-hierarchy link.
@@ -708,6 +734,6 @@ def get_asset_type_from_asset(
         asset (dict): The asset dict.
 
     Returns:
-        dict: Asset type which is the type of given asset.
+        dict: The asset type of the given asset.
     """
     return get_asset_type(asset["entity_type_id"], client=client)

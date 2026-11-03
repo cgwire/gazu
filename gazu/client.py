@@ -1,3 +1,7 @@
+"""
+Low-level HTTP functions for the Kitsu API, and the client class.
+"""
+
 from __future__ import annotations
 
 import json
@@ -52,6 +56,13 @@ if os.getenv("GAZU_DEBUG", "false").lower() == "true":
 
 
 class KitsuClient(object):
+    """
+    The connection to a Kitsu API: host URL, tokens and HTTP session.
+
+    You can use this class as a context manager. At the end of the block, the
+    client logs out, removes its tokens and closes its session.
+    """
+
     def __init__(
         self,
         host: str,
@@ -97,10 +108,10 @@ class KitsuClient(object):
 
     def refresh_access_token(self) -> dict[str, str]:
         """
-        Refresh access tokens for this client.
+        Refresh the access token of this client.
 
         Returns:
-            dict: The new access token.
+            dict: The tokens that the API returns.
         """
         if not self.refresh_token:
             raise NotAuthenticatedException("auth/refresh-token")
@@ -137,10 +148,11 @@ class KitsuClient(object):
 
     def make_auth_header(self) -> dict[str, str]:
         """
-        Make headers required to authenticate.
+        Make the request headers for authentication.
 
         Returns:
-            dict: Headers required to authenticate.
+            dict: The User-Agent header and, if the client has an access
+                token, the Authorization header.
         """
         headers = {"User-Agent": "CGWire Gazu " + __version__}
 
@@ -159,14 +171,15 @@ def create_client(
     **kwargs: Any,
 ) -> KitsuClient:
     """
-    Create a client with given parameters.
+    Create a client with the given parameters.
 
     Args:
         host (str): The host to use for requests.
-        ssl_verify (bool): Whether to verify SSL certificates.
-        cert (str): Path to a client certificate.
-        use_refresh_token (bool): Whether to automatically refresh tokens.
-        callback_not_authenticated (function): Function to call when not authenticated.
+        ssl_verify (bool): If True, verify SSL certificates.
+        cert (str): The path to a client certificate.
+        use_refresh_token (bool): If True, refresh tokens automatically.
+        callback_not_authenticated (function): The function to call if the
+            user is not authenticated.
 
     Returns:
         KitsuClient: The created client.
@@ -213,7 +226,9 @@ def host_is_up(client: KitsuClient = default_client) -> bool:
 
 def host_is_valid(client: KitsuClient = default_client) -> bool:
     """
-    Check if the host is valid by simulating a fake login.
+    Check if the host is valid.
+
+    This function sends a login request with an empty email.
 
     Args:
         client (KitsuClient): The client to use for the request.
@@ -232,8 +247,9 @@ def host_is_valid(client: KitsuClient = default_client) -> bool:
 
 def get_host(client: KitsuClient = default_client) -> str:
     """
-    Get the API URL for the Kitsu host the given client is connected to, e.g
-        "http://kitsu.instance.com/api"
+    Get the API URL of the Kitsu host of the given client.
+
+    For example: "http://kitsu.instance.com/api"
 
     Args:
         client (KitsuClient): The client to use for the request.
@@ -246,17 +262,16 @@ def get_host(client: KitsuClient = default_client) -> str:
 
 def get_api_url_from_host(client: KitsuClient = default_client) -> str:
     """
-    Get the base URL to the Kitsu instance the client is connected to, without
-    the `/api` suffix, e.g
+    Get the base URL of the Kitsu instance of the client.
 
-    This can be used to build URL paths to particular records in the Kitsu
-    web interface.
+    The URL does not have the `/api` suffix. Use this URL to make paths to
+    records in the Kitsu web interface.
 
     Args:
         client (KitsuClient): The client to use for the request.
 
     Returns:
-        str: The base Kitsu URL the client is connected to.
+        str: The base Kitsu URL of the client.
     """
     if client.host.endswith("/api"):
         return client.host[:-4]
@@ -280,7 +295,7 @@ def set_host(new_host: str, client: KitsuClient = default_client) -> str:
 
 def get_event_host(client: KitsuClient = default_client) -> str:
     """
-    Get the host on which listening for events.
+    Get the host that sends the events.
 
     Args:
         client (KitsuClient): The client to use for the request.
@@ -293,7 +308,7 @@ def get_event_host(client: KitsuClient = default_client) -> str:
 
 def set_event_host(new_host: str, client: KitsuClient = default_client) -> str:
     """
-    Set the host on which listening for events.
+    Set the host that sends the events.
 
     Args:
         new_host (str): The new host to set.
@@ -310,10 +325,12 @@ def set_tokens(
     new_tokens: dict[str, str], client: KitsuClient = default_client
 ) -> dict[str, str]:
     """
-    Store authentication token to reuse them for all requests.
+    Store the authentication tokens.
+
+    The client uses these tokens for all requests.
 
     Args:
-        new_tokens (dict): Tokens to use for authentication.
+        new_tokens (dict): The tokens for authentication.
         client (KitsuClient): The client to use for the request.
 
     Returns:
@@ -325,24 +342,27 @@ def set_tokens(
 
 def make_auth_header(client: KitsuClient = default_client) -> dict[str, str]:
     """
-    Make headers required to authenticate.
+    Make the request headers for authentication.
 
     Args:
         client (KitsuClient): The client to use for the request.
 
     Returns:
-        dict: Headers required to authenticate.
+        dict: The User-Agent header and, if the client has an access token,
+            the Authorization header.
     """
     return client.make_auth_header()
 
 
 def url_path_join(*items: str) -> str:
     """
-    Make it easier to build url path by joining every arguments with a '/'
-    character.
+    Join the arguments with a '/' character to make a URL path.
+
+    This function removes the '/' characters at the start and at the end of
+    each argument.
 
     Args:
-        items (list): Path elements
+        items (list): The path elements.
 
     Returns:
         str: The joined path.
@@ -352,27 +372,29 @@ def url_path_join(*items: str) -> str:
 
 def get_full_url(path: str, client: KitsuClient = default_client) -> str:
     """
-    Join host url with given path.
+    Join the host URL and the given path.
 
     Args:
-        path (str): The path to integrate to host url.
+        path (str): The path to add to the host URL.
 
     Returns:
-        The result of joining configured host url with given path.
+        str: The full URL.
     """
     return url_path_join(get_host(client), path)
 
 
 def build_path_with_params(path: str, params: dict) -> str:
     """
-    Add params to a path using urllib encoding.
+    Add parameters to a path with urllib encoding.
+
+    A list value becomes one repeated parameter for each item.
 
     Args:
-        path (str): The url base path
-        params (dict): The parameters to add as a dict
+        path (str): The base URL path.
+        params (dict): The parameters to add.
 
     Returns:
-        str: the built path
+        str: The path with its parameters.
     """
     if not params:
         return path
@@ -396,16 +418,17 @@ def get(
     client: KitsuClient = default_client,
 ) -> Any:
     """
-    Run a get request toward given path for configured host.
+    Send a GET request to the given path of the configured host.
 
     Args:
         path (str): The path to query.
-        json_response (bool): Whether to return a json response.
-        params (dict): The parameters to pass to the request.
+        json_response (bool): If True, return the decoded JSON response.
+            If False, return the response text.
+        params (dict): The parameters of the request.
         client (KitsuClient): The client to use for the request.
 
     Returns:
-        The request result.
+        The decoded JSON response or the response text.
     """
     logger.debug("GET %s", get_full_url(path, client))
     path = build_path_with_params(path, params)
@@ -438,7 +461,7 @@ _SENSITIVE_BODY_FIELDS = {
 
 def _log_request_body(data: Any) -> None:
     """
-    Log a request body at debug level, unless it carries a secret field.
+    Write the request body to the debug log if it has no secret field.
     """
     try:
         has_secret = any(field in data for field in _SENSITIVE_BODY_FIELDS)
@@ -450,15 +473,15 @@ def _log_request_body(data: Any) -> None:
 
 def post(path: str, data: Any, client: KitsuClient = default_client) -> Any:
     """
-    Run a post request toward given path for configured host.
+    Send a POST request to the given path of the configured host.
 
     Args:
         path (str): The path to query.
-        data (Any): The data to post.
+        data (Any): The data to send.
         client (KitsuClient): The client to use for the request.
 
     Returns:
-        The request result.
+        The decoded JSON response.
     """
     logger.debug("POST %s", get_full_url(path, client))
     _log_request_body(data)
@@ -485,15 +508,15 @@ def post(path: str, data: Any, client: KitsuClient = default_client) -> Any:
 
 def put(path: str, data: dict, client: KitsuClient = default_client) -> Any:
     """
-    Run a put request toward given path for configured host.
+    Send a PUT request to the given path of the configured host.
 
     Args:
         path (str): The path to query.
-        data (dict): The data to put.
+        data (dict): The data to send.
         client (KitsuClient): The client to use for the request.
 
     Returns:
-        The request result.
+        The decoded JSON response.
     """
     logger.debug("PUT %s", get_full_url(path, client))
     _log_request_body(data)
@@ -517,15 +540,15 @@ def delete(
     path: str, params: dict | None = None, client: KitsuClient = default_client
 ) -> str:
     """
-    Run a delete request toward given path for configured host.
+    Send a DELETE request to the given path of the configured host.
 
     Args:
         path (str): The path to query.
-        params (dict): The parameters to pass to the request.
+        params (dict): The parameters of the request.
         client (KitsuClient): The client to use for the request.
 
     Returns:
-        The request result.
+        str: The response text.
     """
     logger.debug("DELETE %s", get_full_url(path, client))
     path = build_path_with_params(path, params)
@@ -547,13 +570,14 @@ def get_message_from_data(
     default_message: str = "No additional information",
 ) -> str:
     """
-    Extract Zou's error/message string from a parsed JSON body.
-    Handles Zou's inconsistent message keys and surfaces Pydantic
-    field-level validation details when present.
+    Get the error or message text from a decoded JSON body.
+
+    Zou can use the "message" key or the "error" key. If the body has Pydantic
+    validation details for fields, this function adds them to the text.
 
     Args:
-        message_json: The parsed JSON body (any type).
-        default_message: Value returned when no message is found.
+        message_json: The decoded JSON body (all types).
+        default_message: The value to return if the body has no message.
 
     Returns:
         str: The message to display to the user.
@@ -590,13 +614,15 @@ def get_message_from_response(
     default_message: str = "No additional information",
 ) -> str:
     """
-    A utility function that handles Zou's inconsistent message keys.
-    For a given request, checks if any error messages or regular messages were given and returns their value.
-    If no messages are found, returns a default message.
+    Get the error or message text from a response.
+
+    Zou can use the "message" key or the "error" key. If the response has no
+    message, this function returns the default message.
 
     Args:
-        response: requests.Response - A response to check.
-        default_message: str - An optional default value to revert to if no message is detected.
+        response (requests.Response): The response to check.
+        default_message (str): The value to return if the response has no
+            message.
 
     Returns:
         str: The message to display to the user.
@@ -612,15 +638,18 @@ def _handle_auth_expiry(
     client: KitsuClient, path: str, can_refresh: bool
 ) -> bool:
     """
-    Handle an expired/invalid JWT: refresh the access token when possible,
-    otherwise fall back to the not-authenticated callback.
+    Process an expired or invalid JWT.
+
+    If a refresh is possible, this function refreshes the access token.
+    If the refresh is not possible or fails, this function calls the
+    not-authenticated callback.
 
     Returns:
-        bool: True when the request should be retried.
+        bool: True if the caller must send the request again.
 
     Raises:
-        NotAuthenticatedException: when the token can't be refreshed and no
-            callback authorizes a retry.
+        NotAuthenticatedException: If the refresh is not possible or fails,
+            and no callback gives permission to send the request again.
     """
     try:
         if (
@@ -644,27 +673,30 @@ def check_status(
     request: requests.Response, path: str, client: KitsuClient = None
 ) -> tuple[int, bool]:
     """
-    Raise an exception related to status code, if the status code does not
-    match a success code. Print error message when it's relevant.
+    Raise an exception if the status code shows an error.
+
+    For a server error, this function writes the error message to the log.
 
     Args:
-        request (requests.Response): The request to validate.
+        request (requests.Response): The response to check.
         path (str): The path of the request.
         client (KitsuClient): The client to use for the request.
 
     Returns:
-        tuple[int, bool]: The status code, and whether or not to retry the
-            request.
+        tuple[int, bool]: The status code, and True if the caller must send
+            the request again.
 
     Raises:
-        ParameterException: when 400 response occurs
-        NotAuthenticatedException: when 401 response occurs
-        RouteNotFoundException: when 404 response occurs
-        NotAllowedException: when 403 response occurs
-        MethodNotAllowedException: when 405 response occurs
-        TooBigFileException: when 413 response occurs
-        ValidationException: when 422 response occurs (non auth-related)
-        ServerErrorException: when 500 response occurs
+        ParameterException: If the response status is 400.
+        NotAuthenticatedException: If the response status is 401 or if a 422
+            status shows an expired JWT, and a new try is not possible.
+        NotAllowedException: If the response status is 403.
+        RouteNotFoundException: If the response status is 404.
+        MethodNotAllowedException: If the response status is 405.
+        TooBigFileException: If the response status is 413.
+        ValidationException: If the response status is 422 and the JWT is
+            not expired.
+        ServerErrorException: If the response status is 500 or 502.
     """
     status_code = request.status_code
     if status_code == 404:
@@ -740,18 +772,20 @@ def fetch_all(
 ) -> list[dict]:
     """
     Args:
-        path (str): The path for which we want to retrieve all entries.
-        params (dict): The parameters to pass to the request.
+        path (str): The path of the entries to get. You can add a filter to
+            the model name. For example: "tasks?project_id=project-id".
+        params (dict): The parameters of the request.
         client (KitsuClient): The client to use for the request.
-        paginated (bool): Will query entries page by page.
-        limit (int): Limit the number of entries per page.
-        fields (list / str): Names of the attributes to return for each
-            entry (id and type are always included). Only honored by the
-            generic model list routes; older Kitsu API versions ignore it.
+        paginated (bool): If True, get the entries page by page.
+        limit (int): The maximum number of entries on each page. This
+            function uses this value only if ``paginated`` is True.
+        fields (list / str): The names of the attributes to return for each
+            entry. The API always returns the id and type attributes. Only
+            the generic model list routes use this value. Old Kitsu API
+            versions ignore it.
 
     Returns:
-        list: All entries stored in database for a given model. You can add a
-        filter to the model name like this: "tasks?project_id=project-id"
+        list: All entries in the database for the given path.
     """
     if fields is not None:
         if not params:
@@ -796,12 +830,12 @@ def fetch_first(
 ) -> dict | None:
     """
     Args:
-        path (str): The path for which we want to retrieve the first entry.
-        params (dict): The parameters to pass to the request.
+        path (str): The path of the entry to get.
+        params (dict): The parameters of the request.
         client (KitsuClient): The client to use for the request.
 
     Returns:
-        dict: The first entry for which a model is required.
+        dict: The first entry, or None if there is no entry.
     """
     entries = get(url_path_join("data", path), params=params, client=client)
     return entries[0] if entries else None
@@ -814,17 +848,16 @@ def fetch_one(
     client: KitsuClient = default_client,
 ) -> dict:
     """
-    Function dedicated at targeting routes that returns a single model
-    instance.
+    Get one model instance.
 
     Args:
-        model_name (str): Model type name.
-        id (str): Model instance ID.
-        params (dict): The parameters to pass to the request.
+        model_name (str): The name of the model type.
+        id (str): The ID of the model instance.
+        params (dict): The parameters of the request.
         client (KitsuClient): The client to use for the request.
 
     Returns:
-        dict: The model instance matching id and model name.
+        dict: The model instance with the given ID and model name.
     """
     return get(
         url_path_join("data", model_name, id), params=params, client=client
@@ -835,15 +868,15 @@ def create(
     model_name: str, data: dict, client: KitsuClient = default_client
 ) -> dict:
     """
-    Create an entry for given model and data.
+    Create an entry for the given model and data.
 
     Args:
-        model_name (str): The model type involved.
-        data (dict): The data to use for creation.
+        model_name (str): The model type.
+        data (dict): The data of the entry.
         client (KitsuClient): The client to use for the request.
 
     Returns:
-        dict: Created entry
+        dict: The created entry.
     """
     return post(url_path_join("data", model_name), data, client=client)
 
@@ -855,16 +888,16 @@ def update(
     client: KitsuClient = default_client,
 ) -> dict:
     """
-    Update an entry for given model, id and data.
+    Update an entry for the given model, ID and data.
 
     Args:
-        model_name (str): The model type involved.
-        model_id (str): The target model id.
+        model_name (str): The model type.
+        model_id (str): The ID of the target model.
         data (dict): The data to update.
         client (KitsuClient): The client to use for the request.
 
     Returns:
-        dict: Updated entry
+        dict: The updated entry.
     """
     return put(
         url_path_join("data", model_name, model_id), data, client=client
@@ -873,7 +906,7 @@ def update(
 
 class _ProgressFileWrapper:
     """
-    Wraps a file object to track read progress via a callback.
+    Wrap a file object and call a function each time the code reads data.
     """
 
     def __init__(self, file_obj, callback, offset, total):
@@ -903,20 +936,24 @@ def upload(
     progress_callback: Callable | None = None,
 ) -> Any:
     """
-    Upload file located at *file_path* to given url *path*.
+    Upload the file at *file_path* to the given URL *path*.
 
     Args:
-        path (str): The url path to upload file.
-        file_path (str): The file location on the hard drive.
+        path (str): The URL path for the upload.
+        file_path (str): The location of the file on the hard drive.
         data (dict): The data to send with the file.
-        extra_files (list): List of extra files to upload.
-        files (dict): The dictionary of files to upload.
+        extra_files (list): The paths of the other files to upload.
+        files (dict): The files to upload. If you give this value, this
+            function does not use *file_path* and *extra_files*.
         client (KitsuClient): The client to use for the request.
-        progress_callback (Callable): Callback ``(bytes_read, total)``
-            invoked during upload. *total* is the sum of all file sizes.
+        progress_callback (Callable): The function ``(bytes_read, total)``
+            to call during the upload. *total* is the sum of all file sizes.
 
     Returns:
-        Any: Response from the API.
+        Any: The response of the API.
+
+    Raises:
+        UploadFailedException: If the response contains a message.
     """
     if data is None:
         data = {}
@@ -980,14 +1017,14 @@ def upload(
 
 def _build_file_dict(file_path: str, extra_files: list[str]) -> dict:
     """
-    Build a dictionary of files to upload.
+    Open the files to upload and put them in a dict.
 
     Args:
-        file_path (str): The file location on the hard drive.
-        extra_files (list): List of extra files to upload.
+        file_path (str): The location of the file on the hard drive.
+        extra_files (list): The paths of the other files to upload.
 
     Returns:
-        dict: The dictionary of files to upload.
+        dict: The open files to upload.
     """
 
     files = {}
@@ -1012,27 +1049,31 @@ def download(
     processing_timeout: float = DEFAULT_PROCESSING_TIMEOUT,
 ) -> requests.Response:
     """
-    Download file located at *file_path* to given url *path*.
+    Download the file at the given URL *path* to *file_path*.
 
-    A preview file whose variants are still being built answers 202: the
-    download waits for the delay the server asks for and tries again,
-    silently, for at most *processing_timeout* seconds. It then raises
-    PreviewFileProcessingException. A missing file (404) is an error
-    right away.
+    The server returns the status 202 if it has not finished the variants of
+    a preview file. This function then waits for the delay from the server
+    and tries again. It tries for a maximum of *processing_timeout* seconds.
+    A missing file (status 404) causes an error immediately.
 
     Args:
-        path (str): The url path to download file from.
-        file_path (str): The location to store the file on the hard drive.
-        params (dict): The parameters to pass to the request.
+        path (str): The URL path of the file.
+        file_path (str): The location of the file on the hard drive. If the
+            value is None, this function does not write a file and the
+            response contains the data.
+        params (dict): The parameters of the request.
         client (KitsuClient): The client to use for the request.
-        progress_callback (Callable): Callback ``(bytes_read, total)``
-            invoked during download. *total* is 0 when unknown.
-        processing_timeout (float): Seconds to wait for a preview file
-            still being processed by the server.
+        progress_callback (Callable): The function ``(bytes_read, total)``
+            to call during the download. *total* is 0 if it is unknown.
+        processing_timeout (float): The time in seconds to wait for a preview
+            file that the server has not finished.
 
     Returns:
-        Response: Request response object.
+        Response: The response object of the request.
 
+    Raises:
+        PreviewFileProcessingException: If the server has not finished the
+            preview file after *processing_timeout* seconds.
     """
     path = build_path_with_params(path, params)
     url = get_full_url(path, client)
@@ -1066,9 +1107,10 @@ def download(
 
 def _download_once(url, path, client):
     """
-    One download request, with the auth refresh the other verbs get. The
-    status is checked before anything is streamed to a file, so an error
-    body is never written into the target.
+    Send one download request and refresh the token if necessary.
+
+    This function checks the status before the data goes to a file. Thus,
+    an error body does not go into the target file.
     """
     for _ in range(MAX_AUTH_RETRIES):
         # Built on each try: a token refresh must reach the retry.
@@ -1086,12 +1128,14 @@ def _download_once(url, path, client):
 
 def _retry_after(response, deadline):
     """
-    The delay before the next try, in seconds: the server's Retry-After
-    header, or DEFAULT_RETRY_AFTER when it is missing or not a number.
-    Either way, the delay never exceeds what remains of the processing
-    budget: a large Retry-After (e.g. a misconfigured proxy sending
-    Retry-After: 3600) would otherwise sleep well past the deadline that
-    is only checked once the sleep returns.
+    Return the delay in seconds before the next try.
+
+    The delay is the value of the Retry-After header of the server. If this
+    value is missing or is not a number, the delay is DEFAULT_RETRY_AFTER.
+
+    The delay is never longer than the time before the deadline. The code
+    checks the deadline only after the delay. Thus, a large Retry-After value
+    from a proxy with an incorrect configuration can cause a very long wait.
     """
     try:
         delay = max(0, float(response.headers.get("Retry-After")))
@@ -1105,15 +1149,16 @@ def get_file_data_from_url(
     url: str, full: bool = False, client: KitsuClient = default_client
 ) -> bytes:
     """
-    Return data found at given url.
+    Return the data at the given URL.
 
     Args:
-        url (str): The url to fetch data from.
-        full (bool): Whether to use full url.
+        url (str): The URL of the data.
+        full (bool): If True, the URL is a full URL. If False, this function
+            adds the URL to the host URL.
         client (KitsuClient): The client to use for the request.
 
     Returns:
-        bytes: The data found at the given url.
+        bytes: The data at the given URL.
     """
     if not full:
         url = get_full_url(url, client=client)
@@ -1134,7 +1179,7 @@ def import_data(
     model_name: str, data: dict, client: KitsuClient = default_client
 ) -> dict:
     """
-    Import data for given model.
+    Import data for the given model.
 
     Args:
         model_name (str): The data model to import.
@@ -1155,7 +1200,7 @@ def get_api_version(client: KitsuClient = default_client) -> str:
         client (KitsuClient): The client to use for the request.
 
     Returns:
-        str: Current version of the API.
+        str: The current version of the API.
     """
     return get("", client=client)["version"]
 
@@ -1168,6 +1213,6 @@ def get_current_user(client: KitsuClient = default_client) -> dict:
         client (KitsuClient): The client to use for the request.
 
     Returns:
-        dict: User database information for user linked to auth tokens.
+        dict: The data of the user of the authentication tokens.
     """
     return get("auth/authenticated", client=client)["user"]

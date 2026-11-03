@@ -5,7 +5,7 @@ from . import client as raw
 from .sorting import sort_by_name
 from .cache import cache
 from .client import KitsuClient
-from .helpers import normalize_model_parameter
+from .helpers import normalize_model_parameter, warn_ignored_force
 
 default = raw.default_client
 
@@ -14,7 +14,7 @@ default = raw.default_client
 def all_studios(client: KitsuClient = default) -> list[dict]:
     """
     Returns:
-        list: Studios stored in the database.
+        list: The studios in the database.
     """
     return sort_by_name(raw.fetch_all("studios", client=client))
 
@@ -23,10 +23,10 @@ def all_studios(client: KitsuClient = default) -> list[dict]:
 def get_studio(studio_id: str, client: KitsuClient = default) -> dict:
     """
     Args:
-        studio_id (str): ID of claimed studio.
+        studio_id (str): The ID of the studio.
 
     Returns:
-        dict: Studio corresponding to given id.
+        dict: The studio with the given ID.
     """
     return raw.fetch_one("studios", studio_id, client=client)
 
@@ -37,24 +37,25 @@ def get_studio_by_name(
 ) -> dict | None:
     """
     Args:
-        studio_name (str): Name of claimed studio.
+        studio_name (str): The name of the studio.
 
     Returns:
-        dict: Studio corresponding to given name.
+        dict: The studio with the given name, or None if no studio matches.
     """
     return raw.fetch_first("studios", {"name": studio_name}, client=client)
 
 
 def update_studio(studio: dict, client: KitsuClient = default) -> dict:
     """
-    Save given studio data into the API. Metadata are fully replaced by the
-    ones set on given studio.
+    Save the given studio data to the API.
+
+    The given fields replace the current values.
 
     Args:
         studio (dict): The studio to update.
 
     Returns:
-        dict: Updated studio.
+        dict: The updated studio.
     """
     return raw.put(f"data/studios/{studio['id']}", studio, client=client)
 
@@ -63,13 +64,16 @@ def remove_studio(
     studio: str | dict, force: bool = False, client: KitsuClient = default
 ) -> str:
     """
-    Remove given studio from database.
+    Remove the given studio from the database.
 
     Args:
-        studio (dict / str): Studio to remove.
-        force (bool): Whether to force deletion of the studio.
+        studio (dict / str): The studio to remove.
+        force (bool): Do not use. The API ignores this value on this route.
+
+    Returns:
+        str: The response of the API.
     """
+    if force:
+        warn_ignored_force("remove_studio")
     studio = normalize_model_parameter(studio)
-    path = f"data/studios/{studio['id']}"
-    params = {"force": True} if force else {}
-    return raw.delete(path, params=params, client=client)
+    return raw.delete(f"data/studios/{studio['id']}", client=client)

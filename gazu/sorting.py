@@ -3,12 +3,12 @@ from __future__ import annotations
 
 def sort_by_name(dicts: list[dict]) -> list[dict]:
     """
-    Sorting of a list of dicts. The sorting is based on the name field.
+    Sort a list of dicts with the name field. Letter case has no effect.
 
     Args:
-        list: The list of dicts to sort.
+        dicts (list): The list of dicts to sort.
 
     Returns:
-        Sorted list.
+        list: The sorted list.
     """
     return sorted(dicts, key=lambda k: (k.get("name") or "").lower())

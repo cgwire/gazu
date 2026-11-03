@@ -87,17 +87,6 @@ class StudioTestCase(unittest.TestCase):
             studio = {"id": fakeid("studio-1"), "name": "Studio A"}
             gazu.studio.remove_studio(studio)
 
-    def test_remove_studio_with_force(self):
-        with requests_mock.mock() as mock:
-            mock_route(
-                mock,
-                "DELETE",
-                f"data/studios/{fakeid('studio-1')}?force=true",
-                status_code=204,
-            )
-            studio = {"id": fakeid("studio-1"), "name": "Studio A"}
-            gazu.studio.remove_studio(studio, force=True)
-
     def test_remove_studio_with_id_string(self):
         with requests_mock.mock() as mock:
             mock_route(

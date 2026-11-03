@@ -1,5 +1,5 @@
 """
-Command-line interface for the Kitsu API (via Gazu).
+Command-line interface for the Kitsu API. This interface uses Gazu.
 
 Usage:
     gazu-cli login --host https://kitsu.example.com/api
@@ -43,6 +43,9 @@ CONFIG_FILE = os.path.join(CONFIG_DIR, "config.json")
 
 
 def load_config():
+    """
+    Return the stored configuration, or an empty dict if there is none.
+    """
     if not os.path.exists(CONFIG_FILE):
         return {}
     with open(CONFIG_FILE, "r") as f:
@@ -52,6 +55,11 @@ def load_config():
 def save_config(data):
     # makedirs honors mode only when it creates the dir; enforce 0700 either
     # way so the token file never sits in a world-readable directory.
+    """
+    Write the configuration to the disk.
+
+    Only the current user can read the file, because it contains the tokens.
+    """
     os.makedirs(CONFIG_DIR, mode=0o700, exist_ok=True)
     os.chmod(CONFIG_DIR, 0o700)
     # Create the file 0600 from the start: open("w") + chmod would leave a
@@ -64,6 +72,9 @@ def save_config(data):
 
 
 def clear_config():
+    """
+    Remove the configuration file if it exists.
+    """
     if os.path.exists(CONFIG_FILE):
         os.remove(CONFIG_FILE)
 
@@ -76,8 +87,8 @@ def print_table(rows, columns):
     Print a list of dicts as aligned columns.
 
     Args:
-        rows: list of dicts
-        columns: list of (header, key) tuples
+        rows (list): The dicts to print.
+        columns (list): The (header, key) tuples of the columns.
     """
     if not rows:
         click.echo("No results.")
@@ -106,6 +117,9 @@ def print_table(rows, columns):
 
 
 def _truncate(text, max_len):
+    """
+    Put the text on one line and cut it to the maximum length.
+    """
     text = text.replace("\n", " ").strip()
     if len(text) > max_len:
         return text[: max_len - 3] + "..."
@@ -114,7 +128,10 @@ def _truncate(text, max_len):
 
 def output(ctx, data, columns):
     """
-    Output data as JSON or table depending on context flag.
+    Print the data.
+
+    If the --json flag is set, print the data as JSON. If not, print a list
+    as a table, and print a dict with one line for each column.
     """
     if ctx.obj.get("json"):
         click.echo(json.dumps(data, indent=2, default=str))
@@ -138,6 +155,11 @@ def _is_uuid(value):
 
 
 def resolve_project(name_or_id):
+    """
+    Return the project with the given name or ID.
+
+    If no project has this name, print a message and stop with exit code 1.
+    """
     if _is_uuid(name_or_id):
         return gazu_project.get_project(name_or_id)
     result = gazu_project.get_project_by_name(name_or_id)
@@ -149,7 +171,7 @@ def resolve_project(name_or_id):
 
 def get_project_from_option(project_opt):
     """
-    Resolve project from CLI option or GAZU_PROJECT env var.
+    Get the project from the CLI option or the GAZU_PROJECT variable.
     """
     name_or_id = project_opt or os.environ.get("GAZU_PROJECT")
     if not name_or_id:
@@ -166,7 +188,7 @@ def get_project_from_option(project_opt):
 
 def setup_client():
     """
-    Load config and configure the gazu default client.
+    Load the configuration and set the host and tokens of the default client.
     """
     config = load_config()
     host = config.get("host")
@@ -183,7 +205,7 @@ def setup_client():
 
 def handle_errors(fn):
     """
-    Decorator to catch common gazu exceptions.
+    Catch common gazu exceptions, print a message and stop with exit code 1.
     """
 
     def wrapper(*args, **kwargs):
@@ -219,7 +241,7 @@ def handle_errors(fn):
 @click.pass_context
 def cli(ctx, use_json):
     """
-    Gazu CLI - Command-line client for the Kitsu API.
+    Gazu CLI: the command-line client for the Kitsu API.
     """
     ctx.ensure_object(dict)
     ctx.obj["json"] = use_json
@@ -237,7 +259,7 @@ def cli(ctx, use_json):
 @handle_errors
 def login(host, email, password):
     """
-    Log in to a Kitsu instance and store credentials.
+    Log in to a Kitsu instance and store the host and the tokens.
     """
     host = host.rstrip("/")
     if not host.endswith("/api"):
@@ -252,7 +274,7 @@ def login(host, email, password):
 @handle_errors
 def logout():
     """
-    Log out and clear stored credentials.
+    Log out and remove the stored host and tokens.
     """
     try:
         setup_client()
@@ -268,7 +290,7 @@ def logout():
 @handle_errors
 def status(ctx):
     """
-    Show current connection status.
+    Show the current connection status.
     """
     setup_client()
     user = raw.get_current_user()
@@ -304,7 +326,7 @@ def status(ctx):
 @handle_errors
 def projects(ctx, show_all):
     """
-    List projects.
+    List the open projects. Use --all to list all projects.
     """
     setup_client()
     if show_all:
@@ -329,7 +351,7 @@ def projects(ctx, show_all):
 @handle_errors
 def project(ctx, name_or_id):
     """
-    Show details for a project.
+    Show the details of a project.
     """
     setup_client()
     data = resolve_project(name_or_id)
@@ -356,7 +378,7 @@ def project(ctx, name_or_id):
 @handle_errors
 def assets(ctx, project_opt, asset_type):
     """
-    List assets for a project.
+    List the assets of a project.
     """
     setup_client()
     proj = get_project_from_option(project_opt)
@@ -387,7 +409,7 @@ def assets(ctx, project_opt, asset_type):
 @handle_errors
 def asset(ctx, name_or_id, project_opt):
     """
-    Show details for an asset.
+    Show the details of an asset.
     """
     setup_client()
     if _is_uuid(name_or_id):
@@ -422,7 +444,7 @@ def asset(ctx, name_or_id, project_opt):
 @handle_errors
 def shots(ctx, project_opt, sequence, episode):
     """
-    List shots for a project.
+    List the shots of a project.
     """
     setup_client()
     proj = get_project_from_option(project_opt)
@@ -460,7 +482,7 @@ def shots(ctx, project_opt, sequence, episode):
 @handle_errors
 def sequences(ctx, project_opt, episode):
     """
-    List sequences for a project.
+    List the sequences of a project.
     """
     setup_client()
     proj = get_project_from_option(project_opt)
@@ -489,7 +511,7 @@ def sequences(ctx, project_opt, episode):
 @handle_errors
 def episodes(ctx, project_opt):
     """
-    List episodes for a project.
+    List the episodes of a project.
     """
     setup_client()
     proj = get_project_from_option(project_opt)
@@ -512,7 +534,7 @@ def episodes(ctx, project_opt):
 @handle_errors
 def tasks(ctx, project_opt, task_type, task_status):
     """
-    List tasks for a project.
+    List the tasks of a project.
     """
     setup_client()
     proj = get_project_from_option(project_opt)
@@ -568,7 +590,7 @@ def tasks(ctx, project_opt, task_type, task_status):
 @handle_errors
 def task(ctx, task_id):
     """
-    Show details for a task (by ID).
+    Show the details of a task. Use the task ID.
     """
     setup_client()
     data = gazu_task.get_task(task_id)
@@ -600,7 +622,7 @@ def task(ctx, task_id):
 @handle_errors
 def comment(task_id, status_short, message):
     """
-    Post a comment on a task (with status change).
+    Add a comment to a task and set the task status.
     """
     setup_client()
     ts = gazu_task.get_task_status_by_short_name(status_short)
@@ -645,7 +667,7 @@ def persons(ctx):
 @handle_errors
 def my_tasks(ctx, done):
     """
-    List tasks assigned to current user.
+    List the tasks assigned to the current user.
     """
     setup_client()
     if done:
@@ -675,7 +697,7 @@ def my_tasks(ctx, done):
 @handle_errors
 def search(ctx, query, project_opt):
     """
-    Search for entities across the Kitsu instance.
+    Search for entities in the Kitsu instance.
     """
     setup_client()
     proj = None
@@ -703,7 +725,7 @@ def search(ctx, query, project_opt):
 @handle_errors
 def shot_casting(ctx, shot_id):
     """
-    Show casting (assets linked) for a shot.
+    Show the casting (the linked assets) of a shot.
     """
     setup_client()
     # get_shot_casting needs the shot's project_id, so fetch the full shot.
@@ -730,7 +752,7 @@ def shot_casting(ctx, shot_id):
 @handle_errors
 def asset_types(ctx, project_opt):
     """
-    List asset types.
+    List the asset types.
     """
     setup_client()
     if project_opt:
@@ -747,7 +769,7 @@ def asset_types(ctx, project_opt):
 @handle_errors
 def task_types(ctx, project_opt):
     """
-    List task types.
+    List the task types.
     """
     setup_client()
     if project_opt:
@@ -768,7 +790,7 @@ def task_types(ctx, project_opt):
 @handle_errors
 def task_statuses(ctx, project_opt):
     """
-    List task statuses.
+    List the task statuses.
     """
     setup_client()
     if project_opt:

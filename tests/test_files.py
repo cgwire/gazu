@@ -101,6 +101,7 @@ class FilesTestCase(unittest.TestCase):
                 mock.last_request.json(),
                 {
                     "comment": comment,
+                    "mode": "output",
                     "name": name,
                     "nb_elements": 1,
                     "output_type_id": output_type["id"],
@@ -156,6 +157,7 @@ class FilesTestCase(unittest.TestCase):
                 mock.last_request.json(),
                 {
                     "comment": comment,
+                    "mode": "output",
                     "name": name,
                     "nb_elements": 1,
                     "output_type_id": output_type["id"],

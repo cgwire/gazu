@@ -8,6 +8,7 @@ from .sorting import sort_by_name
 from .helpers import (
     normalize_model_parameter,
     normalize_list_of_models_for_links,
+    warn_ignored_force,
 )
 
 default = raw.default_client
@@ -17,7 +18,7 @@ default = raw.default_client
 def all_entities(client: KitsuClient = default) -> list[dict]:
     """
     Returns:
-        list: Retrieve all entities
+        list: All entities in the database.
     """
     return raw.fetch_all("entities", client=client)
 
@@ -26,7 +27,7 @@ def all_entities(client: KitsuClient = default) -> list[dict]:
 def all_entity_types(client: KitsuClient = default) -> list[dict]:
     """
     Returns:
-        list: Entity types listed in database.
+        list: The entity types in the database.
     """
     return sort_by_name(raw.fetch_all("entity-types", client=client))
 
@@ -35,11 +36,11 @@ def all_entity_types(client: KitsuClient = default) -> list[dict]:
 def get_entity(entity_id: str, client: KitsuClient = default) -> dict:
     """
     Args:
-        entity_id (str): ID of claimed entity.
+        entity_id (str): The ID of the entity.
 
     Returns:
-        dict: Retrieve entity matching given ID (it can be an entity of any
-        kind: asset, shot, sequence, episode, etc).
+        dict: The entity with the given ID. The entity can be of all types:
+        asset, shot, sequence, episode and more.
     """
     return raw.fetch_one("entities", entity_id, client=client)
 
@@ -52,11 +53,12 @@ def get_entity_by_name(
 ) -> dict | None:
     """
     Args:
-        entity_name (str): The name of the claimed entity.
-        project (str / dict): Project ID or dict.
+        entity_name (str): The name of the entity.
+        project (str / dict): The project ID or dict.
 
     Returns:
-        Retrieve entity matching given name (and project if given).
+        dict: The entity with the given name and, if given, in the given
+        project. None if no entity matches.
     """
     params = {"name": entity_name}
     if project is not None:
@@ -71,11 +73,11 @@ def get_entity_type(
 ) -> dict:
     """
     Args:
-        entity_type_id (str): ID of claimed entity type.
+        entity_type_id (str): The ID of the entity type.
 
     Returns:
-        Retrieve entity type matching given ID (It can be an entity type of any
-        kind).
+        dict: The entity type with the given ID. The entity type can be of
+        all kinds.
     """
     return raw.fetch_one("entity-types", entity_type_id, client=client)
 
@@ -86,10 +88,11 @@ def get_entity_type_by_name(
 ) -> dict | None:
     """
     Args:
-        entity_type_name (str): The name of the claimed entity type
+        entity_type_name (str): The name of the entity type.
 
     Returns:
-        Retrieve entity type matching given name.
+        dict: The entity type with the given name, or None if no entity type
+        matches.
     """
     return raw.fetch_first(
         "entity-types", {"name": entity_type_name}, client=client
@@ -104,16 +107,18 @@ def guess_from_path(
     client: KitsuClient = default,
 ) -> list[dict]:
     """
-    Get list of possible project file tree templates matching a file path
-    and data ids corresponding to template tokens.
+    Get the project file tree templates that match a file path.
+
+    The result also gives the data IDs of the template tokens.
 
     Args:
-        project_id (str): Project id of given file
-        path (str): Path to a file
-        sep (str): File path separator, defaults to "/"
+        project_id (str): The project ID of the file.
+        path (str): The path of the file.
+        sep (str): The file path separator ("/" by default).
         client (KitsuClient): The client to use for the request.
+
     Returns:
-        list: dictionaries with the corresponding entities and template name.
+        list: The dicts with the related entities and the template name.
     """
     return raw.post(
         "/data/entities/guess_from_path",
@@ -124,17 +129,18 @@ def guess_from_path(
 
 def new_entity_type(name: str, client: KitsuClient = default) -> dict:
     """
-    Creates an entity type with the given name.
+    Create an entity type with the given name.
 
     Args:
-        name (str): The name of the entity type
+        name (str): The name of the entity type.
 
     Returns:
-        dict: The created entity type
+        dict: The created entity type.
 
     Raises:
         gazu.exception.ParameterException:
-            If an entity type with that name already exists.
+            If an entity type with this name exists. The API ignores the
+            letter case of the name.
     """
     data = {"name": name}
     return raw.create("entity-types", data, client=client)
@@ -144,10 +150,13 @@ def remove_entity_type(
     entity_type: str | dict, client: KitsuClient = default
 ) -> str:
     """
-    Remove given entity type from database.
+    Remove the given entity type from the database.
 
     Args:
-        entity_type (str / dict): Entity type to remove.
+        entity_type (str / dict): The entity type to remove.
+
+    Returns:
+        str: The response of the API.
     """
     entity_type = normalize_model_parameter(entity_type)
     path = f"data/entity-types/{entity_type['id']}"
@@ -158,23 +167,28 @@ def remove_entity(
     entity: str | dict, force: bool = False, client: KitsuClient = default
 ) -> str:
     """
-    Remove given entity from database.
+    Remove the given entity from the database.
 
-    If the Entity has tasks linked to it, this will by default mark the
-    Entity as canceled. Deletion can be forced regardless of task links
-    with the `force` parameter.
+    If the entity has tasks, versions or child entities, the database refuses
+    the deletion. The API returns an error and does not cancel the entity.
+    To cancel an entity or to remove its tasks, use the function for its
+    type (for example, ``gazu.asset.remove_asset``) or ``remove_entities``.
 
     Args:
-        entity (dict): Entity to remove.
-        force (bool): Whether to force deletion of the entity regardless of
-            whether it has links to tasks.
+        entity (str / dict): The entity to remove.
+        force (bool): Do not use. The API ignores this value on this route.
+
+    Returns:
+        str: The response of the API.
+
+    Raises:
+        gazu.exception.ParameterException: If the database refuses the
+            deletion.
     """
-    entity = normalize_model_parameter(entity)
-    path = f"data/entities/{entity['id']}"
-    params = {}
     if force:
-        params = {"force": True}
-    return raw.delete(path, params, client=client)
+        warn_ignored_force("remove_entity")
+    entity = normalize_model_parameter(entity)
+    return raw.delete(f"data/entities/{entity['id']}", client=client)
 
 
 def remove_entities(
@@ -184,34 +198,36 @@ def remove_entities(
     client: KitsuClient = default,
 ) -> list[str]:
     """
-    Remove several entities (assets, shots, edits and concepts) of a given
-    project in a single request.
+    Remove more than one entity of the given project in one request.
 
-    Without `force`, entities that have tasks linked to them are only marked
-    as canceled on a first call, and really removed on a second one. Concepts
-    are always really removed. With `force`, every entity and its tasks are
-    removed right away.
+    The entities can be assets, shots, edits and concepts.
 
-    Only the creator of an entity or a project manager can remove it. For
-    managers, entities that don't exist, that belong to another project, or
-    that are neither an asset, a shot, an edit nor a concept are silently
-    ignored: they don't make the whole batch fail, they are simply absent
-    from the returned list. For other users, a single entity created by
-    someone else makes the whole request fail and nothing is removed.
+    If ``force`` is False, the first call sets an entity with tasks to
+    canceled. The second call removes the entity. The API always removes
+    concepts. If ``force`` is True, the API removes each entity and its tasks
+    immediately.
 
-    Entities are removed one by one by the API: if an error occurs
-    mid-batch, entities already processed remain deleted even though no
-    list is returned.
+    Only the creator of an entity or a project manager can remove it.
+
+    The API ignores an entity in these conditions: the entity does not exist,
+    it is in a different project, or it is not an asset, a shot, an edit or a
+    concept. The returned list does not contain this entity, and the request
+    does not fail.
+
+    For a user who is not a manager, one entity from a different creator
+    causes the request to fail. The API then removes no entity.
+
+    The API removes the entities one by one. If an error occurs during the
+    request, the removed entities stay removed and the API returns no list.
 
     Args:
-        project (str / dict): The project the entities belong to.
-        entities (list): Entities to remove, as IDs or dicts. Every ID must
-            be a valid UUID, otherwise the whole batch is rejected.
-        force (bool): Whether to force deletion of the entities regardless of
-            whether they have links to tasks.
+        project (str / dict): The project of the entities.
+        entities (list): The entities to remove, as IDs or dicts. Each ID
+            must be a valid UUID. If not, the API refuses the full request.
+        force (bool): If True, remove the entities and their tasks.
 
     Returns:
-        list: IDs of the entities effectively processed by the API.
+        list: The IDs of the entities that the API processed.
     """
     project = normalize_model_parameter(project)
     entity_ids = normalize_list_of_models_for_links(entities)
@@ -226,10 +242,10 @@ def all_entities_with_tasks_linked_to_entity(
 ) -> list[dict]:
     """
     Args:
-        entity (str / dict): Entity to get linked entities.
+        entity (str / dict): The entity dict or the entity ID.
 
     Returns:
-        list: Retrieve all entities linked to given entity.
+        list: The entities with tasks that are linked to the given entity.
     """
     entity = normalize_model_parameter(entity)
     return raw.fetch_all(

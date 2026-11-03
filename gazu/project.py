@@ -12,6 +12,7 @@ from .client import KitsuClient
 from .helpers import (
     normalize_model_parameter,
     normalize_list_of_models_for_links,
+    warn_ignored_force,
 )
 
 default = raw.default_client
@@ -21,7 +22,7 @@ default = raw.default_client
 def all_project_status(client: KitsuClient = default) -> list[dict]:
     """
     Returns:
-        list: Project status listed in database.
+        list: The project statuses in the database.
     """
     return sort_by_name(raw.fetch_all("project-status", client=client))
 
@@ -32,10 +33,11 @@ def get_project_status_by_name(
 ) -> dict | None:
     """
     Args:
-        project_status_name (str): Name of claimed project status.
+        project_status_name (str): The name of the project status.
 
     Returns:
-        dict: Project status corresponding to given name.
+        dict: The project status with the given name, or None if no status
+        matches.
     """
     return raw.fetch_first(
         "project-status", {"name": project_status_name}, client=client
@@ -46,7 +48,7 @@ def get_project_status_by_name(
 def all_projects(client: KitsuClient = default) -> list[dict]:
     """
     Returns:
-        list: Projects stored in the database.
+        list: The projects in the database.
     """
     return sort_by_name(raw.fetch_all("projects", client=client))
 
@@ -55,7 +57,7 @@ def all_projects(client: KitsuClient = default) -> list[dict]:
 def all_open_projects(client: KitsuClient = default) -> list[dict]:
     """
     Returns:
-        Open projects stored in the database.
+        list: The open projects in the database.
     """
     return sort_by_name(raw.fetch_all("projects/open", client=client))
 
@@ -64,10 +66,10 @@ def all_open_projects(client: KitsuClient = default) -> list[dict]:
 def get_project(project_id: str, client: KitsuClient = default) -> dict:
     """
     Args:
-        project_id (str): ID of claimed project.
+        project_id (str): The ID of the project.
 
     Returns:
-        dict: Project corresponding to given id.
+        dict: The project with the given ID.
     """
     return raw.fetch_one("projects", project_id, client=client)
 
@@ -79,10 +81,10 @@ def get_project_url(
     """
     Args:
         project (str / dict): The project dict or the project ID.
-        section (str): The section we want to open in the browser.
+        section (str): The section to open in the browser.
 
     Returns:
-        url (str): Web url associated to the given project
+        url (str): The web URL of the given project.
     """
     project = normalize_model_parameter(project)
     host = raw.get_api_url_from_host(client=client)
@@ -96,10 +98,10 @@ def get_project_by_name(
 ) -> dict | None:
     """
     Args:
-        project_name (str): Name of claimed project.
+        project_name (str): The name of the project.
 
     Returns:
-        dict: Project corresponding to given name.
+        dict: The project with the given name, or None if no project matches.
     """
     return raw.fetch_first("projects", {"name": project_name}, client=client)
 
@@ -116,22 +118,26 @@ def new_project(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Creates a new project.
+    Create a project.
+
+    If a project with this name exists, return this project.
 
     Args:
-        name (str): Name of the project to create.
-        production_type (str): short, featurefilm, tvshow.
-        team (list): Team of the project.
-        asset_types (list): Asset types of the project.
-        task_statuses (list): Task statuses of the project.
-        task_types (list): Task types of the project.
-        production_style (str): 2d, 3d, 2d3d, ar, vfx, stop-motion, motion-design,
-            archviz, commercial, catalog, immersive, nft, video-game, vr.
-        project_template (dict / ID): Optional project template to apply
-            after creation. Settings explicitly provided in the call (fps,
-            ratio, etc.) take precedence over the template's defaults.
+        name (str): The name of the project to create.
+        production_type (str): short, featurefilm or tvshow.
+        team (list): The team of the project.
+        asset_types (list): The asset types of the project.
+        task_statuses (list): The task statuses of the project.
+        task_types (list): The task types of the project.
+        production_style (str): 2d, 3d, 2d3d, ar, vfx, stop-motion,
+            motion-design, archviz, commercial, catalog, immersive, nft,
+            video-game or vr.
+        project_template (dict / ID): The optional project template to apply
+            after the creation. The settings that you give in the call (such
+            as fps and ratio) have priority over the values of the template.
+
     Returns:
-        dict: Created project.
+        dict: The created or existing project.
     """
     if team is None:
         team = []
@@ -167,11 +173,19 @@ def remove_project(
     project: str | dict, force: bool = False, client: KitsuClient = default
 ) -> str:
     """
-    Remove given project from database. (Prior to do that, make sure, there
-    is no asset or shot left).
+    Remove the given project from the database.
+
+    The API can remove only closed projects. If ``force`` is False, the data
+    of the project can cause the database to refuse the deletion.
 
     Args:
-        project (dict / str): Project to remove.
+        project (dict / str): The project to remove.
+        force (bool): If True, also remove all data of the project: previews,
+            tasks, budgets, entity links, playlists, entities, metadata,
+            schedule and news.
+
+    Returns:
+        str: The response of the API.
     """
     project = normalize_model_parameter(project)
     path = f"data/projects/{project['id']}"
@@ -182,14 +196,16 @@ def remove_project(
 
 def update_project(project: dict, client: KitsuClient = default) -> dict:
     """
-    Save given project data into the API. Metadata are fully replaced by the
-    ones set on given project.
+    Save the given project data to the API.
+
+    The metadata of the given project replace all current metadata. This
+    function changes the given dict: it replaces the linked objects with IDs.
 
     Args:
         project (dict): The project to update.
 
     Returns:
-        dict: Updated project.
+        dict: The updated project.
     """
     if "team" in project:
         project["team"] = normalize_list_of_models_for_links(project["team"])
@@ -214,15 +230,16 @@ def update_project_data(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Update the metadata for the provided project. Keys that are not provided
-    are not changed.
+    Update the metadata of the given project.
+
+    This function does not change the keys that are not in ``data``.
 
     Args:
-        project (dict / ID): The project dict or id to save in database.
-        data (dict): Free field to set metadata of any kind.
+        project (dict / ID): The project dict or ID.
+        data (dict): The metadata keys and values to set.
 
     Returns:
-        dict: Updated project.
+        dict: The updated project.
     """
     if data is None:
         data = {}
@@ -241,13 +258,17 @@ def update_project_data(
 
 def close_project(project: str | dict, client: KitsuClient = default) -> dict:
     """
-    Closes the provided project.
+    Close the given project.
 
     Args:
-        project (dict / ID): The project dict or id to save in database.
+        project (dict / ID): The project dict or ID.
 
     Returns:
-        dict: Updated project.
+        dict: The given project as a dict, with the closed status ID. This is
+        not the response of the API.
+
+    Raises:
+        ValueError: If no project status has the name "closed".
     """
     project = normalize_model_parameter(project)
     closed_status_id = None
@@ -266,6 +287,16 @@ def close_project(project: str | dict, client: KitsuClient = default) -> dict:
 def add_asset_type(
     project: str | dict, asset_type: str | dict, client: KitsuClient = default
 ) -> dict:
+    """
+    Link an asset type to a project.
+
+    Args:
+        project (dict / ID): The project dict or ID.
+        asset_type (dict / ID): The asset type dict or ID.
+
+    Returns:
+        dict: The project dict.
+    """
     project = normalize_model_parameter(project)
     asset_type = normalize_model_parameter(asset_type)
     data = {"asset_type_id": asset_type["id"]}
@@ -286,10 +317,21 @@ def add_task_type(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Link a task type to a project with a priority. The optional bitrates,
-    in Mbit/s, set the movie encoding of that task type in the project
-    and update an existing link. The optional is_client_visible says
-    whether the clients of the project see that task type.
+    Link a task type to a project with a priority.
+
+    If the link exists, the optional values update it.
+
+    Args:
+        project (dict / ID): The project dict or ID.
+        task_type (dict / ID): The task type dict or ID.
+        priority (int): The priority of the task type in the project.
+        hd_bitrate_compression (int): The optional HD movie bitrate in Mbit/s.
+        ld_bitrate_compression (int): The optional LD movie bitrate in Mbit/s.
+        is_client_visible (bool): If True, the clients of the project can see
+            this task type.
+
+    Returns:
+        dict: The response of the API.
     """
     project = normalize_model_parameter(project)
     task_type = normalize_model_parameter(task_type)
@@ -310,6 +352,16 @@ def add_task_type(
 def add_task_status(
     project: str | dict, task_status: str | dict, client: KitsuClient = default
 ) -> dict:
+    """
+    Link a task status to a project.
+
+    Args:
+        project (dict / ID): The project dict or ID.
+        task_status (dict / ID): The task status dict or ID.
+
+    Returns:
+        dict: The project dict.
+    """
     project = normalize_model_parameter(project)
     task_status = normalize_model_parameter(task_status)
     data = {"task_status_id": task_status["id"]}
@@ -327,15 +379,16 @@ def set_task_status_client_allowed(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Set, for this project, whether clients can set the given task status
-    when they comment. None goes back to the task status value.
+    Set if clients can use the given task status in comments on this project.
+
+    The value None sets the project to use the value of the task status.
 
     Args:
-        project (dict / ID): The project dict or id.
-        task_status (dict / ID): The task status dict or id, linked to the
-            project.
-        is_client_allowed (bool / None): The project value, or None to
-            follow the task status.
+        project (dict / ID): The project dict or ID.
+        task_status (dict / ID): The task status dict or ID. This status must
+            be linked to the project.
+        is_client_allowed (bool / None): The value for the project, or None
+            to use the value of the task status.
 
     Returns:
         dict: The task status link of the project.
@@ -357,11 +410,11 @@ def remove_task_type(
     Remove a task type from the project.
 
     Args:
-        project (dict / ID): The project dict or id.
-        task_type (dict / ID): The task type dict or id.
+        project (dict / ID): The project dict or ID.
+        task_type (dict / ID): The task type dict or ID.
 
     Returns:
-        str: Response from the API.
+        str: The response of the API.
     """
     project = normalize_model_parameter(project)
     task_type = normalize_model_parameter(task_type)
@@ -378,11 +431,11 @@ def remove_task_status(
     Remove a task status from the project.
 
     Args:
-        project (dict / ID): The project dict or id.
-        task_status (dict / ID): The task status dict or id.
+        project (dict / ID): The project dict or ID.
+        task_status (dict / ID): The task status dict or ID.
 
     Returns:
-        str: Response from the API.
+        str: The response of the API.
     """
     project = normalize_model_parameter(project)
     task_status = normalize_model_parameter(task_status)
@@ -404,22 +457,24 @@ def add_metadata_descriptor(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Create a new metadata descriptor for a project.
+    Create a metadata descriptor for a project.
 
     Args:
-        project (dict / ID): The project dict or id.
-        name (str): The name of the metadata descriptor
+        project (dict / ID): The project dict or ID.
+        name (str): The name of the metadata descriptor.
         entity_type (str): One of "Asset", "Shot", "Edit", "Episode",
-            "Sequence", "Project", "Task".
-        data_type (str): The value type, defaults to "string".
-        choices (list): A list of possible values, empty list for free values.
-        for_client (bool) : Wheter it should be displayed in Kitsu or not.
-        departments (list): A list of departments dict or id.
-        task_type_id (dict / ID): The task type the descriptor is scoped to.
-            Required when entity_type is "Task", forbidden otherwise.
+            "Sequence", "Project" or "Task".
+        data_type (str): The value type: "string" (by default), "number",
+            "list", "taglist", "boolean", "checklist", "date", "url",
+            "textarea" or "person".
+        choices (list): The possible values. An empty list permits all values.
+        for_client (bool): If True, clients can see the metadata in Kitsu.
+        departments (list): The department dicts or IDs.
+        task_type_id (dict / ID): The task type of the descriptor. You must
+            give it if entity_type is "Task". If not, do not give it.
 
     Returns:
-        dict: Created metadata descriptor.
+        dict: The created metadata descriptor.
     """
     if choices is None:
         choices = []
@@ -449,14 +504,14 @@ def get_metadata_descriptor(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Retrieve a the metadata descriptor matching given ID.
+    Return the metadata descriptor with the given ID.
 
     Args:
-        project (dict / ID): The project dict or id.
-        metadata_descriptor_id (dict / ID): The metadata descriptor dict or id.
+        project (dict / ID): The project dict or ID.
+        metadata_descriptor_id (dict / ID): The metadata descriptor dict or ID.
 
     Returns:
-        dict: The metadata descriptor matching the ID.
+        dict: The metadata descriptor with the given ID.
     """
     project = normalize_model_parameter(project)
     metadata_descriptor = normalize_model_parameter(metadata_descriptor_id)
@@ -471,14 +526,15 @@ def get_metadata_descriptor_by_field_name(
     project: str | dict, field_name: str, client: KitsuClient = default
 ) -> dict | None:
     """
-    Get a metadata descriptor matching the given project and name.
+    Get the metadata descriptor with the given project and field name.
 
     Args:
-        project (dict / ID): The project dict or id.
+        project (dict / ID): The project dict or ID.
         field_name (str): The name of the metadata field.
 
     Returns:
-        dict: The metadata descriptor matching the given field name.
+        dict: The metadata descriptor with the given field name, or None if no
+        descriptor matches.
     """
     project = normalize_model_parameter(project)
     return raw.fetch_first(
@@ -498,15 +554,15 @@ def all_metadata_descriptors(
     entity_type: str | None = None,
 ) -> list[dict]:
     """
-    Get all the metadata descriptors for a project.
+    Get all the metadata descriptors of a project.
 
     Args:
-        project (dict / ID): The project dict or id.
-        entity_type (str, optional): If set, only descriptors for this
-            model are returned. Values match the API (e.g. "Asset",
-            "Shot", "Project"); casing is significant. Must be passed as a
-            keyword argument so a custom ``client`` can still be the second
-            positional parameter.
+        project (dict / ID): The project dict or ID.
+        entity_type (str, optional): If you give this value, return only the
+            descriptors of this model. Use the API values (for example,
+            "Asset", "Shot" or "Project"). The letter case is important.
+            Give this value as a keyword argument. The second positional
+            parameter is ``client``.
 
     Returns:
         list: The metadata descriptors.
@@ -530,8 +586,8 @@ def update_metadata_descriptor(
     Update a metadata descriptor.
 
     Args:
-        project (dict / ID): The project dict or id.
-        metadata_descriptor (dict): The metadata descriptor that needs to be updated.
+        project (dict / ID): The project dict or ID.
+        metadata_descriptor (dict): The metadata descriptor to update.
 
     Returns:
         dict: The updated metadata descriptor.
@@ -558,20 +614,22 @@ def remove_metadata_descriptor(
     client: KitsuClient = default,
 ) -> str:
     """
-    Remove a metadata descriptor.
+    Remove a metadata descriptor and the values stored for it.
 
     Args:
-        project (dict / ID): The project dict or id.
-        metadata_descriptor_id (dict / ID): The metadata descriptor dict or id.
+        project (dict / ID): The project dict or ID.
+        metadata_descriptor_id (dict / ID): The metadata descriptor dict or ID.
+        force (bool): Do not use. The API ignores this value on this route.
+
+    Returns:
+        str: The response of the API.
     """
+    if force:
+        warn_ignored_force("remove_metadata_descriptor")
     project = normalize_model_parameter(project)
     metadata_descriptor = normalize_model_parameter(metadata_descriptor_id)
-    params = {}
-    if force:
-        params = {"force": True}
     return raw.delete(
         f"data/projects/{project['id']}/metadata-descriptors/{metadata_descriptor['id']}",
-        params,
         client=client,
     )
 
@@ -583,18 +641,19 @@ def reorder_metadata_descriptors(
     client: KitsuClient = default,
 ) -> list[dict]:
     """
-    Reorder metadata descriptors for a given entity type. Position is set
-    according to the order of ids in the list.
+    Change the order of the metadata descriptors of the given entity type.
+
+    The order of the IDs in the list sets the positions.
 
     Args:
-        project (dict / ID): The project dict or id.
+        project (dict / ID): The project dict or ID.
         entity_type (str): One of "Asset", "Shot", "Edit", "Episode",
-            "Sequence", "Project".
-        descriptor_ids (list): The descriptors (ids or dicts) in the
-            desired order.
+            "Sequence" or "Project".
+        descriptor_ids (list): The descriptors (IDs or dicts) in the necessary
+            order.
 
     Returns:
-        list: The reordered metadata descriptors.
+        list: The metadata descriptors in their new order.
     """
     project = normalize_model_parameter(project)
     return raw.post(
@@ -611,13 +670,13 @@ def reorder_metadata_descriptors(
 
 def get_team(project: str | dict, client: KitsuClient = default) -> list[dict]:
     """
-    Get team for project.
+    Get the team of a project.
 
     Args:
-        project (dict / ID): The project dict or id.
+        project (dict / ID): The project dict or ID.
 
     Returns:
-        list[dict]: The list of user dicts that are part of the project team.
+        list[dict]: The user dicts of the project team.
     """
     project = normalize_model_parameter(project)
     return raw.fetch_all(f"projects/{project['id']}/team", client=client)
@@ -630,17 +689,17 @@ def add_person_to_team(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Add a person to the team project.
+    Add a person to the team of the project.
 
     Args:
-        project (dict / ID): The project dict or id.
-        person (dict / ID): The person dict or id.
-        role (str): Role of the person on this project only (user,
-            supervisor, manager, client or vendor). None means the person
-            keeps their global role.
+        project (dict / ID): The project dict or ID.
+        person (dict / ID): The person dict or ID.
+        role (str): The role of the person on this project only (user,
+            supervisor, manager, client or vendor). If the value is None, the
+            person keeps the global role.
 
     Returns:
-        dict: The project dictionary.
+        dict: The project dict.
     """
     project = normalize_model_parameter(project)
     person = normalize_model_parameter(person)
@@ -657,13 +716,13 @@ def update_team_member_role(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Set the role a person has on given project only.
+    Set the role of a person on the given project only.
 
     Args:
-        project (dict / ID): The project dict or id.
-        person (dict / ID): The person dict or id.
-        role (str): user, supervisor, manager, client or vendor. None
-            restores inheritance of the person's global role.
+        project (dict / ID): The project dict or ID.
+        person (dict / ID): The person dict or ID.
+        role (str): user, supervisor, manager, client or vendor. The value
+            None sets the person to use the global role again.
 
     Returns:
         dict: The updated team link (project_id, person_id and role).
@@ -681,11 +740,14 @@ def remove_person_from_team(
     project: str | dict, person: str | dict, client: KitsuClient = default
 ) -> str:
     """
-    Remove a person from the team project.
+    Remove a person from the team of the project.
 
     Args:
-        project (dict / ID): The project dict or id.
-        person (dict / ID): The person dict or id.
+        project (dict / ID): The project dict or ID.
+        person (dict / ID): The person dict or ID.
+
+    Returns:
+        str: The response of the API.
     """
     project = normalize_model_parameter(project)
     person = normalize_model_parameter(person)
@@ -700,10 +762,10 @@ def get_project_task_types(
     project: str | dict, client: KitsuClient = default
 ) -> list[dict]:
     """
-    Get task types configured for a project.
+    Get the task types of a project.
 
     Args:
-        project (dict / ID): The project dict or id.
+        project (dict / ID): The project dict or ID.
 
     Returns:
         list: The task types.
@@ -717,10 +779,10 @@ def get_project_task_statuses(
     project: str | dict, client: KitsuClient = default
 ) -> list[dict]:
     """
-    Get task statuses configured for a project.
+    Get the task statuses of a project.
 
     Args:
-        project (dict / ID): The project dict or id.
+        project (dict / ID): The project dict or ID.
 
     Returns:
         list: The task statuses.
@@ -736,10 +798,10 @@ def all_status_automations(
     project: str | dict, client: KitsuClient = default
 ) -> list[dict]:
     """
-    Get status automations configured for a project.
+    Get the status automations of a project.
 
     Args:
-        project (dict / ID): The project dict or id.
+        project (dict / ID): The project dict or ID.
 
     Returns:
         list: The status automations.
@@ -760,12 +822,12 @@ def add_status_automation(
     Add a status automation to the project.
 
     Args:
-        project (dict / ID): The project dict or id.
-        automation (dict): A dictionary with a key of "status_automation_id" and
-            value of the automation ID.
+        project (dict / ID): The project dict or ID.
+        automation (dict): A dict with the "status_automation_id" key. The
+            value is the automation ID.
 
     Returns:
-        dict: The project dictionary.
+        dict: The project dict.
     """
     project = normalize_model_parameter(project)
     return raw.post(
@@ -782,8 +844,11 @@ def remove_status_automation(
     Remove a status automation from the project.
 
     Args:
-        project (dict / ID): The project dict or id.
-        automation (dict / ID): The automation dict or id.
+        project (dict / ID): The project dict or ID.
+        automation (dict / ID): The automation dict or ID.
+
+    Returns:
+        str: The response of the API.
     """
     project = normalize_model_parameter(project)
     automation = normalize_model_parameter(automation)
@@ -798,10 +863,13 @@ def get_preview_background_files(
     project: str | dict, client: KitsuClient = default
 ) -> list[dict]:
     """
-    Get preview background files configured for a project.
+    Get the preview background files of a project.
 
     Args:
-        project (dict / ID): The project dict or id.
+        project (dict / ID): The project dict or ID.
+
+    Returns:
+        list: The preview background files.
     """
     project = normalize_model_parameter(project)
     return raw.fetch_all(
@@ -818,16 +886,16 @@ def add_preview_background_file(
     """
     Add a preview background file to a project.
 
-    The background_file payload must be a dict in the form:
+    The background_file value must be a dict with this form:
         {"preview_background_file_id": <background file id>}
 
     Args:
-        project (dict / ID): The project dict or id.
-        background_file (dict): A dict with a key of "preview_background_file_id"
-            and value of the ID of the preview background to add.
+        project (dict / ID): The project dict or ID.
+        background_file (dict): A dict with the "preview_background_file_id"
+            key. The value is the ID of the preview background to add.
 
     Returns:
-        (dict): The project dictionary.
+        dict: The project dict.
     """
     project = normalize_model_parameter(project)
     return raw.post(
@@ -846,8 +914,11 @@ def remove_preview_background_file(
     Remove a preview background file from a project.
 
     Args:
-        project (dict / ID): The project dict or id.
-        background_file (dict / ID): The background file dict or id.
+        project (dict / ID): The project dict or ID.
+        background_file (dict / ID): The background file dict or ID.
+
+    Returns:
+        str: The response of the API.
     """
     project = normalize_model_parameter(project)
     background_file = normalize_model_parameter(background_file)
@@ -862,10 +933,13 @@ def get_milestones(
     project: str | dict, client: KitsuClient = default
 ) -> list[dict]:
     """
-    Get production milestones for a project.
+    Get the production milestones of a project.
 
     Args:
-        project (dict / ID): The project dict or id.
+        project (dict / ID): The project dict or ID.
+
+    Returns:
+        list: The milestones.
     """
     project = normalize_model_parameter(project)
     return raw.fetch_all(f"projects/{project['id']}/milestones", client=client)
@@ -878,11 +952,14 @@ def get_project_quotas(
     client: KitsuClient = default,
 ) -> list[dict]:
     """
-    Get quotas for a project and a task type.
+    Get the quotas of a project and a task type.
 
     Args:
-        project (dict / ID): The project dict or id.
-        task_type (dict / ID): The task type quotas are computed for.
+        project (dict / ID): The project dict or ID.
+        task_type (dict / ID): The task type of the quotas.
+
+    Returns:
+        list: The quotas.
     """
     project = normalize_model_parameter(project)
     task_type = normalize_model_parameter(task_type)
@@ -896,11 +973,14 @@ def get_project_person_quotas(
     project: str | dict, person: str | dict, client: KitsuClient = default
 ) -> list[dict]:
     """
-    Get quotas for a person within a project.
+    Get the quotas of a person in a project.
 
     Args:
-        project (dict / ID): The project dict or id.
-        person (dict / ID): The person dict or id.
+        project (dict / ID): The project dict or ID.
+        person (dict / ID): The person dict or ID.
+
+    Returns:
+        list: The quotas.
     """
     project = normalize_model_parameter(project)
     person = normalize_model_parameter(person)
@@ -915,10 +995,13 @@ def get_budgets(
     project: str | dict, client: KitsuClient = default
 ) -> list[dict]:
     """
-    Get budgets for a project.
+    Get the budgets of a project.
 
     Args:
-        project (dict / ID): The project dict or id.
+        project (dict / ID): The project dict or ID.
+
+    Returns:
+        list: The budgets.
     """
     project = normalize_model_parameter(project)
     return raw.fetch_all(f"projects/{project['id']}/budgets", client=client)
@@ -938,13 +1021,17 @@ def create_budget(
     Create a budget for a project.
 
     Args:
-        project (dict / ID): The project dict or id.
-        name (str): Budget name. Required.
-        description (str, optional): Deprecated, ignored by the API.
-        currency (str, optional): Currency code (e.g. "USD", "EUR").
-        start_date (str, optional): Deprecated, ignored by the API.
-        end_date (str, optional): Deprecated, ignored by the API.
-        amount (number, optional): Deprecated, ignored by the API.
+        project (dict / ID): The project dict or ID.
+        name (str): The budget name. This value is necessary.
+        description (str, optional): Do not use. The API ignores this value.
+        currency (str, optional): The currency code (for example, "USD" or
+            "EUR").
+        start_date (str, optional): Do not use. The API ignores this value.
+        end_date (str, optional): Do not use. The API ignores this value.
+        amount (number, optional): Do not use. The API ignores this value.
+
+    Returns:
+        dict: The created budget.
     """
     ignored = {
         "description": description,
@@ -974,11 +1061,14 @@ def get_budget(
     project: str | dict, budget: str | dict, client: KitsuClient = default
 ) -> dict:
     """
-    Get a specific budget.
+    Get a budget.
 
     Args:
-        project (dict / ID): The project dict or id.
-        budget (dict / ID): The budget dict or id.
+        project (dict / ID): The project dict or ID.
+        budget (dict / ID): The budget dict or ID.
+
+    Returns:
+        dict: The budget.
     """
     project = normalize_model_parameter(project)
     budget = normalize_model_parameter(budget)
@@ -994,12 +1084,15 @@ def update_budget(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Update a specific budget.
+    Update a budget.
 
     Args:
-        project (dict / ID): The project dict or id.
-        budget (dict / ID): The budget dict or id.
-        data (dict): The updated budget payload.
+        project (dict / ID): The project dict or ID.
+        budget (dict / ID): The budget dict or ID.
+        data (dict): The budget data to update.
+
+    Returns:
+        dict: The updated budget.
     """
     project = normalize_model_parameter(project)
     budget = normalize_model_parameter(budget)
@@ -1014,11 +1107,14 @@ def remove_budget(
     project: str | dict, budget: str | dict, client: KitsuClient = default
 ) -> str:
     """
-    Delete a specific budget.
+    Remove a budget.
 
     Args:
-        project (dict / ID): The project dict or id.
-        budget (dict / ID): The budget dict or id.
+        project (dict / ID): The project dict or ID.
+        budget (dict / ID): The budget dict or ID.
+
+    Returns:
+        str: The response of the API.
     """
     project = normalize_model_parameter(project)
     budget = normalize_model_parameter(budget)
@@ -1033,11 +1129,14 @@ def get_budget_entries(
     project: str | dict, budget: str | dict, client: KitsuClient = default
 ) -> list[dict]:
     """
-    Get entries for a specific budget.
+    Get the entries of a budget.
 
     Args:
-        project (dict / ID): The project dict or id.
-        budget (dict / ID): The budget dict or id.
+        project (dict / ID): The project dict or ID.
+        budget (dict / ID): The budget dict or ID.
+
+    Returns:
+        list: The budget entries.
     """
     project = normalize_model_parameter(project)
     budget = normalize_model_parameter(budget)
@@ -1060,19 +1159,25 @@ def create_budget_entry(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Create a budget entry for a specific budget: one person, or one open
-    position, of a department over a number of months.
+    Create an entry in a budget.
+
+    The entry is one person or one open position of a department, for a
+    number of months.
 
     Args:
-        project (dict / ID): The project dict or id.
-        budget (dict / ID): The budget dict or id.
-        department (dict / ID): The department dict or id. Required.
-        person (dict / ID, optional): The person dict or id.
-        position (str, optional): Position label (e.g. "artist").
-        seniority (str, optional): Seniority label (e.g. "senior").
-        start_date (str, optional): Start date in ISO format (YYYY-MM-DD).
-        months_duration (int, optional): Duration in months.
-        daily_salary (number, optional): Daily salary.
+        project (dict / ID): The project dict or ID.
+        budget (dict / ID): The budget dict or ID.
+        department (dict / ID): The department dict or ID. This value is
+            necessary.
+        person (dict / ID, optional): The person dict or ID.
+        position (str, optional): The position label (for example, "artist").
+        seniority (str, optional): The seniority label (for example, "senior").
+        start_date (str, optional): The start date in ISO format (YYYY-MM-DD).
+        months_duration (int, optional): The duration in months.
+        daily_salary (number, optional): The daily salary.
+
+    Returns:
+        dict: The created budget entry.
     """
     project = normalize_model_parameter(project)
     budget = normalize_model_parameter(budget)
@@ -1105,12 +1210,15 @@ def get_budget_entry(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Get a specific budget entry.
+    Get a budget entry.
 
     Args:
-        project (dict / ID): The project dict or id.
-        budget (dict / ID): The budget dict or id.
-        entry (dict / ID): The budget entry dict or id.
+        project (dict / ID): The project dict or ID.
+        budget (dict / ID): The budget dict or ID.
+        entry (dict / ID): The budget entry dict or ID.
+
+    Returns:
+        dict: The budget entry.
     """
     project = normalize_model_parameter(project)
     budget = normalize_model_parameter(budget)
@@ -1130,13 +1238,16 @@ def update_budget_entry(
     client: KitsuClient = default,
 ) -> dict:
     """
-    Update a specific budget entry.
+    Update a budget entry.
 
     Args:
-        project (dict / ID): The project dict or id.
-        budget (dict / ID): The budget dict or id.
-        entry (dict / ID): The budget entry dict or id.
-        data (dict): The updated budget entry payload.
+        project (dict / ID): The project dict or ID.
+        budget (dict / ID): The budget dict or ID.
+        entry (dict / ID): The budget entry dict or ID.
+        data (dict): The budget entry data to update.
+
+    Returns:
+        dict: The updated budget entry.
     """
     project = normalize_model_parameter(project)
     budget = normalize_model_parameter(budget)
@@ -1155,12 +1266,15 @@ def remove_budget_entry(
     client: KitsuClient = default,
 ) -> str:
     """
-    Delete a specific budget entry.
+    Remove a budget entry.
 
     Args:
-        project (dict / ID): The project dict or id.
-        budget (dict / ID): The budget dict or id.
-        entry (dict / ID): The budget entry dict or id.
+        project (dict / ID): The project dict or ID.
+        budget (dict / ID): The budget dict or ID.
+        entry (dict / ID): The budget entry dict or ID.
+
+    Returns:
+        str: The response of the API.
     """
     project = normalize_model_parameter(project)
     budget = normalize_model_parameter(budget)

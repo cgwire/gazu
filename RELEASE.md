@@ -14,7 +14,12 @@ Every commit pushed to `main` is also published on
 [TestPyPI](https://test.pypi.org/project/gazu/) as a `.devN` version, `N`
 being the short commit hash read as a number.
 
-You can run a script to perform these commands at once, he is located in scripts/release.sh.
+You can run `scripts/release.sh` to perform these commands at once. It bumps the patch version
+by default (1.3.1 → 1.3.2); pass `minor` (→ 1.4.0) or `major` (→ 2.0.0) to bump another part:
+
+```bash
+scripts/release.sh minor
+```
 
 # Deployment
 
