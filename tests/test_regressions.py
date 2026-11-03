@@ -247,5 +247,21 @@ class IgnoredForceTestCase(unittest.TestCase):
         )
 
 
+class PushTaskCommentTestCase(unittest.TestCase):
+    def test_own_temporary_folder_is_removed(self):
+        comment = {
+            "id": fakeid("comment-1"),
+            "attachment_files": [],
+            "previews": [],
+            "task_status_id": fakeid("task-status-1"),
+        }
+        with tempfile.TemporaryDirectory() as root:
+            with patch("tempfile.tempdir", root):
+                gazu.sync.push_task_comment(
+                    {}, {}, fakeid("task-1"), comment, None, None
+                )
+            self.assertEqual(os.listdir(root), [])
+
+
 if __name__ == "__main__":
     unittest.main()

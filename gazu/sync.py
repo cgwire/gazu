@@ -887,7 +887,8 @@ def push_task_comment(
         client_source (KitsuClient): The client of the source API.
         client_target (KitsuClient): The client of the target API.
         author_id (str): The ID of the person to set as the comment author.
-        tmp_path (str): The local folder for the downloaded files.
+        tmp_path (str): The local folder for the downloaded files. If the value
+            is None, this function uses a temporary folder and removes it.
         normalize_movie (bool): If True, the target normalizes the pushed
             movie previews.
 
@@ -895,7 +896,18 @@ def push_task_comment(
         dict: The source comment, or None if this function did not push it.
     """
     if tmp_path is None:
-        tmp_path = tempfile.mkdtemp(prefix="zou_sync_")
+        with tempfile.TemporaryDirectory(prefix="zou_sync_") as tmp_path:
+            return push_task_comment(
+                task_status_map,
+                person_map,
+                task,
+                comment,
+                client_source,
+                client_target,
+                author_id=author_id,
+                tmp_path=tmp_path,
+                normalize_movie=normalize_movie,
+            )
     attachments = []
     for attachment_id in comment["attachment_files"]:
         if isinstance(attachment_id, dict):
