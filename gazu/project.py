@@ -307,6 +307,41 @@ def add_asset_type(
     )
 
 
+def update_asset_type_workflow(
+    project: str | dict,
+    asset_type: str | dict,
+    task_types: list[str | dict],
+    client: KitsuClient = default,
+) -> dict:
+    """
+    Set the task types allowed for an asset type in the project, instead of
+    the studio workflow. The asset type and the task types must be part of
+    the project settings. The workflows set on a project are listed in its
+    `asset_type_workflows` field.
+
+    Args:
+        project (dict / ID): The project dict or id.
+        asset_type (dict / ID): The asset type dict or id.
+        task_types (list): The task type dicts or ids. An empty list restores
+            the studio workflow.
+
+    Returns:
+        dict: The project, without its relations. Call `get_project` to read
+            `asset_type_workflows`.
+    """
+    project = normalize_model_parameter(project)
+    asset_type = normalize_model_parameter(asset_type)
+    task_type_ids = [
+        normalize_model_parameter(task_type)["id"] for task_type in task_types
+    ]
+    return raw.put(
+        f"data/projects/{project['id']}/settings/asset-types/"
+        f"{asset_type['id']}/task-types",
+        {"task_type_ids": task_type_ids},
+        client=client,
+    )
+
+
 def add_task_type(
     project: str | dict,
     task_type: str | dict,
@@ -407,7 +442,8 @@ def remove_task_type(
     project: str | dict, task_type: str | dict, client: KitsuClient = default
 ) -> str:
     """
-    Remove a task type from the project.
+    Remove a task type from the project and from its asset type workflows. A
+    workflow left empty is removed: its asset type follows the studio workflow.
 
     Args:
         project (dict / ID): The project dict or ID.
