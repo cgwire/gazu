@@ -295,5 +295,23 @@ class ProjectTemplateLinksTestCase(unittest.TestCase):
             )
 
 
+class ProjectTemplateWorkflowTestCase(unittest.TestCase):
+    def test_update_asset_type_workflow(self):
+        with requests_mock.mock() as mock:
+            path = f"{BASE}/asset-types/{ASSET_TYPE}/task-types"
+            mock_route(mock, "PUT", path, text=RESULT)
+            self.assertEqual(
+                templates.update_project_template_asset_type_workflow(
+                    {"id": TEMPLATE},
+                    ASSET_TYPE,
+                    [TASK_TYPE, {"id": fakeid("task-type-2")}],
+                ),
+                RESULT,
+            )
+            self.assertEqual(
+                mock.last_request.json(),
+                {"task_type_ids": [TASK_TYPE, fakeid("task-type-2")]},
+            )
+
 if __name__ == "__main__":
     unittest.main()

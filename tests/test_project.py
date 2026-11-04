@@ -393,6 +393,25 @@ class ProjectSettingsTestCase(unittest.TestCase):
                 self.assertEqual(mock.call_count, 1)
 
 
+class AssetTypeWorkflowTestCase(unittest.TestCase):
+    def test_update_asset_type_workflow(self):
+        with requests_mock.mock() as mock:
+            path = (
+                f"data/projects/{PROJECT}/settings/asset-types/"
+                f"{ASSET_TYPE}/task-types"
+            )
+            mock_route(mock, "PUT", path, text={"id": PROJECT})
+            gazu.project.update_asset_type_workflow(
+                PROJECT,
+                {"id": ASSET_TYPE},
+                [TASK_TYPE, {"id": fakeid("task-type-2")}],
+            )
+            self.assertEqual(
+                mock.last_request.json(),
+                {"task_type_ids": [TASK_TYPE, fakeid("task-type-2")]},
+            )
+
+
 class MetadataDescriptorTestCase(unittest.TestCase):
     def test_add_metadata_descriptor_sends_the_fields(self):
         with requests_mock.mock() as mock:
