@@ -270,7 +270,8 @@ def remove_task_type_from_project_template(
     client: KitsuClient = default,
 ) -> str:
     """
-    Remove a task type from a project template.
+    Remove a task type from a project template and from its asset type
+    workflows.
 
     Args:
         project_template (dict / ID): The template dict or ID.
@@ -447,7 +448,7 @@ def remove_asset_type_from_project_template(
     client: KitsuClient = default,
 ) -> str:
     """
-    Remove an asset type from a project template.
+    Remove an asset type from a project template, with its workflow.
 
     Args:
         project_template (dict / ID): The template dict or ID.

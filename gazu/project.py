@@ -326,7 +326,8 @@ def update_asset_type_workflow(
             the studio workflow.
 
     Returns:
-        dict: The project.
+        dict: The project, without its relations. Call `get_project` to read
+            `asset_type_workflows`.
     """
     project = normalize_model_parameter(project)
     asset_type = normalize_model_parameter(asset_type)
@@ -441,7 +442,8 @@ def remove_task_type(
     project: str | dict, task_type: str | dict, client: KitsuClient = default
 ) -> str:
     """
-    Remove a task type from the project.
+    Remove a task type from the project and from its asset type workflows. A
+    workflow left empty is removed: its asset type follows the studio workflow.
 
     Args:
         project (dict / ID): The project dict or ID.
