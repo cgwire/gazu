@@ -159,6 +159,7 @@ def download_file(
         url,
         headers=headers,
         stream=True,
+        timeout=30,
     ) as response:
         if response.ok:
             if file_path is None:
