@@ -132,7 +132,10 @@ def sanitize_filename(filename: str) -> str:
 
 
 def download_file(
-    url: str, file_path: str | None = None, headers: dict | None = None
+    url: str,
+    file_path: str | None = None,
+    headers: dict | None = None,
+    timeout: float = 300,
 ) -> str:
     """
     Download the file at *url* and store it at *file_path*.
@@ -146,6 +149,7 @@ def download_file(
             value is a folder, this function gets the file name from the URL.
             If the value is None, this function makes a temporary folder.
         headers (dict): The headers of the request.
+        timeout (float): Request timeout in seconds.
 
     Returns:
         str: The location of the stored file.
@@ -159,6 +163,7 @@ def download_file(
         url,
         headers=headers,
         stream=True,
+        timeout=timeout,
     ) as response:
         if response.ok:
             if file_path is None:
