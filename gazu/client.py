@@ -49,7 +49,7 @@ DOWNLOAD_ACCEPT_HEADER = "application/json, */*;q=0.1"
 DEFAULT_PROCESSING_TIMEOUT = 60
 DEFAULT_RETRY_AFTER = 5
 # Entries asked per request by the cursor walk of fetch_all.
-CURSOR_LIMIT = 1000
+CURSOR_LIMIT = 200
 
 if os.getenv("GAZU_DEBUG", "false").lower() == "true":
     # Debug opt-in: only touch the "gazu" logger, never the root logger

@@ -324,7 +324,7 @@ class RequestsTestCase(unittest.TestCase):
                 )
                 self.assertEqual(
                     mock.last_request.qs,
-                    {"fields": ["a,b"], "limit": ["1000"]},
+                    {"fields": ["a,b"], "limit": ["200"]},
                 )
 
     def test_fetch_all_reads_all_pages(self):

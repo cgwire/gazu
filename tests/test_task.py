@@ -95,11 +95,11 @@ class TaskReadTestCase(unittest.TestCase):
                 self.assertEqual(
                     call({"id": entity}), [{"name": "A"}, {"name": "b"}]
                 )
-                self.assertEqual(mock.last_request.qs, {"limit": ["1000"]})
+                self.assertEqual(mock.last_request.qs, {"limit": ["200"]})
                 call(entity, relations=True)
                 self.assertEqual(
                     mock.last_request.qs,
-                    {"relations": ["true"], "limit": ["1000"]},
+                    {"relations": ["true"], "limit": ["200"]},
                 )
 
     def test_type_and_status_lists_are_sorted_by_name(self):
@@ -229,7 +229,7 @@ class TaskReadTestCase(unittest.TestCase):
                     text=[old, new],
                 )
                 self.assertEqual(call(PROJECT), [new, old])
-                self.assertEqual(mock.last_request.qs, {"limit": ["1000"]})
+                self.assertEqual(mock.last_request.qs, {"limit": ["200"]})
 
     def test_task_filters(self):
         task = gazu.task
@@ -272,7 +272,7 @@ class TaskReadTestCase(unittest.TestCase):
                 self.assertEqual(call(), [RESULT])
                 # These lists are walked by cursor.
                 self.assertEqual(
-                    mock.last_request.qs, {**query, "limit": ["1000"]}
+                    mock.last_request.qs, {**query, "limit": ["200"]}
                 )
 
     def test_lookups_return_the_first_match_or_none(self):

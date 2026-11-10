@@ -142,7 +142,7 @@ class FilesReadTestCase(unittest.TestCase):
                 gazu.files.get_all_preview_files_for_task(TASK), [RESULT]
             )
             self.assertEqual(
-                mock.last_request.qs, {"task_id": [TASK], "limit": ["1000"]}
+                mock.last_request.qs, {"task_id": [TASK], "limit": ["200"]}
             )
 
     def test_get_all_working_files_for_entity_sends_the_filters(self):
@@ -164,7 +164,7 @@ class FilesReadTestCase(unittest.TestCase):
                     [RESULT],
                 )
                 self.assertEqual(
-                    mock.last_request.qs, {**query, "limit": ["1000"]}
+                    mock.last_request.qs, {**query, "limit": ["200"]}
                 )
 
     def test_output_file_lists_send_the_filters(self):
@@ -219,7 +219,7 @@ class FilesReadTestCase(unittest.TestCase):
             with self.subTest(path), requests_mock.mock() as mock:
                 mock_route(mock, "GET", path, text=RESULT)
                 self.assertEqual(call(), RESULT)
-                limit = {"limit": ["1000"]}
+                limit = {"limit": ["200"]}
                 self.assertEqual(
                     mock.last_request.qs, {**extra_query, **limit}
                 )
