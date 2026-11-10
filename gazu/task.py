@@ -1820,12 +1820,13 @@ def _get_task_episode_id(task: dict, for_entity: str) -> str | None:
     return None
 
 
-def _fetch_newest_first(
+def _fetch_all_by_update_date(
     path: str, client: KitsuClient, params: dict | None = None
 ) -> list[dict]:
     """
-    Get a large list by cursor, in the order the API gives it in a single
-    response: last updated first.
+    Get a whole list by cursor and sort it as the API does when it answers
+    it in a single response: last updated first. The cursor gives the entries
+    by creation date.
     """
     entries = raw.fetch_all(path, params, client=client)
     return sorted(
@@ -1857,7 +1858,7 @@ def all_tasks_for_project(
     if episode is not None:
         episode = normalize_model_parameter(episode)
         params["episode_id"] = episode["id"]
-    return _fetch_newest_first(path, client, params)
+    return _fetch_all_by_update_date(path, client, params)
 
 
 def update_comment(comment: dict, client: KitsuClient = default) -> dict:
@@ -2007,7 +2008,9 @@ def all_comments_for_project(
         list: The comments of the project.
     """
     project = normalize_model_parameter(project)
-    return _fetch_newest_first(f"projects/{project['id']}/comments", client)
+    return _fetch_all_by_update_date(
+        f"projects/{project['id']}/comments", client
+    )
 
 
 @cache
@@ -2024,7 +2027,7 @@ def all_notifications_for_project(
         list: The notifications of the project.
     """
     project = normalize_model_parameter(project)
-    return _fetch_newest_first(
+    return _fetch_all_by_update_date(
         f"projects/{project['id']}/notifications", client
     )
 
@@ -2043,7 +2046,7 @@ def all_preview_files_for_project(
         list: The preview files of the project.
     """
     project = normalize_model_parameter(project)
-    return _fetch_newest_first(
+    return _fetch_all_by_update_date(
         f"projects/{project['id']}/preview-files", client
     )
 
