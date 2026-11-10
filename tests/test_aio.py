@@ -289,6 +289,26 @@ class AioRequestsTestCase(unittest.TestCase):
             ],
         )
 
+    def test_fetch_all_reads_the_list_again_when_the_cursor_is_deleted(self):
+        rows = [{"id": number} for number in range(1, 4)]
+        queries = []
+
+        async def tasks(request):
+            queries.append(dict(request.query))
+            if "cursor_id" in request.query:
+                return web.json_response({"message": "no row"}, status=400)
+            limit = int(request.query.get("limit", len(rows)))
+            return web.json_response(rows[:limit])
+
+        result = serve(
+            [("GET", "/data/tasks", tasks)],
+            lambda client: gazu.aio.fetch_all("tasks", client=client, limit=2),
+        )
+        self.assertEqual(result, rows)
+        self.assertEqual(
+            queries, [{"limit": "2"}, {"limit": "2", "cursor_id": "2"}, {}]
+        )
+
     def test_fetch_all_without_pagination_returns_the_response(self):
         result = serve(
             [("GET", "/data/tasks", answer([{"id": 1}]))],

@@ -860,22 +860,28 @@ def carries_paging(path: str, params: dict | None) -> bool:
     )
 
 
-def next_cursor_params(params: dict, entries: list, limit: int) -> dict | None:
+def next_cursor_params(
+    params: dict, entries: list, limit: int, seen: set
+) -> dict | None:
     """
     Return the parameters of the request following a cursor request, or None
     when the walk is over. Raise NoCursor when the route has no cursor: it
-    answers the entries it already gave, or entries without id. Shared by
-    the sync and async clients.
+    answers entries it already gave (their ids are kept in seen), or
+    entries without id. Shared by the sync and async clients.
     """
-    last = entries[-1] if entries else None
-    cursor_id = last.get("id") if isinstance(last, dict) else None
-    if cursor_id is not None and cursor_id == params.get("cursor_id"):
+    ids = [
+        entry["id"]
+        for entry in entries
+        if isinstance(entry, dict) and entry.get("id") is not None
+    ]
+    if not seen.isdisjoint(ids):
         raise NoCursor
     if len(entries) != limit:
         return None
-    if cursor_id is None:
+    if len(ids) != limit:
         raise NoCursor
-    return dict(params, cursor_id=cursor_id)
+    seen.update(ids)
+    return dict(params, cursor_id=ids[-1])
 
 
 def _fetch_by_cursor(
@@ -883,17 +889,24 @@ def _fetch_by_cursor(
 ) -> list[dict]:
     walk = dict(params or {}, limit=limit)
     results = []
+    seen = set()
     try:
         while walk is not None:
             entries = get(url, params=walk, client=client)
             if not isinstance(entries, list):
                 return entries
-            walk = next_cursor_params(walk, entries, limit)
+            walk = next_cursor_params(walk, entries, limit, seen)
             results.extend(entries)
+        return results
+    except ParameterException:
+        # The entry used as cursor was deleted during the walk.
+        if "cursor_id" not in walk:
+            raise
     except NoCursor:
-        # The limit may have cut the list: the plain request has it whole.
-        return get(url, params=params, client=client)
-    return results
+        # The limit may have cut the list.
+        pass
+    # The plain request has the whole list.
+    return get(url, params=params, client=client)
 
 
 def fetch_first(

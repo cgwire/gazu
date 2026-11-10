@@ -387,6 +387,40 @@ class RequestsTestCase(unittest.TestCase):
             self.assertEqual(raw.fetch_all("tasks", limit=2), rows)
             self.assertEqual(mock.last_request.qs, {})
 
+    def test_fetch_all_does_not_loop_on_a_route_with_an_unstable_order(self):
+        rows = [{"id": number} for number in range(4)]
+        orders = [rows, rows[::-1]]
+
+        def answer(request, context):
+            # A route that knows the limit, no cursor, and shuffles its rows.
+            limit = int(request.qs.get("limit", [len(rows)])[0])
+            return json.dumps(orders[mock.call_count % 2][:limit])
+
+        with requests_mock.mock() as mock:
+            mock.get(raw.get_full_url("data/tasks"), text=answer)
+            self.assertCountEqual(raw.fetch_all("tasks", limit=3), rows)
+            self.assertEqual(mock.call_count, 3)
+
+    def test_fetch_all_reads_the_list_again_when_the_cursor_is_deleted(self):
+        rows = [{"id": number} for number in range(1, 4)]
+
+        def answer(request, context):
+            if "cursor_id" in request.qs:
+                context.status_code = 400
+                return json.dumps({"message": "cursor_id matches no row."})
+            limit = int(request.qs.get("limit", [len(rows)])[0])
+            return json.dumps(rows[:limit])
+
+        with requests_mock.mock() as mock:
+            mock.get(raw.get_full_url("data/tasks"), text=answer)
+            self.assertEqual(raw.fetch_all("tasks", limit=2), rows)
+            self.assertEqual(mock.last_request.qs, {})
+            mock.get(
+                raw.get_full_url("data/tasks"), status_code=400, text="{}"
+            )
+            with self.assertRaises(gazu.exception.ParameterException):
+                raw.fetch_all("tasks")
+
     def test_fetch_all_reads_entries_without_id_in_a_plain_request(self):
         with requests_mock.mock() as mock:
             mock_route(mock, "GET", "data/tasks", text=["a", "b"])

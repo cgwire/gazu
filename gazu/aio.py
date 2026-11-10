@@ -474,17 +474,24 @@ async def fetch_all(
         limit = limit or CURSOR_LIMIT
         walk = dict(params or {}, limit=limit)
         results = []
+        seen = set()
         try:
             while walk is not None:
                 entries = await get(url, params=walk, client=client)
                 if not isinstance(entries, list):
                     return entries
-                walk = next_cursor_params(walk, entries, limit)
+                walk = next_cursor_params(walk, entries, limit, seen)
                 results.extend(entries)
+            return results
+        except ParameterException:
+            # The entry used as cursor was deleted during the walk.
+            if "cursor_id" not in walk:
+                raise
         except NoCursor:
-            # The limit may have cut the list: the plain request has it whole.
-            return await get(url, params=params, client=client)
-        return results
+            # The limit may have cut the list.
+            pass
+        # The plain request has the whole list.
+        return await get(url, params=params, client=client)
 
     response = await get(url, params=params, client=client)
 
