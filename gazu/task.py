@@ -332,7 +332,6 @@ def all_tasks_for_task_status(
             "task_type_id": task_type["id"],
             "task_status_id": task_status["id"],
         },
-        by_cursor=True,
         client=client,
     )
 
@@ -362,7 +361,7 @@ def all_tasks_for_task_type(
     if episode is not None:
         episode = normalize_model_parameter(episode)
         params["episode_id"] = episode["id"]
-    return raw.fetch_all("tasks", params, by_cursor=True, client=client)
+    return raw.fetch_all("tasks", params, client=client)
 
 
 @cache
@@ -1828,7 +1827,7 @@ def _fetch_newest_first(
     Get a large list by cursor, in the order the API gives it in a single
     response: last updated first.
     """
-    entries = raw.fetch_all(path, params, by_cursor=True, client=client)
+    entries = raw.fetch_all(path, params, client=client)
     return sorted(
         entries, key=lambda entry: entry.get("updated_at") or "", reverse=True
     )

@@ -20,7 +20,7 @@ def all_entities(client: KitsuClient = default) -> list[dict]:
     Returns:
         list: All entities in the database.
     """
-    return raw.fetch_all("entities", by_cursor=True, client=client)
+    return raw.fetch_all("entities", client=client)
 
 
 @cache

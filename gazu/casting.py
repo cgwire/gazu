@@ -307,7 +307,8 @@ def all_entity_links_for_project(
         params["page"] = page
         if limit is not None:
             params["limit"] = limit
-    return raw.fetch_all(path, params=params, client=client)
+    # The route has its own paging, with a cursor on the creation date.
+    return raw.fetch_all(path, params=params, by_cursor=False, client=client)
 
 
 @cache

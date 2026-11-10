@@ -27,8 +27,10 @@ from .client import (
     url_path_join,
     build_path_with_params,
     get_message_from_data,
+    carries_paging,
     next_cursor_params,
     CURSOR_LIMIT,
+    NoCursor,
     MAX_AUTH_RETRIES,
 )
 from .encoder import CustomJSONEncoder
@@ -424,10 +426,11 @@ async def fetch_all(
     paginated: bool = False,
     limit: int | None = None,
     fields: list[str] | str | None = None,
-    by_cursor: bool = False,
+    by_cursor: bool = True,
 ) -> list[dict]:
     """
-    Get all the entries of the given path.
+    Get all the entries of the given path. A large list is read request
+    after request rather than in a single response.
 
     Args:
         path (str): The path of the entries to get, without the ``data``
@@ -440,9 +443,13 @@ async def fetch_all(
             only if ``paginated`` or ``by_cursor`` is True.
         fields (list / str): The names of the attributes to return for each
             entry.
-        by_cursor (bool): If True, get the entries request after request,
-            each one starting after the last entry of the previous one. The
-            entries come newest created first.
+        by_cursor (bool): If True, the default, get the entries request
+            after request, each one starting after the last entry of the
+            previous one. The routes with a cursor return their entries
+            newest created first. The other routes and old Kitsu API
+            versions return all the entries at once, as with False. This
+            function ignores this value if ``paginated`` is True or if the
+            path or the parameters hold a page, a limit or a cursor.
 
     Returns:
         list: The entries.
@@ -463,15 +470,20 @@ async def fetch_all(
 
     url = url_path_join("data", path)
 
-    if by_cursor:
+    if by_cursor and not carries_paging(path, params):
         limit = limit or CURSOR_LIMIT
-        params = dict(params or {}, limit=limit)
+        walk = dict(params or {}, limit=limit)
         results = []
-        while params is not None:
-            entries = await get(url, params=params, client=client)
-            if not isinstance(entries, list):
-                return entries
-            params = next_cursor_params(params, entries, results, limit)
+        try:
+            while walk is not None:
+                entries = await get(url, params=walk, client=client)
+                if not isinstance(entries, list):
+                    return entries
+                walk = next_cursor_params(walk, entries, limit)
+                results.extend(entries)
+        except NoCursor:
+            # The limit may have cut the list: the plain request has it whole.
+            return await get(url, params=params, client=client)
         return results
 
     response = await get(url, params=params, client=client)

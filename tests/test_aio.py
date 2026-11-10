@@ -277,9 +277,7 @@ class AioRequestsTestCase(unittest.TestCase):
 
         result = serve(
             [("GET", "/data/tasks", tasks)],
-            lambda client: gazu.aio.fetch_all(
-                "tasks", client=client, by_cursor=True, limit=2
-            ),
+            lambda client: gazu.aio.fetch_all("tasks", client=client, limit=2),
         )
         self.assertEqual(result, rows)
         self.assertEqual(

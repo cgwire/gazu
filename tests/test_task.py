@@ -95,9 +95,12 @@ class TaskReadTestCase(unittest.TestCase):
                 self.assertEqual(
                     call({"id": entity}), [{"name": "A"}, {"name": "b"}]
                 )
-                self.assertEqual(mock.last_request.qs, {})
+                self.assertEqual(mock.last_request.qs, {"limit": ["1000"]})
                 call(entity, relations=True)
-                self.assertEqual(mock.last_request.qs, {"relations": ["true"]})
+                self.assertEqual(
+                    mock.last_request.qs,
+                    {"relations": ["true"], "limit": ["1000"]},
+                )
 
     def test_type_and_status_lists_are_sorted_by_name(self):
         task = gazu.task

@@ -29,7 +29,7 @@ from .exception import (
 )
 
 
-from urllib.parse import urlencode
+from urllib.parse import parse_qs, urlencode, urlsplit
 
 logger = logging.getLogger("gazu")
 # Library convention: no output unless the host app configures logging.
@@ -47,7 +47,7 @@ DOWNLOAD_ACCEPT_HEADER = "application/json, */*;q=0.1"
 # one that fails.
 DEFAULT_PROCESSING_TIMEOUT = 60
 DEFAULT_RETRY_AFTER = 5
-# Entries asked per request by fetch_all(by_cursor=True).
+# Entries asked per request by the cursor walk of fetch_all.
 CURSOR_LIMIT = 1000
 
 if os.getenv("GAZU_DEBUG", "false").lower() == "true":
@@ -771,9 +771,12 @@ def fetch_all(
     paginated: bool = False,
     limit: int | None = None,
     fields: list[str] | str | None = None,
-    by_cursor: bool = False,
+    by_cursor: bool = True,
 ) -> list[dict]:
     """
+    Get all the entries of the given path. A large list is read request
+    after request rather than in a single response.
+
     Args:
         path (str): The path of the entries to get. You can add a filter to
             the model name. For example: "tasks?project_id=project-id".
@@ -783,11 +786,13 @@ def fetch_all(
         limit (int): The maximum number of entries on each page, or in each
             request if ``by_cursor`` is True. This function uses this value
             only if ``paginated`` or ``by_cursor`` is True.
-        by_cursor (bool): If True, get the entries request after request,
-            each one starting after the last entry of the previous one. Use
-            it for the lists too large for a single response. The entries
-            come newest created first. Old Kitsu API versions and the routes
-            without cursor return all the entries at once.
+        by_cursor (bool): If True, the default, get the entries request
+            after request, each one starting after the last entry of the
+            previous one. The routes with a cursor return their entries
+            newest created first. The other routes and old Kitsu API
+            versions return all the entries at once, as with False. This
+            function ignores this value if ``paginated`` is True or if the
+            path or the parameters hold a page, a limit or a cursor.
         fields (list / str): The names of the attributes to return for each
             entry. The API always returns the id and type attributes. Only
             the generic model list routes use this value. Old Kitsu API
@@ -812,7 +817,7 @@ def fetch_all(
 
     url = url_path_join("data", path)
 
-    if by_cursor:
+    if by_cursor and not carries_paging(path, params):
         return _fetch_by_cursor(url, params, limit or CURSOR_LIMIT, client)
 
     response = get(url, params=params, client=client)
@@ -837,37 +842,57 @@ def fetch_all(
     return results
 
 
-def next_cursor_params(
-    params: dict, entries: Any, results: list, limit: int
-) -> dict | None:
+class NoCursor(Exception):
     """
-    Add the entries of a cursor request to the results and return the
-    parameters of the next request, or None when the walk is over. Shared
-    by the sync and async clients.
+    Raised inside a cursor walk when the route shows it has no cursor.
     """
-    # A route without cursor answers the same entries again.
-    is_repeated = bool(
-        results
-        and entries
-        and entries[-1].get("id") == params.get("cursor_id")
+
+
+def carries_paging(path: str, params: dict | None) -> bool:
+    """
+    Tell if the request already says how to page its list, with a page, a
+    limit or a cursor of any kind. Such a request is sent as it is.
+    """
+    names = list(params or {}) + list(parse_qs(urlsplit(path).query))
+    return any(
+        name in ("page", "limit") or name.startswith("cursor")
+        for name in names
     )
-    if not is_repeated:
-        results.extend(entries)
-    if is_repeated or len(entries) != limit:
+
+
+def next_cursor_params(params: dict, entries: list, limit: int) -> dict | None:
+    """
+    Return the parameters of the request following a cursor request, or None
+    when the walk is over. Raise NoCursor when the route has no cursor: it
+    answers the entries it already gave, or entries without id. Shared by
+    the sync and async clients.
+    """
+    last = entries[-1] if entries else None
+    cursor_id = last.get("id") if isinstance(last, dict) else None
+    if cursor_id is not None and cursor_id == params.get("cursor_id"):
+        raise NoCursor
+    if len(entries) != limit:
         return None
-    return dict(params, cursor_id=entries[-1].get("id"))
+    if cursor_id is None:
+        raise NoCursor
+    return dict(params, cursor_id=cursor_id)
 
 
 def _fetch_by_cursor(
     url: str, params: dict | None, limit: int, client: KitsuClient
 ) -> list[dict]:
-    params = dict(params or {}, limit=limit)
+    walk = dict(params or {}, limit=limit)
     results = []
-    while params is not None:
-        entries = get(url, params=params, client=client)
-        if not isinstance(entries, list):
-            return entries
-        params = next_cursor_params(params, entries, results, limit)
+    try:
+        while walk is not None:
+            entries = get(url, params=walk, client=client)
+            if not isinstance(entries, list):
+                return entries
+            walk = next_cursor_params(walk, entries, limit)
+            results.extend(entries)
+    except NoCursor:
+        # The limit may have cut the list: the plain request has it whole.
+        return get(url, params=params, client=client)
     return results
 
 
