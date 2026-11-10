@@ -340,6 +340,42 @@ class RequestsTestCase(unittest.TestCase):
             self.assertEqual(mock.call_count, 3)
             self.assertEqual(mock.last_request.qs["limit"], ["1"])
 
+    def test_fetch_all_walks_by_cursor(self):
+        rows = [{"id": number} for number in range(1, 6)]
+
+        def page(request, context):
+            cursor = int(request.qs.get("cursor_id", ["0"])[0])
+            limit = int(request.qs["limit"][0])
+            return json.dumps(
+                [row for row in rows if row["id"] > cursor][:limit]
+            )
+
+        params = {"project_id": "a"}
+        for limit, call_count in ((2, 3), (5, 2), (10, 1)):
+            with self.subTest(limit=limit), requests_mock.mock() as mock:
+                mock.get(raw.get_full_url("data/tasks"), text=page)
+                self.assertEqual(
+                    raw.fetch_all(
+                        "tasks", params, by_cursor=True, limit=limit
+                    ),
+                    rows,
+                )
+                self.assertEqual(mock.call_count, call_count)
+                self.assertEqual(mock.last_request.qs["project_id"], ["a"])
+        self.assertEqual(params, {"project_id": "a"})
+
+    def test_fetch_all_by_cursor_reads_a_route_without_cursor_once(self):
+        # An old API answers the whole list whatever the parameters, even
+        # when it is as long as the limit.
+        for nb_rows, call_count in ((1, 1), (2, 2), (3, 1)):
+            rows = [{"id": number} for number in range(nb_rows)]
+            with self.subTest(nb_rows=nb_rows), requests_mock.mock() as mock:
+                mock_route(mock, "GET", "data/tasks", text=rows)
+                self.assertEqual(
+                    raw.fetch_all("tasks", by_cursor=True, limit=2), rows
+                )
+                self.assertEqual(mock.call_count, call_count)
+
     def test_fetch_first(self):
         with requests_mock.mock() as mock:
             mock_route(

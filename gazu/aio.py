@@ -27,6 +27,8 @@ from .client import (
     url_path_join,
     build_path_with_params,
     get_message_from_data,
+    next_cursor_params,
+    CURSOR_LIMIT,
     MAX_AUTH_RETRIES,
 )
 from .encoder import CustomJSONEncoder
@@ -422,6 +424,7 @@ async def fetch_all(
     paginated: bool = False,
     limit: int | None = None,
     fields: list[str] | str | None = None,
+    by_cursor: bool = False,
 ) -> list[dict]:
     """
     Get all the entries of the given path.
@@ -432,10 +435,14 @@ async def fetch_all(
         params (dict): The parameters of the request.
         client (AsyncKitsuClient): The client to use for the request.
         paginated (bool): If True, get the entries page by page.
-        limit (int): The maximum number of entries on each page. This
-            function uses this value only if ``paginated`` is True.
+        limit (int): The maximum number of entries on each page, or in each
+            request if ``by_cursor`` is True. This function uses this value
+            only if ``paginated`` or ``by_cursor`` is True.
         fields (list / str): The names of the attributes to return for each
             entry.
+        by_cursor (bool): If True, get the entries request after request,
+            each one starting after the last entry of the previous one. The
+            entries come newest created first.
 
     Returns:
         list: The entries.
@@ -455,6 +462,18 @@ async def fetch_all(
             params["limit"] = limit
 
     url = url_path_join("data", path)
+
+    if by_cursor:
+        limit = limit or CURSOR_LIMIT
+        params = dict(params or {}, limit=limit)
+        results = []
+        while params is not None:
+            entries = await get(url, params=params, client=client)
+            if not isinstance(entries, list):
+                return entries
+            params = next_cursor_params(params, entries, results, limit)
+        return results
+
     response = await get(url, params=params, client=client)
 
     if not paginated:

@@ -263,6 +263,34 @@ class AioRequestsTestCase(unittest.TestCase):
             ],
         )
 
+    def test_fetch_all_walks_by_cursor(self):
+        rows = [{"id": number} for number in range(1, 6)]
+        queries = []
+
+        async def tasks(request):
+            queries.append(dict(request.query))
+            cursor = int(request.query.get("cursor_id", 0))
+            limit = int(request.query["limit"])
+            return web.json_response(
+                [row for row in rows if row["id"] > cursor][:limit]
+            )
+
+        result = serve(
+            [("GET", "/data/tasks", tasks)],
+            lambda client: gazu.aio.fetch_all(
+                "tasks", client=client, by_cursor=True, limit=2
+            ),
+        )
+        self.assertEqual(result, rows)
+        self.assertEqual(
+            queries,
+            [
+                {"limit": "2"},
+                {"limit": "2", "cursor_id": "2"},
+                {"limit": "2", "cursor_id": "4"},
+            ],
+        )
+
     def test_fetch_all_without_pagination_returns_the_response(self):
         result = serve(
             [("GET", "/data/tasks", answer([{"id": 1}]))],
