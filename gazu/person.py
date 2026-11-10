@@ -367,6 +367,15 @@ def update_person(person: dict, client: KitsuClient = default) -> dict:
     """
     Update a person.
 
+    To change the email of the person you are logged in as, add your
+    `current_password` to the dict, and one of `totp`, `email_otp` or
+    `recovery_code` when two-factor authentication is enabled on your
+    account. An administrator changing the email of someone else adds
+    nothing.
+
+    The `expiration_date` only applies to bots: the returned dict has an
+    `access_token` only when an administrator updates a bot.
+
     Args:
         person (dict): The person dict to update.
 
