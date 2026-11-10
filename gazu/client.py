@@ -20,6 +20,7 @@ from .exception import (
     NotAuthenticatedException,
     NotAllowedException,
     MethodNotAllowedException,
+    NoCursorException,
     ParameterException,
     PreviewFileProcessingException,
     RouteNotFoundException,
@@ -842,12 +843,6 @@ def fetch_all(
     return results
 
 
-class NoCursor(Exception):
-    """
-    Raised inside a cursor walk when the route shows it has no cursor.
-    """
-
-
 def carries_paging(path: str, params: dict | None) -> bool:
     """
     Tell if the request already says how to page its list, with a page, a
@@ -865,9 +860,9 @@ def next_cursor_params(
 ) -> dict | None:
     """
     Return the parameters of the request following a cursor request, or None
-    when the walk is over. Raise NoCursor when the route has no cursor: it
-    answers entries it already gave (their ids are kept in seen), or
-    entries without id. Shared by the sync and async clients.
+    when the walk is over. Raise NoCursorException when the route has no
+    cursor: it answers entries it already gave (their ids are kept in seen),
+    or entries without id. Shared by the sync and async clients.
     """
     ids = [
         entry["id"]
@@ -875,11 +870,11 @@ def next_cursor_params(
         if isinstance(entry, dict) and entry.get("id") is not None
     ]
     if not seen.isdisjoint(ids):
-        raise NoCursor
+        raise NoCursorException
     if len(entries) != limit:
         return None
     if len(ids) != limit:
-        raise NoCursor
+        raise NoCursorException
     seen.update(ids)
     return dict(params, cursor_id=ids[-1])
 
@@ -902,7 +897,7 @@ def _fetch_by_cursor(
         # The entry used as cursor was deleted during the walk.
         if "cursor_id" not in walk:
             raise
-    except NoCursor:
+    except NoCursorException:
         # The limit may have cut the list.
         pass
     # The plain request has the whole list.

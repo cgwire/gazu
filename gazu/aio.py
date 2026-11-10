@@ -30,7 +30,6 @@ from .client import (
     carries_paging,
     next_cursor_params,
     CURSOR_LIMIT,
-    NoCursor,
     MAX_AUTH_RETRIES,
 )
 from .encoder import CustomJSONEncoder
@@ -39,6 +38,7 @@ from .exception import (
     NotAuthenticatedException,
     NotAllowedException,
     MethodNotAllowedException,
+    NoCursorException,
     ParameterException,
     RouteNotFoundException,
     ServerErrorException,
@@ -487,7 +487,7 @@ async def fetch_all(
             # The entry used as cursor was deleted during the walk.
             if "cursor_id" not in walk:
                 raise
-        except NoCursor:
+        except NoCursorException:
             # The limit may have cut the list.
             pass
         # The plain request has the whole list.
