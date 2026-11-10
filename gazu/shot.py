@@ -41,7 +41,9 @@ def all_shots_for_project(
         list: The shots of the given project.
     """
     project = normalize_model_parameter(project)
-    shots = raw.fetch_all(f"projects/{project['id']}/shots", client=client)
+    shots = raw.fetch_all(
+        f"projects/{project['id']}/shots", by_cursor=True, client=client
+    )
     return sort_by_name(shots)
 
 

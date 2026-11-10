@@ -47,10 +47,10 @@ def all_assets_for_project(
     project = normalize_model_parameter(project)
 
     if project is None:
-        return sort_by_name(raw.fetch_all("assets/all", client=client))
+        path = "assets/all"
     else:
         path = f"projects/{project['id']}/assets"
-        return sort_by_name(raw.fetch_all(path, client=client))
+    return sort_by_name(raw.fetch_all(path, by_cursor=True, client=client))
 
 
 @cache
@@ -67,7 +67,12 @@ def all_assets_for_episode(
     episode = normalize_model_parameter(episode)
 
     return sort_by_name(
-        raw.fetch_all("assets", {"source_id": episode["id"]}, client=client)
+        raw.fetch_all(
+            "assets",
+            {"source_id": episode["id"]},
+            by_cursor=True,
+            client=client,
+        )
     )
 
 

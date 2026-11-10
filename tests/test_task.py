@@ -186,18 +186,6 @@ class TaskReadTestCase(unittest.TestCase):
                 f"data/tasks/{TASK}/previews",
             ),
             (
-                lambda: task.all_comments_for_project(PROJECT),
-                f"data/projects/{PROJECT}/comments",
-            ),
-            (
-                lambda: task.all_notifications_for_project(PROJECT),
-                f"data/projects/{PROJECT}/notifications",
-            ),
-            (
-                lambda: task.all_preview_files_for_project(PROJECT),
-                f"data/projects/{PROJECT}/preview-files",
-            ),
-            (
                 lambda: task.all_subscriptions_for_project(PROJECT),
                 f"data/projects/{PROJECT}/subscriptions",
             ),
@@ -219,6 +207,26 @@ class TaskReadTestCase(unittest.TestCase):
             with self.subTest(path), requests_mock.mock() as mock:
                 mock_route(mock, "GET", path, text=RESULT)
                 self.assertEqual(call(), RESULT)
+
+    def test_project_lists_are_walked_by_cursor_newest_first(self):
+        task = gazu.task
+        old = {"id": "a", "updated_at": "2025-01-15T10:00:00"}
+        new = {"id": "b", "updated_at": "2025-01-16T10:00:00"}
+        for call, path in (
+            (task.all_tasks_for_project, "tasks"),
+            (task.all_comments_for_project, "comments"),
+            (task.all_notifications_for_project, "notifications"),
+            (task.all_preview_files_for_project, "preview-files"),
+        ):
+            with self.subTest(path), requests_mock.mock() as mock:
+                mock_route(
+                    mock,
+                    "GET",
+                    f"data/projects/{PROJECT}/{path}",
+                    text=[old, new],
+                )
+                self.assertEqual(call(PROJECT), [new, old])
+                self.assertEqual(mock.last_request.qs, {"limit": ["1000"]})
 
     def test_task_filters(self):
         task = gazu.task
@@ -259,7 +267,10 @@ class TaskReadTestCase(unittest.TestCase):
             with self.subTest(query=query), requests_mock.mock() as mock:
                 mock_route(mock, "GET", path, text=[RESULT])
                 self.assertEqual(call(), [RESULT])
-                self.assertEqual(mock.last_request.qs, query)
+                # These lists are walked by cursor.
+                self.assertEqual(
+                    mock.last_request.qs, {**query, "limit": ["1000"]}
+                )
 
     def test_lookups_return_the_first_match_or_none(self):
         task = gazu.task
