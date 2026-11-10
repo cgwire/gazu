@@ -1642,7 +1642,10 @@ def get_running_preview_files(client: KitsuClient = default) -> list[dict]:
     Returns:
         list: The preview files that are processing.
     """
-    return raw.fetch_all("playlists/preview-files/running", client=client)
+    # The route has its own paging, with a cursor on the preview file.
+    return raw.fetch_all(
+        "playlists/preview-files/running", by_cursor=False, client=client
+    )
 
 
 def get_preview_movie_url(

@@ -442,7 +442,8 @@ def all_tasks_requiring_feedback(client: KitsuClient = default) -> list[dict]:
     Returns:
         list: The tasks that need feedback.
     """
-    return raw.fetch_all("user/tasks-to-check", client=client)
+    # The route has its own limit, 100 tasks when none is asked.
+    return raw.fetch_all("user/tasks-to-check", by_cursor=False, client=client)
 
 
 @cache
