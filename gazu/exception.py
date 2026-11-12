@@ -114,3 +114,10 @@ class PreviewFileProcessingException(GazuException):
     This error occurs if the server does not finish the files of an existing
     preview file before the timeout.
     """
+
+
+class NoCursorException(GazuException):
+    """
+    This error occurs inside a cursor walk when the route shows it has no
+    cursor. The client catches it and reads the list in a plain request.
+    """

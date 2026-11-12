@@ -141,7 +141,9 @@ class FilesReadTestCase(unittest.TestCase):
             self.assertEqual(
                 gazu.files.get_all_preview_files_for_task(TASK), [RESULT]
             )
-            self.assertEqual(mock.last_request.qs, {"task_id": [TASK]})
+            self.assertEqual(
+                mock.last_request.qs, {"task_id": [TASK], "limit": ["200"]}
+            )
 
     def test_get_all_working_files_for_entity_sends_the_filters(self):
         for kwargs, query in (
@@ -161,7 +163,9 @@ class FilesReadTestCase(unittest.TestCase):
                     ),
                     [RESULT],
                 )
-                self.assertEqual(mock.last_request.qs, query)
+                self.assertEqual(
+                    mock.last_request.qs, {**query, "limit": ["200"]}
+                )
 
     def test_output_file_lists_send_the_filters(self):
         filters = {
@@ -215,10 +219,13 @@ class FilesReadTestCase(unittest.TestCase):
             with self.subTest(path), requests_mock.mock() as mock:
                 mock_route(mock, "GET", path, text=RESULT)
                 self.assertEqual(call(), RESULT)
-                self.assertEqual(mock.last_request.qs, extra_query)
+                limit = {"limit": ["200"]}
+                self.assertEqual(
+                    mock.last_request.qs, {**extra_query, **limit}
+                )
                 call(**filters)
                 self.assertEqual(
-                    mock.last_request.qs, {**query, **extra_query}
+                    mock.last_request.qs, {**query, **extra_query, **limit}
                 )
 
     def test_get_last_working_file_revision_selects_the_name(self):

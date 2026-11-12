@@ -1820,6 +1820,20 @@ def _get_task_episode_id(task: dict, for_entity: str) -> str | None:
     return None
 
 
+def _fetch_all_by_update_date(
+    path: str, client: KitsuClient, params: dict | None = None
+) -> list[dict]:
+    """
+    Get a whole list by cursor and sort it as the API does when it answers
+    it in a single response: last updated first. The cursor gives the entries
+    by creation date.
+    """
+    entries = raw.fetch_all(path, params, client=client)
+    return sorted(
+        entries, key=lambda entry: entry.get("updated_at") or "", reverse=True
+    )
+
+
 def all_tasks_for_project(
     project: str | dict,
     task_type: str | dict | None = None,
@@ -1836,7 +1850,7 @@ def all_tasks_for_project(
         list[dict]: The tasks of the given project.
     """
     project = normalize_model_parameter(project)
-    path = f"/data/projects/{project['id']}/tasks"
+    path = f"projects/{project['id']}/tasks"
     params = {}
     if task_type is not None:
         task_type = normalize_model_parameter(task_type)
@@ -1844,7 +1858,7 @@ def all_tasks_for_project(
     if episode is not None:
         episode = normalize_model_parameter(episode)
         params["episode_id"] = episode["id"]
-    return raw.get(path, params=params, client=client)
+    return _fetch_all_by_update_date(path, client, params)
 
 
 def update_comment(comment: dict, client: KitsuClient = default) -> dict:
@@ -1994,7 +2008,9 @@ def all_comments_for_project(
         list: The comments of the project.
     """
     project = normalize_model_parameter(project)
-    return raw.fetch_all(f"projects/{project['id']}/comments", client=client)
+    return _fetch_all_by_update_date(
+        f"projects/{project['id']}/comments", client
+    )
 
 
 @cache
@@ -2011,8 +2027,8 @@ def all_notifications_for_project(
         list: The notifications of the project.
     """
     project = normalize_model_parameter(project)
-    return raw.fetch_all(
-        f"projects/{project['id']}/notifications", client=client
+    return _fetch_all_by_update_date(
+        f"projects/{project['id']}/notifications", client
     )
 
 
@@ -2030,8 +2046,8 @@ def all_preview_files_for_project(
         list: The preview files of the project.
     """
     project = normalize_model_parameter(project)
-    return raw.fetch_all(
-        f"projects/{project['id']}/preview-files", client=client
+    return _fetch_all_by_update_date(
+        f"projects/{project['id']}/preview-files", client
     )
 
 

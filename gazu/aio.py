@@ -27,6 +27,9 @@ from .client import (
     url_path_join,
     build_path_with_params,
     get_message_from_data,
+    carries_paging,
+    next_cursor_params,
+    CURSOR_LIMIT,
     MAX_AUTH_RETRIES,
 )
 from .encoder import CustomJSONEncoder
@@ -35,6 +38,7 @@ from .exception import (
     NotAuthenticatedException,
     NotAllowedException,
     MethodNotAllowedException,
+    NoCursorException,
     ParameterException,
     RouteNotFoundException,
     ServerErrorException,
@@ -422,9 +426,11 @@ async def fetch_all(
     paginated: bool = False,
     limit: int | None = None,
     fields: list[str] | str | None = None,
+    by_cursor: bool = True,
 ) -> list[dict]:
     """
-    Get all the entries of the given path.
+    Get all the entries of the given path. A large list is read request
+    after request rather than in a single response.
 
     Args:
         path (str): The path of the entries to get, without the ``data``
@@ -432,10 +438,18 @@ async def fetch_all(
         params (dict): The parameters of the request.
         client (AsyncKitsuClient): The client to use for the request.
         paginated (bool): If True, get the entries page by page.
-        limit (int): The maximum number of entries on each page. This
-            function uses this value only if ``paginated`` is True.
+        limit (int): The maximum number of entries on each page, or in each
+            request if ``by_cursor`` is True. This function uses this value
+            only if ``paginated`` or ``by_cursor`` is True.
         fields (list / str): The names of the attributes to return for each
             entry.
+        by_cursor (bool): If True, the default, get the entries request
+            after request, each one starting after the last entry of the
+            previous one. The routes with a cursor return their entries
+            newest created first. The other routes and old Kitsu API
+            versions return all the entries at once, as with False. This
+            function ignores this value if ``paginated`` is True or if the
+            path or the parameters hold a page, a limit or a cursor.
 
     Returns:
         list: The entries.
@@ -455,6 +469,30 @@ async def fetch_all(
             params["limit"] = limit
 
     url = url_path_join("data", path)
+
+    if by_cursor and not carries_paging(path, params):
+        limit = limit or CURSOR_LIMIT
+        walk = dict(params or {}, limit=limit)
+        results = []
+        seen = set()
+        try:
+            while walk is not None:
+                entries = await get(url, params=walk, client=client)
+                if not isinstance(entries, list):
+                    return entries
+                walk = next_cursor_params(walk, entries, limit, seen)
+                results.extend(entries)
+            return results
+        except ParameterException:
+            # The entry used as cursor was deleted during the walk.
+            if "cursor_id" not in walk:
+                raise
+        except NoCursorException:
+            # The limit may have cut the list.
+            pass
+        # The plain request has the whole list.
+        return await get(url, params=params, client=client)
+
     response = await get(url, params=params, client=client)
 
     if not paginated:
