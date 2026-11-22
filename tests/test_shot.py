@@ -295,6 +295,20 @@ class ShotWriteTestCase(unittest.TestCase):
         # The dict of the caller must not change.
         self.assertEqual(given_data, {"a": 1})
 
+    def test_new_shot_puts_the_trim_handles_in_the_data(self):
+        with requests_mock.mock() as mock:
+            mock_route(mock, "GET", SHOT_LOOKUP, text=[])
+            mock_route(
+                mock, "POST", f"data/projects/{PROJECT}/shots", text=RESULT
+            )
+            gazu.shot.new_shot(
+                PROJECT, SEQUENCE, "SH01", handle_in=8, handle_out=96
+            )
+            self.assertEqual(
+                mock.last_request.json()["data"],
+                {"handle_in": 8, "handle_out": 96},
+            )
+
     def test_new_shot_returns_the_existing_shot(self):
         with requests_mock.mock() as mock:
             mock_route(mock, "GET", SHOT_LOOKUP, text=[RESULT])

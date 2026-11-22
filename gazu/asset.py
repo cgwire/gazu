@@ -301,7 +301,9 @@ def update_asset_data(
     """
     Update the metadata of the given asset.
 
-    This function does not change the keys that are not in ``data``.
+    This function does not change the keys that are not in ``data``. The
+    ``handle_in`` and ``handle_out`` keys set the trim of the asset movie in
+    the Kitsu player.
 
     Args:
         asset (str / dict): The asset dict or the asset ID.
