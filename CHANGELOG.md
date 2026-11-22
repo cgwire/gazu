@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   movie in the Kitsu player, and stores them in the shot data like the frame
   range. The docstrings of `shot.update_shot_data` and
   `asset.update_asset_data` name these keys: the Kitsu player also trims the
-  asset movies.
+  asset movies (#447).
 
 ### Fixed
 
