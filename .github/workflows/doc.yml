@@ -1,6 +1,11 @@
 name: Generate Gazu Specs for developer docs
 
-on: push
+# Immutable releases are on: a release cannot change after publication,
+# so each version tag gets its own release with the specs.
+on:
+  push:
+    tags:
+      - "v*"
 
 jobs:
   docs:
@@ -36,9 +41,6 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v3
         with:
-          tag_name: spec-latest
-          name: Generate Gazu specs
-          prerelease: true
           files: docs/build/html/gazu-specs.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
