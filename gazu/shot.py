@@ -412,14 +412,16 @@ def new_shot(
     frame_out: int | None = None,
     description: str | None = None,
     data: dict | None = None,
+    handle_in: int | None = None,
+    handle_out: int | None = None,
     client: KitsuClient = default,
 ) -> dict:
     """
     Create a shot for the given sequence and project.
 
-    This function adds the frame in and frame out values to the extra data of
-    the shot. You can also set metadata. If a shot with this name exists in
-    the sequence, return this shot.
+    This function adds the frame in, frame out and trim handle values to the
+    extra data of the shot. You can also set metadata. If a shot with this
+    name exists in the sequence, return this shot.
 
     Args:
         project (str / dict): The project dict or the project ID.
@@ -430,6 +432,10 @@ def new_shot(
         frame_out (int): The frame out value of the shot.
         description (str): The description of the shot.
         data (dict): A free field for metadata of all types.
+        handle_in (int): The movie frame where the Kitsu player starts the
+            shot. The first frame of the movie is 0.
+        handle_out (int): The movie frame where the Kitsu player stops the
+            shot.
 
     Returns:
         dict: The created or existing shot.
@@ -443,6 +449,10 @@ def new_shot(
         data["frame_in"] = frame_in
     if frame_out is not None:
         data["frame_out"] = frame_out
+    if handle_in is not None:
+        data["handle_in"] = handle_in
+    if handle_out is not None:
+        data["handle_out"] = handle_out
 
     data = {"name": name, "data": data, "sequence_id": sequence["id"]}
     if nb_frames is not None:
@@ -516,7 +526,9 @@ def update_shot_data(
     """
     Update the metadata of the given shot.
 
-    This function does not change the keys that are not in ``data``.
+    This function does not change the keys that are not in ``data``. The
+    ``handle_in`` and ``handle_out`` keys set the trim of the shot movie in
+    the Kitsu player.
 
     Args:
         shot (str / dict): The shot dict or the shot ID.
