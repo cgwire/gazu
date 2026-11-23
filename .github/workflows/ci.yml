@@ -25,14 +25,20 @@ jobs:
       fail-fast: false
       matrix:
         version: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
+        # ubuntu-latest (26.04) has no setup-python build of these versions:
+        # they run in the official image instead.
         include:
           - version: "3.7"
             container: python:3.7-bookworm
+          - version: "3.8"
+            container: python:3.8-bookworm
+          - version: "3.9"
+            container: python:3.9-bookworm
     container: ${{ matrix.container }}
     steps:
       - uses: actions/checkout@v6
       - name: Set up Python 🐍
-        if: ${{ !contains(fromJSON('["3.7"]'), matrix.version) }}
+        if: ${{ !contains(fromJSON('["3.7", "3.8", "3.9"]'), matrix.version) }}
         uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.version }}
